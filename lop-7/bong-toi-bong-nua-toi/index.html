@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mô Phỏng Ánh Sáng</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&display=swap');
+:root{
+  --bg:#080c14;--panel:#0b101a;--border:#1e2d45;
+  --accent:#f4c430;--accent2:#ff6b35;--text:#c8d8e8;--dim:#4a6080;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:'Oswald', sans-serif;
+  display:flex;flex-direction:column;
+}
+
+/* ── Header ── */
+header{
+  flex-shrink:0;
+  padding:10px 24px;border-bottom:1px solid var(--border);
+  background:var(--panel);
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+}
+header h1{font-family:'Oswald', sans-serif;font-weight:800;font-size:1.1rem;
+          color:var(--accent);letter-spacing:.05em;white-space:nowrap}
+header span{font-size:.65rem;color:var(--dim);font-style:italic}
+
+/* ── Canvas fills remaining space ── */
+#simWrap{
+  flex:1;overflow:hidden;position:relative;
+  background:#020408;
+}
+canvas{display:block;width:100%;height:100%;cursor:crosshair}
+
+/* ── Bottom control bar ── */
+#ctrlBar{
+  flex-shrink:0;
+  background:var(--panel);border-top:1px solid var(--border);
+  padding:10px 18px 10px;
+  display:flex;flex-wrap:wrap;gap:6px 20px;align-items:flex-end;
+}
+
+/* Control group */
+.cg{display:flex;flex-direction:column;min-width:130px;flex:1;max-width:200px}
+.cg label{font-size:.58rem;color:var(--dim);text-transform:uppercase;
+          letter-spacing:.09em;margin-bottom:3px;display:flex;justify-content:space-between}
+.cg label .val{color:var(--accent);font-size:.65rem}
+input[type=range]{
+  width:100%;-webkit-appearance:none;height:3px;
+  background:var(--border);border-radius:2px;outline:none;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:13px;height:13px;border-radius:50%;
+  background:var(--accent);cursor:pointer;box-shadow:0 0 6px var(--accent);
+}
+
+/* Divider between groups */
+.div{width:1px;background:var(--border);align-self:stretch;margin:0 4px}
+
+/* Section label */
+.sec-lbl{
+  font-family:'Oswald', sans-serif;font-size:.6rem;font-weight:700;
+  color:var(--accent2);letter-spacing:.1em;text-transform:uppercase;
+  align-self:flex-end;padding-bottom:2px;white-space:nowrap;
+}
+
+/* ── Source toggle strip ── */
+#srcToggles{
+  display:none;flex-wrap:wrap;gap:4px;align-items:center;
+  align-self:flex-end;
+}
+.src-btn{
+  display:flex;align-items:center;gap:3px;
+  padding:3px 7px;border-radius:3px;border:1px solid var(--border);
+  background:#0a111c;cursor:pointer;font-family:'Oswald', sans-serif;
+  font-size:.6rem;color:var(--dim);transition:all .12s;user-select:none;
+}
+.src-btn .dot{width:7px;height:7px;border-radius:50%;background:#3a5a80;transition:background .12s}
+.src-btn.on .dot{box-shadow:0 0 5px currentColor}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>⚡ MÔ PHỎNG ÁNH SÁNG</h1>
+  <span>Nguồn sáng → Vật chắn → Màn chiếu &nbsp;|&nbsp; Umbra &amp; Penumbra</span>
+  <span style="margin-left:auto;font-size:.62rem;color:#3a5a80">🖱️ Kéo nguồn sáng để di chuyển</span>
+</header>
+
+<div id="simWrap">
+  <canvas id="sim"></canvas>
+</div>
+
+<div id="ctrlBar">
+
+  <span class="sec-lbl">Vật chắn</span>
+  <div class="cg">
+    <label>Kích thước <span class="val" id="vBarrierSize">120px</span></label>
+    <input type="range" id="barrierSize" min="20" max="400" value="120">
+  </div>
+  <div class="cg">
+    <label>Vị trí dọc <span class="val" id="vBarrierY">50%</span></label>
+    <input type="range" id="barrierY" min="5" max="95" value="50">
+  </div>
+  <div class="cg">
+    <label>Vị trí ngang <span class="val" id="vBarrierX">30%</span></label>
+    <input type="range" id="barrierX" min="15" max="82" value="30">
+  </div>
+
+  <div class="div"></div>
+  <span class="sec-lbl">Nguồn sáng</span>
+
+  <div class="cg">
+    <label>Kích thước nguồn <span class="val" id="vSrcSize">điểm</span></label>
+    <input type="range" id="srcSize" min="0" max="200" value="0">
+  </div>
+  <div class="cg">
+    <label>Số lượng nguồn <span class="val" id="vNumSrc">1</span></label>
+    <input type="range" id="numSources" min="1" max="10" step="1" value="1">
+  </div>
+  <div class="cg">
+    <label>Vị trí dọc nguồn <span class="val" id="vSrcY">50%</span></label>
+    <input type="range" id="srcY" min="2" max="98" value="50">
+  </div>
+  <div class="cg">
+    <label>Vị trí ngang nguồn <span class="val" id="vSrcX">10%</span></label>
+    <input type="range" id="srcX" min="2" max="45" value="10">
+  </div>
+
+  <div id="srcToggles"></div>
+
+  <div class="div"></div>
+  <span class="sec-lbl">Màn chiếu</span>
+
+  <div class="cg">
+    <label>Vị trí màn chiếu <span class="val" id="vScreenX">78%</span></label>
+    <input type="range" id="screenX" min="50" max="95" value="78">
+  </div>
+
+  <div class="div"></div>
+  <span class="sec-lbl">Hiển thị</span>
+
+  <div class="cg">
+    <label>Cường độ <span class="val" id="vIntensity">80%</span></label>
+    <input type="range" id="intensity" min="20" max="100" value="80">
+  </div>
+  <div class="cg">
+    <label>Số tia sáng <span class="val" id="vRays">80</span></label>
+    <input type="range" id="rays" min="20" max="3000" value="80">
+  </div>
+
+  <div class="div"></div>
+  <span class="sec-lbl">Tùy chọn</span>
+
+  <div class="cg" style="min-width:120px;max-width:160px;gap:6px">
+    <label style="flex-direction:row;align-items:center;gap:6px;cursor:pointer">
+      <input type="checkbox" id="showBoundary" checked
+        style="width:13px;height:13px;accent-color:var(--accent);cursor:pointer">
+      <span style="font-size:.58rem;color:var(--dim);text-transform:uppercase;letter-spacing:.08em">Hiện nét đứt boundary</span>
+    </label>
+    <label style="flex-direction:row;align-items:center;gap:6px;cursor:pointer;margin-top:4px">
+      <input type="checkbox" id="showBarrier" checked
+        style="width:13px;height:13px;accent-color:var(--accent);cursor:pointer">
+      <span style="font-size:.58rem;color:var(--dim);text-transform:uppercase;letter-spacing:.08em">Hiện vật cản</span>
+    </label>
+  </div>
+
+</div>
+
+<script>
+const canvas = document.getElementById('sim');
+const ctx    = canvas.getContext('2d');
+const wrap   = document.getElementById('simWrap');
+
+let W, H, SCREEN_X;
+
+function resizeCanvas(){
+  W = wrap.clientWidth;
+  H = wrap.clientHeight;
+  canvas.width  = W;
+  canvas.height = H;
+  // Use slider values if available, else defaults
+  const sxPct = +document.getElementById('screenX').value/100;
+  SCREEN_X = Math.floor(sxPct * W);
+  srcCenter.x = (+document.getElementById('srcX').value/100) * W;
+  srcCenter.y = (+document.getElementById('srcY').value/100) * H;
+  draw();
+}
+
+let srcCenter = { x: 100, y: 0 }; // y set after resize
+let dragging  = false;
+
+// 10-color wheel: hues evenly spaced 36° apart (0°,36°,72°,...,324°)
+// S1=0° red-orange, S6=180° cyan (opposite), ensuring no duplicates
+const SRC_COLORS = [
+  [255, 80,  60],  // S1  0°   red
+  [255,165,  0],   // S2  36°  orange
+  [220,210,  0],   // S3  72°  yellow
+  [ 80,200,  50],  // S4  108° yellow-green
+  [  0,200, 100],  // S5  144° green
+  [  0,210, 220],  // S6  180° cyan  ← opposite of S1
+  [  0,120, 255],  // S7  216° blue
+  [100, 60, 255],  // S8  252° indigo
+  [200,  0, 220],  // S9  288° violet
+  [255,  0, 140],  // S10 324° pink-red
+];
+
+let sourceActive = {};
+
+function getP(){
+  return {
+    bSize : +document.getElementById('barrierSize').value,
+    bY    : +document.getElementById('barrierY').value/100,
+    bX    : +document.getElementById('barrierX').value/100,
+    intens: +document.getElementById('intensity').value/100,
+    nRays : +document.getElementById('rays').value,
+    sSize : +document.getElementById('srcSize').value,
+    nSrc  : +document.getElementById('numSources').value,
+    showBoundary: document.getElementById('showBoundary').checked,
+    showBarrier : document.getElementById('showBarrier').checked,
+  };
+}
+
+// Sync srcCenter and SCREEN_X from sliders (called on slider change)
+function syncFromSliders(){
+  if(!W||!H) return;
+  srcCenter.x = (+document.getElementById('srcX').value/100) * W;
+  srcCenter.y = (+document.getElementById('srcY').value/100) * H;
+  SCREEN_X    = Math.floor((+document.getElementById('screenX').value/100) * W);
+}
+
+// Sync sliders from srcCenter/SCREEN_X (called after drag)
+function syncToSliders(){
+  if(!W||!H) return;
+  document.getElementById('srcX').value = Math.round(srcCenter.x/W*100);
+  document.getElementById('srcY').value = Math.round(srcCenter.y/H*100);
+  document.getElementById('vSrcX').textContent = Math.round(srcCenter.x/W*100)+'%';
+  document.getElementById('vSrcY').textContent = Math.round(srcCenter.y/H*100)+'%';
+}
+
+function rayHit(px,py,dx,dy,ax,ay,bx,by){
+  const d=dx*(by-ay)-dy*(bx-ax);
+  if(Math.abs(d)<1e-10)return null;
+  const t=((ax-px)*(by-ay)-(ay-py)*(bx-ax))/d;
+  const s=((ax-px)*dy-(ay-py)*dx)/d;
+  return(t>0.001&&s>=0&&s<=1)?t:null;
+}
+
+function shadowY(sx,sy,bx,by){
+  const dx=bx-sx;
+  return Math.abs(dx)<.001?sy:sy+(SCREEN_X-sx)/dx*(by-sy);
+}
+
+function buildSubs(p){
+  const {nSrc,sSize}=p;
+  const list=[];
+  if(nSrc===1){
+    if(sSize===0){
+      list.push({x:srcCenter.x,y:srcCenter.y,w:1,idx:0});
+    } else {
+      const cnt=Math.max(7,Math.round(sSize/5));
+      for(let i=0;i<cnt;i++){
+        const t=cnt===1?0:(i/(cnt-1)-.5);
+        list.push({x:srcCenter.x,y:srcCenter.y+t*sSize,w:1/cnt,idx:0});
+      }
+    }
+  } else {
+    const spread=sSize>0?sSize:Math.min(H*.55,(nSrc-1)*55);
+    for(let i=0;i<nSrc;i++){
+      if(sourceActive[i]===false) continue;
+      const t=nSrc===1?0:(i/(nSrc-1)-.5);
+      list.push({x:srcCenter.x,y:srcCenter.y+t*spread,w:1,idx:i});
+    }
+  }
+  return list;
+}
+
+function buildProfile(subs,bT,bB){
+  const total=subs.reduce((a,s)=>a+s.w,0)||1;
+  const prof=new Float32Array(H);
+  for(const s of subs){
+    let sT=shadowY(s.x,s.y,bT.x,bT.y);
+    let sB=shadowY(s.x,s.y,bB.x,bB.y);
+    if(sT>sB)[sT,sB]=[sB,sT];
+    const pen=1.5;
+    for(let y=0;y<H;y++){
+      let lit;
+      if(y<=sT-pen||y>=sB+pen)lit=1;
+      else if(y>=sT&&y<=sB)   lit=0;
+      else if(y<sT)            lit=(sT-y)/pen;
+      else                     lit=(y-sB)/pen;
+      prof[y]+=lit*(s.w/total);
+    }
+  }
+  return prof;
+}
+
+// ── Screen preview: front-facing view ──────────────────
+function drawScreenPreview(p, subs, bT, bB){
+  const PAD   = 16;
+  const SIZE  = Math.min(Math.floor(Math.min(W,H)*0.22), 180);
+  const CX    = PAD + SIZE/2;
+  const CY    = PAD + SIZE/2;
+  const SQ_X  = PAD, SQ_Y = PAD, SQ_W = SIZE, SQ_H = SIZE;
+
+  // Legend panel sits to the right of the square
+  const LEG_X   = PAD + SIZE + 8;
+  const LEG_Y   = PAD;
+  const LEG_W   = 110;
+  const LEG_H   = SIZE;
+  const PANEL_W = SIZE + 8 + LEG_W + 12; // total width for outer panel
+
+  // ── Outer panel background ──
+  ctx.save();
+  ctx.fillStyle='rgba(4,8,16,0.90)';
+  roundRect(ctx, PAD-6, PAD-6, PANEL_W, SIZE+28, 7);
+  ctx.fill();
+  ctx.strokeStyle='rgba(80,120,180,.30)';
+  ctx.lineWidth=1;
+  roundRect(ctx, PAD-6, PAD-6, PANEL_W, SIZE+28, 7);
+  ctx.stroke();
+
+  // Title centred under the square
+  ctx.fillStyle='rgba(140,170,220,.75)';
+  ctx.font='bold 9px Oswald, sans-serif';
+  ctx.textAlign='center';
+  ctx.fillText('MẶT TRƯỚC MÀN CHIẾU', PAD + SIZE/2, PAD + SIZE + 18);
+  ctx.textAlign='left';
+
+  // ── Compute umbra & penumbra ──
+  const prof2 = buildProfile(subs, bT, bB);
+
+  // Tìm trung tâm bóng (midpoint của vùng tối hoặc vùng tối nhất)
+  let uTop=-1, uBot=-1;
+  for(let y=0;y<H;y++){
+    if(prof2[y]<0.02){ if(uTop<0)uTop=y; uBot=y; }
+  }
+  let penTop=-1, penBot=-1;
+  for(let y=0;y<H;y++){
+    const v=prof2[y];
+    if(v>0.02&&v<0.98){ if(penTop<0)penTop=y; penBot=y; }
+  }
+
+  const shadowCY = uTop>=0 ? (uTop+uBot)/2 : (penTop>=0?(penTop+penBot)/2:H/2);
+
+  // scale cố định: tỉ lệ thực giữa màn mô phỏng và khung preview
+  // → bán kính umbra trong preview tỉ lệ đúng với vùng tối thực
+  const scale   = SIZE / H;
+  const umbraH  = uTop>=0 ? (uBot-uTop) : 0;
+  const umbraR  = umbraH/2 * scale;
+
+  // Tính các ranh giới penumbra (nhiều band)
+  // Phía trên: từ uTop đi lên (penTop..uTop), phía dưới: từ uBot đi xuống (uBot..penBot)
+  // Gom các band có cùng độ sáng (round 2 chữ số)
+  // Chiến lược: quét từ biên ngoài penumbra vào umbra, gom segment liên tiếp cùng brightness
+  // Mỗi segment → 1 vành khuyên
+
+  // Thu thập tất cả bands theo prof2: quét từ penTop → uTop (phía trên) và uBot → penBot (phía dưới)
+  // Mỗi band: { litVal, halfHeightPx } — nơi halfHeightPx là khoảng cách từ center đến giữa band
+  // Cách đơn giản hơn: quét từ ngoài vào, lấy từng đoạn y có lit giống nhau → radius ngoài/trong
+
+  function collectBands(yFrom, yTo, dir){
+    // dir: +1 = từ ngoài vào trong (yFrom là ngoài, yTo là trong)
+    const bands=[];
+    let segStart=yFrom, segLit=Math.round(prof2[yFrom]*20)/20;
+    for(let y=yFrom+dir; y!==yTo+dir; y+=dir){
+      const litRound=Math.round(prof2[y]*20)/20;
+      if(litRound!==segLit || y===yTo){
+        const rOuter=Math.abs(segStart-shadowCY)*scale;
+        const rInner=Math.abs(y-shadowCY)*scale;
+        bands.push({lit:segLit, rOuter:Math.max(rOuter,rInner), rInner:Math.min(rOuter,rInner)});
+        segStart=y; segLit=litRound;
+      }
+    }
+    return bands;
+  }
+
+  const bandsTop = penTop>=0 && uTop>=0 ? collectBands(penTop, uTop, +1) : [];
+  const bandsBot = penBot>=0 && uBot>=0 ? collectBands(penBot, uBot, -1) : [];
+  // Merge: lấy max rOuter từ cả hai phía cho cùng lit value
+  const bandMap={};
+  [...bandsTop,...bandsBot].forEach(b=>{
+    const k=b.lit.toFixed(2);
+    if(!bandMap[k]) bandMap[k]={lit:b.lit,rOuter:b.rOuter,rInner:b.rInner};
+    else {
+      bandMap[k].rOuter=Math.max(bandMap[k].rOuter,b.rOuter);
+      bandMap[k].rInner=Math.min(bandMap[k].rInner,b.rInner);
+    }
+  });
+  const bands=Object.values(bandMap).sort((a,b)=>b.rOuter-a.rOuter);
+
+  // penR = outermost band's rOuter
+  const penR = bands.length>0 ? bands[0].rOuter : 0;
+
+  // For legend use
+  const toR = halfPx => halfPx * scale;
+
+  // ── Clip to square ──
+  ctx.beginPath();
+  ctx.rect(SQ_X, SQ_Y, SQ_W, SQ_H);
+  ctx.clip();
+
+  // 1. Nền sáng hoàn toàn (vùng sáng = vành ngoài cùng)
+  ctx.fillStyle=`rgba(255,225,80,${p.intens*0.65})`;
+  ctx.fillRect(SQ_X, SQ_Y, SQ_W, SQ_H);
+
+  // 2. Vẽ từng vành khuyên từ ngoài vào trong theo đúng độ sáng
+  for(const band of bands){
+    const litAlpha = (1 - band.lit) * p.intens; // càng tối → alpha càng cao
+    // Vẽ đĩa tròn đến rOuter với màu tương ứng, rồi "khoét" phần rInner bằng compositing
+    ctx.fillStyle=`rgba(2,4,8,${litAlpha})`;
+    ctx.beginPath(); ctx.arc(CX, CY, band.rOuter, 0, Math.PI*2); ctx.fill();
+  }
+
+  // 3. Umbra: đĩa đen hoàn toàn ở trung tâm
+  if(umbraR>0){
+    ctx.fillStyle=`rgba(2,4,8,${p.intens})`;
+    ctx.beginPath(); ctx.arc(CX, CY, umbraR, 0, Math.PI*2); ctx.fill();
+  }
+
+  // 4. Ranh giới penumbra ngoài: nét đứt vàng
+  if(penR>1){
+    ctx.strokeStyle='rgba(244,210,40,.9)';
+    ctx.lineWidth=1.3; ctx.setLineDash([4,4]);
+    ctx.beginPath(); ctx.arc(CX, CY, penR, 0, Math.PI*2); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  // 5. Ranh giới umbra: nét liền tím
+  if(umbraR>1){
+    ctx.strokeStyle='rgba(160,80,255,.9)';
+    ctx.lineWidth=1.5; ctx.setLineDash([]);
+    ctx.beginPath(); ctx.arc(CX, CY, umbraR, 0, Math.PI*2); ctx.stroke();
+  }
+
+  // 6. Ranh giới giữa các band penumbra: nét mảnh để phân biệt vành khuyên
+  for(const band of bands){
+    if(band.rInner>1 && Math.abs(band.rInner-umbraR)>2){
+      ctx.strokeStyle=`rgba(200,200,200,.2)`;
+      ctx.lineWidth=0.5; ctx.setLineDash([2,3]);
+      ctx.beginPath(); ctx.arc(CX, CY, band.rInner, 0, Math.PI*2); ctx.stroke();
+      ctx.setLineDash([]);
+    }
+  }
+
+  ctx.restore(); // end clip
+
+  // Square border
+  ctx.strokeStyle='rgba(80,130,210,.45)';
+  ctx.lineWidth=1.5; ctx.setLineDash([]);
+  ctx.strokeRect(SQ_X, SQ_Y, SQ_W, SQ_H);
+
+  // ── Legend panel (right of square, no clip) ──
+  ctx.save();
+
+  // Divider line
+  ctx.strokeStyle='rgba(40,60,90,.6)';
+  ctx.lineWidth=1;
+  ctx.beginPath();
+  ctx.moveTo(LEG_X - 2, LEG_Y + 4);
+  ctx.lineTo(LEG_X - 2, LEG_Y + LEG_H - 4);
+  ctx.stroke();
+
+  const lf = ctx.font; // save
+  ctx.font='600 9px Oswald, sans-serif';
+
+  let ly = LEG_Y + 14; // current y cursor in legend
+  const LH = 28;       // line height per legend item
+
+  // Helper: draw one legend row
+  // lineStyle: 'dashed-yellow' | 'solid-purple' | 'solid-yellow'
+  function legendRow(label, sublabel, lineStyle){
+    const lx = LEG_X + 6;
+    const lineY = ly;
+    const lineLen = 22;
+
+    // Draw the line sample
+    ctx.lineWidth = 1.5;
+    if(lineStyle === 'dashed-yellow'){
+      ctx.strokeStyle='rgba(244,210,40,.9)';
+      ctx.setLineDash([4,4]);
+    } else if(lineStyle === 'solid-purple'){
+      ctx.strokeStyle='rgba(160,80,255,.9)';
+      ctx.setLineDash([]);
+    } else {
+      ctx.strokeStyle='rgba(255,225,80,.7)';
+      ctx.setLineDash([]);
+    }
+    ctx.beginPath();
+    ctx.moveTo(lx, lineY);
+    ctx.lineTo(lx + lineLen, lineY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Label
+    ctx.fillStyle='rgba(200,215,235,.9)';
+    ctx.font='700 8.5px Oswald, sans-serif';
+    ctx.fillText(label, lx + lineLen + 5, lineY + 3);
+
+    // Sublabel
+    if(sublabel){
+      ctx.fillStyle='rgba(120,145,175,.75)';
+      ctx.font='400 7.5px Oswald, sans-serif';
+      ctx.fillText(sublabel, lx + lineLen + 5, lineY + 13);
+    }
+
+    ly += LH;
+  }
+
+  legendRow('Ranh giới bóng nửa tối', null, 'dashed-yellow');
+  legendRow('Ranh giới bóng tối', null, 'solid-purple');
+
+  // Small colour swatches
+  ly += 4;
+  // Penumbra swatch
+  ctx.fillStyle='rgba(4,8,16,0.85)';
+  ctx.fillRect(LEG_X+6, ly, 10, 10);
+  const pg=ctx.createRadialGradient(LEG_X+11,ly+5,0,LEG_X+11,ly+5,6);
+  pg.addColorStop(0,'rgba(8,10,20,.95)');
+  pg.addColorStop(1,'rgba(255,225,80,0)');
+  ctx.fillStyle=pg; ctx.fillRect(LEG_X+6,ly,10,10);
+  ctx.strokeStyle='rgba(244,210,40,.7)';ctx.lineWidth=1;ctx.setLineDash([2,2]);
+  ctx.strokeRect(LEG_X+6,ly,10,10); ctx.setLineDash([]);
+  ctx.fillStyle='rgba(200,215,235,.85)';
+  ctx.font='400 7.5px Oswald, sans-serif';
+  ctx.fillText('Bóng nửa tối', LEG_X+20, ly+8);
+  ly+=16;
+
+  // Umbra swatch
+  ctx.fillStyle='rgb(2,4,8)';
+  ctx.fillRect(LEG_X+6, ly, 10, 10);
+  ctx.strokeStyle='rgba(160,80,255,.7)';ctx.lineWidth=1;ctx.setLineDash([]);
+  ctx.strokeRect(LEG_X+6,ly,10,10);
+  ctx.fillStyle='rgba(200,215,235,.85)';
+  ctx.font='400 7.5px Oswald, sans-serif';
+  ctx.fillText('Bóng tối', LEG_X+20, ly+8);
+  ly+=16;
+
+  // Lit swatch
+  ctx.fillStyle=`rgba(255,225,80,${p.intens*0.6})`;
+  ctx.fillRect(LEG_X+6, ly, 10, 10);
+  ctx.strokeStyle='rgba(255,225,80,.4)';ctx.lineWidth=1;
+  ctx.strokeRect(LEG_X+6,ly,10,10);
+  ctx.fillStyle='rgba(200,215,235,.85)';
+  ctx.font='400 7.5px Oswald, sans-serif';
+  ctx.fillText('Vùng sáng', LEG_X+20, ly+8);
+
+  ctx.restore();
+}
+
+function roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.lineTo(x+w-r,y);ctx.arcTo(x+w,y,x+w,y+r,r);
+  ctx.lineTo(x+w,y+h-r);ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
+  ctx.lineTo(x+r,y+h);ctx.arcTo(x,y+h,x,y+h-r,r);
+  ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);
+  ctx.closePath();
+}
+
+function draw(){
+  if(!W||!H)return;
+  const p=getP();
+  const bCX=p.bX*W, bCY=p.bY*H, half=p.bSize/2;
+  // Khi vật cản tắt: bT/bB đặt ngoài canvas → không chặn tia, không tạo bóng
+  const bT = p.showBarrier ? {x:bCX,y:bCY-half} : {x:-9999,y:-9999};
+  const bB = p.showBarrier ? {x:bCX,y:bCY+half} : {x:-9999,y: 9999};
+
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#020408'; ctx.fillRect(0,0,W,H);
+
+  // Grid
+  ctx.strokeStyle='rgba(30,45,70,.22)'; ctx.lineWidth=.5;
+  for(let x=0;x<W;x+=50){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for(let y=0;y<H;y+=50){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+
+  const subs=buildSubs(p);
+  const prof=buildProfile(subs,bT,bB);
+  const activeCnt=subs.length||1;
+
+  // ── Rays ──
+  // Bắn tất cả tia từ một pool chung, phân bố đều cho mọi sub-source
+  // → tránh hiện tượng vùng giữa tối hơn do alpha cộng dồn không đều
+  const rps = Math.max(4, p.nRays);
+  ctx.lineWidth = .55;
+
+  if(subs.length > 0){
+    // alpha mỗi tia không đổi bất kể số sub-sources
+    const base = p.intens;
+    const totalRays = rps;
+
+    for(let i=0; i<totalRays; i++){
+      // Chọn sub-source theo vòng tròn (đều nhau)
+      const src = subs[i % subs.length];
+
+      // Y mục tiêu trên màn: trải đều toàn bộ pool
+      const screenY = -H*0.05 + (i/(totalRays-1)) * (H*1.1);
+      const dx = SCREEN_X - src.x;
+      const dy = screenY  - src.y;
+      const len = Math.sqrt(dx*dx+dy*dy);
+      if(len<1) continue;
+      const ndx = dx/len, ndy = dy/len;
+
+      const hit = rayHit(src.x,src.y,ndx,ndy,bT.x,bT.y,bB.x,bB.y);
+      let ex, ey;
+
+      if(hit !== null){
+        ex = src.x + hit*ndx;
+        ey = src.y + hit*ndy;
+      } else {
+        ex = SCREEN_X; ey = screenY;
+        if(ey < 0){ const t=(0-src.y)/ndy; ex=src.x+t*ndx; ey=0; }
+        if(ey > H){ const t=(H-src.y)/ndy; ex=src.x+t*ndx; ey=H; }
+      }
+
+      // Gradient đồng nhất từ nguồn đến màn
+      const g = ctx.createLinearGradient(src.x, src.y, SCREEN_X, src.y);
+      g.addColorStop(0,   `rgba(244,196,48,${base*.55})`);
+      g.addColorStop(0.5, `rgba(255,220,80,${base*.2})`);
+      g.addColorStop(1,   `rgba(255,200,50,.01)`);
+      ctx.beginPath(); ctx.moveTo(src.x,src.y); ctx.lineTo(ex,ey);
+      ctx.strokeStyle=g; ctx.stroke();
+    }
+  }
+
+  // ── Shadow boundary dashes ──
+  if(p.showBoundary && subs.length>0){
+    ctx.setLineDash([8,5]);ctx.lineWidth=1.8;
+    const db=(sx,sy,bpx,bpy)=>{
+      const sey=shadowY(sx,sy,bpx,bpy);
+      ctx.strokeStyle='rgba(244,196,48,.65)';
+      ctx.beginPath();ctx.moveTo(sx,sy);ctx.lineTo(bpx,bpy);ctx.lineTo(SCREEN_X,sey);ctx.stroke();
+    };
+    const s0=subs[0],sN=subs[subs.length-1];
+    db(s0.x,s0.y,bT.x,bT.y);db(s0.x,s0.y,bB.x,bB.y);
+    if(subs.length>1){db(sN.x,sN.y,bT.x,bT.y);db(sN.x,sN.y,bB.x,bB.y);}
+    ctx.setLineDash([]);
+  }
+
+  // ── Screen line ──
+  ctx.strokeStyle='rgba(80,120,180,.55)';ctx.lineWidth=2;ctx.setLineDash([]);
+  ctx.beginPath();ctx.moveTo(SCREEN_X,0);ctx.lineTo(SCREEN_X,H);ctx.stroke();
+
+  // ── Combined illumination strip (always) ──
+  const MAIN_W = 12;
+  for(let y=0;y<H;y++){
+    const lit=prof[y];
+    if(lit>.01){
+      ctx.fillStyle=`rgba(244,196,48,${lit*p.intens*.75})`;
+      ctx.fillRect(SCREEN_X,y,MAIN_W,1);
+    }
+  }
+
+  // ── Per-source shadow bands ──
+  const BAND_W  = 16;
+  const BAND_GAP = 3;
+  const BANDS_START = SCREEN_X + MAIN_W + 5;
+
+  if(p.nSrc>1){
+    for(const src of subs){
+      const [cr,cg,cb]=SRC_COLORS[src.idx%SRC_COLORS.length];
+      let sT=shadowY(src.x,src.y,bT.x,bT.y);
+      let sB=shadowY(src.x,src.y,bB.x,bB.y);
+      if(sT>sB)[sT,sB]=[sB,sT];
+
+      // Use the actual index position (not subs index) so gaps show for disabled
+      const bx = BANDS_START + src.idx*(BAND_W+BAND_GAP);
+      const top = Math.max(0,sT), bot = Math.min(H,sB);
+
+      // Background = black
+      ctx.fillStyle='rgb(2,4,8)';
+      ctx.fillRect(bx,0,BAND_W,H);
+
+      // Shadow region = black (umbra)
+      ctx.fillStyle='rgb(2,4,8)';
+      ctx.fillRect(bx,top,BAND_W,bot-top);
+
+      // Lit regions = source color
+      ctx.fillStyle=`rgba(${cr},${cg},${cb},${.6*p.intens})`;
+      if(top>0)  ctx.fillRect(bx,0,BAND_W,top);
+      if(bot<H)  ctx.fillRect(bx,bot,BAND_W,H-bot);
+
+      // Thin border around band
+      ctx.strokeStyle=`rgba(${cr},${cg},${cb},.25)`;
+      ctx.lineWidth=1;
+      ctx.strokeRect(bx,0,BAND_W,H);
+
+      // Shadow edge tick lines
+      ctx.strokeStyle=`rgba(${cr},${cg},${cb},.8)`;
+      ctx.lineWidth=1.5;
+      if(top>6&&top<H-6){
+        ctx.beginPath();ctx.moveTo(bx-1,top);ctx.lineTo(bx+BAND_W+1,top);ctx.stroke();
+      }
+      if(bot>6&&bot<H-6){
+        ctx.beginPath();ctx.moveTo(bx-1,bot);ctx.lineTo(bx+BAND_W+1,bot);ctx.stroke();
+      }
+
+      // Label at top of band (rotated)
+      ctx.save();
+      ctx.translate(bx+BAND_W/2, 6);
+      ctx.fillStyle=`rgb(${cr},${cg},${cb})`;
+      ctx.font='bold 9px Oswald, sans-serif';
+      ctx.textAlign='center';
+      ctx.fillText(`S${src.idx+1}`, 0, 8);
+      ctx.restore();
+
+      // Dashed line connecting screen edge to band
+      ctx.strokeStyle=`rgba(${cr},${cg},${cb},.2)`;
+      ctx.lineWidth=.6;ctx.setLineDash([3,4]);
+      ctx.beginPath();ctx.moveTo(SCREEN_X,top);ctx.lineTo(bx,top);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(SCREEN_X,bot);ctx.lineTo(bx,bot);ctx.stroke();
+      ctx.setLineDash([]);
+    }
+  }
+
+  // ── Screen labels ──
+  ctx.font='11px Oswald, sans-serif';
+  let uTop=-1,uBot=-1;
+  for(let y=0;y<H;y++){if(prof[y]<.02){if(uTop<0)uTop=y;uBot=y;}}
+  let p1T=-1,p1B=-1,p2T=-1,p2B=-1;
+  for(let y=0;y<H;y++){
+    const v=prof[y];
+    if(v>.02&&v<.98){
+      if(uTop>=0&&y<uTop){if(p1T<0)p1T=y;p1B=y;}
+      else if(uBot>=0&&y>uBot){if(p2T<0)p2T=y;p2B=y;}
+    }
+  }
+  // Labels go left of screen line
+  const lblX=SCREEN_X-8;
+  ctx.textAlign='right';
+  if(uTop>=0&&uBot-uTop>10){ctx.fillStyle='rgba(100,120,230,.95)';ctx.fillText('BÓNG TỐI',lblX,(uTop+uBot)/2+4);}
+  if(p1T>=0&&p1B-p1T>6){ctx.fillStyle='rgba(220,220,60,.9)';ctx.fillText('BÓNG NỬA TỐI',lblX,(p1T+p1B)/2+4);}
+  if(p2T>=0&&p2B-p2T>6){ctx.fillStyle='rgba(220,220,60,.9)';ctx.fillText('BÓNG NỬA TỐI',lblX,(p2T+p2B)/2+4);}
+  const ref=uTop>=0?uTop:H/2;
+  if(ref>40){ctx.fillStyle='rgba(244,196,48,.85)';ctx.fillText('SÁNG',lblX,ref*.4+8);}
+  const ref2=uBot>=0?uBot:H/2;
+  if(ref2<H-30){ctx.fillStyle='rgba(244,196,48,.85)';ctx.fillText('SÁNG',lblX,ref2+(H-ref2)*.5);}
+  ctx.textAlign='left';
+
+  // ── Barrier ──
+  if(p.showBarrier){
+    ctx.lineCap='round';
+    ctx.strokeStyle='rgba(80,150,255,.1)';ctx.lineWidth=20;
+    ctx.beginPath();ctx.moveTo(bT.x,bT.y);ctx.lineTo(bB.x,bB.y);ctx.stroke();
+    ctx.strokeStyle='#2a6aaa';ctx.lineWidth=8;
+    ctx.beginPath();ctx.moveTo(bT.x,bT.y);ctx.lineTo(bB.x,bB.y);ctx.stroke();
+    ctx.strokeStyle='#80b8f0';ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(bT.x,bT.y);ctx.lineTo(bB.x,bB.y);ctx.stroke();
+    ctx.fillStyle='rgba(100,170,255,.9)';ctx.font='bold 11px Oswald, sans-serif';
+    ctx.fillText('VẬT CHẮN',bT.x+10,bT.y-10);
+  }
+
+  // ── Sub-sources ──
+  const renderedIdx=new Set();
+  for(const src of subs){
+    const [cr,cg,cb]=SRC_COLORS[src.idx%SRC_COLORS.length];
+    for(let r=30;r>0;r-=5){
+      ctx.beginPath();ctx.arc(src.x,src.y,r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(${cr},${cg},${cb},${.009*(31-r)/30*p.intens*2.5})`;ctx.fill();
+    }
+    const rad=(p.nSrc===1&&p.sSize===0)?8:6;
+    const sg=ctx.createRadialGradient(src.x,src.y,0,src.x,src.y,rad+3);
+    sg.addColorStop(0,'#fff');
+    sg.addColorStop(.35,`rgb(${cr},${cg},${cb})`);
+    sg.addColorStop(1,`rgba(${cr},${cg},${cb},0)`);
+    ctx.fillStyle=sg;ctx.beginPath();ctx.arc(src.x,src.y,rad+3,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle=`rgba(${cr},${cg},${cb},.55)`;ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.arc(src.x,src.y,rad,0,Math.PI*2);ctx.stroke();
+    if(p.nSrc>1&&!renderedIdx.has(src.idx)){
+      renderedIdx.add(src.idx);
+      ctx.fillStyle=`rgba(${cr},${cg},${cb},.95)`;
+      ctx.font='bold 10px Oswald, sans-serif';
+      ctx.fillText(`S${src.idx+1}`,src.x+10,src.y+4);
+    }
+  }
+
+  // Source label/bracket
+  if(subs.length>0){
+    const y1=subs[0].y,y2=subs[subs.length-1].y;
+    if(Math.abs(y2-y1)>10){
+      ctx.strokeStyle='rgba(255,200,50,.3)';ctx.lineWidth=1;ctx.setLineDash([3,3]);
+      ctx.beginPath();ctx.moveTo(srcCenter.x-16,y1);ctx.lineTo(srcCenter.x-16,y2);ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.beginPath();ctx.moveTo(srcCenter.x-20,y1);ctx.lineTo(srcCenter.x-12,y1);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(srcCenter.x-20,y2);ctx.lineTo(srcCenter.x-12,y2);ctx.stroke();
+    }
+    const activeN=p.nSrc>1?subs.length:1;
+    const lbl=p.nSrc>1
+      ?`${activeN}/${p.nSrc} NGUỒN`
+      :(p.sSize>0?`MỞ RỘNG (${p.sSize}px)`:'NGUỒN ĐIỂM');
+    ctx.fillStyle='rgba(255,220,80,.9)';ctx.font='bold 10px Oswald, sans-serif';
+    ctx.fillText(lbl,srcCenter.x+13,Math.min(y1,y2)-14);
+  }
+
+  // ── Circular screen preview (top-left inset) ──
+  drawScreenPreview(p, subs, bT, bB);
+
+  // ── Per-source shadow boundary lines ON the screen (layer trên cùng) ──
+  if(p.nSrc>1 && subs.length>1){
+    const TICK_W = 32;
+    for(const src of subs){
+      const [cr,cg,cb]=SRC_COLORS[src.idx%SRC_COLORS.length];
+      let sT=shadowY(src.x,src.y,bT.x,bT.y);
+      let sB=shadowY(src.x,src.y,bB.x,bB.y);
+      if(sT>sB)[sT,sB]=[sB,sT];
+
+      ctx.save();
+      ctx.strokeStyle=`rgb(${cr},${cg},${cb})`;
+      ctx.lineWidth=1.8;
+      ctx.setLineDash([5,4]);
+      if(sT>2&&sT<H-2){
+        ctx.beginPath();ctx.moveTo(SCREEN_X-TICK_W,sT);ctx.lineTo(SCREEN_X+TICK_W,sT);ctx.stroke();
+      }
+      if(sB>2&&sB<H-2){
+        ctx.beginPath();ctx.moveTo(SCREEN_X-TICK_W,sB);ctx.lineTo(SCREEN_X+TICK_W,sB);ctx.stroke();
+      }
+      ctx.setLineDash([]);
+      ctx.fillStyle=`rgb(${cr},${cg},${cb})`;
+      ctx.font='bold 9px Oswald, sans-serif';
+      ctx.textAlign='left';
+      if(sT>8&&sT<H-8) ctx.fillText(`S${src.idx+1}`,SCREEN_X+TICK_W+3,sT+4);
+      if(sB>8&&sB<H-8) ctx.fillText(`S${src.idx+1}`,SCREEN_X+TICK_W+3,sB+4);
+      ctx.restore();
+    }
+    ctx.setLineDash([]);
+  }
+
+  // Border
+  ctx.strokeStyle='rgba(30,45,70,.5)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(W,0);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(0,H-1);ctx.lineTo(W,H-1);ctx.stroke();
+}
+
+// ── Toggle buttons ──
+function rebuildToggles(n){
+  const cont=document.getElementById('srcToggles');
+  cont.innerHTML='';
+  if(n<=1){cont.style.display='none';return;}
+  cont.style.display='flex';
+  for(let i=0;i<n;i++){
+    if(sourceActive[i]===undefined)sourceActive[i]=true;
+    const [cr,cg,cb]=SRC_COLORS[i%SRC_COLORS.length];
+    const btn=document.createElement('div');
+    btn.className='src-btn'+(sourceActive[i]?' on':'');
+    btn.innerHTML=`<span class="dot"></span>S${i+1}`;
+    if(sourceActive[i]){
+      btn.style.borderColor=`rgb(${cr},${cg},${cb})`;
+      btn.style.color=`rgb(${cr},${cg},${cb})`;
+      btn.querySelector('.dot').style.background=`rgb(${cr},${cg},${cb})`;
+    }
+    btn.addEventListener('click',()=>{
+      sourceActive[i]=!sourceActive[i];
+      if(!Object.values(sourceActive).some(v=>v)){sourceActive[i]=true;return;}
+      rebuildToggles(n);draw();
+    });
+    cont.appendChild(btn);
+  }
+}
+
+// ── Controls wiring ──
+const fmt={
+  barrierSize:v=>v+'px', barrierY:v=>v+'%', barrierX:v=>v+'%',
+  intensity:v=>v+'%', rays:v=>v,
+  srcSize:v=>+v===0?'điểm':v+'px',
+  numSources:v=>v,
+  srcY:v=>v+'%', srcX:v=>v+'%',
+  screenX:v=>v+'%',
+};
+const id2v={
+  barrierSize:'vBarrierSize',barrierY:'vBarrierY',barrierX:'vBarrierX',
+  intensity:'vIntensity',rays:'vRays',srcSize:'vSrcSize',numSources:'vNumSrc',
+  srcY:'vSrcY',srcX:'vSrcX',screenX:'vScreenX',
+};
+Object.keys(fmt).forEach(id=>{
+  const el=document.getElementById(id);
+  const ve=document.getElementById(id2v[id]);
+  if(!el||!ve)return;
+  const evtName = id==='numSources' ? 'change' : 'input';
+  el.addEventListener(evtName,()=>{
+    ve.textContent=fmt[id](el.value);
+    if(id==='numSources'){
+      for(let i=0;i<10;i++)if(sourceActive[i]===undefined)sourceActive[i]=true;
+      rebuildToggles(+el.value);
+    }
+    if(id==='srcX'||id==='srcY'){
+      srcCenter.x=(+document.getElementById('srcX').value/100)*W;
+      srcCenter.y=(+document.getElementById('srcY').value/100)*H;
+    }
+    if(id==='screenX'){
+      SCREEN_X=Math.floor(+el.value/100*W);
+    }
+    draw();
+  });
+});
+
+// Sync slider display values from current srcCenter (called after drag)
+function syncToSliders(){
+  if(!W||!H)return;
+  const sx=Math.round(srcCenter.x/W*100);
+  const sy=Math.round(srcCenter.y/H*100);
+  document.getElementById('srcX').value=sx;
+  document.getElementById('srcY').value=sy;
+  document.getElementById('vSrcX').textContent=sx+'%';
+  document.getElementById('vSrcY').textContent=sy+'%';
+}
+
+// ── Checkboxes ──
+document.getElementById('showBoundary').addEventListener('change',draw);
+document.getElementById('showBarrier').addEventListener('change',draw);
+
+// ── Drag ──
+canvas.addEventListener('mousedown',e=>{
+  const r=canvas.getBoundingClientRect();
+  const scx=W/r.width, scy=H/r.height;
+  const mx=(e.clientX-r.left)*scx, my=(e.clientY-r.top)*scy;
+  if(Math.hypot(mx-srcCenter.x,my-srcCenter.y)<32)dragging=true;
+});
+canvas.addEventListener('mousemove',e=>{
+  if(!dragging)return;
+  const r=canvas.getBoundingClientRect();
+  const scx=W/r.width, scy=H/r.height;
+  srcCenter.x=Math.max(12,Math.min(W*.45,(e.clientX-r.left)*scx));
+  srcCenter.y=Math.max(12,Math.min(H-12,(e.clientY-r.top)*scy));
+  syncToSliders(); draw();
+});
+canvas.addEventListener('mouseup',()=>dragging=false);
+canvas.addEventListener('mouseleave',()=>dragging=false);
+canvas.addEventListener('touchstart',e=>{
+  e.preventDefault();
+  const r=canvas.getBoundingClientRect(),t=e.touches[0];
+  const scx=W/r.width, scy=H/r.height;
+  const mx=(t.clientX-r.left)*scx, my=(t.clientY-r.top)*scy;
+  if(Math.hypot(mx-srcCenter.x,my-srcCenter.y)<36)dragging=true;
+},{passive:false});
+canvas.addEventListener('touchmove',e=>{
+  e.preventDefault();
+  if(!dragging)return;
+  const r=canvas.getBoundingClientRect(),t=e.touches[0];
+  const scx=W/r.width, scy=H/r.height;
+  srcCenter.x=Math.max(12,Math.min(W*.45,(t.clientX-r.left)*scx));
+  srcCenter.y=Math.max(12,Math.min(H-12,(t.clientY-r.top)*scy));
+  syncToSliders(); draw();
+},{passive:false});
+canvas.addEventListener('touchend',()=>dragging=false);
+
+// ── Init & resize ──
+for(let i=0;i<10;i++)sourceActive[i]=true;
+window.addEventListener('resize',resizeCanvas);
+requestAnimationFrame(()=>{
+  // Init srcCenter from slider defaults
+  const W0=wrap.clientWidth, H0=wrap.clientHeight;
+  srcCenter.x=(+document.getElementById('srcX').value/100)*W0;
+  srcCenter.y=(+document.getElementById('srcY').value/100)*H0;
+  resizeCanvas();
+});
+</script>
+</body>
+</html>
