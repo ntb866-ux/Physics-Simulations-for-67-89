@@ -1,0 +1,1251 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Lăng kính và màu sắc</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Phòng thí nghiệm lăng kính, tán sắc và màu sắc (KHTN 9): dải video thực tế, sân khấu canvas bên trái, sổ ghi chép bên phải. Điện thoại xếp một cột.
+   Cùng hệ màu, phông với bộ mô phỏng KHTN 6–9. Phòng tối (tán sắc, cầu vồng) luôn nền tối để màu ánh sáng hiện đúng. */
+:root{
+  --bg:#edf0f3; --panel:#ffffff; --lane:#f4f6f9; --ink:#141c26; --muted:#556170; --line:#c9d1db;
+  --accent:#1d5fa8; --accent-ink:#ffffff; --ok:#1d8a4b; --warn:#c2410c;
+  --force:#d1323b; --vel:#1f6fd1; --glass:#9cc9e6; --glass2:#3d7fae; --normal:#7a8696;
+  --space:#0d1626; --star:#e9eef7; --dark:#05080d; --gold:#c99a2e; --wood:#b07a45; --sky:#8fc3ea; --ground:#6d9a58;
+  --font-ui:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-num:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Consolas,monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0e131a; --panel:#161e28; --lane:#111821; --ink:#e3e9f0; --muted:#97a3b2; --line:#2a3644;
+  --accent:#5ea6ec; --accent-ink:#04182c; --ok:#47c47d; --warn:#f08a4b;
+  --force:#ff5f67; --vel:#5aa2ff; --glass:#3e6f8f; --glass2:#7fb8e0; --normal:#8d99ab;
+  --space:#060a12; --star:#cfd8e6; --dark:#03050a; --gold:#e0b24a; --wood:#9a6a3c; --sky:#2f5f88; --ground:#3f6436;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e131a; --panel:#161e28; --lane:#111821; --ink:#e3e9f0; --muted:#97a3b2; --line:#2a3644;
+  --accent:#5ea6ec; --accent-ink:#04182c; --ok:#47c47d; --warn:#f08a4b;
+  --force:#ff5f67; --vel:#5aa2ff; --glass:#3e6f8f; --glass2:#7fb8e0; --normal:#8d99ab;
+  --space:#060a12; --star:#cfd8e6; --dark:#03050a; --gold:#e0b24a; --wood:#9a6a3c; --sky:#2f5f88; --ground:#3f6436;
+  color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-ui);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px 40px}
+.wrap{max-width:1320px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.hbtns{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.eyebrow{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{margin:0;font-size:clamp(25px,3.4vw,36px);line-height:1.15;font-weight:800;text-wrap:balance;letter-spacing:-.01em}
+h2{margin:0;font-size:17px;font-weight:700;text-wrap:balance}
+.btn{font:inherit;font-weight:600;font-size:15px;min-height:44px;padding:8px 14px;border-radius:8px;border:1px solid var(--line);
+  background:var(--panel);color:var(--ink);cursor:pointer;touch-action:manipulation}
+.btn:hover{border-color:var(--accent)}
+.btn:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible,a:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn.sm{min-height:40px;padding:4px 12px;font-size:14px}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
+.seg .btn{border:0;border-radius:0;min-width:52px}
+.seg .btn i{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:6px;vertical-align:-1px}
+nav.tabs{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line)}
+nav.tabs button{font:inherit;font-size:15px;font-weight:600;white-space:nowrap;min-height:46px;padding:8px 14px;border:0;border-bottom:3px solid transparent;
+  background:none;color:var(--muted);cursor:pointer;margin-bottom:-1px}
+nav.tabs button.on{color:var(--ink);border-bottom-color:var(--accent)}
+.req{margin:0;font-size:14px;color:var(--muted);max-width:110ch}
+.req b{color:var(--ink);font-weight:600}
+.lab{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:14px;align-items:start}
+@media (max-width:1020px){.lab{grid-template-columns:minmax(0,1fr)}}
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.col{display:flex;flex-direction:column;gap:12px;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card p{margin:0}
+canvas{display:block;width:100%;border-radius:8px;background:var(--lane);touch-action:pan-y;user-select:none;-webkit-user-select:none}
+canvas.drk{background:var(--dark)}
+.hint{margin:0;font-size:14px;color:var(--muted)}
+.status{margin:0;font-weight:600;min-height:1.5em}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chk{display:inline-flex;align-items:center;gap:8px;min-height:44px;font-size:15px;cursor:pointer}
+.chk input{width:22px;height:22px;accent-color:var(--accent)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:14px;color:var(--muted)}
+.legend i{display:inline-block;width:18px;height:5px;border-radius:3px;margin-right:6px;vertical-align:middle}
+.sl{display:flex;flex-direction:column;gap:4px}
+.sl .top{display:flex;justify-content:space-between;gap:8px;font-size:15px}
+.sl .val{font-family:var(--font-num);font-weight:600;text-align:right}
+input[type=range]{width:100%;height:44px;accent-color:var(--accent);margin:0}
+.kv{display:grid;grid-template-columns:minmax(0,1fr) max-content;gap:4px 12px;font-size:15px;margin:0}
+.kv dt{color:var(--muted)} .kv dd{margin:0;font-family:var(--font-num);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.kv dd.t{font-family:var(--font-ui);font-weight:600;white-space:normal;grid-column:1/-1;text-align:left;margin:-2px 0 4px 12px}
+.opts{display:flex;flex-direction:column;gap:6px}
+.opts .btn{text-align:left;font-size:14px}
+.opts .btn.picked{border:2px solid var(--accent)}
+.opts .btn.right{background:color-mix(in srgb,var(--ok) 18%,var(--panel));border-color:var(--ok)}
+.opts .btn.wrong{background:color-mix(in srgb,var(--warn) 14%,var(--panel));border-color:var(--warn)}
+.ans{background:var(--lane);border-left:4px solid var(--ok);padding:8px 12px;border-radius:6px;font-size:15px}
+.muted{color:var(--muted);font-size:14px}
+details{border:1px solid var(--line);border-radius:var(--r);background:var(--panel);padding:0 14px}
+details[open]{padding-bottom:12px}
+summary{cursor:pointer;font-weight:700;min-height:44px;display:flex;align-items:center;font-size:15px}
+details p,details ul,details ol{margin:6px 0;font-size:15px;max-width:95ch}
+details ul,details ol{padding-left:22px}
+details li{margin:3px 0}
+details h3{font-size:15px;margin:12px 0 2px}
+.fine{font-size:13px;color:var(--muted);margin:0}
+.tblwrap{overflow-x:auto}
+table.log{border-collapse:collapse;width:100%;font-size:14px}
+table.log th,table.log td{padding:6px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+table.log th{color:var(--muted);font-weight:600}
+table.log td.n{font-family:var(--font-num);text-align:right;white-space:nowrap}
+table.log th.n{text-align:right}
+table.log .sw{display:inline-block;width:14px;height:14px;border-radius:3px;vertical-align:-2px;margin-right:6px;border:1px solid var(--line)}
+.res-ok{color:var(--ok);font-weight:700}.res-no{color:var(--warn);font-weight:700}
+.chal{display:flex;flex-direction:column;gap:6px}
+.chal div{display:flex;gap:10px;align-items:flex-start;font-size:15px}
+.chal b{font-size:18px;line-height:1.3;width:22px;flex:none;text-align:center}
+.chal .done{color:var(--ok)}
+.objs{display:flex;flex-wrap:wrap;gap:6px}
+.objs .btn{font-size:14px;padding:6px 10px}
+.objs .btn.on{border:2px solid var(--accent);background:color-mix(in srgb,var(--accent) 12%,var(--panel))}
+.swatch{display:flex;gap:10px;align-items:center}
+.swatch{flex-wrap:wrap}.swatch i{display:inline-block;width:44px;height:30px;border-radius:6px;border:1px solid var(--line);flex:none}
+.q5{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:12px}
+.q5:first-child{border-top:0;padding-top:0}
+.q5 p{margin:0;font-weight:600}
+.score{font-family:var(--font-num);font-size:clamp(26px,4vw,40px);font-weight:600;line-height:1.1}
+/* Dải video thực tế: thumbnail bấm là phát ngay trong trang */
+.vbox{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:14px;align-items:start;background:var(--space);color:var(--star);border-radius:var(--r);padding:12px}
+.vbox.playing{grid-template-columns:minmax(0,1fr)}
+@media (max-width:720px){.vbox{grid-template-columns:minmax(0,1fr)}}
+.vmedia{position:relative;width:100%;aspect-ratio:16/9;border-radius:8px;overflow:hidden;background:linear-gradient(135deg,#1e2c44,#0b111c)}
+.vbox.playing .vmedia{max-width:860px}
+.thumb{all:unset;cursor:pointer;position:absolute;inset:0;display:block}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb .ph{position:absolute;left:10px;bottom:8px;font-size:13px;opacity:.75}
+.thumb .pbtn{position:absolute;left:50%;top:50%;width:64px;height:64px;margin:-32px 0 0 -32px;border-radius:50%;background:var(--force);box-shadow:0 2px 12px rgba(0,0,0,.4)}
+.thumb .pbtn::before{content:"";position:absolute;left:25px;top:20px;border-style:solid;border-width:12px 0 12px 20px;border-color:transparent transparent transparent #fff}
+.thumb .dur{position:absolute;right:8px;bottom:8px;background:rgba(0,0,0,.75);color:#fff;font:600 13px var(--font-num);padding:2px 6px;border-radius:4px}
+.thumb:focus-visible{outline:3px solid var(--star);outline-offset:-3px}
+.player{position:absolute;inset:0}
+.player video,.player iframe{width:100%;height:100%;border:0;display:block;background:#000}
+.vt{display:flex;flex-direction:column;gap:4px;min-width:0}
+.vt .lbl{font-size:12px;letter-spacing:.06em;text-transform:uppercase;opacity:.75;font-weight:600}
+.vt .ttl{font-weight:700;font-size:16px;line-height:1.3}
+.vt .look{font-size:14px;opacity:.92}
+.vt .src{font-size:12.5px;opacity:.7}
+.vchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.chip{font:inherit;font-size:14px;font-weight:600;min-height:40px;padding:6px 12px;border-radius:8px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;
+  background:transparent;color:var(--star);border:1px solid color-mix(in srgb,var(--star) 45%,transparent)}
+.chip.on{background:var(--star);color:var(--space)}
+/* Chế độ giáo viên: che số liệu để lớp dự đoán */
+body.hideNums .num{filter:blur(7px);user-select:none}
+body.hideNums .num:hover{filter:none}
+footer{font-size:13px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow" data-i18n="eyebrow"></div>
+      <h1 data-i18n="title"></h1>
+    </div>
+    <div class="hbtns">
+      <button class="btn" id="gvBtn" aria-pressed="false" data-i18n="gvBtn"></button>
+      <button class="btn" id="langBtn">EN</button>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="1" data-i18n="tab1"></button>
+    <button role="tab" data-tab="2" data-i18n="tab2"></button>
+    <button role="tab" data-tab="3" data-i18n="tab3"></button>
+    <button role="tab" data-tab="4" data-i18n="tab4"></button>
+    <button role="tab" data-tab="5" data-i18n="tab5"></button>
+  </nav>
+
+  <!-- ===================== TAB 1: ĐƯỜNG ĐI CỦA TIA SÁNG QUA LĂNG KÍNH ===================== -->
+  <section id="t1" class="col">
+    <p class="req" data-i18n-html="req1"></p>
+    <div class="vbox" id="v1"></div>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" data-i18n="hint1"></p>
+        <canvas id="cv1" class="drag" aria-label="laser beam through a triangular prism"></canvas>
+        <div class="controls">
+          <div class="seg" id="col1"></div>
+          <button class="btn" id="draw1" aria-pressed="false" data-i18n="draw1"></button>
+          <button class="btn primary" id="chk1" data-i18n="chk1" hidden></button>
+          <button class="btn" id="rst1" data-i18n="reset"></button>
+        </div>
+        <p class="status" id="st1"></p>
+        <canvas id="gr1" aria-label="graph of deviation angle against angle of incidence"></canvas>
+        <div class="legend">
+          <span><i style="background:var(--force)"></i><span data-i18n="lgD"></span></span>
+          <span><i style="background:var(--normal)"></i><span data-i18n="lgN"></span></span>
+        </div>
+        <p class="fine" data-i18n="assume1"></p>
+      </div>
+      <div class="col">
+        <div class="card" id="p1"></div>
+        <div class="card"><h2 data-i18n="data"></h2><dl class="kv" id="kv1"></dl></div>
+        <div class="card">
+          <div><div class="muted" data-i18n="setMat"></div><div class="seg" id="mat1"></div></div>
+          <div class="sl"><div class="top"><span data-i18n="setA"></span><span class="val" id="a1V"></span></div>
+            <input type="range" id="a1" min="30" max="75" step="1" value="60"></div>
+          <div class="sl"><div class="top"><span data-i18n="setI"></span><span class="val" id="i1V"></span></div>
+            <input type="range" id="i1" min="-60" max="85" step="0.5" value="48"></div>
+        </div>
+        <div class="card" id="p1b"></div>
+        <div class="card" id="c1"></div>
+      </div>
+    </div>
+    <details><summary data-i18n="whyT"></summary><div data-i18n-html="why1"></div></details>
+    <details><summary data-i18n="misT"></summary><div data-i18n-html="mis1"></div></details>
+  </section>
+
+  <!-- ===================== TAB 2: TÁN SẮC ÁNH SÁNG TRẮNG ===================== -->
+  <section id="t2" class="col" hidden>
+    <p class="req" data-i18n-html="req2"></p>
+    <div class="vbox" id="v2"></div>
+    <div class="lab">
+      <div class="stage">
+        <div class="controls"><div class="seg" id="mode2"></div></div>
+        <p class="hint" id="hint2"></p>
+        <canvas id="cv2" class="drk drag" aria-label="white light dispersed by a prism in a dark room"></canvas>
+        <p class="muted" data-i18n="scr2T"></p>
+        <canvas id="cv2s" class="drk" aria-label="enlarged view of the screen"></canvas>
+        <p class="status" id="st2"></p>
+        <div class="tblwrap"><table class="log" id="tb2"></table></div>
+        <p class="fine" data-i18n="assume2"></p>
+      </div>
+      <div class="col">
+        <div class="card" id="p2"></div>
+        <div class="card">
+          <div><div class="muted" data-i18n="setSrc"></div><div class="seg" id="src2"></div></div>
+          <div><div class="muted" data-i18n="setMat"></div><div class="seg" id="mat2"></div></div>
+          <div class="sl"><div class="top"><span data-i18n="setRot"></span><span class="val" id="r2V"></span></div>
+            <input type="range" id="r2" min="-20" max="20" step="0.5" value="0"></div>
+          <div class="sl"><div class="top"><span data-i18n="setW"></span><span class="val" id="w2V"></span></div>
+            <input type="range" id="w2" min="1" max="12" step="1" value="2"></div>
+        </div>
+        <div class="card" id="p2b"></div>
+        <div class="card" id="c2"></div>
+      </div>
+    </div>
+    <details><summary data-i18n="whyT"></summary><div data-i18n-html="why2"></div></details>
+    <details><summary data-i18n="misT"></summary><div data-i18n-html="mis2"></div></details>
+  </section>
+
+  <!-- ===================== TAB 3: MÀU SẮC CỦA VẬT ===================== -->
+  <section id="t3" class="col" hidden>
+    <p class="req" data-i18n-html="req3"></p>
+    <div class="vbox" id="v3"></div>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" data-i18n="hint3"></p>
+        <canvas id="cv3" aria-label="objects on a table under a coloured lamp"></canvas>
+        <div class="objs" id="obj3"></div>
+        <canvas id="cv3s" aria-label="spectra of the lamp, the object's reflection and the reflected light"></canvas>
+        <div class="legend">
+          <span><i style="background:linear-gradient(90deg,#8040ff,#0060ff,#00c060,#ffd000,#ff3000)"></i><span data-i18n="lgS"></span></span>
+          <span><i style="background:var(--ink)"></i><span data-i18n="lgR"></span></span>
+        </div>
+        <p class="fine" data-i18n="assume3"></p>
+      </div>
+      <div class="col">
+        <div class="card" id="p3"></div>
+        <div class="card">
+          <div><div class="muted" data-i18n="setLamp"></div><div class="seg" id="lamp3"></div></div>
+          <div id="rgb3" class="col" hidden>
+            <div class="sl"><div class="top"><span data-i18n="ledR"></span><span class="val" id="lr3V"></span></div><input type="range" id="lr3" min="0" max="100" step="5" value="100"></div>
+            <div class="sl"><div class="top"><span data-i18n="ledG"></span><span class="val" id="lg3V"></span></div><input type="range" id="lg3" min="0" max="100" step="5" value="100"></div>
+            <div class="sl"><div class="top"><span data-i18n="ledB"></span><span class="val" id="lb3V"></span></div><input type="range" id="lb3" min="0" max="100" step="5" value="0"></div>
+          </div>
+          <div><div class="muted" data-i18n="setFilt"></div><div class="seg" id="filt3"></div></div>
+          <label class="chk"><input type="checkbox" id="adapt3" checked> <span data-i18n="adapt3"></span></label>
+        </div>
+        <div class="card"><h2 id="obT3"></h2><div class="swatch"><i id="sw3a"></i><span class="muted" data-i18n="swWhite"></span><i id="sw3b"></i><span class="muted" data-i18n="swNow"></span></div><dl class="kv" id="kv3"></dl></div>
+        <div class="card"><h2 data-i18n="chalT"></h2><div class="chal" id="ch3"></div></div>
+        <div class="card" id="p3b"></div>
+        <div class="card" id="c3"></div>
+      </div>
+    </div>
+    <details><summary data-i18n="whyT"></summary><div data-i18n-html="why3"></div></details>
+    <details><summary data-i18n="misT"></summary><div data-i18n-html="mis3"></div></details>
+  </section>
+
+  <!-- ===================== TAB 4: CẦU VỒNG ===================== -->
+  <section id="t4" class="col" hidden>
+    <p class="req" data-i18n-html="req4"></p>
+    <div class="vbox" id="v4"></div>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" data-i18n="hint4"></p>
+        <canvas id="cv4" class="drk drag" aria-label="sunlight entering a water droplet"></canvas>
+        <div class="controls">
+          <div class="seg" id="col4"></div>
+          <label class="chk"><input type="checkbox" id="many4"> <span data-i18n="many4"></span></label>
+          <label class="chk"><input type="checkbox" id="sec4"> <span data-i18n="sec4"></span></label>
+        </div>
+        <canvas id="gr4" aria-label="graph of the angle of the outgoing ray against the entry height"></canvas>
+        <p class="hint" data-i18n="hint4b"></p>
+        <canvas id="cv4s" aria-label="sky seen by an observer with the sun behind"></canvas>
+        <div class="sl"><div class="top"><span data-i18n="setSun"></span><span class="val" id="sun4V"></span></div>
+          <input type="range" id="sun4" min="0" max="60" step="1" value="20"></div>
+        <p class="fine" data-i18n="assume4"></p>
+      </div>
+      <div class="col">
+        <div class="card" id="p4"></div>
+        <div class="card"><h2 data-i18n="data"></h2><dl class="kv" id="kv4"></dl></div>
+        <div class="card" id="p4b"></div>
+        <div class="card" id="c4"></div>
+      </div>
+    </div>
+    <details><summary data-i18n="whyT"></summary><div data-i18n-html="why4"></div></details>
+    <details><summary data-i18n="misT"></summary><div data-i18n-html="mis4"></div></details>
+  </section>
+
+  <!-- ===================== TAB 5: LUYỆN TẬP ===================== -->
+  <section id="t5" class="col" hidden>
+    <p class="req" data-i18n-html="req5"></p>
+    <div class="lab">
+      <div class="card" id="q5"></div>
+      <div class="col">
+        <div class="card"><h2 data-i18n="scoreT"></h2><div class="score num" id="sc5"></div><p class="muted" id="sc5t"></p>
+          <div><button class="btn" id="rst5" data-i18n="reset"></button></div></div>
+      </div>
+    </div>
+  </section>
+
+  <details><summary data-i18n="originT"></summary><div data-i18n-html="origin"></div></details>
+  <details><summary data-i18n="mediaT"></summary><p data-i18n-html="mediaIntro"></p><div class="tblwrap"><table class="log" id="mediaTbl"></table></div></details>
+  <footer data-i18n="footer"></footer>
+</div>
+<script>
+/* ================= Chuỗi song ngữ ================= */
+const I18N={vi:{
+docTitle:'Lăng kính và màu sắc',eyebrow:'KHTN 9 · Ánh sáng · Lăng kính, tán sắc, màu sắc',title:'Lăng kính, sự tán sắc ánh sáng và màu sắc của vật',gvBtn:'Che số liệu',
+tab1:'1. Tia sáng qua lăng kính',tab2:'2. Tán sắc ánh sáng trắng',tab3:'3. Màu sắc của vật',tab4:'4. Cầu vồng',tab5:'5. Luyện tập',
+req1:'<b>Yêu cầu cần đạt:</b> Vẽ được sơ đồ đường truyền của tia sáng qua lăng kính.',
+req2:'<b>Yêu cầu cần đạt:</b> Thực hiện thí nghiệm với lăng kính tạo được quang phổ của ánh sáng trắng; giải thích được một cách định tính sự tán sắc ánh sáng Mặt Trời qua lăng kính; từ kết quả thí nghiệm nêu được khái niệm ánh sáng màu.',
+req3:'<b>Yêu cầu cần đạt:</b> Nêu được màu sắc của một vật được nhìn thấy phụ thuộc vào màu sắc của ánh sáng bị vật đó hấp thụ và phản xạ.',
+req4:'<b>Yêu cầu cần đạt:</b> Vận dụng kiến thức về sự truyền ánh sáng, màu sắc ánh sáng, giải thích được một số hiện tượng đơn giản thường gặp trong thực tế (cầu vồng).',
+req5:'<b>Luyện tập:</b> 10 câu hỏi ôn cả bài. Chọn một đáp án để xem giải thích.',
+data:'Số liệu',reset:'Đặt lại',
+predTitle:'Dự đoán trước',predThen:'Làm thí nghiệm để kiểm tra, rồi mở đáp án.',showAns:'Xem đáp án',hideAns:'Ẩn đáp án',conclTitle:'Rút ra kết luận',
+whyT:'Vì sao? Cơ chế khoa học và cách nói cho học sinh',misT:'Học sinh hay hiểu sai',
+cRed:'đỏ',cOrange:'cam',cYellow:'vàng',cGreen:'lục',cCyan:'lục lam',cBlue:'lam',cIndigo:'chàm',cViolet:'tím',
+c_red:'Đỏ',c_orange:'Cam',c_yellow:'Vàng',c_green:'Lục',c_blue:'Lam',c_indigo:'Chàm',c_violet:'Tím',
+m_bk7:'Thuỷ tinh thường',m_f2:'Thuỷ tinh flint',m_pmma:'Nhựa acrylic',m_water:'Nước',m_dia:'Kim cương',
+/* Tab 1 */
+hint1:'Kéo đèn laser để đổi góc tới, kéo chấm xanh để dời điểm tới trên mặt bên. Đường nét đứt xám là pháp tuyến.',
+draw1:'✎ Tự vẽ trước',chk1:'Kiểm tra hình vẽ',lgD:'Góc lệch D',lgN:'Pháp tuyến',
+assume1:'Giả thiết mô phỏng: hình vẽ là mặt cắt phẳng của lăng kính; chiết suất tính theo công thức thực nghiệm của từng chất ở 20 °C; tia mờ là phần ánh sáng bị phản xạ ở mặt lăng kính (tính theo công thức Fresnel); bỏ qua sự hấp thụ trong lăng kính.',
+setMat:'Chất làm lăng kính',setA:'Góc chiết quang A',setI:'Góc tới i₁',
+lzRed:'Laser đỏ',lzGreen:'Laser lục',lzViolet:'Laser tím',apex:'đỉnh',base:'đáy',drawMine:'tia ló em vẽ',
+st1Draw:'Tia sáng sau khi vào lăng kính đã bị che. Kéo chấm xanh trên mặt bên thứ hai tới chỗ em nghĩ tia sáng gặp mặt này, rồi kéo chấm xanh ngoài cùng để chỉ hướng tia ló. Xong bấm “Kiểm tra hình vẽ”.',
+st1NoCheck:'Với góc tới này tia sáng không ló ra ở mặt bên thứ hai (bị phản xạ toàn phần hoặc gặp đáy). Đổi góc tới rồi vẽ lại.',
+st1Good:'Rất tốt! Tia trong lăng kính lệch {a}°, tia ló lệch {b}° so với đường đúng.',
+st1Off:'Chưa khớp: tia trong lăng kính lệch {a}°, tia ló lệch {b}° so với đường đúng (đường liền). Nhớ: mỗi lần khúc xạ, vẽ pháp tuyến trước.',
+st1Info:'Tia ló lệch về phía đáy lăng kính một góc D = {d}° so với tia tới.',
+grI1:'góc tới i₁',grD:'góc lệch D',dMin:'D nhỏ nhất ≈ {d}°',grNone:'Với góc A này tia sáng luôn bị phản xạ toàn phần ở mặt thứ hai',
+kN:'Chiết suất n (màu này)',kI1:'Góc tới i₁',kR1:'Góc khúc xạ r₁',kR2:'Góc tới mặt thứ hai r₂',kI2:'Góc ló i₂',kD:'Góc lệch D',
+kBase:'Tia sáng đi xuống gặp đáy lăng kính.',kTir:'Phản xạ toàn phần ở mặt thứ hai (r₂ lớn hơn góc tới hạn {c}°): không có tia ló ở mặt này.',
+kToBase:'Tia ló lệch về phía đáy.',kToApex:'Tia ló lệch về phía đỉnh.',
+p1q:'Lăng kính đặt đỉnh ở trên. Chiếu tia laser đỏ vào mặt bên trái. Tia ló ra ở mặt bên phải sẽ lệch về phía nào so với tia tới?',
+p1a:'Lệch lên, về phía đỉnh lăng kính',p1b:'Lệch xuống, về phía đáy lăng kính',p1c:'Đi thẳng, không lệch',
+p1e:'Tia sáng bị khúc xạ hai lần, lần nào cũng bị bẻ về phía phần dày hơn của lăng kính, nên tia ló lệch về phía đáy. Đổi góc tới, đổi chất làm lăng kính: lúc nào tia ló cũng lệch về đáy (khi còn ló ra được).',
+p1bq:'Giữ nguyên góc tới, thay laser đỏ bằng laser tím. Góc lệch D thay đổi thế nào?',
+p1ba:'D lớn hơn: tia tím lệch nhiều hơn',p1bb:'D nhỏ hơn: tia tím lệch ít hơn',p1bc:'D không đổi vì cùng một lăng kính',
+p1be:'Thuỷ tinh có chiết suất với ánh sáng tím (khoảng 1,530) lớn hơn với ánh sáng đỏ (khoảng 1,514), nên tia tím bị bẻ mạnh hơn và lệch nhiều hơn. Đây chính là mầm mống của sự tán sắc ở tab 2.',
+c1q:'Mô tả đường đi của một tia sáng đơn sắc qua lăng kính. Cách vẽ như thế nào?',
+c1a:'Tia sáng bị khúc xạ hai lần: lần một khi đi từ không khí vào lăng kính, lần hai khi từ lăng kính ra không khí. Tia ló bị lệch về phía đáy lăng kính so với tia tới. Cách vẽ: (1) vẽ pháp tuyến tại điểm tới; (2) vẽ tia khúc xạ lệch gần pháp tuyến hơn (vào chất chiết quang hơn); (3) tại mặt thứ hai vẽ pháp tuyến; (4) vẽ tia ló lệch xa pháp tuyến hơn. Ánh sáng màu khác nhau thì lệch khác nhau một chút.',
+why1:'<h3>Cơ chế</h3><p>Lăng kính là khối chất trong suốt có hai mặt phẳng không song song (hai mặt bên), góc giữa chúng là góc chiết quang A. Tại mỗi mặt, tia sáng tuân theo định luật khúc xạ: sin i = n·sin r. Ở mặt thứ nhất tia sáng đi vào chất có chiết suất lớn hơn nên bị bẻ lại gần pháp tuyến; ở mặt thứ hai tia sáng ra không khí nên bị bẻ xa pháp tuyến. Vì hai mặt nghiêng về hai phía khác nhau của đỉnh, cả hai lần bẻ đều làm tia sáng quay về phía đáy. Góc lệch tổng cộng là D = i₁ + i₂ − A, nhỏ nhất khi tia đi đối xứng qua lăng kính (đồ thị dưới hình).</p><p>Nếu r₂ lớn hơn góc tới hạn thì xảy ra phản xạ toàn phần ở mặt thứ hai (thử với kim cương hoặc góc A lớn), đây là cách lăng kính trong ống nhòm hoạt động.</p><h3>Nói cho học sinh</h3><p>Ánh sáng đi trong thuỷ tinh chậm hơn trong không khí. Giống như một hàng người chạy từ đường nhựa vào bãi cát chéo góc: người chạm cát trước bị chậm lại trước, cả hàng bị quay hướng. Lăng kính “dày” ở đáy, “mỏng” ở đỉnh, nên ánh sáng luôn bị quay về phía đáy.</p>',
+mis1:'<ul><li><b>“Tia sáng bị bẻ ở giữa lăng kính.”</b> Tia sáng chỉ đổi hướng ở mặt phân cách; bên trong thuỷ tinh đồng chất nó đi thẳng.</li><li><b>“Tia ló lệch về phía đỉnh.”</b> Khi ló ra được ở mặt bên thứ hai, tia ló luôn lệch về phía đáy.</li><li><b>Vẽ tia khúc xạ không vẽ pháp tuyến</b>, đo góc so với mặt lăng kính thay vì so với pháp tuyến.</li><li><b>“Lăng kính nào cũng cho tia ló.”</b> Góc A lớn hoặc chất có chiết suất lớn (kim cương) thì tia sáng có thể bị phản xạ toàn phần bên trong.</li></ul>',
+/* Tab 2 */
+scr2T:'Màn chắn phóng to (nhìn thẳng vào màn):',
+assume2:'Giả thiết mô phỏng: ánh sáng trắng coi là có mọi màu từ 400 nm đến 700 nm với cường độ như nhau; chùm sáng gồm nhiều tia song song; chiết suất theo công thức thực nghiệm (Sellmeier); thấu kính coi là mỏng, lí tưởng, không tự tán sắc; màu trên màn hình máy tính chỉ gần đúng với màu thật của quang phổ. Lăng kính cao 5 cm.',
+setSrc:'Nguồn sáng',setRot:'Xoay lăng kính (0° = lệch ít nhất)',setW:'Bề rộng chùm sáng',
+mode_one:'Một lăng kính',mode_slit:'Tách riêng một màu',mode_lens:'Gom các màu lại',
+src_white:'Ánh sáng trắng',src_red:'Laser đỏ',src_green:'Laser lục',src_na:'Đèn natri (vàng)',src_mix:'Đỏ + lam (hồng tím)',
+hint2_one:'Phòng tối, chùm sáng trắng hẹp chiếu vào lăng kính. Kéo màn chắn ra xa, đổi chùm sáng hẹp hay rộng, đổi nguồn sáng.',
+hint2_slit:'Thí nghiệm “quyết định” của Newton: màn thứ nhất có khe hẹp. Kéo khe lên xuống để chọn một màu, cho màu đó qua lăng kính thứ hai. (Ở chế độ này chùm sáng tới được thu hẹp còn 0,15 mm.)',
+hint2_lens:'Thí nghiệm tổng hợp của Newton: đặt thấu kính hội tụ sau lăng kính. Kéo màn chắn tìm chỗ các màu chụm lại; kéo thấu kính để đổi chỗ.',
+lens:'thấu kính hội tụ',slit:'màn có khe',screen:'màn chắn',screen2:'màn 2',
+drag2slit:'Kéo khe (vòng xanh) lên, xuống · kéo màn 2 sang trái, phải',drag2lens:'Kéo thấu kính hoặc màn chắn sang trái, phải',drag2scr:'Kéo màn chắn sang trái, phải',
+scrNone:'Không có ánh sáng tới màn này',scrTop:'↑ phía trên màn',scrBot:'phía dưới màn ↓',scrSpan:'phần màn đang xem cao {mm} mm',
+tColor:'Màu',tDev:'Góc lệch D',
+st2One:'Đỏ lệch {r}°, tím lệch {v}°: tím lệch nhiều hơn đỏ {dd}°. Các màu tách nhau ra thành dải màu cầu vồng (quang phổ).',
+st2Mono:'Nguồn chỉ có một vài màu nên trên màn chỉ có một vài vạch sáng, không có dải màu liên tục.',
+st2Tir:'Với góc xoay này tia sáng bị phản xạ toàn phần trong lăng kính. Xoay lăng kính về gần 0°.',
+st2SlitNone:'Khe chưa nằm trong dải màu. Kéo khe lên hoặc xuống.',
+st2Slit:'Khe đang cho qua ánh sáng {c} ({l} nm). Qua lăng kính thứ hai, chùm sáng này lệch thêm nhưng không tách ra màu khác: đây là ánh sáng đơn sắc.',
+st2LensW:'Các màu chụm lại thành một vệt sáng trắng (rộng {mm} mm)! Ánh sáng trắng là hỗn hợp của các ánh sáng màu.',
+st2Lens:'Vệt sáng trên màn rộng {mm} mm. Kéo màn tìm chỗ vệt sáng hẹp nhất và trắng nhất.',
+p2q:'Chiếu một chùm sáng trắng hẹp qua lăng kính lên màn chắn. Trên màn em thấy gì?',
+p2a:'Một vệt sáng trắng, lệch xuống phía dưới',p2b:'Một dải màu từ đỏ đến tím; tím lệch nhiều nhất',p2c:'Một dải màu từ đỏ đến tím; đỏ lệch nhiều nhất',
+p2e:'Ánh sáng trắng gồm nhiều ánh sáng màu. Chiết suất của thuỷ tinh lớn nhất với ánh sáng tím, nhỏ nhất với ánh sáng đỏ, nên tím lệch nhiều nhất, đỏ lệch ít nhất. Các màu tách ra thành dải màu liên tục: quang phổ của ánh sáng trắng.',
+p2bq:'Dùng màn có khe để tách riêng chùm sáng màu lục, rồi cho chùm này đi qua lăng kính thứ hai. Kết quả là gì?',
+p2ba:'Chùm lục lại tách ra thành nhiều màu',p2bb:'Chùm lục chỉ bị lệch thêm, vẫn là màu lục',p2bc:'Chùm lục biến thành ánh sáng trắng',
+p2be:'Lăng kính không “tạo ra” màu. Ánh sáng lục đã là ánh sáng đơn sắc nên qua lăng kính thứ hai chỉ bị lệch, không tách thêm. Newton gọi đây là “thí nghiệm quyết định” (experimentum crucis, 1672).',
+c2q:'Ánh sáng trắng là gì? Ánh sáng màu (ánh sáng đơn sắc) là gì? Vì sao lăng kính phân tích được ánh sáng trắng?',
+c2a:'Ánh sáng trắng (ánh sáng Mặt Trời, đèn dây tóc) là hỗn hợp của rất nhiều ánh sáng màu biến thiên liên tục từ đỏ đến tím. Ánh sáng màu đơn sắc là ánh sáng có một màu nhất định, không bị lăng kính tách ra thành màu khác. Chiết suất của lăng kính khác nhau với mỗi màu (lớn nhất với tím), nên mỗi màu bị lệch một góc khác nhau và tách nhau ra: đó là sự tán sắc ánh sáng. Gom các màu lại (bằng thấu kính) thì được ánh sáng trắng.',
+why2:'<h3>Cơ chế</h3><p>Tốc độ ánh sáng trong thuỷ tinh phụ thuộc vào màu (bước sóng) của ánh sáng: ánh sáng tím chậm hơn ánh sáng đỏ một chút. Vì chiết suất n = c/v nên n với ánh sáng tím lớn hơn với ánh sáng đỏ: với thuỷ tinh thường n ≈ 1,514 (đỏ) đến 1,530 (tím); với thuỷ tinh flint n ≈ 1,615 đến 1,649. Theo định luật khúc xạ, n lớn hơn thì tia bị bẻ mạnh hơn, nên mỗi màu ló ra theo một hướng khác: chùm sáng trắng bị “mở quạt” thành quang phổ. Đó là sự tán sắc ánh sáng.</p><p>Điều thú vị khi tăng bề rộng chùm sáng: phần giữa vệt sáng trên màn vẫn trắng, chỉ hai mép có màu, vì ở giữa các màu vẫn chồng lên nhau. Muốn thấy rõ quang phổ phải dùng khe hẹp và đặt màn xa (Newton dùng lỗ nhỏ trên cửa chớp và màn cách 7 m).</p><h3>Nói cho học sinh</h3><p>Ánh sáng trắng giống một đội chạy gồm nhiều bạn mặc áo bảy màu. Khi chạy vào bãi cát chéo góc, bạn áo tím bị chậm lại nhiều nhất nên rẽ gấp nhất, bạn áo đỏ rẽ ít nhất. Ra khỏi bãi cát, cả đội không còn đi chung một hướng nữa mà tách thành dải bảy màu.</p>',
+mis2:'<ul><li><b>“Lăng kính nhuộm màu cho ánh sáng.”</b> Các màu đã có sẵn trong ánh sáng trắng; lăng kính chỉ tách chúng ra (chế độ “Tách riêng một màu” và “Gom các màu lại”).</li><li><b>“Quang phổ có đúng 7 màu.”</b> Quang phổ biến thiên liên tục; Newton chọn 7 tên màu cho giống 7 nốt nhạc. Nhiều sách nước ngoài chỉ kể 6 màu (không có chàm).</li><li><b>“Đỏ lệch nhiều nhất vì đứng đầu dải.”</b> Đỏ lệch ít nhất, tím lệch nhiều nhất.</li><li><b>“Ánh sáng màu nào cũng là ánh sáng đơn sắc.”</b> Ánh sáng hồng tím (đỏ + lam) qua lăng kính tách ra thành hai vạch: đó là ánh sáng màu nhưng không đơn sắc. Thử nguồn “Đỏ + lam”.</li></ul>',
+/* Tab 3 */
+hint3:'Chọn đèn và kính lọc. Chạm vào một vật để xem ánh sáng các màu chiếu tới vật, màu nào bị hấp thụ (dấu ×), màu nào bị phản xạ vào mắt.',
+lgS:'Ánh sáng chiếu tới (nhạt) và phần phản xạ vào mắt (đậm)',lgR:'Tỉ lệ phản xạ của vật theo từng màu',
+assume3:'Giả thiết mô phỏng: tỉ lệ phản xạ của các vật là đường cong gần đúng của vật thật; màu nhìn thấy tính từ hàm nhạy màu của mắt (CIE 1931); “mắt tự thích nghi” giữ cho tờ giấy trắng luôn sáng như nhau; đèn đỏ, lục, lam là đèn LED có phổ hẹp; đèn natri chỉ phát vạch 589 nm.',
+setLamp:'Đèn chiếu sáng',ledR:'LED đỏ',ledG:'LED lục',ledB:'LED lam',setFilt:'Kính lọc màu đặt trước đèn',adapt3:'Mắt tự thích nghi với độ sáng',
+swWhite:'dưới ánh sáng trắng',swNow:'dưới đèn đang bật',chalT:'Thử thách',filterOn:'kính lọc',eye:'mắt',spT:'Phổ ánh sáng',
+lamp_sun:'Mặt Trời (trắng)',lamp_red:'Đỏ',lamp_green:'Lục',lamp_blue:'Lam',lamp_na:'Natri (vàng)',lamp_rgb:'Tự trộn 3 LED',
+f_none:'Không có',f_red:'Đỏ',f_green:'Lục',f_blue:'Lam',f_yellow:'Vàng',
+o_paper:'Giấy trắng',o_cloth:'Vải đen',o_tomato:'Cà chua',o_banana:'Chuối chín',o_leaf:'Lá cây',o_block:'Khối lam',o_dragon:'Thanh long',
+nBlack:'đen (gần như không có ánh sáng tới mắt)',nWhite:'trắng',nGrey:'xám',nRed:'đỏ',nOrange:'cam',nYellow:'vàng',nGreen:'lục',nCyan:'lục lam',nBlue:'lam',nViolet:'tím',nMagenta:'hồng tím',
+kWhite:'Dưới ánh sáng trắng trông màu',kNow:'Bây giờ trông màu',kRefl:'Phần ánh sáng bị phản xạ',kBandsR:'Màu bị phản xạ nhiều',kBandsA:'Màu bị hấp thụ phần lớn',
+ch_c1:'Làm cho quả chuối chín trông màu đỏ.',ch_c2:'Làm cho lá cây trông gần như đen, trong khi tờ giấy trắng vẫn sáng.',ch_c3:'Làm cho tờ giấy trắng và quả cà chua trông cùng một màu.',
+ch_c4:'Làm cho quả thanh long trông màu lam hoặc tím.',ch_c5:'Dùng một kính lọc màu để tờ giấy trắng trông màu lục.',
+p3q:'Chiếu đèn màu lục vào quả cà chua chín (màu đỏ). Quả cà chua trông màu gì?',
+p3a:'Vẫn màu đỏ',p3b:'Màu lục',p3c:'Gần như đen',
+p3e:'Cà chua đỏ phản xạ mạnh ánh sáng đỏ và hấp thụ gần hết các màu khác. Đèn lục không có ánh sáng đỏ nên cà chua gần như không phản xạ ánh sáng nào vào mắt: trông gần như đen. Màu đỏ không “nằm sẵn” trong quả cà chua.',
+p3bq:'Đặt kính lọc màu đỏ trước đèn trắng. Chiếc lá cây trông thế nào?',
+p3ba:'Màu đỏ, vì kính lọc nhuộm đỏ cho lá',p3bb:'Gần như đen',p3bc:'Vẫn xanh lục',
+p3be:'Kính lọc đỏ hấp thụ gần hết các màu, chỉ cho ánh sáng đỏ đi qua. Lá cây phản xạ chủ yếu ánh sáng lục và hấp thụ ánh sáng đỏ, nên dưới ánh sáng đỏ lá gần như đen.',
+c3q:'Vì sao ta thấy một vật có màu đỏ? Vật màu trắng và vật màu đen khác nhau thế nào?',
+c3a:'Ta nhìn thấy vật khi có ánh sáng từ vật truyền vào mắt. Vật màu đỏ phản xạ mạnh ánh sáng đỏ và hấp thụ phần lớn các ánh sáng màu khác; dưới ánh sáng trắng, ánh sáng phản xạ vào mắt là ánh sáng đỏ nên ta thấy vật màu đỏ. Vật màu trắng phản xạ tốt mọi màu, nên trông có màu của ánh sáng chiếu vào nó. Vật màu đen hấp thụ gần hết mọi màu. Vậy màu ta thấy phụ thuộc vào cả ánh sáng chiếu tới và ánh sáng mà vật hấp thụ, phản xạ.',
+why3:'<h3>Cơ chế</h3><p>Ánh sáng chiếu vào bề mặt một vật, một phần bị các phân tử chất màu (sắc tố) hấp thụ và biến thành nhiệt, phần còn lại bị phản xạ (tán xạ) ra mọi phía. Mỗi chất màu hấp thụ mạnh ở một số màu nhất định: chất diệp lục trong lá hấp thụ mạnh ánh sáng lam và đỏ để quang hợp, phản xạ phần lớn ánh sáng lục; lycopene trong cà chua hấp thụ lam, lục và phản xạ đỏ. Ánh sáng phản xạ vào mắt là “phổ ánh sáng chiếu tới × tỉ lệ phản xạ của vật” (đồ thị bên dưới): màu ta thấy do phần còn lại này quyết định.</p><p>Kính lọc màu cũng vậy nhưng cho ánh sáng truyền qua: kính lọc đỏ hấp thụ các màu khác, chỉ cho đỏ đi qua. Kính lọc chỉ bớt đi, không thêm màu.</p><h3>Nói cho học sinh</h3><p>Mỗi vật giống một “người gác cổng” chỉ trả lại một số màu, giữ lại các màu khác. Quả cà chua chỉ trả lại màu đỏ. Nếu ánh sáng chiếu tới không có màu đỏ thì cà chua không có gì để trả lại, và ta thấy nó gần như đen.</p>',
+mis3:'<ul><li><b>“Màu là của vật, lúc nào cũng vậy.”</b> Màu nhìn thấy phụ thuộc vào ánh sáng chiếu tới: dưới đèn natri, cà chua, lá cây và khối lam gần như không phân biệt được.</li><li><b>“Vật đỏ phát ra ánh sáng đỏ.”</b> Vật không tự phát sáng; nó phản xạ phần ánh sáng đỏ có sẵn trong ánh sáng chiếu tới.</li><li><b>“Kính lọc nhuộm màu cho ánh sáng.”</b> Kính lọc hấp thụ bớt các màu khác; ánh sáng qua kính lọc luôn yếu hơn.</li><li><b>“Màu đen là một màu như các màu khác.”</b> Đen là khi hầu như không có ánh sáng từ vật tới mắt.</li><li><b>“Trộn ánh sáng giống trộn sơn.”</b> Bật LED đỏ và LED lục cùng lúc: tờ giấy trắng trông màu vàng, không phải màu nâu như khi trộn sơn.</li></ul>',
+/* Tab 4 */
+hint4:'Ánh sáng Mặt Trời chiếu từ bên trái vào một giọt nước (phóng to). Kéo chấm xanh lên xuống để đổi chỗ tia sáng đi vào giọt nước.',
+many4:'Nhiều tia song song',sec4:'Cầu vồng phụ (2 lần phản xạ)',
+hint4b:'Nhìn từ phía sau lưng người quan sát: Mặt Trời ở sau lưng, cầu vồng là vòng tròn quanh điểm đối nhật (bóng của đầu em). Kéo thanh trượt để đổi độ cao Mặt Trời.',
+setSun:'Độ cao Mặt Trời',
+assume4:'Giả thiết mô phỏng: giọt nước hình cầu (vẽ mặt cắt), lớn hơn nhiều bước sóng ánh sáng; bỏ qua hiện tượng giao thoa (vân phụ bên trong cầu vồng); chiết suất nước theo công thức thực nghiệm Daimon–Masumura ở 20 °C; Mặt Trời coi là điểm; tia mờ là phần ánh sáng phản xạ hoặc ló ra ở các mặt khác.',
+drop:'giọt nước (phóng to)',sunLbl:'ánh sáng Mặt Trời',c4w:'Ánh sáng trắng',grB:'vị trí tia tới b (0 = giữa giọt, 1 = mép giọt)',grTh:'góc θ của tia ló so với hướng ngược tia Mặt Trời',
+anti:'điểm đối nhật',sunBehind:'Mặt Trời ở sau lưng, cao {s}°',bowTop:'Đỉnh cầu vồng chính cao {t}° trên đường chân trời',bowNone:'Mặt Trời quá cao: cầu vồng chính nằm dưới đường chân trời, không thấy được',
+kLam:'Bước sóng',kB:'Vị trí tia tới b',kI:'Góc tới i',kR:'Góc khúc xạ r',kTh:'Góc θ của tia ló',kMaxR:'θ lớn nhất của màu đỏ',kMaxV:'θ lớn nhất của màu tím',kMinR:'θ nhỏ nhất của màu đỏ',kMinV:'θ nhỏ nhất của màu tím',
+p4q:'Muốn thấy cầu vồng sau cơn mưa, em phải đứng thế nào?',
+p4a:'Quay mặt về phía Mặt Trời',p4b:'Quay lưng về phía Mặt Trời, nhìn về phía màn mưa',p4c:'Đứng hướng nào cũng thấy',
+p4e:'Ánh sáng đi vào giọt nước, phản xạ ở mặt sau rồi quay ngược trở lại, ló ra theo hướng lệch khoảng 40°–42° so với hướng ngược tia Mặt Trời. Vì vậy cầu vồng luôn ở phía đối diện Mặt Trời.',
+p4bq:'Ở mép ngoài (phía trên cùng) của cầu vồng chính là màu gì?',
+p4ba:'Màu đỏ',p4bb:'Màu tím',p4bc:'Lúc đỏ, lúc tím',
+p4be:'Ánh sáng đỏ ló ra với góc lớn nhất khoảng 42°, tím khoảng 40,6°. Giọt nước ở cao hơn gửi ánh sáng đỏ tới mắt, giọt thấp hơn gửi ánh sáng tím, nên đỏ ở ngoài, tím ở trong. Cầu vồng phụ thì ngược lại.',
+c4q:'Giải thích vì sao có cầu vồng.',
+c4a:'Sau mưa, không khí còn nhiều giọt nước. Ánh sáng Mặt Trời đi vào mỗi giọt nước bị khúc xạ và tán sắc (giống qua lăng kính), phản xạ ở mặt sau giọt, rồi khúc xạ, tán sắc thêm lần nữa khi ló ra. Mỗi màu ló ra mạnh nhất theo một góc riêng (đỏ khoảng 42°, tím khoảng 40,6° so với hướng ngược tia Mặt Trời). Mắt nhận ánh sáng đỏ từ các giọt ở góc 42°, ánh sáng tím từ các giọt ở góc 40,6°, nên ta thấy các vòng cung màu. Phải quay lưng về Mặt Trời mới thấy.',
+why4:'<h3>Cơ chế</h3><p>Một tia sáng vào giọt nước ở độ cao b bị khúc xạ (sin i = n·sin r), phản xạ một lần ở mặt sau, rồi khúc xạ khi ló ra. Góc θ giữa tia ló và hướng ngược tia Mặt Trời là θ = 4r − 2i. Đồ thị cho thấy θ tăng dần theo b rồi đạt giá trị lớn nhất (khoảng 42° với ánh sáng đỏ) và giảm lại: các tia gần b ≈ 0,86 ló ra gần như cùng một hướng, ánh sáng dồn lại ở đó rất sáng (bật “Nhiều tia song song” để thấy). Vì n của nước với ánh sáng tím lớn hơn, góc lớn nhất của tím nhỏ hơn (khoảng 40,6°): các màu tách ra. Mọi giọt nằm trên hình nón 42° quanh điểm đối nhật cùng gửi ánh sáng đỏ về mắt, nên cầu vồng là một cung tròn. Nếu Mặt Trời cao hơn khoảng 42° thì cung này nằm dưới đường chân trời: buổi trưa mùa hè hiếm khi thấy cầu vồng.</p><p>Cầu vồng phụ do ánh sáng phản xạ hai lần trong giọt nước, ở khoảng 50°–53°, mờ hơn và thứ tự màu đảo ngược. Vùng trời giữa hai cầu vồng tối hơn (dải tối Alexander).</p><h3>Nói cho học sinh</h3><p>Mỗi giọt mưa là một “lăng kính tròn tí hon” có thêm một chiếc gương ở mặt sau. Nó tách ánh sáng Mặt Trời thành các màu rồi gửi ngược về phía em. Hàng triệu giọt mưa, mỗi giọt gửi cho em một màu, ghép lại thành cầu vồng.</p>',
+mis4:'<ul><li><b>“Cầu vồng ở một chỗ cố định, đi tới được chân cầu vồng.”</b> Cầu vồng là hướng nhìn, không phải vật: mỗi người thấy cầu vồng của riêng mình, đi tới thì nó lùi theo.</li><li><b>“Một giọt nước cho cả cầu vồng.”</b> Mỗi giọt chỉ gửi một màu vào mắt em; các giọt ở độ cao khác nhau cho các màu khác nhau.</li><li><b>“Nhìn về phía Mặt Trời mới thấy cầu vồng.”</b> Phải quay lưng về phía Mặt Trời.</li><li><b>“Cầu vồng chỉ do khúc xạ.”</b> Cần cả khúc xạ, tán sắc và phản xạ ở mặt sau giọt nước.</li></ul>',
+/* Tab 5 */
+scoreT:'Kết quả',sc5:'Đã làm {n} câu.',
+q0:'Tia sáng đơn sắc đi qua lăng kính (khi ló ra được ở mặt bên thứ hai) thì tia ló:',q0_0:'lệch về phía đỉnh lăng kính',q0_1:'lệch về phía đáy lăng kính',q0_2:'song song với tia tới',q0_3:'vuông góc với mặt bên thứ hai',
+q0e:'Tia sáng bị khúc xạ hai lần, mỗi lần đều bị bẻ về phía đáy, nên tia ló lệch về phía đáy lăng kính.',
+q1:'Khi vẽ đường truyền của tia sáng qua lăng kính, việc đầu tiên tại mỗi mặt lăng kính là:',q1_0:'vẽ tia phản xạ',q1_1:'đo góc giữa tia sáng và mặt lăng kính',q1_2:'vẽ pháp tuyến tại điểm tới',q1_3:'vẽ tia ló song song với đáy',
+q1e:'Góc tới và góc khúc xạ đo so với pháp tuyến, nên phải vẽ pháp tuyến tại điểm tới trước.',
+q2:'Chiếu chùm sáng trắng qua lăng kính, ánh sáng màu nào bị lệch nhiều nhất?',q2_0:'Tím',q2_1:'Đỏ',q2_2:'Vàng',q2_3:'Các màu lệch như nhau',
+q2e:'Chiết suất của thuỷ tinh lớn nhất với ánh sáng tím nên tím bị lệch nhiều nhất, đỏ lệch ít nhất.',
+q3:'Thí nghiệm nào chứng tỏ lăng kính không “tạo ra” màu?',q3_0:'Chiếu laser đỏ qua lăng kính',q3_1:'Đặt màn chắn xa hơn',q3_2:'Xoay lăng kính',q3_3:'Tách riêng một màu rồi cho qua lăng kính thứ hai, màu đó không tách thêm',
+q3e:'Nếu lăng kính tạo ra màu thì lăng kính thứ hai cũng phải tạo thêm màu. Thực tế chùm đơn sắc chỉ lệch thêm, không đổi màu: các màu đã có sẵn trong ánh sáng trắng.',
+q4:'Ánh sáng đơn sắc là ánh sáng:',q4_0:'có màu trắng',q4_1:'có một màu nhất định, không bị lăng kính tách ra thành màu khác',q4_2:'không bị lệch khi qua lăng kính',q4_3:'chỉ có ở tia laser đỏ',
+q4e:'Ánh sáng đơn sắc vẫn bị lăng kính làm lệch, nhưng không bị tách ra thành các màu khác.',
+q5:'Một tờ giấy trắng được chiếu bằng ánh sáng đỏ sẽ trông màu:',q5_0:'trắng',q5_1:'đen',q5_2:'đỏ',q5_3:'hồng tím',
+q5e:'Giấy trắng phản xạ tốt mọi màu, nên phản xạ ánh sáng đỏ chiếu tới: trông màu đỏ.',
+q6:'Lá cây có màu xanh lục dưới ánh sáng Mặt Trời vì lá:',q6_0:'phát ra ánh sáng lục',q6_1:'hấp thụ mạnh ánh sáng lục',q6_2:'cho mọi màu đi xuyên qua',q6_3:'phản xạ mạnh ánh sáng lục, hấp thụ phần lớn ánh sáng đỏ và lam',
+q6e:'Chất diệp lục hấp thụ mạnh ánh sáng đỏ và lam, phản xạ ánh sáng lục vào mắt.',
+q7:'Nhìn tờ giấy trắng qua kính lọc màu lam. Tờ giấy trông màu:',q7_0:'lam',q7_1:'trắng',q7_2:'đỏ',q7_3:'đen',
+q7e:'Kính lọc lam chỉ cho ánh sáng lam đi qua, nên ánh sáng tới mắt chỉ còn màu lam.',
+q8:'Vì sao dưới đèn natri (vàng) ta khó phân biệt quả cà chua với chiếc lá?',q8_0:'Vì đèn natri quá sáng',q8_1:'Vì đèn natri làm vật đổi màu vĩnh viễn',q8_2:'Vì đèn natri chỉ phát một màu vàng, các vật chỉ phản xạ được ít hay nhiều màu vàng đó',q8_3:'Vì mắt không nhìn được màu vàng',
+q8e:'Đèn natri phát gần như một bước sóng 589 nm. Vật nào cũng chỉ có thể phản xạ màu vàng đó nhiều hay ít, nên mọi vật chỉ còn vàng đậm, vàng nhạt hoặc đen.',
+q9:'Muốn ngắm cầu vồng lúc chiều tà (Mặt Trời ở phía tây), em nhìn về phía nào?',q9_0:'Phía tây',q9_1:'Phía đông',q9_2:'Phía nam',q9_3:'Phía nào cũng được',
+q9e:'Cầu vồng ở phía đối diện Mặt Trời. Mặt Trời ở phía tây thì nhìn về phía đông.',
+/* Chung */
+originT:'Nguồn gốc các thuật ngữ và một chút lịch sử',
+origin:`<ul><li><b>Lăng kính</b> (棱鏡): “lăng” 棱 là cạnh, góc cạnh; “kính” 鏡 là gương, kính. Lăng kính là khối kính có cạnh. Tiếng Anh <i>prism</i>, từ tiếng Hy Lạp <i>prisma</i> “vật được cưa ra” (động từ <i>prizein</i>: cưa), vì khối lăng trụ giống một khúc gỗ được cưa vát. Tiếng Pháp <i>prisme</i>, tiếng Trung 棱镜 léngjìng, tiếng Nhật プリズム.</li>
+<li><b>Tán sắc</b> (散色): “tán” 散 là tản ra, rải ra; “sắc” 色 là màu. Tán sắc là màu bị tản ra. Tiếng Anh <i>dispersion</i>, từ tiếng Latinh <i>dispergere</i> = <i>dis-</i> (ra nhiều phía) + <i>spargere</i> (rắc, rải). Tiếng Trung dùng 色散 sèsàn (đảo ngược hai chữ), tiếng Nhật 分散 bunsan.</li>
+<li><b>Quang phổ</b> (光譜): “quang” là ánh sáng, “phổ” 譜 là bảng ghi có thứ tự (như gia phả, nhạc phổ). Tiếng Anh <i>spectrum</i>, tiếng Latinh nghĩa là “hình ảnh hiện ra, bóng ma” (từ <i>specere</i>: nhìn). Newton dùng từ này năm 1671 cho dải màu hiện trên tường.</li>
+<li><b>Đơn sắc</b>: “đơn” là một, “sắc” là màu. Tiếng Anh <i>monochromatic</i>, từ tiếng Hy Lạp <i>monos</i> (một) + <i>chroma</i> (màu).</li>
+<li><b>Chiết quang</b> (折光): “chiết” 折 là bẻ gãy; chiết quang là bẻ ánh sáng. Góc chiết quang A là góc giữa hai mặt bẻ ánh sáng.</li>
+<li><b>Cầu vồng</b>: từ thuần Việt, cái cầu cong vồng lên; Hán Việt là “hồng” 虹 (chữ có bộ trùng 虫, vì người xưa tưởng cầu vồng là con rồng uống nước). Tiếng Anh <i>rainbow</i> (cây cung của mưa), tiếng Pháp <i>arc-en-ciel</i> (cung trên trời). Người Hy Lạp gọi là <i>Iris</i>, tên nữ thần sứ giả; từ đó có từ <i>iris</i> (mống mắt, nhiều màu).</li>
+<li><b>Kính lọc</b>: tiếng Anh <i>filter</i>, từ tiếng Latinh thời Trung cổ <i>filtrum</i> là tấm nỉ dùng để lọc chất lỏng.</li></ul>
+<p><b>Lịch sử:</b> Khoảng năm 1304, Theodoric xứ Freiberg (Đức) và Kamāl al-Dīn al-Fārisī (Ba Tư) dùng quả cầu thuỷ tinh đựng nước làm “giọt mưa phóng to” và hiểu ra đường đi của ánh sáng trong cầu vồng. Năm 1637, Descartes tính được góc 42°. Năm 1666, khi trường đại học đóng cửa vì bệnh dịch, Isaac Newton làm thí nghiệm lăng kính trong phòng tối; năm 1672 ông gửi Hội Hoàng gia Anh bức thư mô tả “thí nghiệm quyết định”: ánh sáng trắng là hỗn hợp các ánh sáng màu.</p>`,
+mediaT:'Danh sách video (dùng cho bản offline)',
+mediaIntro:'Bản offline: tạo thư mục <b>media</b> cạnh file <b>index.html</b>, tải từng video về và đặt đúng tên file trong bảng (có thể thêm ảnh bìa cùng tên, đuôi <b>.jpg</b>). Khi bấm hình, trang sẽ phát file trong <b>media/</b> trước; nếu không có file thì phát YouTube (cần mạng). Thời lượng ghi “?” là chưa kiểm tra được, thầy cô nên xem trước.',
+mTab:'Tab',mFile:'Tên file cần lưu',mVideo:'Video',mDur:'Thời lượng',mType:'Loại',
+vLbl:'Video thực tế',vLook:'Để ý:',vMain:'Video chính',vAlt:'Video phụ',vDurUnk:'chưa kiểm tra thời lượng',vNoThumb:'Bấm để phát video',
+vNote:'Bấm hình để phát ngay trong trang. Nếu khung phát để trống (xem trên claude.ai không nhúng được YouTube), bấm “YouTube ↗”.',
+vt_exp:'Thí nghiệm',vt_phen:'Hiện tượng',vt_app:'Ứng dụng',
+footer:'Mô phỏng KHTN 9 · Chủ đề Ánh sáng · Chương trình GDPT 2018. Chiết suất theo số liệu thực nghiệm; các chỗ đơn giản hoá ghi ở dòng “Giả thiết mô phỏng” của từng tab.'
+},en:{
+docTitle:'Prisms and colour',eyebrow:'Science 9 · Light · Prisms, dispersion, colour',title:'Prisms, dispersion of light and the colour of objects',gvBtn:'Hide numbers',
+tab1:'1. Ray through a prism',tab2:'2. Dispersion of white light',tab3:'3. Colour of objects',tab4:'4. Rainbows',tab5:'5. Practice',
+req1:'<b>Learning outcome:</b> Draw the path of a light ray through a prism.',
+req2:'<b>Learning outcome:</b> Do an experiment with a prism to produce the spectrum of white light; explain qualitatively the dispersion of sunlight by a prism; from the results, state what coloured light is.',
+req3:'<b>Learning outcome:</b> State that the colour we see an object depends on the colours of light it absorbs and reflects.',
+req4:'<b>Learning outcome:</b> Use ideas about light and colour to explain everyday phenomena (rainbows).',
+req5:'<b>Practice:</b> 10 questions on the whole topic. Pick an answer to see the explanation.',
+data:'Data',reset:'Reset',
+predTitle:'Predict first',predThen:'Test it in the simulation, then open the answer.',showAns:'Show answer',hideAns:'Hide answer',conclTitle:'Draw a conclusion',
+whyT:'Why? The science and how to explain it to students',misT:'Common misconceptions',
+cRed:'red',cOrange:'orange',cYellow:'yellow',cGreen:'green',cCyan:'cyan',cBlue:'blue',cIndigo:'indigo',cViolet:'violet',
+c_red:'Red',c_orange:'Orange',c_yellow:'Yellow',c_green:'Green',c_blue:'Blue',c_indigo:'Indigo',c_violet:'Violet',
+m_bk7:'Crown glass',m_f2:'Flint glass',m_pmma:'Acrylic',m_water:'Water',m_dia:'Diamond',
+hint1:'Drag the laser to change the angle of incidence; drag the blue dot to move the point of incidence. Grey dashed lines are normals.',
+draw1:'✎ Draw it first',chk1:'Check my drawing',lgD:'Deviation D',lgN:'Normal',
+assume1:'Model assumptions: a flat cross-section of the prism; refractive index from measured formulas for each material at 20 °C; faint rays are light partly reflected at the faces (Fresnel equations); absorption in the prism ignored.',
+setMat:'Prism material',setA:'Apex angle A',setI:'Angle of incidence i₁',
+lzRed:'Red laser',lzGreen:'Green laser',lzViolet:'Violet laser',apex:'apex',base:'base',drawMine:'my emergent ray',
+st1Draw:'The ray inside the prism is hidden. Drag the blue dot on the second face to where you think the ray meets it, then drag the outer blue dot to set the emergent ray. Then press “Check my drawing”.',
+st1NoCheck:'At this angle the ray does not leave through the second face (total internal reflection or it hits the base). Change the angle and draw again.',
+st1Good:'Well done! Your ray inside is off by {a}°, your emergent ray by {b}°.',
+st1Off:'Not yet: inside ray off by {a}°, emergent ray off by {b}° (solid line is correct). Remember: draw the normal first at each refraction.',
+st1Info:'The emergent ray is bent towards the base by D = {d}° from the incident ray.',
+grI1:'angle of incidence i₁',grD:'deviation D',dMin:'minimum D ≈ {d}°',grNone:'With this apex angle the ray is always totally reflected at the second face',
+kN:'Refractive index n (this colour)',kI1:'Angle of incidence i₁',kR1:'Angle of refraction r₁',kR2:'Angle at second face r₂',kI2:'Angle of emergence i₂',kD:'Deviation D',
+kBase:'The ray goes down and meets the base.',kTir:'Total internal reflection at the second face (r₂ is larger than the critical angle {c}°): no ray leaves this face.',
+kToBase:'The emergent ray bends towards the base.',kToApex:'The emergent ray bends towards the apex.',
+p1q:'The prism has its apex at the top. A red laser hits the left face. Which way is the ray leaving the right face bent compared with the incoming ray?',
+p1a:'Up, towards the apex',p1b:'Down, towards the base',p1c:'Straight on, not bent',
+p1e:'The ray is refracted twice, each time towards the thicker part of the prism, so it bends towards the base. Change the angle or material: whenever it emerges, it bends towards the base.',
+p1bq:'Keep the angle, swap the red laser for a violet one. How does the deviation D change?',
+p1ba:'D is larger: violet bends more',p1bb:'D is smaller: violet bends less',p1bc:'D stays the same: same prism',
+p1be:'Glass has a larger refractive index for violet (about 1.530) than for red (about 1.514), so violet is bent more. This is the seed of the dispersion in tab 2.',
+c1q:'Describe the path of a single-colour ray through a prism. How do you draw it?',
+c1a:'The ray is refracted twice: entering the prism from air and leaving it into air. The emergent ray is deviated towards the base. To draw: (1) normal at the point of incidence; (2) refracted ray bent towards the normal; (3) normal at the second face; (4) emergent ray bent away from the normal. Different colours deviate slightly differently.',
+why1:'<h3>The science</h3><p>A prism is a transparent block with two non-parallel flat faces; the angle between them is the apex angle A. At each face Snell’s law holds: sin i = n·sin r. Entering the denser material, the ray bends towards the normal; leaving it, away from the normal. Because the two faces lean opposite ways, both bends turn the ray towards the base. The total deviation is D = i₁ + i₂ − A, smallest when the ray passes symmetrically (graph below).</p><p>If r₂ is larger than the critical angle, the ray is totally reflected at the second face (try diamond or a large A), which is how prisms in binoculars work.</p><h3>For students</h3><p>Light is slower in glass than in air. Think of a line of runners crossing from tarmac onto sand at an angle: whoever hits the sand first slows first, and the whole line turns. The prism is thick at the base and thin at the apex, so the light always turns towards the base.</p>',
+mis1:'<ul><li><b>“The ray bends in the middle of the prism.”</b> It only changes direction at a boundary; inside uniform glass it is straight.</li><li><b>“The ray bends towards the apex.”</b> When it emerges from the second face it always bends towards the base.</li><li><b>Drawing refraction without a normal</b>, measuring angles from the surface instead of the normal.</li><li><b>“Every prism lets the ray out.”</b> With a large A or high index (diamond) the ray can be totally reflected inside.</li></ul>',
+scr2T:'Enlarged screen (looking straight at it):',
+assume2:'Model assumptions: white light has every colour from 400 nm to 700 nm with equal strength; the beam is many parallel rays; refractive index from the Sellmeier formula; the lens is thin and ideal, with no dispersion of its own; screen colours only approximate real spectral colours. The prism is 5 cm tall.',
+setSrc:'Light source',setRot:'Rotate the prism (0° = least deviation)',setW:'Beam width',
+mode_one:'One prism',mode_slit:'Pick out one colour',mode_lens:'Recombine the colours',
+src_white:'White light',src_red:'Red laser',src_green:'Green laser',src_na:'Sodium lamp (yellow)',src_mix:'Red + blue (magenta)',
+hint2_one:'A dark room; a narrow beam of white light hits the prism. Drag the screen further away, widen or narrow the beam, change the source.',
+hint2_slit:'Newton’s “crucial experiment”: the first screen has a narrow slit. Drag the slit up or down to pick one colour and send it through a second prism. (In this mode the incoming beam is narrowed to 0.15 mm.)',
+hint2_lens:'Newton’s recombination: a converging lens after the prism. Drag the screen to find where the colours meet; drag the lens to move it.',
+lens:'converging lens',slit:'screen with slit',screen:'screen',screen2:'screen 2',
+drag2slit:'Drag the slit (blue ring) up or down · drag screen 2 left or right',drag2lens:'Drag the lens or the screen left or right',drag2scr:'Drag the screen left or right',
+scrNone:'No light reaches this screen',scrTop:'↑ top of screen',scrBot:'bottom of screen ↓',scrSpan:'this view of the screen is {mm} mm tall',
+tColor:'Colour',tDev:'Deviation D',
+st2One:'Red deviates {r}°, violet {v}°: violet {dd}° more than red. The colours spread into a rainbow band (a spectrum).',
+st2Mono:'This source has only one or two colours, so the screen shows one or two bright lines, not a continuous band.',
+st2Tir:'At this rotation the light is totally reflected inside the prism. Rotate it back towards 0°.',
+st2SlitNone:'The slit is outside the band of colours. Drag it up or down.',
+st2Slit:'The slit passes {c} light ({l} nm). Through the second prism it deviates again but does not split into other colours: it is monochromatic light.',
+st2LensW:'The colours meet in a white spot ({mm} mm wide)! White light is a mixture of coloured lights.',
+st2Lens:'The spot on the screen is {mm} mm wide. Drag the screen to find the narrowest, whitest spot.',
+p2q:'A narrow beam of white light passes through a prism onto a screen. What do you see?',
+p2a:'A white spot, shifted down',p2b:'A band from red to violet; violet deviates most',p2c:'A band from red to violet; red deviates most',
+p2e:'White light contains many colours. The refractive index of glass is largest for violet and smallest for red, so violet deviates most and red least. The colours spread into a continuous band: the spectrum of white light.',
+p2bq:'A slit picks out the green part, which then goes through a second prism. What happens?',
+p2ba:'The green splits into more colours',p2bb:'The green is only deviated again; it stays green',p2bc:'The green turns into white light',
+p2be:'The prism does not “make” colours. Green is already monochromatic, so the second prism only deviates it. Newton called this the “crucial experiment” (experimentum crucis, 1672).',
+c2q:'What is white light? What is monochromatic (single-colour) light? Why can a prism split white light?',
+c2a:'White light (sunlight, a filament lamp) is a mixture of many coloured lights changing continuously from red to violet. Monochromatic light has a single colour that a prism cannot split further. The prism’s refractive index differs for each colour (largest for violet), so each colour deviates by a different angle and they separate: dispersion. Bringing the colours together (with a lens) gives white light again.',
+why2:'<h3>The science</h3><p>The speed of light in glass depends on its colour (wavelength): violet is a little slower than red. Since n = c/v, n is larger for violet: crown glass n ≈ 1.514 (red) to 1.530 (violet); flint glass n ≈ 1.615 to 1.649. By Snell’s law a larger n means a stronger bend, so each colour leaves in a different direction and the white beam fans out into a spectrum. That is dispersion.</p><p>Notice what happens when you widen the beam: the middle of the patch stays white and only the edges are coloured, because the colours still overlap in the middle. To see a clean spectrum you need a narrow slit and a distant screen (Newton used a small hole in his shutter and a wall 7 m away).</p><h3>For students</h3><p>White light is like a team of runners in seven different shirts. Running onto sand at an angle, the violet runner slows the most and turns the most, the red runner the least. Out of the sand they no longer run together: they spread into a band of seven colours.</p>',
+mis2:'<ul><li><b>“The prism dyes the light.”</b> The colours are already in white light; the prism only separates them (try “Pick out one colour” and “Recombine”).</li><li><b>“The spectrum has exactly 7 colours.”</b> It changes continuously; Newton chose 7 names to match the 7 notes of a musical scale. Many books list only 6 (no indigo).</li><li><b>“Red deviates most because it is first.”</b> Red deviates least, violet most.</li><li><b>“Any coloured light is monochromatic.”</b> Magenta (red + blue) splits into two lines: coloured but not monochromatic. Try the “Red + blue” source.</li></ul>',
+hint3:'Choose a lamp and a filter. Tap an object to see which colours reach it, which are absorbed (×) and which are reflected into the eye.',
+lgS:'Light arriving (pale) and the part reflected into the eye (solid)',lgR:'How much of each colour the object reflects',
+assume3:'Model assumptions: reflectance curves approximate real objects; colours computed from the eye’s colour-matching functions (CIE 1931); “eye adapts” keeps the white paper equally bright; red, green and blue lamps are narrow-band LEDs; the sodium lamp emits only the 589 nm line.',
+setLamp:'Lamp',ledR:'Red LED',ledG:'Green LED',ledB:'Blue LED',setFilt:'Colour filter in front of the lamp',adapt3:'Eye adapts to brightness',
+swWhite:'in white light',swNow:'under this lamp',chalT:'Challenges',filterOn:'filter',eye:'eye',spT:'Spectrum',
+lamp_sun:'Sun (white)',lamp_red:'Red',lamp_green:'Green',lamp_blue:'Blue',lamp_na:'Sodium (yellow)',lamp_rgb:'Mix 3 LEDs',
+f_none:'None',f_red:'Red',f_green:'Green',f_blue:'Blue',f_yellow:'Yellow',
+o_paper:'White paper',o_cloth:'Black cloth',o_tomato:'Tomato',o_banana:'Ripe banana',o_leaf:'Leaf',o_block:'Blue block',o_dragon:'Dragon fruit',
+nBlack:'black (almost no light reaches the eye)',nWhite:'white',nGrey:'grey',nRed:'red',nOrange:'orange',nYellow:'yellow',nGreen:'green',nCyan:'cyan',nBlue:'blue',nViolet:'violet',nMagenta:'magenta',
+kWhite:'Colour in white light',kNow:'Colour now',kRefl:'Share of light reflected',kBandsR:'Colours mostly reflected',kBandsA:'Colours mostly absorbed',
+ch_c1:'Make the ripe banana look red.',ch_c2:'Make the leaf look almost black while the white paper stays bright.',ch_c3:'Make the white paper and the tomato look the same colour.',
+ch_c4:'Make the dragon fruit look blue or violet.',ch_c5:'Use a colour filter to make the white paper look green.',
+p3q:'A green lamp shines on a ripe (red) tomato. What colour does the tomato look?',
+p3a:'Still red',p3b:'Green',p3c:'Almost black',
+p3e:'A red tomato reflects red strongly and absorbs nearly all other colours. A green lamp has no red, so almost no light comes back to the eye: it looks nearly black. The red is not “stored” in the tomato.',
+p3bq:'A red filter is put in front of a white lamp. How does the leaf look?',
+p3ba:'Red, because the filter dyes it red',p3bb:'Almost black',p3bc:'Still green',
+p3be:'A red filter absorbs nearly all colours and lets only red through. A leaf reflects mainly green and absorbs red, so in red light it looks nearly black.',
+c3q:'Why does an object look red? How do white and black objects differ?',
+c3a:'We see an object when light from it enters our eye. A red object reflects red strongly and absorbs most other colours; in white light the light reaching the eye is red, so the object looks red. A white object reflects every colour well, so it takes the colour of the light falling on it. A black object absorbs nearly every colour. So the colour we see depends on both the light arriving and the colours the object absorbs and reflects.',
+why3:'<h3>The science</h3><p>Light falling on a surface is partly absorbed by pigment molecules (turning into heat) and partly reflected (scattered) in all directions. Each pigment absorbs certain colours strongly: chlorophyll absorbs blue and red for photosynthesis and reflects much of the green; lycopene in tomatoes absorbs blue and green and reflects red. The light reaching the eye is “arriving spectrum × reflectance” (graph below), and that remainder decides the colour we see.</p><p>A colour filter works the same way but transmits light: a red filter absorbs other colours and lets red through. A filter only removes colours; it never adds them.</p><h3>For students</h3><p>Each object is a “gatekeeper” that hands back only some colours and keeps the rest. A tomato hands back only red. If the light has no red in it, the tomato has nothing to hand back, and it looks almost black.</p>',
+mis3:'<ul><li><b>“Colour belongs to the object, always.”</b> The colour we see depends on the light: under a sodium lamp a tomato, a leaf and a blue block look almost alike.</li><li><b>“A red object gives out red light.”</b> It does not glow; it reflects the red that is already in the light falling on it.</li><li><b>“A filter dyes the light.”</b> It absorbs other colours; light through a filter is always dimmer.</li><li><b>“Black is a colour like any other.”</b> Black is when almost no light comes from the object to the eye.</li><li><b>“Mixing light is like mixing paint.”</b> Turn on the red and green LEDs together: white paper looks yellow, not brown as with paint.</li></ul>',
+hint4:'Sunlight comes from the left into an (enlarged) raindrop. Drag the blue dot up or down to change where the ray enters the drop.',
+many4:'Many parallel rays',sec4:'Secondary bow (2 reflections)',
+hint4b:'Seen from behind an observer: the Sun is behind them and the rainbow is a circle around the antisolar point (the shadow of your head). Use the slider to change the Sun’s height.',
+setSun:'Height of the Sun',
+assume4:'Model assumptions: spherical drop (cross-section shown), much larger than the wavelength of light; interference (supernumerary bands) ignored; refractive index of water from the Daimon–Masumura formula at 20 °C; the Sun treated as a point; faint rays are light reflected or leaving at other surfaces.',
+drop:'raindrop (enlarged)',sunLbl:'sunlight',c4w:'White light',grB:'entry height b (0 = centre, 1 = edge of the drop)',grTh:'angle θ of the outgoing ray from the anti-sun direction',
+anti:'antisolar point',sunBehind:'Sun behind you, {s}° high',bowTop:'Top of the primary bow is {t}° above the horizon',bowNone:'The Sun is too high: the primary bow is below the horizon, out of sight',
+kLam:'Wavelength',kB:'Entry height b',kI:'Angle of incidence i',kR:'Angle of refraction r',kTh:'Angle θ of the outgoing ray',kMaxR:'Largest θ for red',kMaxV:'Largest θ for violet',kMinR:'Smallest θ for red',kMinV:'Smallest θ for violet',
+p4q:'To see a rainbow after rain, how must you stand?',
+p4a:'Facing the Sun',p4b:'With your back to the Sun, looking at the rain',p4c:'Any direction works',
+p4e:'Light enters a drop, reflects off the back and comes back out at about 40°–42° from the anti-sun direction. So a rainbow is always opposite the Sun.',
+p4bq:'Which colour is on the outer (top) edge of the primary rainbow?',
+p4ba:'Red',p4bb:'Violet',p4bc:'Sometimes red, sometimes violet',
+p4be:'Red leaves at a largest angle of about 42°, violet about 40.6°. Higher drops send red to your eye, lower drops send violet, so red is outside and violet inside. The secondary bow is the other way round.',
+c4q:'Explain how a rainbow forms.',
+c4a:'After rain the air is full of drops. Sunlight entering each drop is refracted and dispersed (as in a prism), reflected off the back of the drop, then refracted and dispersed again on leaving. Each colour comes out most strongly at its own angle (red about 42°, violet about 40.6° from the anti-sun direction). Your eye gets red from drops at 42° and violet from drops at 40.6°, so you see coloured arcs. You must have your back to the Sun.',
+why4:'<h3>The science</h3><p>A ray entering a drop at height b is refracted (sin i = n·sin r), reflected once at the back and refracted on leaving. The angle between the outgoing ray and the anti-sun direction is θ = 4r − 2i. The graph shows θ rising with b to a maximum (about 42° for red) and falling again: rays near b ≈ 0.86 all leave in nearly the same direction, so light piles up there (turn on “Many parallel rays”). Water’s n is larger for violet, so violet’s maximum is smaller (about 40.6°): the colours separate. Every drop on the 42° cone around the antisolar point sends red to your eye, so the bow is a circular arc. If the Sun is higher than about 42°, the arc is below the horizon: you rarely see rainbows at midday in summer.</p><p>The secondary bow comes from two reflections inside the drop, at about 50°–53°, fainter and with colours reversed. The sky between the bows is darker (Alexander’s dark band).</p><h3>For students</h3><p>Each raindrop is a tiny round prism with a mirror at the back. It splits sunlight into colours and sends them back towards you. Millions of drops, each sending you one colour, build the rainbow.</p>',
+mis4:'<ul><li><b>“A rainbow is in a fixed place; you can walk to its end.”</b> A rainbow is a direction, not an object: everyone sees their own, and it moves as you walk.</li><li><b>“One drop makes the whole rainbow.”</b> Each drop sends just one colour to your eye; drops at different heights give different colours.</li><li><b>“Look towards the Sun to see a rainbow.”</b> You must have your back to the Sun.</li><li><b>“Rainbows are only refraction.”</b> They need refraction, dispersion and reflection at the back of the drop.</li></ul>',
+scoreT:'Score',sc5:'{n} answered.',
+q0:'A single-colour ray passes through a prism (and emerges from the second face). The emergent ray:',q0_0:'bends towards the apex',q0_1:'bends towards the base',q0_2:'is parallel to the incident ray',q0_3:'is perpendicular to the second face',
+q0e:'The ray is refracted twice, each time towards the base, so it bends towards the base.',
+q1:'Drawing a ray through a prism, the first thing to do at each face is:',q1_0:'draw the reflected ray',q1_1:'measure the angle between the ray and the face',q1_2:'draw the normal at the point of incidence',q1_3:'draw the emergent ray parallel to the base',
+q1e:'Angles of incidence and refraction are measured from the normal, so draw the normal first.',
+q2:'White light passes through a prism. Which colour deviates most?',q2_0:'Violet',q2_1:'Red',q2_2:'Yellow',q2_3:'All the same',
+q2e:'Glass has its largest refractive index for violet, so violet deviates most and red least.',
+q3:'Which experiment shows that a prism does not “make” colours?',q3_0:'Shine a red laser through it',q3_1:'Move the screen further away',q3_2:'Rotate the prism',q3_3:'Pick out one colour and pass it through a second prism; it does not split further',
+q3e:'If a prism made colours, the second prism would make more. In fact the single colour is only deviated: the colours were already in white light.',
+q4:'Monochromatic light is light that:',q4_0:'is white',q4_1:'has one definite colour that a prism cannot split into others',q4_2:'is not deviated by a prism',q4_3:'only comes from red lasers',
+q4e:'Monochromatic light is still deviated by a prism, but it is not split into other colours.',
+q5:'White paper lit by red light looks:',q5_0:'white',q5_1:'black',q5_2:'red',q5_3:'magenta',
+q5e:'White paper reflects every colour well, so it reflects the red light falling on it: it looks red.',
+q6:'Leaves look green in sunlight because they:',q6_0:'give out green light',q6_1:'absorb green light strongly',q6_2:'let every colour pass through',q6_3:'reflect green strongly and absorb most red and blue',
+q6e:'Chlorophyll absorbs red and blue strongly and reflects green into the eye.',
+q7:'You look at white paper through a blue filter. It looks:',q7_0:'blue',q7_1:'white',q7_2:'red',q7_3:'black',
+q7e:'A blue filter lets only blue through, so only blue light reaches the eye.',
+q8:'Why is it hard to tell a tomato from a leaf under a sodium (yellow) lamp?',q8_0:'The lamp is too bright',q8_1:'The lamp changes their colour permanently',q8_2:'The lamp gives out only one yellow, so objects can only reflect more or less of that yellow',q8_3:'Eyes cannot see yellow',
+q8e:'A sodium lamp emits almost a single wavelength, 589 nm. Every object can only reflect more or less of it, so things look dark yellow, pale yellow or black.',
+q9:'To watch a rainbow late in the afternoon (Sun in the west), which way do you look?',q9_0:'West',q9_1:'East',q9_2:'South',q9_3:'Any way',
+q9e:'A rainbow is opposite the Sun. With the Sun in the west, look east.',
+originT:'Where the terms come from, and a little history',
+origin:`<ul><li><b>Prism</b>: from Greek <i>prisma</i>, “something sawn off” (<i>prizein</i>, to saw), because the solid looks like a sawn block. Vietnamese <i>lăng kính</i> (棱鏡) means “edged glass”. French <i>prisme</i>, Chinese 棱镜 léngjìng, Japanese プリズム.</li>
+<li><b>Dispersion</b>: from Latin <i>dispergere</i> = <i>dis-</i> (in all directions) + <i>spargere</i> (to scatter). Vietnamese <i>tán sắc</i> (散色) means “colours scattered”; Chinese reverses it, 色散 sèsàn; Japanese 分散 bunsan.</li>
+<li><b>Spectrum</b>: Latin for “an appearance, an apparition” (from <i>specere</i>, to look). Newton used it in 1671 for the band of colours on his wall. Vietnamese <i>quang phổ</i> (光譜) means “an ordered record of light”.</li>
+<li><b>Monochromatic</b>: Greek <i>monos</i> (one) + <i>chroma</i> (colour); Vietnamese <i>đơn sắc</i>, “single colour”.</li>
+<li><b>Refracting (apex) angle</b>: Vietnamese <i>góc chiết quang</i>, from 折 “to break” + 光 “light”: the angle between the faces that break the light.</li>
+<li><b>Rainbow</b>: “bow of the rain”; French <i>arc-en-ciel</i> (arc in the sky). The Greeks called it <i>Iris</i>, the messenger goddess, giving the word <i>iris</i> for the coloured part of the eye. Vietnamese <i>cầu vồng</i> means “arched bridge”; the Sino-Vietnamese word 虹 contains the “creature” radical because people imagined a dragon drinking water.</li>
+<li><b>Filter</b>: from Medieval Latin <i>filtrum</i>, felt used to strain liquids.</li></ul>
+<p><b>History:</b> Around 1304, Theodoric of Freiberg (Germany) and Kamāl al-Dīn al-Fārisī (Persia) used water-filled glass spheres as giant raindrops and worked out the path of light in a rainbow. In 1637 Descartes calculated the 42° angle. In 1666, with Cambridge closed by plague, Isaac Newton experimented with prisms in a darkened room; in 1672 he described his “crucial experiment” to the Royal Society: white light is a mixture of coloured lights.</p>`,
+mediaT:'Video list (for the offline version)',
+mediaIntro:'Offline version: make a folder <b>media</b> next to <b>index.html</b>, download each video and save it with the file name in the table (optionally add a cover image with the same name ending in <b>.jpg</b>). Clicking a video plays the file in <b>media/</b> first, otherwise YouTube (needs internet). Durations marked “?” were not checked; please preview them.',
+mTab:'Tab',mFile:'File name to save',mVideo:'Video',mDur:'Length',mType:'Type',
+vLbl:'Real-world video',vLook:'Watch for:',vMain:'Main video',vAlt:'Extra video',vDurUnk:'length not checked',vNoThumb:'Click to play',
+vNote:'Click the picture to play it here. If the player stays blank (YouTube cannot be embedded on claude.ai), use “YouTube ↗”.',
+vt_exp:'Experiment',vt_phen:'Phenomenon',vt_app:'Application',
+footer:'Science 9 simulation · Light · Vietnam 2018 curriculum. Refractive indices from measured data; simplifications are listed under “Model assumptions” in each tab.'
+}};
+</script>
+<script>
+'use strict';
+/* ================= Tiện ích ================= */
+const $=id=>document.getElementById(id);
+let lang='vi';
+const T=k=>{const v=I18N[lang][k];return v!=null?v:(I18N.vi[k]!=null?I18N.vi[k]:k);};
+const Tf=(k,o)=>T(k).replace(/\{(\w+)\}/g,(_,n)=>o[n]);
+const nf=(x,d=2,mn=0)=>{if(!isFinite(x))x=0;if(Math.abs(x)<0.5*Math.pow(10,-d))x=0;return new Intl.NumberFormat(lang==='vi'?'vi-VN':'en-US',{maximumFractionDigits:d,minimumFractionDigits:mn}).format(x);};
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const DEG=Math.PI/180;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const store={get(k){try{return localStorage.getItem(k);}catch(e){return null;}},set(k,v){try{localStorage.setItem(k,v);}catch(e){}}};
+let CS={};
+function readColors(){const s=getComputedStyle(document.documentElement);
+  ['bg','panel','lane','ink','muted','line','accent','ok','warn','force','vel','glass','glass2','normal','space','star','dark','gold','wood','sky','ground']
+  .forEach(k=>CS[k]=s.getPropertyValue('--'+k).trim());DIRTY.all=true;}
+const DIRTY={all:true};
+readColors();
+try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',readColors);}catch(e){}
+const isPhone=()=>innerWidth<640;
+function fit(cv,asp,minH=0){const w=Math.max(260,cv.clientWidth|0);const h=Math.max(minH,Math.round(w*asp));const d=Math.min(2.5,window.devicePixelRatio||1);
+  if(cv._w!==w||cv._h!==h||cv._d!==d){cv.width=Math.round(w*d);cv.height=Math.round(h*d);cv.style.height=h+'px';cv._w=w;cv._h=h;cv._d=d;}
+  const c=cv.getContext('2d');c.setTransform(d,0,0,d,0,0);c.globalCompositeOperation='source-over';c.globalAlpha=1;c.clearRect(0,0,w,h);return{c,w,h};}
+function txt(c,s,x,y,o={}){c.font=`${o.w||600} ${o.sz||13}px ${o.mono?'"IBM Plex Mono",monospace':'"Be Vietnam Pro",system-ui,sans-serif'}`;c.fillStyle=o.col||CS.ink;c.textAlign=o.al||'center';c.textBaseline=o.bl||'middle';c.fillText(s,x,y);}
+function pill(c,s,x,y,o={}){c.font=`700 ${o.sz||13}px "Be Vietnam Pro",system-ui,sans-serif`;const tw=c.measureText(s).width,sz=o.sz||13;
+  c.fillStyle=o.bg||CS.panel;c.globalAlpha=.88;rrect(c,x-tw/2-5,y-sz*.78,tw+10,sz*1.56,5);c.fill();c.globalAlpha=1;txt(c,s,x,y,{col:o.col||CS.ink,sz,w:700});}
+function rrect(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath();}
+function arrowHead(c,x,y,ang,sz,col){c.save();c.translate(x,y);c.rotate(ang);c.fillStyle=col;c.beginPath();c.moveTo(sz,0);c.lineTo(-sz*.7,sz*.6);c.lineTo(-sz*.7,-sz*.6);c.closePath();c.fill();c.restore();}
+function seg(id,items,cur,pick){const el=$(id);el.innerHTML='';items.forEach(it=>{const b=document.createElement('button');b.className='btn';
+  b.innerHTML=(it.dot?`<i style="background:${it.dot}"></i>`:'')+esc(it.label);
+  b.setAttribute('aria-pressed',String(it.k===cur));b.onclick=()=>pick(it.k);el.appendChild(b);});}
+function pickCanvas(cv,e){const r=cv.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top];}
+function onDrag(cv,down,move,up){
+  cv.addEventListener('pointerdown',e=>{const p=pickCanvas(cv,e);if(down(p,e)){cv.setPointerCapture(e.pointerId);cv._d=true;e.preventDefault();}});
+  cv.addEventListener('pointermove',e=>{if(cv._d)move(pickCanvas(cv,e),e);});
+  const end=e=>{if(cv._d){cv._d=false;up&&up();}};
+  cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);}
+/* vectơ 2D */
+const V=(x,y)=>[x,y],add=(a,b)=>[a[0]+b[0],a[1]+b[1]],sub=(a,b)=>[a[0]-b[0],a[1]-b[1]],mul=(a,k)=>[a[0]*k,a[1]*k],
+  dot=(a,b)=>a[0]*b[0]+a[1]*b[1],len=a=>Math.hypot(a[0],a[1]),unit=a=>{const l=len(a)||1;return[a[0]/l,a[1]/l];},
+  rot=(a,t)=>[a[0]*Math.cos(t)-a[1]*Math.sin(t),a[0]*Math.sin(t)+a[1]*Math.cos(t)],cross=(a,b)=>a[0]*b[1]-a[1]*b[0];
+const angOf=a=>Math.atan2(a[1],a[0]);
+
+/* ================= Quang học: chiết suất theo bước sóng (λ tính bằng nm) ================= */
+// Công thức Sellmeier: Schott (N-BK7, F2), Sultanova 2009 (PMMA), Peter 1923 (kim cương), Daimon–Masumura 2007 (nước 20 °C).
+const sell=(B,C)=>l=>{const L=(l/1000)**2;let s=1;for(let k=0;k<B.length;k++)s+=B[k]*L/(L-C[k]);return Math.sqrt(s);};
+const MATS={
+  bk7:{n:sell([1.03961212,0.231792344,1.01046945],[0.00600069867,0.0200179144,103.560653])},
+  f2:{n:sell([1.34533359,0.209073176,0.937357162],[0.00997743871,0.0470450767,111.886764])},
+  pmma:{n:sell([0.99654,0.18964,0.00411],[0.00787,0.02191,3.85727])},
+  water:{n:sell([5.684027565e-1,1.726177391e-1,2.086189578e-2,1.130748688e-1],[5.101829712e-3,1.821153936e-2,2.620722293e-2,1.069792721e1])},
+  dia:{n:sell([4.3356,0.3306],[0.1060**2,0.1750**2])}};
+const MAT_KEYS=['bk7','f2','pmma','water','dia'];
+
+/* ================= Màu: hàm màu CIE 1931 (xấp xỉ Wyman–Sloan–Shirley 2013) → sRGB ================= */
+const gp=(x,m,s1,s2)=>{const t=(x-m)/(x<m?s1:s2);return Math.exp(-.5*t*t);};
+function cmf(l){return[1.056*gp(l,599.8,37.9,31)+.362*gp(l,442,16,26.7)-.065*gp(l,501.1,20.4,26.2),
+  .821*gp(l,568.8,46.9,40.5)+.286*gp(l,530.9,16.3,31.1),1.217*gp(l,437,11.8,36)+.681*gp(l,459,26,13.8)];}
+const xyz2lin=([X,Y,Z])=>[3.2406*X-1.5372*Y-.4986*Z,-.9689*X+1.8758*Y+.0415*Z,.0557*X-.204*Y+1.057*Z];
+const gam=u=>{u=clamp(u,0,1);return u<=.0031308?12.92*u:1.055*Math.pow(u,1/2.4)-.055;};
+const css=(r,g,b,a=1)=>`rgba(${Math.round(gam(r)*255)},${Math.round(gam(g)*255)},${Math.round(gam(b)*255)},${a})`;
+// Màu hiển thị của một bước sóng: bỏ phần âm (màn hình không hiện được), chuẩn hoá kênh lớn nhất = 1.
+const DISP={};
+function lamRGB(l){l=Math.round(l);if(DISP[l])return DISP[l];let [r,g,b]=xyz2lin(cmf(Math.min(l,645))).map(v=>Math.max(0,v));// đuôi đỏ của hàm xấp xỉ kém chính xác: lấy sắc độ của 645 nm
+  const m=Math.max(r,g,b)||1;// cho đầu đỏ và đầu tím tối dần như mắt thấy
+  const fade=l<420?.35+.65*(l-380)/40:l>680?.35+.65*(730-l)/50:1;
+  return DISP[l]=[r/m*fade,g/m*fade,b/m*fade];}
+const lamCss=(l,a=1)=>{const [r,g,b]=lamRGB(l);return css(r,g,b,a);};
+const COL7=[{k:'red',l:700},{k:'orange',l:600},{k:'yellow',l:580},{k:'green',l:530},{k:'blue',l:470},{k:'indigo',l:440},{k:'violet',l:410}];
+function lamName(l){return T(l>=625?'cRed':l>=590?'cOrange':l>=565?'cYellow':l>=495?'cGreen':l>=480?'cCyan':l>=450?'cBlue':l>=430?'cIndigo':'cViolet');}
+
+/* ================= Dò tia qua đa giác (định luật khúc xạ + hệ số phản xạ Fresnel) ================= */
+function hitPolys(o,d,polys){let best=null;
+  polys.forEach((P,k)=>{const pts=P.pts;for(let j=0;j<pts.length;j++){const a=pts[j],b=pts[(j+1)%pts.length],e=sub(b,a),den=cross(d,e);
+    if(Math.abs(den)<1e-12)continue;const w=sub(a,o),t=cross(w,e)/den,s=cross(w,d)/den;
+    if(t>1e-6&&s>=-1e-9&&s<=1+1e-9&&(!best||t<best.t)){const nr=unit([e[1],-e[0]]);best={t,k,j,nrm:nr};}}});
+  return best;}
+// Đa giác khai báo theo chiều kim đồng hồ trên màn hình (y hướng xuống) để [e1,-e0] là pháp tuyến hướng ra ngoài.
+function refractAt(d,N,n1,n2){// N ngược hướng d
+  const ci=-dot(d,N),eta=n1/n2,k=1-eta*eta*(1-ci*ci);
+  const rd=add(d,mul(N,2*ci));
+  if(k<0)return{R:1,rd,td:null,ci,ct:0};
+  const ct=Math.sqrt(k),rs=((n1*ci-n2*ct)/(n1*ci+n2*ct))**2,rp=((n1*ct-n2*ci)/(n1*ct+n2*ci))**2;
+  return{R:(rs+rp)/2,rd,td:add(mul(d,eta),mul(N,eta*ci-ct)),ci,ct};}
+function trace(o,d,polys,lam,opt={}){const L=opt.L||4000,minW=opt.minW||.03,maxDepth=opt.maxDepth||8,segs=[],ev=[];
+  const st=[{o,d,w:1,inP:-1,dep:0,main:true}];
+  while(st.length){const r=st.pop();const h=hitPolys(r.o,r.d,polys);
+    if(!h||r.dep>=maxDepth){segs.push({a:r.o,b:add(r.o,mul(r.d,L)),w:r.w,main:r.main,end:true,d:r.d});continue;}
+    const p=add(r.o,mul(r.d,h.t));segs.push({a:r.o,b:p,w:r.w,main:r.main,inP:r.inP,d:r.d});
+    const n1=r.inP>=0?polys[r.inP].n(lam):1,ent=r.inP<0,n2=ent?polys[h.k].n(lam):1;
+    let N=h.nrm;if(dot(r.d,N)>0)N=mul(N,-1);
+    const f=refractAt(r.d,N,n1,n2);
+    if(r.main)ev.push({p,k:h.k,j:h.j,ent,n1,n2,i:Math.acos(clamp(f.ci,-1,1))/DEG,r:f.td?Math.acos(clamp(f.ct,-1,1))/DEG:null,tir:!f.td,N,din:r.d,dout:f.td||f.rd});
+    if(!f.td){st.push({o:p,d:f.rd,w:r.w,inP:r.inP,dep:r.dep+1,main:r.main});continue;}
+    if(opt.branch&&r.w*f.R>minW)st.push({o:p,d:f.rd,w:r.w*f.R,inP:r.inP,dep:r.dep+1,main:false});
+    st.push({o:p,d:f.td,w:r.w*(1-f.R),inP:ent?h.k:-1,dep:r.dep+1,main:r.main});}
+  return{segs,ev};}
+// Lăng kính tam giác cân, đỉnh ở trên: tâm (cx,cy) là trọng tâm, cao H, góc chiết quang A, xoay góc rotD (độ).
+function prism(cx,top,H,A,rotD=0,flip=false){const hb=H*Math.tan(A*DEG/2);let pts=[[0,0],[hb,H],[-hb,H]];// đỉnh, đáy phải, đáy trái (chiều kim đồng hồ)
+  if(flip)pts=pts.map(p=>[p[0],H-p[1]]).reverse();
+  const g=[0,flip?H/3:2*H/3];pts=pts.map(p=>add(rot(sub(p,g),rotD*DEG),[cx,top+g[1]]));
+  return pts;}
+
+/* ================= Video thực tế ================= */
+const VIDEOS={
+1:[{id:'Ea33I0AiNKs',file:'tab1-thi-nghiem.mp4',t:'Recombination of Red Laser light through two prism – Newton’s Prism Experiment',c:'FUN PHYSICS (GOA)',d:'?',type:'exp',
+   look:{vi:'Tia laser đỏ đi qua lăng kính thứ nhất bị lệch về phía đáy. Lăng kính thứ hai đặt ngược bẻ tia trở lại. Để ý: ánh sáng laser chỉ có một màu nên không tách ra thành dải màu.',en:'A red laser beam is bent towards the base by the first prism; an inverted second prism bends it back. Notice: laser light has one colour, so it does not spread into a band of colours.'}},
+  {id:'YN1-2Fat4Lw',file:'tab1-phu.mp4',t:'Refraction of light through prism | Dispersion Of White Light',c:'K12 Mojo',d:'?',type:'exp',
+   look:{vi:'Cách vẽ đường truyền của tia sáng qua lăng kính: pháp tuyến ở mỗi mặt, tia khúc xạ, tia ló lệch về phía đáy. So với hình vẽ trong mô phỏng.',en:'How to draw the path of a ray through a prism: the normal at each face, the refracted ray, the emergent ray bent towards the base. Compare with the simulation.'}}],
+2:[{id:'_Pp12DJktBM',file:'tab2-hien-tuong.mp4',t:'Dispersion of light experiment through a prism and laser light',c:'AG SCHOOL',d:'0:42',type:'phen',
+   look:{vi:'Ánh sáng trắng qua lăng kính tách thành dải màu từ đỏ đến tím; tia laser một màu thì không tách. Để ý màu nào ở trên, màu nào ở dưới.',en:'White light through a prism spreads into colours from red to violet; a single-colour laser does not. Notice which colour is on top and which is at the bottom.'}},
+  {id:'tL5-6GUg52I',file:'tab2-thi-nghiem.mp4',t:'Splitting of white light in seven rainbow colors | Dispersion Of White Light Using A Glass Prism',c:'Lenin’s Science Experiments',d:'1:25',type:'exp',
+   look:{vi:'Thí nghiệm làm được ở lớp với lăng kính thuỷ tinh và nguồn sáng mạnh. Để ý: màn đặt càng xa lăng kính thì dải màu càng rộng.',en:'A classroom version with a glass prism and a bright source. Notice: the further the screen, the wider the band of colours.'}},
+  {id:'RaQfGqsB30o',file:'tab2-newton.mp4',t:'Can You Turn a Rainbow Back into White Light?',c:'Steve Mould',d:'?',type:'exp',
+   look:{vi:'Làm lại thí nghiệm của Newton: gom dải màu lại bằng lăng kính thứ hai và thấu kính hội tụ thì được lại ánh sáng trắng. Giống chế độ “Gom lại” trong tab này.',en:'Newton’s experiment redone: a second prism and a converging lens gather the colours back into white light, like the “Recombine” mode in this tab.'}}],
+3:[{id:'_goD-vZdgg8',file:'tab3-thi-nghiem.mp4',t:'Opaque Object Colors Under Different Light',c:'Joel Bryan',d:'?',type:'exp',
+   look:{vi:'Cùng một vật đặt dưới đèn có màu khác nhau. Để ý: vật đỏ dưới đèn lục trông gần như đen, vật trắng thì mang màu của đèn.',en:'The same objects under lamps of different colours. Notice: a red object under green light looks almost black; a white object takes the colour of the lamp.'}},
+  {id:'FQdWdNmBnaE',file:'tab3-den-natri.mp4',t:'Sodium Lamp ~ Fully Warmed Up 18 W Low Pressure – Color Rendering',c:'Elite Edge: Tech & Wellness',d:'2:56',type:'phen',
+   look:{vi:'Đèn hơi natri chỉ phát một màu vàng (589 nm). Để ý: mọi vật chỉ còn vàng và đen, không phân biệt được đỏ, lục, lam. Thử đèn “Natri” trong mô phỏng.',en:'A sodium lamp emits a single yellow (589 nm). Notice: everything looks yellow or black; red, green and blue cannot be told apart. Try the “Sodium” lamp.'}},
+  {id:'S9T0V5Mh01g',file:'tab3-kinh-loc.mp4',t:'Colour and Colour Filters – GCSE Physics',c:'Physics Online',d:'5:05',type:'app',
+   look:{vi:'Kính lọc màu chỉ cho một số màu đi qua và hấp thụ các màu còn lại; kính lọc không “nhuộm” thêm màu cho ánh sáng.',en:'A colour filter lets some colours through and absorbs the rest; it does not “dye” the light.'}}],
+4:[{id:'spdGo_Q0oOc',file:'tab4-cau-vong.mp4',t:'How are rainbows formed?',c:'Royal Meteorological Society (RMetS)',d:'?',type:'phen',
+   look:{vi:'Ánh sáng Mặt Trời khúc xạ khi vào giọt nước, phản xạ ở mặt sau, khúc xạ lần nữa khi ra. Để ý: người xem phải đứng quay lưng về phía Mặt Trời.',en:'Sunlight refracts entering a raindrop, reflects off the back and refracts again leaving it. Notice: the observer stands with the Sun behind them.'}},
+  {id:'WtVt-YjAOio',file:'tab4-binh-cau.mp4',t:'Rainbow in a Flask',c:'?',d:'?',type:'exp',
+   look:{vi:'Bình cầu đựng nước đóng vai một “giọt mưa khổng lồ”. Thầy cô nên xem trước video này (chưa kiểm tra được nội dung).',en:'A round flask of water acts as a giant raindrop. Teachers should preview this video (content not checked).'}}]};
+const VSEL={1:0,2:0,3:0,4:0},VPLAY={};
+function renderVideo(n){const list=VIDEOS[n],Vd=list[VSEL[n]],el=$('v'+n),pl=!!VPLAY[n];el.classList.toggle('playing',pl);
+  const dur=Vd.d==='?'?T('vDurUnk'):Vd.d;
+  el.innerHTML=`<div class="vmedia">${pl?`<div class="player" id="pl${n}"></div>`:`<button class="thumb" data-play="${n}" aria-label="${esc(Vd.t)}"><span class="ph">${T('vNoThumb')}</span><img alt="" src="media/${Vd.file.replace('.mp4','.jpg')}"><span class="pbtn"></span>${Vd.d!=='?'?`<span class="dur">${Vd.d}</span>`:''}</button>`}</div>
+  <div class="vt"><span class="lbl">${T('vLbl')} · ${T('vt_'+Vd.type)} · ${esc(Vd.c)} · ${dur}</span><span class="ttl">${esc(Vd.t)}</span>
+  <span class="look"><b>${T('vLook')}</b> ${esc(Vd.look[lang])}</span>
+  <div class="vchips">${list.map((x,i)=>`<button class="chip ${i===VSEL[n]?'on':''}" data-vsel="${n}:${i}">${i?T('vAlt')+(list.length>2?' '+i:''):T('vMain')}</button>`).join('')}<a class="chip" href="https://www.youtube.com/watch?v=${Vd.id}" target="_blank" rel="noopener">YouTube ↗</a></div>
+  <span class="src">${T('vNote')}</span></div>`;
+  const img=el.querySelector('img');if(img){img.onerror=()=>{if(!img.dataset.t){img.dataset.t=1;img.src='https://i.ytimg.com/vi/'+Vd.id+'/hqdefault.jpg';}else img.remove();};}
+  if(pl){const box=$('pl'+n),vid=document.createElement('video');vid.controls=true;vid.autoplay=true;vid.playsInline=true;
+    vid.onerror=()=>{const f=document.createElement('iframe');f.src='https://www.youtube-nocookie.com/embed/'+Vd.id+'?autoplay=1&rel=0&playsinline=1';
+      f.allow='autoplay; encrypted-media; picture-in-picture; fullscreen';f.allowFullscreen=true;f.title=Vd.t;box.replaceChildren(f);};
+    vid.src='media/'+Vd.file;box.replaceChildren(vid);}}
+document.addEventListener('click',e=>{const p=e.target.closest('[data-play]'),s=e.target.closest('[data-vsel]');
+  if(p){VPLAY[+p.dataset.play]=true;renderVideo(+p.dataset.play);}
+  else if(s){const [n,i]=s.dataset.vsel.split(':').map(Number);VSEL[n]=i;VPLAY[n]=false;renderVideo(n);}});
+function renderMedia(){let h=`<thead><tr><th>${T('mTab')}</th><th>${T('mFile')}</th><th>${T('mVideo')}</th><th>${T('mDur')}</th><th>${T('mType')}</th></tr></thead><tbody>`;
+  for(const n of [1,2,3,4])VIDEOS[n].forEach((Vd,i)=>{h+=`<tr><td>${n}${i?' ('+T('vAlt').toLowerCase()+')':''}</td><td><code>media/${Vd.file}</code></td><td><a href="https://www.youtube.com/watch?v=${Vd.id}" target="_blank" rel="noopener">${esc(Vd.t)}</a> · ${esc(Vd.c)}</td><td>${Vd.d}</td><td>${T('vt_'+Vd.type)}</td></tr>`;});
+  $('mediaTbl').innerHTML=h+'</tbody>';}
+
+/* ================= Dự đoán và kết luận ================= */
+const PRED={p1:{q:'p1q',o:['p1a','p1b','p1c'],c:1,e:'p1e'},p1b:{q:'p1bq',o:['p1ba','p1bb','p1bc'],c:0,e:'p1be'},
+  p2:{q:'p2q',o:['p2a','p2b','p2c'],c:1,e:'p2e'},p2b:{q:'p2bq',o:['p2ba','p2bb','p2bc'],c:1,e:'p2be'},
+  p3:{q:'p3q',o:['p3a','p3b','p3c'],c:2,e:'p3e'},p3b:{q:'p3bq',o:['p3ba','p3bb','p3bc'],c:1,e:'p3be'},
+  p4:{q:'p4q',o:['p4a','p4b','p4c'],c:1,e:'p4e'},p4b:{q:'p4bq',o:['p4ba','p4bb','p4bc'],c:0,e:'p4be'}};
+function predHTML(P){return `<h2>${T('predTitle')}</h2><p>${T(P.q)}</p><div class="opts">${P.o.map((k,i)=>`<button class="btn ${P.pick===i?'picked':''} ${P.show&&i===P.c?'right':''}" data-i="${i}">${T(k)}</button>`).join('')}</div>`+
+  (P.pick==null?'':`<p class="muted">${T('predThen')}</p><div><button class="btn sm rv">${T(P.show?'hideAns':'showAns')}</button></div>`)+(P.show?`<div class="ans">${T(P.e)}</div>`:'');}
+function renderPred(id){$(id).innerHTML=predHTML(PRED[id]);}
+Object.keys(PRED).forEach(id=>$(id).addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const P=PRED[id];
+  if(b.classList.contains('rv'))P.show=!P.show;else if(b.dataset.i!=null)P.pick=+b.dataset.i;renderPred(id);}));
+const CONC={c1:{q:'c1q',a:'c1a'},c2:{q:'c2q',a:'c2a'},c3:{q:'c3q',a:'c3a'},c4:{q:'c4q',a:'c4a'}};
+function renderConc(id){const C=CONC[id];$(id).innerHTML=`<h2>${T('conclTitle')}</h2><p>${T(C.q)}</p><div><button class="btn sm">${T(C.show?'hideAns':'showAns')}</button></div>${C.show?`<div class="ans">${T(C.a)}</div>`:''}`;}
+Object.keys(CONC).forEach(id=>$(id).addEventListener('click',e=>{if(e.target.closest('button')){CONC[id].show=!CONC[id].show;renderConc(id);}}));
+
+/* ================= TAB 1: Đường đi của tia sáng qua lăng kính ================= */
+const LASERS=[{k:650,key:'lzRed'},{k:532,key:'lzGreen'},{k:405,key:'lzViolet'}];
+const S1={mat:'bk7',A:60,i:48,u:.5,lam:650,draw:false,checked:false,h1:.5,h2:0,drag:null,msg:''};
+function geo1(w,h){const H=Math.min(h*.66,w*(w<560?.3:.2)/Math.tan(S1.A*DEG/2)),top=h*.14,cx=w*.5;const pts=prism(cx,top,H,S1.A);
+  const P0=pts[0],P1=pts[2],P2=pts[1];// đỉnh, đáy trái, đáy phải
+  const tB=unit(sub(P1,P0)),nOut=unit([tB[1],-tB[0]]);const nO=dot(nOut,sub(P0,[cx,top+H]))<0&&nOut[0]>0?mul(nOut,-1):nOut;
+  const aim=add(P0,mul(sub(P1,P0),S1.u));const src=[Math.cos(S1.i*DEG),Math.sin(S1.i*DEG)];// trong hệ (pháp tuyến, cạnh)
+  const back=add(mul(nO,src[0]),mul(tB,src[1]));const d0=mul(back,-1);
+  const Lz=Math.min(w*(w<560?.17:.3),190),o=add(aim,mul(back,Lz));
+  const tR=unit(sub(P2,P0)),nR=unit([-tR[1],tR[0]]);const nRo=nR[0]<0?mul(nR,-1):nR;
+  return{pts,P0,P1,P2,tB,nO,aim,d0,o,Lz,tR,nR:nRo,H,top,cx};}
+function analyticD(i,n,A){const s=Math.sin(i*DEG)/n;const r1=Math.asin(s)/DEG,r2=A-r1,q=n*Math.sin(r2*DEG);if(Math.abs(q)>1)return null;const i2=Math.asin(q)/DEG;return{r1,r2,i2,D:i+i2-A};}
+const cv1=$('cv1'),gr1=$('gr1');
+onDrag(cv1,([x,y])=>{const G=cv1._G;if(!G)return false;
+  if(S1.draw&&!S1.checked){const h1=add(G.P0,mul(sub(G.P2,G.P0),S1.h1));if(Math.hypot(x-h1[0],y-h1[1])<26){S1.drag='h1';return true;}
+    const hd=add(h1,mul([Math.cos(S1.h2*DEG),Math.sin(S1.h2*DEG)],95));if(Math.hypot(x-hd[0],y-hd[1])<26){S1.drag='h2';return true;}}
+  if(Math.hypot(x-G.aim[0],y-G.aim[1])<24){S1.drag='aim';return true;}
+  // thân đèn laser: đoạn từ o lùi thêm 60 px
+  const b=unit(sub(G.o,G.aim)),q=sub([x,y],G.o),along=dot(q,b),perp=Math.abs(cross(b,q));
+  if(along>-40&&along<80&&perp<26){S1.drag='lz';return true;}
+  return false;},
+ ([x,y])=>{const G=cv1._G;if(!G)return;
+  if(S1.drag==='aim'){const e=sub(G.P1,G.P0);S1.u=clamp(dot(sub([x,y],G.P0),e)/dot(e,e),.12,.88);}
+  else if(S1.drag==='lz'){const v=sub([x,y],G.aim);const a=Math.atan2(dot(v,G.tB),dot(v,G.nO))/DEG;S1.i=clamp(Math.round(a*2)/2,-30,85);$('i1').value=S1.i;}
+  else if(S1.drag==='h1'){const e=sub(G.P2,G.P0);S1.h1=clamp(dot(sub([x,y],G.P0),e)/dot(e,e),.02,.98);}
+  else if(S1.drag==='h2'){const h1=add(G.P0,mul(sub(G.P2,G.P0),S1.h1));S1.h2=clamp(angOf(sub([x,y],h1))/DEG,-80,85);}
+  ui1();},()=>{S1.drag=null;});
+$('a1').oninput=e=>{S1.A=+e.target.value;S1.checked=false;ui1();};
+$('i1').oninput=e=>{S1.i=+e.target.value;S1.checked=false;ui1();};
+$('draw1').onclick=()=>{S1.draw=!S1.draw;S1.checked=false;S1.msg=S1.draw?T('st1Draw'):'';ui1();};
+$('chk1').onclick=()=>{check1();ui1();};
+$('rst1').onclick=()=>{Object.assign(S1,{mat:'bk7',A:60,i:48,u:.5,lam:650,draw:false,checked:false,h1:.5,h2:0,msg:''});$('a1').value=60;$('i1').value=48;ui1();};
+let R1=null;
+function solve1(w,h){const G=geo1(w,h);const n=l=>MATS[S1.mat].n(l);const res=trace(G.o,G.d0,[{pts:G.pts,n}],S1.lam,{branch:true,minW:.025,L:3000});
+  const ev=res.ev;let out=null;
+  if(ev.length>=2&&ev[0].ent){const e2=ev[1];out={i1:ev[0].i,r1:ev[0].r,face:e2.j,tir:e2.tir,r2:e2.i,i2:e2.r,p1:ev[0].p,p2:e2.p,dIn:ev[0].dout};
+    // tia ló cuối cùng của đường chính
+    const last=res.segs.filter(s=>s.main&&s.end)[0];if(last){out.dF=last.d;out.pF=last.a;const c=clamp(dot(G.d0,last.d),-1,1);out.D=Math.acos(c)/DEG;out.toBase=cross(G.d0,last.d)>0;}
+    out.nInside=ev.filter(e=>!e.ent&&e.tir).length;}
+  return{G,res,out};}
+function check1(){const R=R1;if(!R||!R.out)return;const o=R.out;
+  if(o.face!==0||o.tir){S1.msg=T('st1NoCheck');S1.checked=true;return;}
+  const G=R.G,h1=add(G.P0,mul(sub(G.P2,G.P0),S1.h1));const dStu=unit(sub(h1,o.p1));
+  const e1=Math.acos(clamp(dot(dStu,o.dIn),-1,1))/DEG;
+  const fin=R.res.segs.find(s=>s.main&&s.end);const e2=Math.abs(((S1.h2-angOf(fin.d)/DEG)+540)%360-180);
+  S1.checked=true;S1.msg=Tf(e1<4&&e2<6?'st1Good':'st1Off',{a:nf(e1,1),b:nf(e2,1)});}
+function draw1(){const {c,w,h}=fit(cv1,isPhone()?.95:.6);const R=solve1(w,h);R1=R;cv1._G=R.G;const G=R.G,o=R.out,col=lamCss(S1.lam);
+  // nền phòng hơi tối để tia laser nổi
+  c.fillStyle=CS.lane;c.fillRect(0,0,w,h);
+  // lăng kính
+  c.beginPath();G.pts.forEach((p,i)=>i?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1]));c.closePath();c.fillStyle=CS.glass;c.globalAlpha=.45;c.fill();c.globalAlpha=1;c.strokeStyle=CS.glass2;c.lineWidth=2;c.stroke();
+  // góc chiết quang A
+  {const a1=angOf(sub(G.P1,G.P0)),a2=angOf(sub(G.P2,G.P0));c.strokeStyle=CS.ink;c.lineWidth=1.5;c.beginPath();c.arc(G.P0[0],G.P0[1],30,a2,a1);c.stroke();
+   txt(c,'A = '+nf(S1.A,0)+'°',G.P0[0],G.P0[1]+48,{sz:13,w:700});txt(c,T('apex'),G.P0[0],G.P0[1]-10,{sz:12,col:CS.muted});
+   txt(c,T('base'),(G.P1[0]+G.P2[0])/2,G.P1[1]+16,{sz:12,col:CS.muted});}
+  const showAll=!S1.draw||S1.checked;
+  // pháp tuyến
+  const nline=(p,N,L=70)=>{c.setLineDash([6,5]);c.strokeStyle=CS.normal;c.lineWidth=1.5;c.beginPath();c.moveTo(p[0]-N[0]*L,p[1]-N[1]*L);c.lineTo(p[0]+N[0]*L,p[1]+N[1]*L);c.stroke();c.setLineDash([]);};
+  if(o){nline(o.p1,G.nO);if(showAll&&o.p2){const e2=R.res.ev[1];nline(o.p2,e2.N);}}
+  // các tia (đường chính đậm, phản xạ một phần mờ)
+  c.lineCap='round';
+  for(const s of R.res.segs){if(!showAll&&!(s.main&&s.inP===undefined&&dot(sub(s.a,G.o),sub(s.a,G.o))<1))continue;
+    c.strokeStyle=col;c.globalAlpha=s.main?1:clamp(s.w*2.2,.12,.6);c.lineWidth=s.main?3.2:1.6;c.beginPath();c.moveTo(s.a[0],s.a[1]);c.lineTo(s.b[0],s.b[1]);c.stroke();
+    if(s.main&&len(sub(s.b,s.a))>80){const m=add(s.a,mul(sub(s.b,s.a),s.end?.06:.5));arrowHead(c,m[0]+s.d[0]*(s.end?40:0),m[1]+s.d[1]*(s.end?40:0),angOf(s.d),8,col);}}
+  c.globalAlpha=1;
+  if(o&&showAll&&o.dF&&!o.nInside){// phần kéo dài tia tới và góc lệch D
+    c.setLineDash([3,6]);c.strokeStyle=CS.muted;c.lineWidth=1.5;c.beginPath();c.moveTo(o.p1[0],o.p1[1]);c.lineTo(o.p1[0]+G.d0[0]*w,o.p1[1]+G.d0[1]*w);c.stroke();
+    const den=cross(G.d0,o.dF);if(Math.abs(den)>1e-3){const t=cross(sub(o.pF,o.p1),o.dF)/den;const X=add(o.p1,mul(G.d0,t));
+      c.beginPath();c.moveTo(X[0],X[1]);c.lineTo(o.pF[0],o.pF[1]);c.stroke();c.setLineDash([]);
+      const a0=angOf(G.d0),a1=angOf(o.dF);c.strokeStyle=CS.force;c.lineWidth=2.5;const rd=clamp((w-X[0])*.6,70,280);c.beginPath();c.arc(X[0],X[1],rd,Math.min(a0,a1),Math.max(a0,a1));c.stroke();
+      const am=(a0+a1)/2;pill(c,'D = '+nf(o.D,1)+'°',X[0]+Math.cos(am)*(rd+22),X[1]+Math.sin(am)*(rd+22),{col:CS.force});}
+    c.setLineDash([]);}
+  // nhãn góc
+  if(o){const lab=(p,N,dir,s,rad,sideIn)=>{const aN=angOf(sideIn?mul(N,-1):N),aD=angOf(sideIn?dir:mul(dir,-1));let d=aD-aN;while(d>Math.PI)d-=2*Math.PI;while(d<-Math.PI)d+=2*Math.PI;
+      c.strokeStyle=CS.ink;c.lineWidth=1.3;c.beginPath();c.arc(p[0],p[1],rad,Math.min(aN,aN+d),Math.max(aN,aN+d));c.stroke();
+      txt(c,s,p[0]+Math.cos(aN+d/2)*(rad+16),p[1]+Math.sin(aN+d/2)*(rad+16),{sz:13,w:700});};
+    lab(o.p1,G.nO,G.d0,'i₁',34,false);
+    if(showAll){lab(o.p1,G.nO,o.dIn,'r₁',40,true);
+      if(o.p2){const e2=R.res.ev[1];lab(o.p2,e2.N,o.dIn,'r₂',36,false);if(!e2.tir)lab(o.p2,e2.N,e2.dout,'i₂',40,true);}}}
+  // đèn laser
+  {const b=unit(sub(G.o,G.aim)),a=angOf(b);c.save();c.translate(G.o[0],G.o[1]);c.rotate(a);c.fillStyle='#2b3440';rrect(c,0,-11,70,22,5);c.fill();c.fillStyle=col;c.fillRect(-3,-5,5,10);
+    c.fillStyle='#e9eef7';c.font='600 11px "Be Vietnam Pro",sans-serif';c.textAlign='center';c.textBaseline='middle';
+    c.save();c.translate(36,0);if(Math.cos(a)<0)c.rotate(Math.PI);c.fillText(S1.lam+' nm',0,0);c.restore();c.restore();
+    // tay nắm
+    c.beginPath();c.arc(G.aim[0],G.aim[1],9,0,7);c.fillStyle=CS.accent;c.fill();c.strokeStyle=CS.panel;c.lineWidth=2;c.stroke();}
+  // chế độ thử vẽ: tay nắm của học sinh
+  if(S1.draw&&o){const h1=add(G.P0,mul(sub(G.P2,G.P0),S1.h1)),dv=[Math.cos(S1.h2*DEG),Math.sin(S1.h2*DEG)],hd=add(h1,mul(dv,95));
+    c.strokeStyle=CS.accent;c.lineWidth=3;c.setLineDash([9,6]);c.beginPath();c.moveTo(o.p1[0],o.p1[1]);c.lineTo(h1[0],h1[1]);c.lineTo(h1[0]+dv[0]*w,h1[1]+dv[1]*w);c.stroke();c.setLineDash([]);
+    for(const p of [h1,hd]){c.beginPath();c.arc(p[0],p[1],11,0,7);c.fillStyle=CS.accent;c.fill();c.strokeStyle=CS.panel;c.lineWidth=2.5;c.stroke();}
+    txt(c,T('drawMine'),hd[0],hd[1]-22,{sz:12,col:CS.accent,w:700});}
+}
+function drawGr1(){const {c,w,h}=fit(gr1,isPhone()?.62:.36);const n=MATS[S1.mat].n(S1.lam),A=S1.A;const L=50,Rr=14,Tt=16,B=34,W=w-L-Rr,H=h-Tt-B;
+  const pts=[];for(let i=-30;i<=90;i+=.5){const r=analyticD(i,n,A);if(r)pts.push([i,r.D]);}
+  let yM=10;pts.forEach(p=>yM=Math.max(yM,p[1]));yM=Math.ceil(yM/10)*10;const yMin=Math.max(0,Math.floor(Math.min(...pts.map(p=>p[1]),yM)/10)*10-10);
+  const X=i=>L+(i+30)/120*W,Y=d=>Tt+H-(d-yMin)/(yM-yMin)*H;
+  c.fillStyle=CS.panel;c.fillRect(L,Tt,W,H);c.strokeStyle=CS.line;c.lineWidth=1;c.beginPath();
+  for(let i=-30;i<=90;i+=15){c.moveTo(X(i),Tt);c.lineTo(X(i),Tt+H);}for(let d=yMin;d<=yM;d+=10){c.moveTo(L,Y(d));c.lineTo(L+W,Y(d));}c.stroke();
+  for(let i=-30;i<=90;i+=15)txt(c,nf(i,0)+'°',X(i),Tt+H+13,{sz:12,mono:true,col:CS.muted,w:500});
+  for(let d=yMin;d<=yM;d+=10)txt(c,nf(d,0)+'°',L-6,Y(d),{sz:12,mono:true,col:CS.muted,w:500,al:'right'});
+  txt(c,T('grI1'),L+W,Tt+H+28,{al:'right',sz:13,w:700});txt(c,T('grD'),L+4,Tt-4,{al:'left',sz:13,w:700});
+  if(pts.length){c.strokeStyle=CS.force;c.lineWidth=2.5;c.beginPath();pts.forEach((p,k)=>k?c.lineTo(X(p[0]),Y(p[1])):c.moveTo(X(p[0]),Y(p[1])));c.stroke();
+    let m=pts[0];pts.forEach(p=>{if(p[1]<m[1])m=p;});c.fillStyle=CS.force;c.beginPath();c.arc(X(m[0]),Y(m[1]),4,0,7);c.fill();
+    txt(c,Tf('dMin',{d:nf(m[1],1)}),X(m[0]),Y(m[1])+16,{sz:12,col:CS.force});}
+  else txt(c,T('grNone'),L+W/2,Tt+H/2,{sz:14,col:CS.warn});
+  const r=analyticD(S1.i,n,A);if(r){c.beginPath();c.arc(X(S1.i),Y(r.D),7,0,7);c.fillStyle=lamCss(S1.lam);c.fill();c.strokeStyle=CS.ink;c.lineWidth=2;c.stroke();}}
+function ui1(){seg('col1',LASERS.map(L=>({k:L.k,label:T(L.key),dot:lamCss(L.k)})),S1.lam,k=>{S1.lam=k;S1.checked=false;ui1();});
+  seg('mat1',MAT_KEYS.map(k=>({k,label:T('m_'+k)})),S1.mat,k=>{S1.mat=k;S1.checked=false;ui1();});
+  $('a1V').textContent=nf(S1.A,0)+'°';$('i1V').textContent=nf(S1.i,1)+'°';
+  $('draw1').setAttribute('aria-pressed',String(S1.draw));$('chk1').hidden=!S1.draw;
+  const R=R1,o=R&&R.out,n=MATS[S1.mat].n(S1.lam);
+  let h=`<dt>${T('kN')}</dt><dd class="num">${nf(n,4)}</dd><dt>${T('kI1')}</dt><dd class="num">${nf(S1.i,1)}°</dd>`;
+  if(o){h+=`<dt>${T('kR1')}</dt><dd class="num">${nf(o.r1,1)}°</dd>`;
+    if(o.face!==0)h+=`<dd class="t">${T('kBase')}</dd>`;
+    else if(o.tir)h+=`<dt>${T('kR2')}</dt><dd class="num">${nf(o.r2,1)}°</dd><dd class="t" style="color:var(--warn)">${Tf('kTir',{c:nf(Math.asin(1/n)/DEG,1)})}</dd>`;
+    else h+=`<dt>${T('kR2')}</dt><dd class="num">${nf(o.r2,1)}°</dd><dt>${T('kI2')}</dt><dd class="num">${nf(o.i2,1)}°</dd><dt>${T('kD')}</dt><dd class="num">${nf(o.D,1)}°</dd><dd class="t">${T(o.toBase?'kToBase':'kToApex')}</dd>`;}
+  $('kv1').innerHTML=h;
+  $('st1').textContent=S1.msg||(o&&o.face===0&&!o.tir?Tf('st1Info',{d:nf(o.D,1)}):'');}
+
+/* ================= TAB 2: Tán sắc ánh sáng trắng ================= */
+const SOURCES={white:{lams:null},red:{lams:[650]},green:{lams:[532]},na:{lams:[589]},mix:{lams:[650,450]}};
+const S2={mode:'one',src:'white',mat:'f2',rot:0,wmm:2,xs:.86,ys:null,xl:.62,xs2:.18,drag:null,key:''};
+const LAMS2=[];for(let l=400;l<=700;l+=5)LAMS2.push(l);
+const WHITE_SUM=(()=>{const s=[0,0,0];LAMS2.forEach(l=>{const v=xyz2lin(cmf(l)).map(x=>Math.max(0,x));s[0]+=v[0];s[1]+=v[1];s[2]+=v[2];});return s;})();
+const cv2=$('cv2'),cv2s=$('cv2s');
+function lams2(){return SOURCES[S2.src].lams||LAMS2;}
+// Hình học phòng tối: chùm sáng đi chếch lên một góc Dmin/2 để khi lăng kính chưa xoay, ánh sáng vàng đi đối xứng (lệch ít nhất) và tới được màn.
+function geo2(w,h){const A=60,slit=S2.mode==='slit',H=h*(slit?.34:.42),top=h*(slit?.06:.12),cx=w*(slit?.2:.27);const n=MATS[S2.mat].n;
+  const Dm=2*Math.asin(n(580)*Math.sin(A*DEG/2))/DEG-A;const pts=prism(cx,top,H,A,S2.rot);
+  const p0=prism(cx,top,H,A,0);const mid0=add(p0[0],mul(sub(p0[2],p0[0]),.55));
+  const d0=[Math.cos(Dm/2*DEG),-Math.sin(Dm/2*DEG)];const o0=add(mid0,mul(d0,-(mid0[0]+8)/d0[0]));
+  return{pts,H,sc:50/H,cx,top,d0,o0,perp:[-d0[1],d0[0]],Dm};}
+// giao của tia với đường thẳng qua Q, pháp tuyến N; trả về điểm và toạ độ dọc theo đường đó
+function hitLine(p,d,Q,N){const den=dot(d,N);if(Math.abs(den)<1e-9)return null;const t=dot(sub(Q,p),N)/den;if(t<=0)return null;const q=add(p,mul(d,t));return{p:q,s:dot(sub(q,Q),[-N[1],N[0]])};}
+const VERT=[1,0];
+// Dò một tia trong phòng tối: lăng kính 1 → (khe + lăng kính 2 | thấu kính) → màn. Trả về các đoạn và điểm chạm màn.
+function trace2(G,o,d,l,w,h){const n=MATS[S2.mat].n;const segs=[];
+  const r=trace(o,d,[{pts:G.pts,n}],l,{L:1});const main=r.segs.filter(s=>s.main);
+  main.slice(0,-1).forEach(s=>segs.push([s.a,s.b]));
+  const last=main[main.length-1];let p=last.a,dir=last.d;const far=q=>segs.push([q,add(q,mul(dir,3000))]);
+  if(r.ev.length<2||r.ev[1].tir||dir[0]<=0){far(p);return{segs,hit:null};}
+  if(S2.mode==='one'){const q=hitLine(p,dir,[S2.xs*w,0],VERT);if(!q){far(p);return{segs,hit:null};}segs.push([p,q.p]);return{segs,hit:{scr:1,y:q.p[1]}};}
+  if(S2.mode==='slit'){const q=hitLine(p,dir,[G.x1,0],VERT);if(!q){far(p);return{segs,hit:null};}
+    segs.push([p,q.p]);if(Math.abs(q.p[1]-S2.ys)>G.slitH)return{segs,hit:{scr:0,y:q.p[1]}};
+    const r2=trace(q.p,dir,[{pts:G.pr2,n}],l,{L:1});const m2=r2.segs.filter(s=>s.main);m2.slice(0,-1).forEach(s=>segs.push([s.a,s.b]));
+    const l2=m2[m2.length-1];const q2=hitLine(l2.a,l2.d,G.Q2,G.N2);if(!q2||r2.ev.length<2){segs.push([l2.a,add(l2.a,mul(l2.d,3000))]);return{segs,hit:{scr:0,y:q.p[1],pass:true}};}
+    segs.push([l2.a,q2.p]);return{segs,hit:{scr:2,y:q2.s,pass:true}};}
+  // thấu kính hội tụ lí tưởng (mỏng): tại x = xL, độ dốc mới = độ dốc cũ − (y − yc)/f
+  const xl=S2.xl*w;const q=hitLine(p,dir,[xl,0],VERT);if(!q){far(p);return{segs,hit:null};}segs.push([p,q.p]);
+  const m=dir[1]/dir[0],m2=m-(q.p[1]-G.lensY)/G.f;const d2=unit([1,m2]);const q2=hitLine(q.p,d2,[S2.xs*w,0],VERT);if(!q2){segs.push([q.p,add(q.p,mul(d2,3000))]);return{segs,hit:null};}
+  segs.push([q.p,q2.p]);return{segs,hit:{scr:1,y:q2.p[1]}};}
+let R2=null;
+function solve2(w,h){const key=[w,h,S2.mode,S2.src,S2.mat,S2.rot,S2.wmm,S2.xs,S2.ys,S2.xl,S2.xs2].join('|');if(R2&&R2.key===key)return R2;
+  const G=geo2(w,h),ls=lams2(),NW=14,Wp=(S2.mode==='slit'?.15:S2.wmm)/G.sc;G.f=w*.1;G.slitH=S2.mode==='slit'?.5:1;G.x1=w*.6;
+  // tia giữa màu vàng để đặt thấu kính / lăng kính 2 đúng chỗ
+  const n=MATS[S2.mat].n;const rc=trace(G.o0,G.d0,[{pts:G.pts,n}],580,{L:1}).segs.filter(s=>s.main);const lc=rc[rc.length-1];
+  const ql=hitLine(lc.a,lc.d,[S2.xl*w,0],VERT);G.lensY=ql?ql.p[1]:h/2;
+  if(S2.mode==='slit'){const qs=hitLine(lc.a,lc.d,[G.x1,0],VERT);const yc=qs?qs.p[1]:h*.4;if(S2.ys==null||Math.abs(S2.ys-yc)>h*.25)S2.ys=yc;
+    // lăng kính 2 cùng chiều với lăng kính 1, xoay để chùm sáng qua nó cũng lệch ít nhất
+    const phi=angOf(lc.d)/DEG,rot2=phi+G.Dm/2,H2=G.H*.75;const tmp=prism(0,0,H2,60,rot2);const mid2=add(tmp[0],mul(sub(tmp[2],tmp[0]),.55));
+    const tgt=add([G.x1,S2.ys],mul(lc.d,w*.07));G.pr2=tmp.map(p=>add(p,sub(tgt,mid2)));
+    const rr=trace([G.x1,S2.ys],lc.d,[{pts:G.pr2,n}],580,{L:1}).segs.filter(s=>s.main);const e2=rr[rr.length-1];
+    G.N2=e2.d;G.Q2=add(e2.a,mul(e2.d,w*S2.xs2));G.e2a=e2.a;}
+  const rays=[];// mỗi bước sóng: NW tia song song trải đều theo bề rộng chùm
+  for(const l of ls){const row=[];for(let k=0;k<NW;k++){const off=(k+.5)/NW-.5;const o=add(G.o0,mul(G.perp,off*Wp));row.push(trace2(G,o,G.d0,l,w,h));}rays.push({l,row});}
+  R2={key,G,rays,Wp};return R2;}
+onDrag(cv2,([x,y])=>{const R=R2,w=cv2._w;if(!R)return false;const G=R.G;
+  if(S2.mode==='slit'){if(Math.abs(x-G.x1)<24){S2.drag='slit';return true;}if(G.Q2&&Math.hypot(x-G.Q2[0],y-G.Q2[1])<70){S2.drag='scr2';return true;}return false;}
+  if(S2.mode==='lens'&&Math.abs(x-S2.xl*w)<24){S2.drag='lens';return true;}
+  if(Math.abs(x-S2.xs*w)<24){S2.drag='scr';return true;}return false;},
+ ([x,y])=>{const w=cv2._w,G=R2&&R2.G;if(S2.drag==='scr')S2.xs=clamp(x/w,S2.mode==='lens'?S2.xl+.04:.5,.98);else if(S2.drag==='slit')S2.ys=y;
+  else if(S2.drag==='scr2'&&G&&G.e2a){S2.xs2=clamp(dot(sub([x,y],G.e2a),G.N2)/w,.06,.4);}else if(S2.drag==='lens'){S2.xl=clamp(x/w,.45,.75);if(S2.xs<S2.xl+.04)S2.xs=S2.xl+.04;}ui2();},()=>{S2.drag=null;});
+function drawScreenBar(c,x,y0,y1,lab){c.fillStyle='#d8dde4';c.fillRect(x-3,y0,6,y1-y0);txt(c,lab,x,y0-10,{sz:12,col:'#cfd8e6'});}
+function draw2(){const slit=S2.mode==='slit';const {c,w,h}=fit(cv2,isPhone()?(slit?1.1:.9):(slit?.62:.5));const R=solve2(w,h),G=R.G;
+  c.fillStyle='#05080d';c.fillRect(0,0,w,h);
+  // nguồn sáng và khe (ở mép trái, quay theo hướng chùm sáng)
+  c.save();c.translate(G.o0[0]+8,G.o0[1]);c.rotate(angOf(G.d0));c.fillStyle='#3a4452';rrect(c,-40,-24,44,48,6);c.fill();
+  c.fillStyle=SOURCES[S2.src].lams?lamCss(SOURCES[S2.src].lams[0]):'#fff';c.fillRect(2,-R.Wp/2,3,R.Wp);c.restore();
+  const poly=(P)=>{c.beginPath();P.forEach((p,i)=>i?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1]));c.closePath();c.fillStyle='rgba(150,200,235,.16)';c.fill();c.strokeStyle='rgba(170,215,245,.75)';c.lineWidth=1.6;c.stroke();};
+  poly(G.pts);if(slit&&G.pr2)poly(G.pr2);
+  if(S2.mode==='lens'){const x=S2.xl*w,y=G.lensY,hh=h*.3;c.strokeStyle='rgba(170,215,245,.85)';c.lineWidth=2;c.beginPath();c.ellipse(x,y,9,hh,0,0,7);c.fillStyle='rgba(150,200,235,.16)';c.fill();c.stroke();
+    txt(c,T('lens'),x,Math.max(12,y-hh-10),{sz:12,col:'#cfd8e6'});}
+  // tia sáng: cộng màu (lighter), chỗ các màu chồng lên nhau hiện trắng
+  c.globalCompositeOperation='lighter';c.lineCap='round';const ls=R.rays.length,mono=ls<=2;
+  const ks=mono?[3,6,10]:[0,4,9,13];
+  for(const row of R.rays){const col=lamCss(row.l,mono?.75:.42);c.strokeStyle=col;c.lineWidth=mono?2.2:1.6;
+    for(const k of ks){const rr=row.row[k];if(!rr)continue;c.beginPath();for(const s of rr.segs){c.moveTo(s[0][0],s[0][1]);c.lineTo(s[1][0],s[1][1]);}c.stroke();}}
+  c.globalCompositeOperation='source-over';
+  // màn chắn
+  if(slit){const xs=G.x1;c.fillStyle='#d8dde4';c.fillRect(xs-3,0,6,S2.ys-G.slitH);c.fillRect(xs-3,S2.ys+G.slitH,6,h);
+    txt(c,T('slit'),xs,h-14,{sz:12,col:'#cfd8e6',al:'right'});c.beginPath();c.arc(xs,S2.ys,9,0,7);c.strokeStyle='#5ea6ec';c.lineWidth=2.5;c.stroke();
+    if(G.Q2){const pr=[-G.N2[1],G.N2[0]],a=add(G.Q2,mul(pr,h*.22)),b=add(G.Q2,mul(pr,-h*.22));c.strokeStyle='#d8dde4';c.lineWidth=6;c.beginPath();c.moveTo(a[0],a[1]);c.lineTo(b[0],b[1]);c.stroke();
+      txt(c,T('screen2'),G.Q2[0]+G.N2[0]*20+30,G.Q2[1]+G.N2[1]*20,{sz:12,col:'#cfd8e6',al:'left'});}}
+  else drawScreenBar(c,S2.xs*w,24,h-6,T('screen'));
+  txt(c,T(slit?'drag2slit':S2.mode==='lens'?'drag2lens':'drag2scr'),w/2,14,{sz:12,col:'#97a3b2'});
+  drawScr2();}
+function drawScr2(){const {c,w,h}=fit(cv2s,isPhone()?.24:.12,70);const R=R2;c.fillStyle='#05080d';c.fillRect(0,0,w,h);if(!R)return;
+  const scr=S2.mode==='slit'?2:1;let ys=[];for(const row of R.rays)for(const rr of row.row)if(rr.hit&&rr.hit.scr===scr)ys.push(rr.hit.y);
+  if(S2.mode==='slit'&&!ys.length){txt(c,T('scrNone'),w/2,h/2,{sz:14,col:'#97a3b2'});return;}
+  if(!ys.length){txt(c,T('scrNone'),w/2,h/2,{sz:14,col:'#97a3b2'});return;}
+  let y0=Math.min(...ys),y1=Math.max(...ys);const pad=Math.max(6,(y1-y0)*.25);y0-=pad;y1+=pad;const mw=S2.mode==='slit'?60:30;if(y1-y0<mw){const m=(y0+y1)/2;y0=m-mw/2;y1=m+mw/2;}
+  const N=Math.max(60,w|0),acc=new Float64Array(N*3);const toB=y=>(y-y0)/(y1-y0)*N;
+  for(const row of R.rays){const v=xyz2lin(cmf(row.l)).map(x=>Math.max(0,x));const wt=[v[0]/WHITE_SUM[0],v[1]/WHITE_SUM[1],v[2]/WHITE_SUM[2]];
+    const mono=R.rays.length<=2;const wv=mono?lamRGB(row.l):wt;
+    const hs=row.row.map(rr=>rr.hit&&rr.hit.scr===scr?rr.hit.y:null);
+    for(let k=0;k<hs.length;k++){if(hs[k]==null)continue;const nb=hs[k+1]!=null?hs[k+1]:hs[k-1]!=null?2*hs[k]-hs[k-1]:hs[k]+1;
+      let a=toB(Math.min(hs[k],nb)),b=toB(Math.max(hs[k],nb));if(b-a<1){const m=(a+b)/2;a=m-.5;b=m+.5;}
+      const per=1/(b-a);for(let j=Math.max(0,Math.floor(a));j<Math.min(N,Math.ceil(b));j++){const ov=Math.min(b,j+1)-Math.max(a,j);if(ov<=0)continue;
+        acc[j*3]+=wv[0]*ov*per;acc[j*3+1]+=wv[1]*ov*per;acc[j*3+2]+=wv[2]*ov*per;}}}
+  let mx=1e-9;for(let j=0;j<N*3;j++)mx=Math.max(mx,acc[j]);
+  const sh=h-26;for(let j=0;j<N;j++){c.fillStyle=css(acc[j*3]/mx,acc[j*3+1]/mx,acc[j*3+2]/mx);c.fillRect(j*w/N,4,w/N+1,sh);}
+  const mmTot=(y1-y0)*R.G.sc;txt(c,T('scrTop'),6,h-11,{al:'left',sz:12,col:'#97a3b2'});txt(c,T('scrBot'),w-6,h-11,{al:'right',sz:12,col:'#97a3b2'});
+  txt(c,Tf('scrSpan',{mm:nf(mmTot,1)}),w/2,h-11,{sz:12,col:'#97a3b2'});
+  R.spread=(Math.max(...ys)-Math.min(...ys))*R.G.sc;
+  // độ lệch giữa tâm vệt sáng của các màu (để biết các màu đã chụm lại chưa)
+  const cs=[];for(const row of R.rays){const v=row.row.filter(rr=>rr.hit&&rr.hit.scr===scr).map(rr=>rr.hit.y);if(v.length)cs.push(v.reduce((a,b)=>a+b,0)/v.length);}
+  R.spreadC=cs.length?(Math.max(...cs)-Math.min(...cs))*R.G.sc:null;}
+function ui2(){seg('mode2',['one','slit','lens'].map(k=>({k,label:T('mode_'+k)})),S2.mode,k=>{S2.mode=k;S2.ys=null;if(k==='lens'){S2.xs=.86;}ui2();});
+  seg('src2',Object.keys(SOURCES).map(k=>({k,label:T('src_'+k),dot:SOURCES[k].lams?lamCss(SOURCES[k].lams[0]):'#fff'})),S2.src,k=>{S2.src=k;ui2();});
+  seg('mat2',MAT_KEYS.filter(k=>k!=='dia').map(k=>({k,label:T('m_'+k)})),S2.mat,k=>{S2.mat=k;ui2();});
+  $('r2V').textContent=nf(S2.rot,1)+'°';$('w2V').textContent=nf(S2.wmm,0)+' mm';$('hint2').textContent=T('hint2_'+S2.mode);
+  // bảng góc lệch 7 màu (tia giữa, qua lăng kính 1)
+  const w=cv2._w||800,h=cv2._h||400,G=geo2(w,h),n=MATS[S2.mat].n;
+  let tb=`<thead><tr><th>${T('tColor')}</th><th class="n">λ (nm)</th><th class="n">n</th><th class="n">${T('tDev')}</th></tr></thead><tbody>`;let Ds=[];
+  for(const C of COL7){const r=trace(G.o0,G.d0,[{pts:G.pts,n}],C.l,{L:1});const last=r.segs.filter(s=>s.main).pop();const ok=r.ev.length>=2&&!r.ev[1].tir;
+    const D=ok?Math.acos(clamp(dot(last.d,G.d0),-1,1))/DEG:null;Ds.push(D);
+    tb+=`<tr><td><span class="sw" style="background:${lamCss(C.l)}"></span>${T('c_'+C.k)}</td><td class="n">${C.l}</td><td class="n num">${nf(n(C.l),4)}</td><td class="n num">${D==null?'—':nf(D,2)+'°'}</td></tr>`;}
+  $('tb2').innerHTML=tb+'</tbody>';
+  let st='';const R=R2;
+  if(S2.mode==='one'){st=Ds[0]!=null&&Ds[6]!=null?Tf(SOURCES[S2.src].lams?'st2Mono':'st2One',{r:nf(Ds[0],2),v:nf(Ds[6],2),dd:nf(Ds[6]-Ds[0],2)}):T('st2Tir');}
+  else if(S2.mode==='slit'&&R){const pass=[];for(const row of R.rays)if(row.row.some(rr=>rr.hit&&rr.hit.pass))pass.push(row.l);
+    if(!pass.length)st=T('st2SlitNone');else{const lm=pass.reduce((a,b)=>a+b,0)/pass.length;st=Tf('st2Slit',{c:lamName(lm),l:nf(Math.min(...pass),0)+(pass.length>1?'–'+nf(Math.max(...pass),0):'')});}}
+  else if(S2.mode==='lens'&&R){st=R.spread!=null?Tf(R.spreadC<.45&&!SOURCES[S2.src].lams?'st2LensW':'st2Lens',{mm:nf(R.spread,1)}):'';}
+  $('st2').textContent=st;}
+$('r2').oninput=e=>{S2.rot=+e.target.value;ui2();};$('w2').oninput=e=>{S2.wmm=+e.target.value;ui2();};
+
+/* ================= TAB 3: Màu sắc của vật ================= */
+const LG=[];for(let l=380;l<=730;l+=5)LG.push(l);
+const CMF=LG.map(cmf);
+const logi=x=>1/(1+Math.exp(-x));
+const spec=f=>LG.map(f);
+const LED={r:spec(l=>gp(l,630,10,10)),g:spec(l=>gp(l,528,16,16)),b:spec(l=>gp(l,460,10,10))};
+function toXYZ(S){let X=0,Y=0,Z=0;for(let k=0;k<LG.length;k++){X+=S[k]*CMF[k][0];Y+=S[k]*CMF[k][1];Z+=S[k]*CMF[k][2];}return[X,Y,Z];}
+const WB=xyz2lin(toXYZ(spec(()=>1)));// cân bằng trắng: ánh sáng trắng đều mọi màu → trung tính
+const balLin=S=>{const v=xyz2lin(toXYZ(S));return[v[0]/WB[0],v[1]/WB[1],v[2]/WB[2]];};
+const lum=v=>.2126*v[0]+.7152*v[1]+.0722*v[2];
+// trọng số ba LED để R+G+B ra trắng trung tính, cùng độ sáng với ánh sáng trắng
+const LEDW=(()=>{const a=balLin(LED.r),b=balLin(LED.g),c=balLin(LED.b);const M=[[a[0],b[0],c[0]],[a[1],b[1],c[1]],[a[2],b[2],c[2]]];
+  const det=m=>m[0][0]*(m[1][1]*m[2][2]-m[1][2]*m[2][1])-m[0][1]*(m[1][0]*m[2][2]-m[1][2]*m[2][0])+m[0][2]*(m[1][0]*m[2][1]-m[1][1]*m[2][0]);
+  const D=det(M),w=[0,1,2].map(j=>{const m=M.map(r=>r.slice());for(let i=0;i<3;i++)m[i][j]=1;return det(m)/D;});return w;})();
+const NA=spec(l=>gp(l,589.3,1.2,1.2));const NAk=lum(balLin(spec(()=>1)))/lum(balLin(NA));
+const LAMPS={sun:()=>spec(()=>1),red:()=>LED.r.map(v=>v*LEDW[0]),green:()=>LED.g.map(v=>v*LEDW[1]),blue:()=>LED.b.map(v=>v*LEDW[2]),na:()=>NA.map(v=>v*NAk),
+  rgb:()=>LG.map((_,k)=>LED.r[k]*LEDW[0]*S3.rgb[0]+LED.g[k]*LEDW[1]*S3.rgb[1]+LED.b[k]*LEDW[2]*S3.rgb[2])};
+const LAMPDOT={sun:'#fff',red:'#ff3b30',green:'#22c55e',blue:'#3b6cff',na:'#ffb000',rgb:'conic-gradient(#ff3b30 0 33%,#22c55e 0 66%,#3b6cff 0)'};
+const FILTERS={none:()=>1,red:l=>.9*logi((l-598)/7),green:l=>.85*gp(l,530,28,28),blue:l=>.85*gp(l,455,26,26),yellow:l=>.9*logi((l-505)/7)};
+const FDOT={none:'transparent',red:'#e5322b',green:'#1fa64a',blue:'#2f5fe0',yellow:'#f2c200'};
+const OBJS=[
+  {k:'paper',R:l=>.88},{k:'cloth',R:l=>.04},{k:'tomato',R:l=>.05+.75*logi((l-596)/9)},{k:'banana',R:l=>.06+.76*logi((l-505)/11)},
+  {k:'leaf',R:l=>.05+.42*gp(l,550,32,36)},{k:'block',R:l=>.05+.62*gp(l,458,30,34)},{k:'dragon',R:l=>.07+.72*(1-gp(l,540,42,42))}];
+const ROOM={wall:l=>.62,table:l=>.08+.35*logi((l-575)/28)};
+OBJS.forEach(o=>o.Rs=spec(o.R));const RW=spec(ROOM.wall),RT=spec(ROOM.table),RLEAF=OBJS[4].Rs;
+const S3={lamp:'sun',filt:'none',rgb:[1,1,0],adapt:true,sel:'tomato',done:{}};
+function light3(){const S=LAMPS[S3.lamp](),f=FILTERS[S3.filt];return S.map((v,k)=>v*f(LG[k]));}
+// Màu nhìn thấy của bề mặt có độ phản xạ Rs dưới ánh sáng S; k: hệ số phơi sáng (mắt thích nghi)
+function seen(S,Rs,k){const v=balLin(S.map((s,i)=>s*Rs[i])).map(x=>Math.max(0,x*k));const m=Math.max(1,...v);return v.map(x=>x/m);}
+function expo3(S){const Yw=lum(balLin(S));const Yref=lum(balLin(spec(()=>1)));if(!S3.adapt)return 1/Yref;return Yw>1e-6?.95/Yw:1/Yref;}
+function colName(v,Lrel){const g=v.map(gam);const mx=Math.max(...g),mn=Math.min(...g),s=mx>0?(mx-mn)/mx:0;
+  if(Lrel<.07||mx<.18)return T('nBlack');if(s<.2)return T(mx>.75?'nWhite':'nGrey');
+  let hh;const [r,gg,b]=g;if(mx===r)hh=60*(((gg-b)/(mx-mn))%6);else if(mx===gg)hh=60*((b-r)/(mx-mn)+2);else hh=60*((r-gg)/(mx-mn)+4);if(hh<0)hh+=360;
+  return T(hh<14||hh>=338?'nRed':hh<40?'nOrange':hh<70?'nYellow':hh<165?'nGreen':hh<200?'nCyan':hh<255?'nBlue':hh<290?'nViolet':'nMagenta');}
+const cv3=$('cv3'),cv3s=$('cv3s');
+cv3.addEventListener('pointerdown',e=>{const [x,y]=pickCanvas(cv3,e);const L=cv3._L;if(!L)return;let best=null;L.forEach(o=>{const d=Math.hypot(x-o.x,y-o.y);if(d<o.r&&(!best||d<best.d))best={d,k:o.k};});
+  if(best){S3.sel=best.k;ui3();}});
+function shadeFill(v,f=1){return css(v[0]*f,v[1]*f,v[2]*f);}
+function draw3(){const {c,w,h}=fit(cv3,isPhone()?1.05:.46);const S=light3(),k=expo3(S);
+  const wall=seen(S,RW,k),table=seen(S,RT,k),leaf=seen(S,RLEAF,k);
+  c.fillStyle=shadeFill(wall,.55);c.fillRect(0,0,w,h);
+  // vùng sáng của đèn trên tường
+  const lx=w*.5,ly=h*.1;const gr=c.createRadialGradient(lx,h*.55,10,lx,h*.55,w*.55);gr.addColorStop(0,shadeFill(wall,.95));gr.addColorStop(1,shadeFill(wall,.45));c.fillStyle=gr;c.fillRect(0,0,w,h);
+  const ty=h*.7;c.fillStyle=shadeFill(table,.95);c.fillRect(0,ty,w,h-ty);c.fillStyle=shadeFill(table,.7);c.fillRect(0,ty,w,5);
+  // đèn
+  const emit=balLin(S);const em=Math.max(...emit)||1;const ec=emit.map(x=>Math.max(0,x/em));
+  c.strokeStyle='#444c57';c.lineWidth=2;c.beginPath();c.moveTo(lx,0);c.lineTo(lx,ly-12);c.stroke();
+  c.fillStyle='#3a4250';c.beginPath();c.moveTo(lx-46,ly+6);c.lineTo(lx-18,ly-14);c.lineTo(lx+18,ly-14);c.lineTo(lx+46,ly+6);c.closePath();c.fill();
+  c.fillStyle=em>1e-6?css(ec[0],ec[1],ec[2]):'#222';c.beginPath();c.ellipse(lx,ly+7,40,7,0,0,7);c.fill();
+  if(S3.filt!=='none'){c.fillStyle=FDOT[S3.filt];c.globalAlpha=.7;rrect(c,lx-52,ly+16,104,9,3);c.fill();c.globalAlpha=1;txt(c,T('filterOn'),lx+64,ly+21,{al:'left',sz:12,col:CS.ink});}
+  // vật
+  const n=OBJS.length,rows=w<560?2:1,per=Math.ceil(n/rows),gap=w/(per+.4),R=Math.min(gap*.36,h*(rows>1?.1:.13)),L=[];
+  OBJS.forEach((o,i)=>{const row=Math.floor(i/per),col=i%per,x=gap*(col+.7)+(row&&rows>1?gap*.5:0),y=(rows>1?(row?h*.95:ty+R*1.6):ty)-R*.95;const v=seen(S,o.Rs,k);L.push({k:o.k,x,y,r:R*1.25});c.save();c.translate(x,y);
+    const g=c.createRadialGradient(-R*.35,-R*.4,R*.1,0,0,R*1.15);g.addColorStop(0,shadeFill(v,1));g.addColorStop(1,shadeFill(v,.55));
+    if(o.k==='paper'){c.fillStyle=shadeFill(v,.98);c.save();c.rotate(-.08);c.fillRect(-R*.75,-R*.95,R*1.5,R*1.9);c.strokeStyle='rgba(0,0,0,.25)';c.lineWidth=1;c.strokeRect(-R*.75,-R*.95,R*1.5,R*1.9);c.restore();}
+    else if(o.k==='cloth'){c.fillStyle=shadeFill(v,1);c.beginPath();c.moveTo(-R*.9,R*.95);c.quadraticCurveTo(-R,-R*.2,-R*.5,-R*.7);c.quadraticCurveTo(0,-R*.4,R*.5,-R*.75);c.quadraticCurveTo(R,-R*.1,R*.9,R*.95);c.closePath();c.fill();
+      c.strokeStyle='rgba(255,255,255,.12)';c.stroke();}
+    else if(o.k==='tomato'){c.fillStyle=g;c.beginPath();c.ellipse(0,R*.1,R*.95,R*.85,0,0,7);c.fill();c.fillStyle=shadeFill(leaf,.9);
+      for(let a=0;a<5;a++){c.save();c.translate(0,-R*.68);c.rotate(a*1.256);c.beginPath();c.ellipse(R*.22,0,R*.24,R*.07,0,0,7);c.fill();c.restore();}}
+    else if(o.k==='banana'){c.strokeStyle=shadeFill(v,.95);c.lineCap='round';c.lineWidth=R*.55;c.beginPath();c.arc(0,-R*.9,R*1.55,Math.PI*.3,Math.PI*.7);c.stroke();
+      c.strokeStyle=shadeFill(v,.6);c.lineWidth=R*.12;c.beginPath();c.arc(0,-R*.9,R*1.3,Math.PI*.33,Math.PI*.67);c.stroke();}
+    else if(o.k==='leaf'){c.fillStyle=g;c.beginPath();c.moveTo(-R,R*.6);c.quadraticCurveTo(-R*.4,-R*1.1,R,-R*.8);c.quadraticCurveTo(R*.5,R*.7,-R,R*.6);c.fill();
+      c.strokeStyle=shadeFill(v,.55);c.lineWidth=2;c.beginPath();c.moveTo(-R,R*.6);c.quadraticCurveTo(0,-R*.1,R,-R*.8);c.stroke();}
+    else if(o.k==='block'){const s=R*.8;c.fillStyle=shadeFill(v,1);c.fillRect(-s,-s*.6,s*1.4,s*1.5);c.fillStyle=shadeFill(v,.78);
+      c.beginPath();c.moveTo(-s,-s*.6);c.lineTo(-s*.6,-s);c.lineTo(s*.8,-s);c.lineTo(s*.4,-s*.6);c.closePath();c.fill();c.fillStyle=shadeFill(v,.6);
+      c.beginPath();c.moveTo(s*.4,-s*.6);c.lineTo(s*.8,-s);c.lineTo(s*.8,s*.5);c.lineTo(s*.4,s*.9);c.closePath();c.fill();}
+    else if(o.k==='dragon'){c.fillStyle=g;c.beginPath();c.ellipse(0,R*.1,R*.8,R*.92,0,0,7);c.fill();c.fillStyle=shadeFill(leaf,.95);
+      for(const [a,b,t] of [[-.5,-.35,-.6],[.5,-.2,.6],[-.45,.45,-.5],[.45,.55,.5],[0,-.75,0]]){c.save();c.translate(a*R,b*R);c.rotate(t);c.beginPath();c.moveTo(-R*.18,0);c.quadraticCurveTo(0,-R*.35,R*.18,0);c.closePath();c.fill();c.restore();}}
+    c.restore();
+    if(S3.sel===o.k){c.strokeStyle=CS.accent;c.lineWidth=3;c.setLineDash([6,4]);c.beginPath();c.arc(x,y,R*1.2,0,7);c.stroke();c.setLineDash([]);}
+    if(rows===1)pill(c,T('o_'+o.k),x,ty+R*.55,{sz:12});});
+  cv3._L=L;
+  // mắt người quan sát
+  const ex=w*.93,ey=h*.2;c.fillStyle='#fff';c.beginPath();c.ellipse(ex,ey,18,11,0,0,7);c.fill();c.strokeStyle='#333';c.lineWidth=2;c.stroke();c.fillStyle='#3a2a1a';c.beginPath();c.arc(ex-5,ey,6,0,7);c.fill();
+  txt(c,T('eye'),ex,ey+24,{sz:12});
+  // mũi tên ánh sáng các màu tới vật được chọn và phần phản xạ vào mắt
+  const sel=L.find(o=>o.k===S3.sel),obj=OBJS.find(o=>o.k===S3.sel);if(sel){const bands=[410,450,490,530,570,610,660];const Smax=Math.max(...S,1e-9);
+    bands.forEach((l,j)=>{const kk=LG.indexOf(l);const sIn=S[kk]/Smax,sR=sIn*obj.Rs[kk];if(sIn<.03)return;const off=(j-3)*7;
+      const a=[lx+off,ly+20],b=[sel.x+off*.6,sel.y-R*.9];c.strokeStyle=lamCss(l,.95);c.lineWidth=1+3*sIn;c.beginPath();c.moveTo(a[0],a[1]);c.lineTo(b[0],b[1]);c.stroke();
+      arrowHead(c,b[0],b[1],angOf(sub(b,a)),7,lamCss(l));
+      if(sR>.06){const e=[ex-10+off*.4,ey+8+j*2];const s0=[sel.x+off*.6,sel.y-R*.95];c.lineWidth=1+3*sR;c.setLineDash([]);c.beginPath();c.moveTo(s0[0],s0[1]);c.lineTo(e[0],e[1]);c.stroke();
+        arrowHead(c,e[0],e[1],angOf(sub(e,s0)),7,lamCss(l));}
+      else{c.fillStyle=lamCss(l);c.font='700 13px sans-serif';c.textAlign='center';c.fillText('×',b[0],b[1]-10);}});}
+  drawSpec3(S);}
+function drawSpec3(S){const {c,w,h}=fit(cv3s,isPhone()?.55:.26,150);const L=40,Rr=10,Tt=14,B=30,W=w-L-Rr,H=h-Tt-B;const obj=OBJS.find(o=>o.k===S3.sel);
+  const X=l=>L+(l-380)/350*W,Y=v=>Tt+H-v*H;c.fillStyle=CS.panel;c.fillRect(L,Tt,W,H);
+  const Smax=Math.max(...S,1e-9);
+  for(let k=0;k<LG.length-1;k++){const l=LG[k],x0=X(l),x1=X(LG[k+1]);const sIn=S[k]/Smax,sR=sIn*obj.Rs[k];
+    c.fillStyle=lamCss(l,.28);c.fillRect(x0,Y(sIn),x1-x0+.6,sIn*H);c.fillStyle=lamCss(l,1);c.fillRect(x0,Y(sR),x1-x0+.6,sR*H);}
+  c.strokeStyle=CS.ink;c.lineWidth=2.5;c.beginPath();LG.forEach((l,k)=>k?c.lineTo(X(l),Y(obj.Rs[k])):c.moveTo(X(l),Y(obj.Rs[k])));c.stroke();
+  c.strokeStyle=CS.line;c.lineWidth=1;c.strokeRect(L,Tt,W,H);
+  for(let l=400;l<=700;l+=50)txt(c,String(l),X(l),Tt+H+12,{sz:12,mono:true,col:CS.muted,w:500});
+  txt(c,'λ (nm)',L+W,Tt+H+25,{al:'right',sz:12,w:700});
+  for(const v of [0,.5,1])txt(c,nf(v*100,0)+'%',L-5,Y(v),{al:'right',sz:12,mono:true,col:CS.muted,w:500});
+  txt(c,T('spT'),L+6,Tt+10,{al:'left',sz:12,w:700});}
+function check3(){const S=light3(),k=expo3(S);const get=key=>seen(S,OBJS.find(o=>o.k===key).Rs,k);
+  const Yw=lum(balLin(S));const Lr=key=>Yw>1e-6?lum(balLin(S.map((s,i)=>s*OBJS.find(o=>o.k===key).Rs[i])))/Yw:0;const lit=Yw>1e-4;
+  const isCol=(key,names)=>names.includes(colName(get(key),Lr(key)));
+  const dist=(a,b)=>Math.hypot(...a.map((x,i)=>gam(x)-gam(b[i])));
+  return{c1:lit&&isCol('banana',[T('nRed')]),c2:lit&&Lr('leaf')<.07&&Lr('paper')>.5,c3:lit&&dist(get('paper'),get('tomato'))<.14,c4:lit&&isCol('dragon',[T('nBlue'),T('nViolet')]),c5:lit&&S3.filt!=='none'&&isCol('paper',[T('nGreen')])};}
+function ui3(){seg('lamp3',Object.keys(LAMPS).map(k=>({k,label:T('lamp_'+k),dot:k==='rgb'?'#888':LAMPDOT[k]})),S3.lamp,k=>{S3.lamp=k;ui3();});
+  seg('filt3',Object.keys(FILTERS).map(k=>({k,label:T('f_'+k),dot:k==='none'?null:FDOT[k]})),S3.filt,k=>{S3.filt=k;ui3();});
+  $('rgb3').hidden=S3.lamp!=='rgb';['r','g','b'].forEach((ch,i)=>{$('l'+ch+'3V').textContent=nf(S3.rgb[i]*100,0)+'%';});
+  const objs=$('obj3');objs.innerHTML=OBJS.map(o=>`<button class="btn ${S3.sel===o.k?'on':''}" data-o="${o.k}">${T('o_'+o.k)}</button>`).join('');
+  const S=light3(),k=expo3(S),obj=OBJS.find(o=>o.k===S3.sel);const v=seen(S,obj.Rs,k),vw=seen(spec(()=>1),obj.Rs,expo3a());
+  $('sw3a').style.background=css(...vw);$('sw3b').style.background=css(...v);$('obT3').textContent=T('o_'+obj.k);
+  const Yw=lum(balLin(S));const Lr=Yw>1e-6?lum(balLin(S.map((s,i)=>s*obj.Rs[i])))/Yw:0;
+  const RANGES={red:[620,730],orange:[590,620],yellow:[570,590],green:[495,570],blue:[450,495],indigo:[430,450],violet:[380,430]},Stot=S.reduce((x,y)=>x+y,0)||1;
+  const bands=COL7.map(C=>{const [l0,l1]=RANGES[C.k];let sw=0,rw=0;LG.forEach((l,k)=>{if(l>=l0&&l<l1){sw+=S[k];rw+=S[k]*obj.Rs[k];}});return{C,s:sw/Stot,r:sw>0?rw/sw:0};});
+  const refl=bands.filter(b=>b.s>.02&&b.r>.3).map(b=>T('c_'+b.C.k)),abs=bands.filter(b=>b.s>.02&&b.r<=.3).map(b=>T('c_'+b.C.k));
+  $('kv3').innerHTML=`<dt>${T('kWhite')}</dt><dd class="t">${colName(vw,lum(balLin(obj.Rs))/lum(balLin(spec(()=>1))))}</dd><dt>${T('kNow')}</dt><dd class="t num">${Yw>1e-6?colName(v,Lr):T('nBlack')}</dd>
+    <dt>${T('kRefl')}</dt><dd class="num">${nf(Lr*100,0)}%</dd><dt>${T('kBandsR')}</dt><dd class="t">${refl.join(', ')||'—'}</dd><dt>${T('kBandsA')}</dt><dd class="t">${abs.join(', ')||'—'}</dd>`;
+  const C=check3();Object.keys(C).forEach(k=>{if(C[k])S3.done[k]=true;});
+  $('ch3').innerHTML=['c1','c2','c3','c4','c5'].map(k=>`<div class="${S3.done[k]?'done':''}"><b>${S3.done[k]?'✓':'○'}</b><span>${T('ch_'+k)}</span></div>`).join('');}
+function expo3a(){const s=S3.adapt;S3.adapt=true;const r=expo3(spec(()=>1));S3.adapt=s;return r;}
+$('obj3').addEventListener('click',e=>{const b=e.target.closest('[data-o]');if(b){S3.sel=b.dataset.o;ui3();}});
+['r','g','b'].forEach((ch,i)=>$('l'+ch+'3').oninput=e=>{S3.rgb[i]=+e.target.value/100;ui3();});
+$('adapt3').onchange=e=>{S3.adapt=e.target.checked;ui3();};
+
+/* ================= TAB 4: Cầu vồng ================= */
+const S4={col:'w',b:.86,many:false,sec:false,sun:20,drag:false};
+const nW=MATS.water.n;
+// góc lệch so với hướng ngược tia Mặt Trời (góc nhìn cầu vồng), k lần phản xạ trong giọt
+function theta(b,n,k){const i=Math.asin(b),r=Math.asin(b/n);return k===1?(4*r-2*i)/DEG:(Math.PI+2*i-6*r)/DEG;}
+function thetaMax(n,k){let best=k===1?-1e9:1e9,bb=0;for(let b=.001;b<1;b+=.0005){const t=theta(b,n,k);if(k===1?t>best:t<best){best=t;bb=b;}}return{t:best,b:bb};}
+const TH={};[400,410,440,470,530,580,610,650,700].forEach(l=>{TH[l]={p:thetaMax(nW(l),1),s:thetaMax(nW(l),2)};});
+const cv4=$('cv4'),gr4=$('gr4'),cv4s=$('cv4s');
+function dropTrace(C,R,b,l,k){// dò tia trong giọt hình cầu (mặt cắt tròn): khúc xạ – k lần phản xạ – khúc xạ
+  const n=nW(l);const o=[C[0]-R*1.6,C[1]-b*R],d=[1,0];const pts=[o];let p,dir=d;
+  const hitC=(p0,dd)=>{const m=sub(p0,C),B=dot(m,dd),c0=dot(m,m)-R*R,disc=B*B-c0;if(disc<0)return null;const t1=-B-Math.sqrt(disc),t2=-B+Math.sqrt(disc);const t=t1>1e-6?t1:t2>1e-6?t2:null;return t==null?null:add(p0,mul(dd,t));};
+  p=hitC(o,d);if(!p)return{pts:[o,add(o,mul(d,R*4))],side:[]};pts.push(p);
+  let N=unit(sub(p,C));let f=refractAt(dir,N,1,n);const side=[{a:p,d:f.rd,w:f.R}];dir=f.td;
+  for(let j=0;j<k;j++){const q=hitC(add(p,mul(dir,1e-3)),dir);N=mul(unit(sub(q,C)),-1);f=refractAt(dir,N,n,1);if(f.td)side.push({a:q,d:f.td,w:1-f.R});p=q;pts.push(p);dir=f.rd;}
+  const q=hitC(add(p,mul(dir,1e-3)),dir);pts.push(q);N=mul(unit(sub(q,C)),-1);f=refractAt(dir,N,n,1);const out=f.td||f.rd;pts.push(add(q,mul(out,R*3)));
+  return{pts,side,out};}
+onDrag(cv4,([x,y])=>{const G=cv4._G;if(!G)return false;if(x<G.C[0]-G.R*.2){S4.drag=true;S4.b=clamp((G.C[1]-y)/G.R,-.99,.99);ui4();return true;}return false;},
+  ([x,y])=>{const G=cv4._G;S4.b=clamp((G.C[1]-y)/G.R,-.99,.99);ui4();},()=>{S4.drag=false;});
+function draw4(){const {c,w,h}=fit(cv4,isPhone()?.9:.52);c.fillStyle='#05080d';c.fillRect(0,0,w,h);const R=Math.min(h*.36,w*.26),C=[w*.55,h*.5];cv4._G={C,R};
+  // giọt nước
+  const g=c.createRadialGradient(C[0]-R*.3,C[1]-R*.3,R*.1,C[0],C[1],R);g.addColorStop(0,'rgba(140,190,240,.28)');g.addColorStop(1,'rgba(90,150,220,.12)');
+  c.fillStyle=g;c.beginPath();c.arc(C[0],C[1],R,0,7);c.fill();c.strokeStyle='rgba(170,215,245,.8)';c.lineWidth=2;c.stroke();
+  txt(c,T('drop'),C[0],C[1]-R-12,{sz:12,col:'#cfd8e6'});
+  // Mặt Trời bên trái
+  c.fillStyle='#ffd34d';c.beginPath();c.arc(22,30,14,0,7);c.fill();txt(c,T('sunLbl'),44,30,{al:'left',sz:12,col:'#ffd34d'});
+  const k=S4.sec?2:1;const cols=S4.col==='w'?COL7.map(x=>x.l):S4.col==='r'?[700]:[410];
+  c.globalCompositeOperation='lighter';c.lineCap='round';c.lineJoin='round';
+  const bs=S4.many?Array.from({length:24},(_,j)=>(S4.b>=0?1:-1)*(.04+j*.04)):[S4.b];
+  const useCols=S4.many&&S4.col==='w'?[700,410]:cols;
+  for(const b of bs)for(const l of useCols){const r=dropTrace(C,R,b,l,k);const a=S4.many?.55:(S4.col==='w'?.7:1);
+    c.strokeStyle=lamCss(l,a);c.lineWidth=S4.many?1.4:2.4;c.beginPath();r.pts.forEach((p,j)=>j?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1]));c.stroke();
+    if(!S4.many){r.side.forEach(s=>{c.strokeStyle=lamCss(l,clamp(s.w,.08,.4));c.lineWidth=1.2;c.beginPath();c.moveTo(s.a[0],s.a[1]);c.lineTo(s.a[0]+s.d[0]*R*.9,s.a[1]+s.d[1]*R*.9);c.stroke();});}}
+  c.globalCompositeOperation='source-over';
+  // tay nắm chọn chỗ tia tới
+  const hy=C[1]-S4.b*R;c.beginPath();c.arc(C[0]-R*1.6,hy,10,0,7);c.fillStyle='#5ea6ec';c.fill();c.strokeStyle='#fff';c.lineWidth=2;c.stroke();
+  // góc θ của tia ló (một tia, màu đỏ hoặc trắng)
+  if(!S4.many){const r=dropTrace(C,R,S4.b,cols[0],k);const q=r.pts[r.pts.length-2],out=r.out;const ang=angOf(out),back=Math.PI;
+    c.setLineDash([4,5]);c.strokeStyle='#97a3b2';c.lineWidth=1.3;c.beginPath();c.moveTo(q[0],q[1]);c.lineTo(q[0]-R*1.1,q[1]);c.stroke();c.setLineDash([]);
+    const t=theta(Math.abs(S4.b),nW(cols[0]),k);txt(c,'θ = '+nf(t,1)+'°',q[0]-R*.75,q[1]+(out[1]>0?-12:14),{sz:13,w:700,col:'#e9eef7'});}
+}
+function drawGr4(){const {c,w,h}=fit(gr4,isPhone()?.6:.3);const L=46,Rr=12,Tt=14,B=32,W=w-L-Rr,H=h-Tt-B;const k=S4.sec?2:1;
+  const y0=k===1?0:40,y1=k===1?50:90;const X=b=>L+b*W,Y=t=>Tt+H-(t-y0)/(y1-y0)*H;c.fillStyle=CS.panel;c.fillRect(L,Tt,W,H);c.strokeStyle=CS.line;c.lineWidth=1;c.beginPath();
+  for(let b=0;b<=1.001;b+=.2){c.moveTo(X(b),Tt);c.lineTo(X(b),Tt+H);}for(let t=y0;t<=y1;t+=10){c.moveTo(L,Y(t));c.lineTo(L+W,Y(t));}c.stroke();
+  for(let b=0;b<=1.001;b+=.2)txt(c,nf(b,1),X(b),Tt+H+12,{sz:12,mono:true,col:CS.muted,w:500});for(let t=y0;t<=y1;t+=10)txt(c,t+'°',L-5,Y(t),{al:'right',sz:12,mono:true,col:CS.muted,w:500});
+  txt(c,T('grB'),L+W,Tt+H+26,{al:'right',sz:12,w:700});txt(c,T('grTh'),L+4,Tt+8,{al:'left',sz:w<560?10.5:12,w:700});
+  c.save();c.beginPath();c.rect(L,Tt,W,H);c.clip();
+  for(const l of [700,410]){c.strokeStyle=lamCss(l);c.lineWidth=2.4;c.beginPath();for(let b=0;b<=1;b+=.005){const t=theta(b,nW(l),k);b?c.lineTo(X(b),Y(t)):c.moveTo(X(b),Y(t));}c.stroke();
+    const m=k===1?TH[l].p:TH[l].s;c.setLineDash([4,4]);c.beginPath();c.moveTo(L,Y(m.t));c.lineTo(L+W,Y(m.t));c.stroke();c.setLineDash([]);
+    txt(c,nf(m.t,1)+'°',X(.06),Y(m.t)+(l===700?(k===1?-9:9):(k===1?9:-9)),{sz:12,col:lamCss(l),w:700,al:'left'});}
+  const b=Math.abs(S4.b),t=theta(b,nW(S4.col==='v'?410:700),k);c.beginPath();c.arc(X(b),Y(t),6,0,7);c.fillStyle=CS.accent;c.fill();c.restore();}
+function drawSky4(){const {c,w,h}=fit(cv4s,isPhone()?.7:.38);const s=S4.sun*DEG;const yH=h*.78,ppd=Math.min(h*.7/60,w/150);const cx=w/2;
+  const sky=c.createLinearGradient(0,0,0,yH);sky.addColorStop(0,'#5d7691');sky.addColorStop(1,'#a7b8c8');c.fillStyle=sky;c.fillRect(0,0,w,yH);
+  // hướng nhìn: phía đối diện Mặt Trời; điểm đối nhật thấp hơn đường chân trời đúng bằng độ cao Mặt Trời
+  const A=[Math.cos(-s),0,Math.sin(-s)];// (x: phía trước, y: ngang, z: lên)
+  const u=[-Math.sin(-s),0,Math.cos(-s)],vv=[0,1,0];
+  const toXY=p=>{const el=Math.asin(clamp(p[2],-1,1)),az=Math.atan2(p[1],p[0]);return[cx+az/DEG*ppd,yH-el/DEG*ppd];};
+  const arc=(rho,col,lw,alpha)=>{c.strokeStyle=col;c.globalAlpha=alpha;c.lineWidth=lw;c.beginPath();let pen=false;
+    for(let ph=0;ph<=360;ph+=1){const a=ph*DEG,cr=Math.cos(rho*DEG),sr=Math.sin(rho*DEG);const p=[0,1,2].map(i=>cr*A[i]+sr*(Math.cos(a)*u[i]+Math.sin(a)*vv[i]));
+      const [x,y]=toXY(p);if(y<=yH+1&&p[0]>-0.2){pen?c.lineTo(x,y):c.moveTo(x,y);pen=true;}else pen=false;}c.stroke();c.globalAlpha=1;};
+  // dải trời sáng hơn bên trong cầu vồng chính
+  for(let rho=2;rho<40;rho+=2)arc(rho,'#ffffff',ppd*2.1,.035);
+  const ls=[700,650,610,580,530,470,440,410];ls.forEach(l=>arc(TH[l]?TH[l].p.t:thetaMax(nW(l),1).t,lamCss(l),Math.max(2,ppd*.32),.8));
+  if(true)ls.forEach(l=>arc(TH[l]?TH[l].s.t:thetaMax(nW(l),2).t,lamCss(l),Math.max(2,ppd*.36),.35));
+  // mặt đất và người quan sát (nhìn từ sau lưng)
+  c.fillStyle='#4f7a44';c.fillRect(0,yH,w,h-yH);
+  const ax=cx,ay=yH+s/DEG*ppd;if(ay<h-4){c.strokeStyle='#ffd34d';c.lineWidth=2;c.beginPath();c.moveTo(ax-8,ay);c.lineTo(ax+8,ay);c.moveTo(ax,ay-8);c.lineTo(ax,ay+8);c.stroke();txt(c,T('anti'),ax+12,ay,{al:'left',sz:12,col:'#fff'});}
+  const px=w*.18,py=h-6;c.fillStyle='#1a1f27';c.beginPath();c.arc(px,py-48,10,0,7);c.fill();rrect(c,px-12,py-38,24,38,6);c.fill();
+  txt(c,Tf('sunBehind',{s:nf(S4.sun,0)}),8,34,{al:'left',sz:12,col:'#fff'});
+  const top=TH[700].p.t-S4.sun;txt(c,top>0?Tf('bowTop',{t:nf(top,1)}):T('bowNone'),8,14,{al:'left',sz:w<560?12:13,w:700,col:top>0?'#fff':'#ffd34d'});}
+function ui4(){seg('col4',[{k:'w',label:T('c4w'),dot:'#fff'},{k:'r',label:T('c_red'),dot:lamCss(700)},{k:'v',label:T('c_violet'),dot:lamCss(410)}],S4.col,k=>{S4.col=k;ui4();});
+  $('sun4V').textContent=nf(S4.sun,0)+'°';const k=S4.sec?2:1,b=Math.abs(S4.b),l=S4.col==='v'?410:700,n=nW(l);
+  const i=Math.asin(b)/DEG,r=Math.asin(b/n)/DEG;
+  $('kv4').innerHTML=`<dt>${T('kLam')}</dt><dd class="num">${l} nm</dd><dt>n</dt><dd class="num">${nf(n,4)}</dd><dt>${T('kB')}</dt><dd class="num">${nf(b,2)}</dd>
+   <dt>${T('kI')}</dt><dd class="num">${nf(i,1)}°</dd><dt>${T('kR')}</dt><dd class="num">${nf(r,1)}°</dd><dt>${T('kTh')}</dt><dd class="num">${nf(theta(b,n,k),1)}°</dd>
+   <dt>${T(k===1?'kMaxR':'kMinR')}</dt><dd class="num">${nf((k===1?TH[700].p:TH[700].s).t,1)}°</dd><dt>${T(k===1?'kMaxV':'kMinV')}</dt><dd class="num">${nf((k===1?TH[410].p:TH[410].s).t,1)}°</dd>`;}
+$('many4').onchange=e=>{S4.many=e.target.checked;ui4();};$('sec4').onchange=e=>{S4.sec=e.target.checked;ui4();};$('sun4').oninput=e=>{S4.sun=+e.target.value;ui4();};
+
+/* ================= TAB 5: Luyện tập ================= */
+const QZ=[{o:4,c:1},{o:4,c:2},{o:4,c:0},{o:4,c:3},{o:4,c:1},{o:4,c:2},{o:4,c:3},{o:4,c:0},{o:4,c:2},{o:4,c:1}];
+const A5={};
+function render5(){let h='';QZ.forEach((q,i)=>{const p=A5[i];h+=`<div class="q5"><p>${i+1}. ${T('q'+i)}</p><div class="opts">`+
+  [...Array(q.o)].map((_,j)=>`<button class="btn ${p!=null&&j===q.c?'right':''} ${p===j&&j!==q.c?'wrong':''}" data-q="${i}:${j}" ${p!=null?'disabled':''}>${String.fromCharCode(65+j)}. ${T('q'+i+'_'+j)}</button>`).join('')+
+  `</div>${p!=null?`<div class="ans">${T('q'+i+'e')}</div>`:''}</div>`;});$('q5').innerHTML=h;
+  const n=Object.keys(A5).length,ok=Object.keys(A5).filter(i=>A5[i]===QZ[i].c).length;$('sc5').textContent=ok+' / '+QZ.length;$('sc5t').textContent=Tf('sc5',{n});}
+$('q5').addEventListener('click',e=>{const b=e.target.closest('[data-q]');if(!b)return;const [i,j]=b.dataset.q.split(':').map(Number);if(A5[i]==null){A5[i]=j;render5();}});
+$('rst5').onclick=()=>{for(const k in A5)delete A5[k];render5();};
+
+/* ================= Tab, ngôn ngữ, chế độ GV ================= */
+let tab=1;
+function setTab(n){tab=n;document.querySelectorAll('nav.tabs button').forEach(b=>{const on=+b.dataset.tab===n;b.classList.toggle('on',on);b.setAttribute('aria-selected',on);});
+  for(let k=1;k<=5;k++)$('t'+k).hidden=k!==n;store.set('tsms-tab',String(n));DIRTY.all=true;}
+document.querySelectorAll('nav.tabs button').forEach(b=>b.onclick=()=>setTab(+b.dataset.tab));
+$('gvBtn').onclick=()=>{const on=!document.body.classList.contains('hideNums');document.body.classList.toggle('hideNums',on);$('gvBtn').setAttribute('aria-pressed',on);};
+function applyLang(){document.documentElement.lang=lang;document.title=T('docTitle');
+  document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=T(el.dataset.i18n));
+  document.querySelectorAll('[data-i18n-html]').forEach(el=>el.innerHTML=T(el.dataset.i18nHtml));
+  $('langBtn').textContent=lang==='vi'?'EN':'VI';
+  Object.keys(PRED).forEach(renderPred);Object.keys(CONC).forEach(renderConc);[1,2,3,4].forEach(renderVideo);renderMedia();render5();
+  ui1();ui2();ui3();ui4();DIRTY.all=true;}
+$('langBtn').onclick=()=>{lang=lang==='vi'?'en':'vi';applyLang();};
+
+/* ================= Vòng lặp: chỉ vẽ lại khi có thay đổi ================= */
+applyLang();
+{const t=+store.get('tsms-tab');setTab(t>=1&&t<=5?t:1);}
+let lastSig='';
+function sig(){const cv=[cv1,cv2,cv3,cv4][tab-1];return [tab,cv?cv.clientWidth:0,JSON.stringify(tab===1?S1:tab===2?[S2.mode,S2.src,S2.mat,S2.rot,S2.wmm,S2.xs,S2.ys,S2.xl,S2.xs2]:tab===3?S3:S4),lang].join('#');}
+function loop(){try{const s=sig();if(s!==lastSig||DIRTY.all){lastSig=s;DIRTY.all=false;
+    if(tab===1){draw1();drawGr1();ui1();}else if(tab===2){draw2();ui2();}else if(tab===3){draw3();}else if(tab===4){draw4();drawGr4();drawSky4();}}}
+  catch(err){console.error(err);}requestAnimationFrame(loop);}
+addEventListener('resize',()=>{DIRTY.all=true;});
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

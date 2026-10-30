@@ -1,0 +1,1189 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Sự nở vì nhiệt và băng kép</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Sự nở vì nhiệt, băng kép, đo năng lượng nhiệt (KHTN 8). Cùng hệ màu, phông với bộ mô phỏng KHTN 6–9. */
+/* Phòng thí nghiệm đồ thị quãng đường – thời gian (KHTN 7): dải video thực tế, sân khấu canvas bên trái, sổ ghi chép bên phải. Điện thoại xếp một cột.
+   Cùng hệ màu, phông với bộ mô phỏng KHTN 6–9 (Lực hấp dẫn, Lực ma sát). */
+:root{
+  --bg:#edf0f3; --panel:#ffffff; --lane:#f4f6f9; --ink:#141c26; --muted:#556170; --line:#c9d1db;
+  --accent:#1d5fa8; --accent-ink:#ffffff; --ok:#1d8a4b; --warn:#c2410c;
+  --force:#d1323b; --vel:#1f6fd1; --mass:#7a3fc2; --spring:#5d6b7a; --spring2:#e07b00;
+  --earth:#2f78c4; --land:#4f9a5b; --moon:#a9adb3; --space:#0d1626; --star:#e9eef7;
+  --gold:#c99a2e; --metal:#8b96a3; --metal2:#5b6673; --wood:#b07a45;
+  --laneA:#0f7c8a; --laneB:#d0661c; --c3:#7a3fc2; --c4:#1d8a4b; --c5:#b8326a;
+  --font-ui:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-num:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Consolas,monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0e131a; --panel:#161e28; --lane:#111821; --ink:#e3e9f0; --muted:#97a3b2; --line:#2a3644;
+  --accent:#5ea6ec; --accent-ink:#04182c; --ok:#47c47d; --warn:#f08a4b;
+  --force:#ff5f67; --vel:#5aa2ff; --mass:#b28cff; --spring:#9aa8b8; --spring2:#ffa630;
+  --earth:#3b86d4; --land:#4c8a55; --moon:#8d9197; --space:#060a12; --star:#cfd8e6;
+  --gold:#e0b24a; --metal:#7c8794; --metal2:#a9b4c1; --wood:#9a6a3c;
+  --laneA:#3cc3d2; --laneB:#ff9a4d; --c3:#b28cff; --c4:#47c47d; --c5:#f06aa2;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e131a; --panel:#161e28; --lane:#111821; --ink:#e3e9f0; --muted:#97a3b2; --line:#2a3644;
+  --accent:#5ea6ec; --accent-ink:#04182c; --ok:#47c47d; --warn:#f08a4b;
+  --force:#ff5f67; --vel:#5aa2ff; --mass:#b28cff; --spring:#9aa8b8; --spring2:#ffa630;
+  --earth:#3b86d4; --land:#4c8a55; --moon:#8d9197; --space:#060a12; --star:#cfd8e6;
+  --gold:#e0b24a; --metal:#7c8794; --metal2:#a9b4c1; --wood:#9a6a3c;
+  --laneA:#3cc3d2; --laneB:#ff9a4d; --c3:#b28cff; --c4:#47c47d; --c5:#f06aa2;
+  color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-ui);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px 40px}
+.wrap{max-width:1320px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.hbtns{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.eyebrow{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{margin:0;font-size:clamp(25px,3.4vw,36px);line-height:1.15;font-weight:800;text-wrap:balance;letter-spacing:-.01em}
+h2{margin:0;font-size:17px;font-weight:700;text-wrap:balance}
+h3{margin:0;font-size:15px;font-weight:700}
+.btn{font:inherit;font-weight:600;font-size:15px;min-height:44px;padding:8px 14px;border-radius:8px;border:1px solid var(--line);
+  background:var(--panel);color:var(--ink);cursor:pointer;touch-action:manipulation}
+.btn:hover{border-color:var(--accent)}
+.btn:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
+.seg .btn{border:0;border-radius:0;min-width:52px}
+.places{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:6px}
+.places .btn{font-size:14px;padding:6px 8px;line-height:1.25}
+.places .btn small{display:block;font-family:var(--font-num);font-size:12px;font-weight:500;opacity:.8}
+nav.tabs{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line)}
+nav.tabs button{font:inherit;font-size:15px;font-weight:600;white-space:nowrap;min-height:46px;padding:8px 14px;border:0;border-bottom:3px solid transparent;
+  background:none;color:var(--muted);cursor:pointer;margin-bottom:-1px}
+nav.tabs button.on{color:var(--ink);border-bottom-color:var(--accent)}
+.req{margin:0;font-size:14px;color:var(--muted);max-width:110ch}
+.req b{color:var(--ink);font-weight:600}
+.lab{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:14px;align-items:start}
+@media (max-width:1020px){.lab{grid-template-columns:minmax(0,1fr)}}
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.col{display:flex;flex-direction:column;gap:12px;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card p{margin:0}
+canvas{display:block;width:100%;border-radius:8px;background:var(--lane);touch-action:pan-y;user-select:none;-webkit-user-select:none}
+canvas.drag{touch-action:none}
+.hint{margin:0;font-size:14px;color:var(--muted)}
+.status{margin:0;font-weight:600;min-height:1.5em}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chk{display:inline-flex;align-items:center;gap:8px;min-height:44px;font-size:15px;cursor:pointer}
+.chk input{width:22px;height:22px;accent-color:var(--accent)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:14px;color:var(--muted)}
+.legend i{display:inline-block;width:18px;height:5px;border-radius:3px;margin-right:6px;vertical-align:middle}
+.sl{display:flex;flex-direction:column;gap:4px}
+.sl .top{display:flex;justify-content:space-between;gap:8px;font-size:15px}
+.sl .val{font-family:var(--font-num);font-weight:600;text-align:right}
+.sl .ends{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+input[type=range]{width:100%;height:44px;accent-color:var(--accent);margin:0}
+select{font:inherit;font-size:15px;min-height:44px;padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);width:100%}
+.kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;font-size:15px;margin:0}
+.kv dt{color:var(--muted)} .kv dd{margin:0;font-family:var(--font-num);font-variant-numeric:tabular-nums;text-align:right;overflow-wrap:anywhere}
+.bigfig{font-family:var(--font-num);font-size:clamp(22px,2.6vw,30px);font-weight:600;line-height:1.2;overflow-wrap:anywhere}
+.cmp{font-size:15px;background:var(--lane);border-radius:8px;padding:8px 12px}
+.opts{display:flex;flex-direction:column;gap:6px}
+.opts .btn{text-align:left;font-size:14px}
+.opts .btn.picked{border:2px solid var(--accent)}
+.opts .btn.right{background:color-mix(in srgb,var(--ok) 18%,var(--panel));border-color:var(--ok)}
+.ans{background:var(--lane);border-left:4px solid var(--ok);padding:8px 12px;border-radius:6px;font-size:15px}
+.muted{color:var(--muted);font-size:14px}
+details{border:1px solid var(--line);border-radius:var(--r);background:var(--panel);padding:0 14px}
+details[open]{padding-bottom:12px}
+summary{cursor:pointer;font-weight:700;min-height:44px;display:flex;align-items:center;font-size:15px}
+details p,details ul{margin:6px 0;font-size:15px;max-width:95ch}
+details ul{padding-left:20px}
+.fine{font-size:13px;color:var(--muted);margin:0}
+.two4{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media (max-width:560px){.two4{grid-template-columns:1fr}}
+.tblwrap{overflow-x:auto}
+table.log{border-collapse:collapse;width:100%;font-size:14px}
+table.log th,table.log td{padding:4px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+table.log th:first-child,table.log td:first-child{text-align:left}
+table.log td{font-family:var(--font-num);font-variant-numeric:tabular-nums}
+table.log th{color:var(--muted);font-weight:600}
+.kv dd.t,table.log td.t{font-family:var(--font-ui)}
+/* Dải video thực tế */
+.video{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center;background:var(--space);color:var(--star);
+  border-radius:var(--r);padding:12px 14px}
+.video .play{width:52px;height:52px;border-radius:50%;background:var(--force);display:grid;place-items:center;flex:none}
+.video .play::before{content:"";border-style:solid;border-width:10px 0 10px 17px;border-color:transparent transparent transparent #fff;margin-left:4px}
+.video .vt{display:flex;flex-direction:column;gap:2px;min-width:0}
+.video .lbl{font-size:12px;letter-spacing:.08em;text-transform:uppercase;opacity:.75;font-weight:600}
+.video .ttl{font-weight:700;font-size:16px;line-height:1.3}
+.video .look{font-size:14px;opacity:.9}
+.video .links{display:flex;flex-direction:column;gap:6px;align-items:stretch}
+.video a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:6px 14px;border-radius:8px;font-weight:700;font-size:15px;text-decoration:none;
+  background:var(--star);color:var(--space);white-space:nowrap}
+.video a.alt{background:transparent;color:var(--star);border:1px solid color-mix(in srgb,var(--star) 45%,transparent);font-weight:600;font-size:14px}
+.video .src{font-size:13px;opacity:.75}
+@media (max-width:720px){.video{grid-template-columns:auto minmax(0,1fr)}.video .links{grid-column:1/-1;flex-direction:row;flex-wrap:wrap}.video a{flex:1 1 160px}}
+/* Chế độ giáo viên: che số liệu để lớp dự đoán */
+body.hideNums .num{filter:blur(7px);user-select:none}
+body.hideNums .num:hover{filter:none}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+/* Bảng số liệu ngang, câu hỏi đọc đồ thị, thử thách */
+table.log.hz th,table.log.hz td{text-align:center;min-width:44px}
+table.log.hz th:first-child,table.log.hz td:first-child{text-align:left;position:sticky;left:0;background:var(--panel)}
+.quiz{display:flex;flex-direction:column;gap:12px}
+.qz{display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--line);padding-top:10px}
+.qz:first-child{border-top:0;padding-top:0}
+.qz .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.qz input{font:inherit;font-family:var(--font-num);font-size:16px;width:110px;min-height:44px;padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+.qz .unit{font-family:var(--font-num);color:var(--muted)}
+.qz .res{font-weight:700}
+.qz .res.ok{color:var(--ok)} .qz .res.no{color:var(--warn)}
+.stars{font-size:28px;letter-spacing:4px;color:var(--gold)}
+.big{font-family:var(--font-num);font-size:clamp(30px,5vw,48px);font-weight:600;line-height:1}
+.count{font-size:15px;color:var(--muted)}
+/* Thêm cho mô phỏng này */
+.i{display:inline}
+.vids{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:10px}
+.vc{display:grid;grid-template-columns:150px minmax(0,1fr);gap:12px;background:var(--space);color:var(--star);border-radius:var(--r);padding:10px;align-items:center}
+@media (max-width:420px){.vc{grid-template-columns:110px minmax(0,1fr)}}
+.vth{position:relative;aspect-ratio:16/9;border-radius:8px;overflow:hidden;background:linear-gradient(135deg,#22324a,#101a2a);border:0;padding:0;cursor:pointer;width:100%}
+.vth img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.vth::after{content:"";position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;background:rgba(209,50,59,.92)}
+.vth::before{content:"";position:absolute;z-index:1;left:50%;top:50%;margin:-9px 0 0 -6px;border-style:solid;border-width:9px 0 9px 15px;border-color:transparent transparent transparent #fff}
+.vc .kind{font-size:12px;letter-spacing:.06em;text-transform:uppercase;opacity:.8;font-weight:700}
+.vc .ttl{font-weight:700;font-size:15px;line-height:1.3;margin:2px 0}
+.vc .look{font-size:13.5px;opacity:.92}
+.vc .meta{font-size:12.5px;opacity:.7;margin-top:4px}
+.vc a{color:var(--star);font-size:13px}
+.vplay{background:var(--space);border-radius:var(--r);padding:8px;color:var(--star)}
+.vplay video,.vplay iframe{width:100%;aspect-ratio:16/9;border:0;border-radius:6px;background:#000;display:block}
+.vplay .row{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-top:6px;font-size:13px;flex-wrap:wrap}
+.pred{border:1px solid var(--line);border-radius:var(--r);padding:12px;background:var(--lane)}
+.pred p{margin:6px 0 8px}
+.opts .btn.wrong{background:color-mix(in srgb,var(--warn) 16%,var(--panel));border-color:var(--warn)}
+.concl{border-left:4px solid var(--accent);background:var(--lane);padding:10px 14px;border-radius:6px}
+.concl p{margin:4px 0}
+.lock{color:var(--muted);font-size:14px}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:1px 8px;border-radius:99px;background:var(--lane);border:1px solid var(--line);color:var(--muted)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:8px}
+.cl{border:1px solid var(--line);border-radius:8px;padding:10px;background:var(--panel)}
+.cl p{margin:0 0 8px;font-size:15px}
+.cl .row{display:flex;gap:6px;flex-wrap:wrap}
+.cl .fb{margin-top:6px;font-size:14px}
+.cl.done{background:var(--lane)}
+.warnbox{border-left:4px solid var(--warn);background:color-mix(in srgb,var(--warn) 10%,var(--panel));padding:8px 12px;border-radius:6px;font-size:15px}
+.etym td{padding:3px 10px 3px 0;vertical-align:top;font-size:15px}
+.etym td:first-child{font-weight:700;white-space:nowrap}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow"><span class="i" data-vi="KHTN 8 · Nhiệt · thí nghiệm, hiện tượng, ứng dụng" data-en="Grade 8 science · Heat · experiments, phenomena, applications"></span></div>
+      <h1><span class="i" data-vi="Sự nở vì nhiệt, băng kép và đo năng lượng nhiệt" data-en="Thermal expansion, the bimetallic strip and measuring thermal energy"></span></h1>
+    </div>
+    <div class="hbtns">
+      <button class="btn" id="gvBtn" aria-pressed="false"></button>
+      <button class="btn" id="langBtn">EN</button>
+    </div>
+  </header>
+  <nav class="tabs" role="tablist" id="tabs"></nav>
+  <section class="tab col" data-n="1" id="t1"></section>
+  <section class="tab col" data-n="2" id="t2" hidden></section>
+  <section class="tab col" data-n="3" id="t3" hidden></section>
+  <section class="tab col" data-n="4" id="t4" hidden></section>
+  <section class="tab col" data-n="5" id="t5" hidden></section>
+  <section class="tab col" data-n="6" id="t6" hidden></section>
+  <footer class="fine" id="foot"></footer>
+</div>
+<script>
+"use strict";
+/* ============ Tiện ích chung ============ */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+let lang='vi'; try{ if(localStorage.getItem('nvn_lang')==='en') lang='en'; }catch(e){}
+const t=(vi,en)=>lang==='vi'?vi:en;
+const nf=(x,d=1)=>new Intl.NumberFormat(lang==='vi'?'vi-VN':'en-US',{minimumFractionDigits:d,maximumFractionDigits:d}).format(x);
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+const I=(vi,en)=>'<span class="i" data-vi="'+esc(vi)+'" data-en="'+esc(en)+'"></span>';
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const lerp=(a,b,u)=>a+(b-a)*u;
+const FONT='"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif';
+const MONO='"IBM Plex Mono",ui-monospace,Consolas,monospace';
+function applyI(root){ $$('.i',root||document).forEach(e=>{e.innerHTML=e.dataset[lang];}); }
+
+/* Màu đọc từ biến CSS (có chế độ tối) */
+const COL={};
+function readCol(){
+  const cs=getComputedStyle(document.documentElement);
+  ['bg','panel','lane','ink','muted','line','accent','ok','warn','force','vel','mass','space','star','laneA','laneB','c3','c4','c5','gold','metal','metal2','wood','earth'].forEach(k=>{COL[k]=cs.getPropertyValue('--'+k).trim();});
+}
+readCol();
+try{ matchMedia('(prefers-color-scheme: dark)').addEventListener('change',readCol); }catch(e){}
+
+/* Canvas có toạ độ logic cố định LW×LH, tự co theo bề rộng */
+function mkCanvas(cv,LW,LH){
+  const o={cv,LW,LH,ctx:cv.getContext('2d'),s:1};
+  cv.fitObj=function(){o.fit();};
+  o.fit=function(){
+    const w=cv.clientWidth||LW, dpr=window.devicePixelRatio||1;
+    cv.width=Math.round(w*dpr); cv.height=Math.round(w*LH/LW*dpr);
+    cv.style.height=(w*LH/LW)+'px'; o.s=cv.width/LW;
+  };
+  o.begin=function(){ o.ctx.setTransform(o.s,0,0,o.s,0,0); o.ctx.clearRect(0,0,LW,LH); o.ctx.lineJoin='round'; return o.ctx; };
+  o.pt=function(e){ const r=cv.getBoundingClientRect(); return {x:(e.clientX-r.left)*LW/r.width,y:(e.clientY-r.top)*LH/r.height}; };
+  o.fit();
+  if(window.ResizeObserver) new ResizeObserver(o.fit).observe(cv); else window.addEventListener('resize',o.fit);
+  return o;
+}
+function tx(c,s,x,y,o){
+  o=o||{}; c.font=(o.w||500)+' '+(o.size||14)+'px '+(o.mono?MONO:FONT);
+  c.fillStyle=o.color||COL.ink; c.textAlign=o.align||'left'; c.textBaseline=o.base||'alphabetic'; c.fillText(s,x,y);
+}
+function rr(c,x,y,w,h,r){ c.beginPath(); c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r); c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath(); }
+
+/* Trục toạ độ + lưới; trả về hàm đổi giá trị -> pixel */
+function axes(c,b,xa,ya,xl,yl,dx,dy){
+  const X=v=>b.x+(v-xa[0])/(xa[1]-xa[0])*b.w, Y=v=>b.y+b.h-(v-ya[0])/(ya[1]-ya[0])*b.h;
+  c.lineWidth=1; c.strokeStyle=COL.line; c.fillStyle=COL.muted;
+  for(let v=xa[0];v<=xa[1]+1e-9;v+=xa[2]){ c.beginPath(); c.moveTo(X(v),b.y); c.lineTo(X(v),b.y+b.h); c.stroke(); tx(c,nf(v,dx||0),X(v),b.y+b.h+16,{size:12,color:COL.muted,align:'center'}); }
+  for(let v=ya[0];v<=ya[1]+1e-9;v+=ya[2]){ c.beginPath(); c.moveTo(b.x,Y(v)); c.lineTo(b.x+b.w,Y(v)); c.stroke(); tx(c,nf(v,dy||0),b.x-6,Y(v)+4,{size:12,color:COL.muted,align:'right'}); }
+  c.strokeStyle=COL.ink; c.lineWidth=1.6; c.beginPath(); c.moveTo(b.x,b.y); c.lineTo(b.x,b.y+b.h); c.lineTo(b.x+b.w,b.y+b.h); c.stroke();
+  tx(c,xl,b.x+b.w,b.y+b.h+32,{size:13,color:COL.ink,align:'right',w:600});
+  tx(c,yl,b.x,b.y-8,{size:13,color:COL.ink,align:'left',w:600});
+  return {X,Y};
+}
+
+/* ============ Thanh trượt, nút chọn, bảng số liệu ============ */
+const SL=[], SEGS=[];
+function mkSlider(host,o){
+  host.className='sl';
+  host.innerHTML='<div class="top"><span>'+I(o.vi,o.en)+'</span><span class="val num"></span></div><input type="range" min="'+o.min+'" max="'+o.max+'" step="'+o.step+'" value="'+o.val+'" aria-label="'+esc(o.vi)+'">';
+  const inp=$('input',host), val=$('.val',host);
+  const api={get:()=>+inp.value, set(v){inp.value=v;show();}, show};
+  function show(){ const v=+inp.value; val.textContent=o.fmt?o.fmt(v):nf(v,o.dec||0)+(o.unit?' '+o.unit:''); }
+  inp.addEventListener('input',()=>{show(); if(o.cb) o.cb(v());});
+  function v(){return +inp.value;}
+  show(); SL.push(api); return api;
+}
+function mkSeg(host,labels,init,cb){
+  host.classList.add('seg');
+  const api={i:init};
+  api.render=function(){
+    host.innerHTML=labels().map((l,k)=>'<button class="btn" data-k="'+k+'" aria-pressed="'+(k===api.i)+'">'+l+'</button>').join('');
+  };
+  api.set=function(k,silent){ api.i=k; api.render(); if(!silent&&cb) cb(k); };
+  host.addEventListener('click',e=>{ const b=e.target.closest('button'); if(b) api.set(+b.dataset.k); });
+  api.render(); SEGS.push(api); return api;
+}
+function kv(el,rows){ el.innerHTML=rows.map(r=>'<dt>'+t(r[0],r[1])+'</dt><dd class="num">'+r[2]+'</dd>').join(''); }
+
+/* Dự đoán -> quan sát -> kết luận */
+const PR={};
+function predict(id,q,opts,ans,ex){
+  PR[id]={ans:ans};
+  return '<div class="pred" id="pr_'+id+'"><h3>'+I('Dự đoán trước khi làm','Predict first')+'</h3><p>'+q+'</p><div class="opts">'+
+    opts.map((o,k)=>'<button class="btn" data-pr="'+id+'" data-k="'+k+'">'+o+'</button>').join('')+
+    '</div><div class="ans" hidden>'+ex+'</div></div>';
+}
+document.addEventListener('click',e=>{
+  const b=e.target.closest('button[data-pr]'); if(!b) return;
+  const id=b.dataset.pr, k=+b.dataset.k, box=$('#pr_'+id), a=$('.ans',box);
+  $$('button[data-pr]',box).forEach(x=>{x.classList.remove('picked','right','wrong');});
+  b.classList.add(k===PR[id].ans?'right':'wrong'); b.classList.add('picked');
+  if(k!==PR[id].ans) $$('button[data-pr]',box)[PR[id].ans].classList.add('right');
+  const mark=k===PR[id].ans?I('✓ Đúng. ','✓ Correct. '):I('✗ Chưa đúng, hãy làm thí nghiệm để kiểm tra. ','✗ Not quite — run the experiment to check. ');
+  a.dataset.mark=mark; a.innerHTML=mark+a.dataset.ex; a.hidden=false; applyI(a);
+});
+function fixPred(){ $$('.pred .ans').forEach(a=>{ if(!a.dataset.ex) a.dataset.ex=a.innerHTML; }); }
+function concl(id,html){ return '<div class="card"><h2>'+I('Kết luận','Conclusion')+'</h2><div id="cc_'+id+'" class="lock">'+I('Làm thí nghiệm xong sẽ hiện kết luận ở đây.','The conclusion appears here once you have done the experiment.')+'</div><template id="ct_'+id+'">'+html+'</template></div>'; }
+const OPENED={};
+function unlock(id){ if(OPENED[id]) return; OPENED[id]=1; const c=$('#cc_'+id); c.className='concl'; c.innerHTML=$('#ct_'+id).innerHTML; applyI(c); }
+
+/* ============ Video ============ */
+const HOSTTYPE=/claude\.(ai|com)|claudeusercontent|anthropic/.test(location.hostname)?'artifact':(location.protocol==='file:'?'file':'web');
+const KIND={ph:['Hiện tượng','Phenomenon','≤ 1 phút','≤ 1 min'],tn:['Thí nghiệm','Experiment','≤ 5 phút','≤ 5 min'],ud:['Ứng dụng','Application','≤ 5 phút','≤ 5 min']};
+const VID={};
+function vidHTML(n){
+  return '<div class="vids">'+VID[n].map((v,k)=>{
+    const K=KIND[v.k];
+    return '<div class="vc"><button class="vth" data-v="'+n+'-'+k+'" aria-label="Play"><img alt="" loading="lazy" src="https://img.youtube.com/vi/'+v.id+'/hqdefault.jpg" onerror="this.remove()"></button><div>'+
+      '<div class="kind">'+I(K[0],K[1])+' · '+I(K[2],K[3])+'</div><div class="ttl">'+esc(v.t)+'</div>'+
+      '<div class="look">'+I('Để ý gì khi xem: '+v.look[0],'Look for: '+v.look[1])+'</div>'+
+      '<div class="meta">'+I('Video tiếng Anh · thời lượng chưa kiểm tra · tệp offline: ','English video · length not yet checked · offline file: ')+'media/'+v.f+'.mp4 · <a href="https://www.youtube.com/watch?v='+v.id+'" target="_blank" rel="noopener">YouTube ↗</a></div></div></div>';
+  }).join('')+'</div><div class="vplay" id="vp'+n+'" hidden></div>';
+}
+document.addEventListener('click',e=>{
+  const b=e.target.closest('button[data-v]'); if(!b) return;
+  const [n,k]=b.dataset.v.split('-'), v=VID[n][+k], area=$('#vp'+n), yt='https://www.youtube.com/watch?v='+v.id;
+  if(HOSTTYPE==='artifact'){ window.open(yt,'_blank','noopener'); return; }
+  area.hidden=false;
+  area.innerHTML='<video controls autoplay playsinline src="media/'+v.f+'.mp4"></video><div class="row"><span>'+esc(v.t)+'</span><a href="'+yt+'" target="_blank" rel="noopener" style="color:var(--star)">'+I('Mở trên YouTube ↗','Open on YouTube ↗')+'</a></div>';
+  applyI(area);
+  $('video',area).addEventListener('error',()=>{
+    if(HOSTTYPE==='web') area.innerHTML='<iframe src="https://www.youtube-nocookie.com/embed/'+v.id+'?autoplay=1&rel=0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe><div class="row"><span>'+esc(v.t)+'</span><a href="'+yt+'" target="_blank" rel="noopener" style="color:var(--star)">'+I('Mở trên YouTube ↗','Open on YouTube ↗')+'</a></div>';
+    else area.innerHTML='<div class="row"><span>'+I('Chưa có tệp media/'+v.f+'.mp4. ','File media/'+v.f+'.mp4 not found. ')+'</span><a href="'+yt+'" target="_blank" rel="noopener" style="color:var(--star)">'+I('Mở trên YouTube ↗','Open on YouTube ↗')+'</a></div>';
+    applyI(area);
+  },{once:true});
+  area.scrollIntoView({block:'nearest',behavior:'smooth'});
+});
+
+/* ============ Khung một tab ============ */
+function details(ob){
+  return '<details open><summary>'+I('Cơ chế khoa học: vì sao?','Scientific mechanism: why?')+'</summary><div>'+ob.mech+'</div></details>'+
+    '<details><summary>'+I('Cách nói đơn giản cho học sinh','Simple explanation for students')+'</summary><div>'+ob.simple+'</div></details>'+
+    '<details><summary>'+I('Chỗ học sinh hay hiểu sai','Common misconceptions')+'</summary><div>'+ob.wrong+'</div></details>'+
+    '<details><summary>'+I('Nguồn gốc từ ngữ','Where the words come from')+'</summary><div>'+ob.word+'</div></details>';
+}
+function build(n,ob){
+  $('#t'+n).innerHTML='<p class="req">'+ob.req+'</p>'+vidHTML(n)+'<div class="lab"><div class="stage">'+ob.stage+'</div><div class="col">'+ob.side+'</div></div>'+details(ob);
+}
+
+/* ============ Vòng lặp & chuyển tab ============ */
+const TABS={}; let cur=1;
+const TABNAME=[['① Quả cầu và vòng','① Ball and ring'],['② Các chất rắn','② Different solids'],['③ Chất lỏng và khí','③ Liquids and gases'],['④ Băng kép','④ Bimetallic strip'],['⑤ Công dụng, tác hại','⑤ Uses and harms'],['⑥ Đo năng lượng nhiệt','⑥ Measuring thermal energy']];
+function renderTabs(){ $('#tabs').innerHTML=TABNAME.map((x,k)=>'<button role="tab" data-tab="'+(k+1)+'" class="'+(cur===k+1?'on':'')+'">'+t(x[0],x[1])+'</button>').join(''); }
+$('#tabs').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b) showTab(+b.dataset.tab); });
+function showTab(n){
+  cur=n; $$('section.tab').forEach(s=>{s.hidden=s.dataset.n!=n;}); renderTabs();
+  if(TABS[n]&&TABS[n].onShow) TABS[n].onShow();
+  $$('canvas').forEach(c=>{ if(c.fitObj) c.fitObj(); });
+}
+let last=performance.now();
+function loop(now){
+  const dt=Math.min((now-last)/1000,0.05); last=now;
+  const tb=TABS[cur]; if(tb&&tb.frame){ try{ tb.frame(dt); }catch(err){ console.error(err); } }
+  requestAnimationFrame(loop);
+}
+function fixCanvases(){ $$('canvas').forEach(c=>{}); }
+
+/* Chế độ giáo viên + ngôn ngữ */
+function applyLang(){
+  document.documentElement.lang=lang;
+  applyI(); fixPred();
+  $$('.pred .ans').forEach(a=>{ if(!a.hidden&&a.dataset.mark){ a.innerHTML=a.dataset.mark+a.dataset.ex; applyI(a);} });
+  $('#gvBtn').textContent=t('Che số liệu (GV)','Hide numbers (teacher)');
+  $('#langBtn').textContent=lang==='vi'?'EN':'VI';
+  $('#foot').textContent=t('Mô phỏng dùng số liệu vật liệu thật (SI). Chỗ đơn giản hoá được ghi dưới mỗi hình.','Simulations use real material data (SI units). Simplifications are noted under each figure.');
+  document.title=t('Sự nở vì nhiệt và băng kép','Thermal expansion and the bimetallic strip');
+  SL.forEach(s=>s.show()); SEGS.forEach(s=>s.render()); renderTabs();
+  Object.values(TABS).forEach(tb=>{ if(tb.refresh) tb.refresh(); });
+}
+$('#langBtn').addEventListener('click',()=>{ lang=lang==='vi'?'en':'vi'; try{localStorage.setItem('nvn_lang',lang);}catch(e){} applyLang(); });
+$('#gvBtn').addEventListener('click',e=>{ const on=document.body.classList.toggle('hideNums'); e.currentTarget.setAttribute('aria-pressed',on); });
+/* ============ TAB 1: Quả cầu và vòng kim loại ============ */
+VID[1]=[
+ {id:'KFliDkkCZlY',k:'ph',f:'tab1-qua-cau-vong',t:'Ball & Ring Thermal Expansion Trick!',look:['bi lọt vòng khi nguội, kẹt khi bi nóng.','the ball fits when cold and sticks when hot.']},
+ {id:'OSgrwivwCZE',k:'tn',f:'tab1-qua-cau-vong-2',t:'Thermal Expansion with Ball and Ring (NormandinEdu)',look:['người làm hơ bi hay hơ vòng, rồi bi có lọt không.','whether the ball or the ring is heated, and whether the ball then fits.']}];
+build(1,{
+ req:'<b>'+I('Yêu cầu cần đạt (KHTN 8, Nhiệt): ','Learning goal (Grade 8, Heat): ')+'</b>'+I('thực hiện thí nghiệm chứng tỏ vật rắn nở ra khi nóng, co lại khi lạnh; giải thích bằng chuyển động của các hạt.','run an experiment showing that solids expand when heated and contract when cooled; explain it with moving particles.'),
+ stage:
+  '<p class="hint">'+I('Kéo bi hoặc vòng vào ngọn lửa (trái) hay chậu nước đá (phải). Nhìn nhiệt độ rồi bấm “Thử cho bi lọt vòng”.','Drag the ball or the ring into the flame (left) or the ice water (right). Watch the temperature, then press “Try the ball through the ring”.')+'</p>'+
+  '<canvas id="cv1a" class="drag" aria-label="brass ball, ring, flame and ice water"></canvas>'+
+  '<div class="controls"><button class="btn primary" id="b1test">'+I('Thử cho bi lọt vòng','Try the ball through the ring')+'</button>'+
+  '<button class="btn" id="b1bf">'+I('Bi → lửa','Ball → flame')+'</button><button class="btn" id="b1bi">'+I('Bi → nước đá','Ball → ice')+'</button>'+
+  '<button class="btn" id="b1rf">'+I('Vòng → lửa','Ring → flame')+'</button><button class="btn" id="b1ri">'+I('Vòng → nước đá','Ring → ice')+'</button>'+
+  '<button class="btn" id="b1rst">'+I('Đặt lại','Reset')+'</button></div>'+
+  '<p class="status" id="st1"></p>'+
+  '<p class="hint">'+I('Kính lúp (chênh lệch được phóng đại rất nhiều) và hình ảnh các nguyên tử bên trong bi:','Magnifier (differences greatly exaggerated) and the atoms inside the ball:')+'</p>'+
+  '<canvas id="cv1b" aria-label="magnified ball and ring hole, atoms"></canvas>'+
+  '<p class="fine">'+I('Giả thiết: bi và vòng bằng đồng thau, α = 19·10⁻⁶ K⁻¹, d = 25,000 mm và D = 25,030 mm ở 20 °C; nhiệt độ đồng đều trong vật; bỏ qua oxi hoá. Ngọn lửa ~600 °C. Kính lúp và các nguyên tử vẽ phóng đại, không đúng tỉ lệ.','Assumptions: brass ball and ring, α = 19·10⁻⁶ K⁻¹, d = 25.000 mm and D = 25.030 mm at 20 °C; uniform temperature; no oxidation. Flame ~600 °C. The magnifier and atoms are exaggerated, not to scale.')+'</p>',
+ side:
+  '<div class="card"><h2>'+I('Số liệu đang đo','Live readings')+'</h2><dl class="kv" id="o1"></dl></div>'+
+  '<div class="card"><h2>'+I('Các lần thử','Trials')+'</h2><div class="tblwrap"><table class="log" id="tb1"></table></div></div>'+
+  predict('1a',I('Ở 20 °C bi vừa lọt qua vòng. Nung nóng bi, vòng giữ nguội, rồi thả bi lên vòng. Bi sẽ…','At 20 °C the ball just fits through the ring. The ball is heated, the ring stays cold, then the ball is placed on the ring. The ball will…'),
+    [I('lọt dễ hơn','fit more easily'),I('bị kẹt, không lọt','get stuck'),I('lọt như cũ','fit just as before')],1,
+    I('Bi nóng nở ra nên đường kính d lớn hơn lỗ D: bi bị kẹt. Làm nguội bi (nước đá) thì bi lại lọt.','The hot ball expands so its diameter d exceeds the hole D: it gets stuck. Cool the ball in ice water and it fits again.'))+
+  predict('1b',I('Nung nóng CẢ bi và vòng đến cùng nhiệt độ rồi thử lại. Bi sẽ…','Heat BOTH the ball and the ring to the same temperature and try again. The ball will…'),
+    [I('kẹt vì bi nở','get stuck because the ball expands'),I('vẫn lọt vì lỗ của vòng cũng nở ra','still fit because the ring’s hole expands too'),I('rơi hẳn xuống rất nhanh','fall through very fast')],1,
+    I('Lỗ trên vòng cũng nở như bản phóng to của chính nó: D tăng theo, khe hở D − d còn tăng chút ít nên bi vẫn lọt.','The hole expands like an enlarged copy of itself: D grows too, the gap D − d even grows slightly, so the ball still fits.'))+
+  concl('1','<p>'+I('1) Vật rắn nóng lên thì nở ra theo mọi hướng, lạnh đi thì co lại.','1) A solid expands in every direction when it warms and contracts when it cools.')+'</p><p>'+I('2) Lỗ trên vòng cũng nở ra khi vòng nóng lên (không bị “nở vào trong”).','2) The hole in a ring also gets bigger when the ring is heated (it does not “grow inwards”).')+'</p><p>'+I('3) Khối lượng bi không đổi nhưng thể tích tăng, nên khối lượng riêng giảm.','3) The ball’s mass stays the same but its volume grows, so its density decreases.')+'</p>'),
+ mech:
+  '<p>'+I('Trong chất rắn, mỗi nguyên tử dao động quanh vị trí cân bằng. Lực giữa hai nguyên tử không đối xứng: đẩy rất mạnh khi lại gần, kéo yếu hơn khi ra xa. Vì vậy khi dao động mạnh hơn (nhiệt độ cao), khoảng cách trung bình giữa các nguyên tử tăng. Mọi khoảng cách đều tăng nên cả vật (kể cả lỗ trống) được “phóng to” đồng đều. Độ dài tăng thêm: Δl = α·l₀·Δt, α là hệ số nở dài của chất làm vật.','In a solid every atom vibrates about an equilibrium position. The force between two atoms is asymmetric: it repels very strongly when they get closer and attracts more weakly when they move apart. So when the vibrations grow (higher temperature) the average spacing grows. Every distance increases, so the whole object, holes included, is enlarged uniformly. The extra length is Δl = α·l₀·Δt, where α is the coefficient of linear expansion of the material.')+'</p>',
+ simple:
+  '<p>'+I('Các hạt trong kim loại luôn rung lắc tại chỗ. Càng nóng, chúng rung càng mạnh và chiếm nhiều chỗ hơn, giống như cả lớp đứng nhảy mạnh thì phải đứng cách xa nhau hơn. Hạt không to ra, chỉ khoảng cách giữa chúng tăng nên cả khối kim loại phình ra.','The particles in a metal always jiggle in place. The hotter it is, the harder they jiggle and the more room they need, like a class dancing hard having to stand further apart. The particles do not get bigger; the gaps between them do, so the whole piece swells.')+'</p>',
+ wrong:
+  '<ul><li>'+I('“Vòng nóng lên thì lỗ bị nhỏ lại vì kim loại nở vào trong.” Sai: lỗ cũng nở to ra. Dùng bi nóng/vòng nóng trong mô phỏng để kiểm tra.','“A heated ring has a smaller hole because the metal expands inwards.” Wrong: the hole gets bigger too. Check it with the hot ball / hot ring in the simulation.')+'</li><li>'+I('“Nguyên tử nóng thì to ra.” Sai: kích thước nguyên tử gần như không đổi, chỉ khoảng cách giữa chúng tăng.','“Hot atoms get bigger.” Wrong: atom size hardly changes; only the spacing increases.')+'</li><li>'+I('“Vật nóng thì nặng hơn.” Sai: khối lượng không đổi, thể tích tăng nên khối lượng riêng giảm.','“A hot object is heavier.” Wrong: mass is unchanged, volume grows, so density falls.')+'</li></ul>',
+ word:
+  '<table class="etym"><tr><td>'+I('nở','nở')+'</td><td>'+I('Từ thuần Việt, như “hoa nở”: to ra, mở rộng. Dịch của expansion.','Native Vietnamese, as in “flowers bloom”: to swell, to open out. Used to translate expansion.')+'</td></tr><tr><td>expansion</td><td>'+I('Latinh expandere = ex- (ra ngoài) + pandere (trải ra, dang rộng). Pháp: dilatation, từ Latinh dilatare (làm rộng ra).','Latin expandere = ex- (out) + pandere (to spread). French dilatation comes from Latin dilatare (to widen).')+'</td></tr><tr><td>nhiệt 熱</td><td>'+I('Hán Việt, nghĩa là nóng. Hán ngữ gọi hiện tượng này là 热胀冷缩 (rè zhàng lěng suō: nóng thì trướng, lạnh thì co); tiếng Nhật 熱膨張 (netsu-bōchō).','Sino-Vietnamese for “hot”. Chinese calls the phenomenon 热胀冷缩 (rè zhàng lěng suō: hot swells, cold shrinks); Japanese 熱膨張 (netsu-bōchō).')+'</td></tr><tr><td>thermal</td><td>'+I('Hy Lạp thermē = sức nóng, cũng là gốc của thermometer, thermos.','Greek thermē = heat, also the root of thermometer and thermos.')+'</td></tr></table>'
+});
+
+TABS[1]=(function(){
+  const AL=19e-6,D0=25,H0=25.03,RHO=8500,V0=Math.PI/6*D0**3;
+  const dia=T=>D0*(1+AL*(T-20)), hole=T=>H0*(1+AL*(T-20));
+  const A=mkCanvas($('#cv1a'),640,320), B=mkCanvas($('#cv1b'),640,210);
+  const S={ball:{x:255,y:165,T:20},ring:{x:395,y:165,T:20},drag:null,off:{x:0,y:0},log:[],anim:null,msg:null,acc:0,ph:0};
+  const ZF={x:10,y:210,w:215,h:100}, ZI={x:415,y:210,w:215,h:100};
+  const inZ=(o,z)=>o.x>z.x&&o.x<z.x+z.w&&o.y>z.y&&o.y<z.y+z.h;
+  function reset(){ S.ball.x=255;S.ball.y=165;S.ball.T=20;S.ring.x=395;S.ring.y=165;S.ring.T=20;S.anim=null;S.msg=null;S.log=[];S.drag=null; readout(); }
+  function put(o,z){ o.x=z.x+z.w/2; o.y=z.y+50; }
+  function heatCol(T){
+    const g=clamp((T-80)/420,0,1), c=clamp((10-T)/25,0,1);
+    const base=[181,144,47], hot=[238,72,40], cold=[150,196,226], r=[0,0,0];
+    for(let k=0;k<3;k++) r[k]=Math.round(lerp(lerp(base[k],hot[k],g),cold[k],c));
+    return 'rgb('+r.join(',')+')';
+  }
+  function ringPath(c,o){ c.beginPath(); c.ellipse(o.x,o.y,38,14,0,0,Math.PI*2); c.ellipse(o.x,o.y,29,9.5,0,0,Math.PI*2,true); }
+  function drawRing(c,o,front){
+    c.save(); if(front){ c.beginPath(); c.rect(o.x-60,o.y,120,40); c.clip(); }
+    ringPath(c,o); c.fillStyle=heatCol(o.T); c.shadowColor='rgba(255,90,30,'+clamp((o.T-150)/350,0,.9)+')'; c.shadowBlur=clamp((o.T-100)/20,0,26); c.fill('evenodd'); c.shadowBlur=0;
+    c.lineWidth=1.5; c.strokeStyle='rgba(0,0,0,.45)'; c.stroke(); c.restore();
+  }
+  function drawBall(c,o){
+    const r=20, g=c.createRadialGradient(o.x-6,o.y-7,3,o.x,o.y,r);
+    g.addColorStop(0,'#ffffff55'); g.addColorStop(.25,heatCol(o.T)); g.addColorStop(1,heatCol(o.T));
+    c.save(); c.shadowColor='rgba(255,90,30,'+clamp((o.T-150)/350,0,.9)+')'; c.shadowBlur=clamp((o.T-100)/20,0,26);
+    c.beginPath(); c.arc(o.x,o.y,r,0,Math.PI*2); c.fillStyle=heatCol(o.T); c.fill(); c.shadowBlur=0;
+    c.fillStyle=g; c.fill(); c.lineWidth=1.5; c.strokeStyle='rgba(0,0,0,.45)'; c.stroke(); c.restore();
+  }
+  function label(c,o,dy){ tx(c,nf(o.T,0)+' °C',o.x,o.y-dy,{size:15,w:700,mono:true,align:'center',color:o.T>100?COL.warn:(o.T<8?COL.accent:COL.ink)}); }
+  function drawScene(){
+    const c=A.begin();
+    c.fillStyle=COL.lane; c.fillRect(0,0,640,320);
+    c.fillStyle=COL.line; c.fillRect(0,312,640,8);
+    // đèn cồn + lửa
+    const bx=ZF.x+ZF.w/2;
+    c.fillStyle=COL.metal2; rr(c,bx-30,288,60,24,6); c.fill();
+    c.fillStyle='#9dd6e8aa'; rr(c,bx-26,262,52,40,10); c.fill(); c.strokeStyle=COL.metal; c.lineWidth=2; c.stroke();
+    c.fillStyle=COL.metal2; c.fillRect(bx-4,248,8,16);
+    const fl=Math.sin(S.ph*9)*3;
+    c.beginPath(); c.moveTo(bx-14,250); c.quadraticCurveTo(bx-18,230+fl,bx,196+fl); c.quadraticCurveTo(bx+18,230-fl,bx+14,250); c.closePath();
+    const fg=c.createLinearGradient(0,196,0,250); fg.addColorStop(0,'#ffd24a'); fg.addColorStop(1,'#ff6a1e'); c.fillStyle=fg; c.fill();
+    tx(c,t('Ngọn lửa ≈ 600 °C','Flame ≈ 600 °C'),bx,205,{size:13,color:COL.muted,align:'center',w:600});
+    // chậu nước đá
+    c.fillStyle='#8fc4ea'; rr(c,ZI.x+25,246,165,66,10); c.fill(); c.strokeStyle=COL.metal; c.lineWidth=2.5; c.stroke();
+    c.fillStyle='#ffffffcc'; for(let k=0;k<5;k++){ rr(c,ZI.x+42+k*28,250+(k%2)*6,20,18,4); c.fill(); }
+    tx(c,t('Nước đá 0 °C','Ice water 0 °C'),ZI.x+ZI.w/2,238,{size:13,color:COL.muted,align:'center',w:600});
+    // vật
+    const r=S.ring,b=S.ball;
+    drawRing(c,r,false); drawBall(c,b); if(Math.abs(b.x-r.x)<46&&Math.abs(b.y-r.y)<70) drawRing(c,r,true);
+    label(c,r,32); label(c,b,34);
+    tx(c,t('vòng','ring'),r.x,r.y+36,{size:13,color:COL.muted,align:'center'});
+    tx(c,t('bi','ball'),b.x,b.y+38,{size:13,color:COL.muted,align:'center'});
+  }
+  function drawMag(){
+    const c=B.begin(); c.fillStyle=COL.lane; c.fillRect(0,0,640,210);
+    const b=S.ball,r=S.ring,d=dia(b.T),H=hole(r.T);
+    const pd=100+(d-D0)*300, pH=100+(H-D0)*300, cx=170, cy=105;
+    // vòng: hình khuyên
+    c.beginPath(); c.arc(cx,cy,pH/2+34,0,Math.PI*2); c.arc(cx,cy,pH/2,0,Math.PI*2,true); c.fillStyle=heatCol(r.T); c.fill('evenodd'); c.strokeStyle='rgba(0,0,0,.4)'; c.lineWidth=1.5; c.stroke();
+    c.beginPath(); c.arc(cx,cy,pd/2,0,Math.PI*2); c.fillStyle=heatCol(b.T); c.globalAlpha=.85; c.fill(); c.globalAlpha=1; c.lineWidth=2.5; c.strokeStyle=(d<H)?COL.ok:COL.warn; c.stroke();
+    tx(c,'d = '+nf(d,3)+' mm',cx,cy+4,{size:14,w:700,mono:true,align:'center',color:'#111'});
+    tx(c,'D = '+nf(H,3)+' mm',cx,24,{size:14,w:700,mono:true,align:'center'});
+    tx(c,(d<H)?t('d < D: lọt','d < D: fits'):t('d > D: kẹt','d > D: stuck'),cx,200,{size:14,w:700,align:'center',color:(d<H)?COL.ok:COL.warn});
+    // nguyên tử trong bi
+    const T=b.T, sp=30*(1+(T-20)*0.0007), amp=1.5+5*Math.sqrt(Math.max(T+273,1)/293), ox=430, oy=60;
+    tx(c,t('Các nguyên tử trong bi','Atoms inside the ball'),ox+70,22,{size:13,w:600,color:COL.muted,align:'center'});
+    for(let i=0;i<5;i++) for(let j=0;j<4;j++){
+      const px=ox+i*sp+Math.sin(S.ph*7+i*1.7+j*2.3)*amp, py=oy+j*sp+Math.cos(S.ph*8+i*2.1+j*1.3)*amp;
+      c.beginPath(); c.arc(px,py,8,0,Math.PI*2); c.fillStyle=heatCol(T); c.fill(); c.strokeStyle='rgba(0,0,0,.4)'; c.lineWidth=1; c.stroke();
+    }
+    tx(c,t('rung mạnh hơn, xa nhau hơn; nguyên tử không to ra','vibrate harder, further apart; atoms do not grow'),ox+70,196,{size:12.5,color:COL.muted,align:'center'});
+  }
+  function readout(){
+    const b=S.ball,r=S.ring,d=dia(b.T),H=hole(r.T),V=V0*Math.pow(1+AL*(b.T-20),3),m=RHO*V0*1e-6,rho=RHO*V0/V;
+    kv($('#o1'),[['Nhiệt độ bi','Ball temperature',nf(b.T,0)+' °C'],['Nhiệt độ vòng','Ring temperature',nf(r.T,0)+' °C'],
+      ['Đường kính bi d','Ball diameter d',nf(d,3)+' mm'],['Đường kính lỗ vòng D','Ring hole D',nf(H,3)+' mm'],
+      ['Khe hở D − d','Gap D − d',nf((H-d)*1000,0)+' µm'],['Thể tích bi','Ball volume',nf(V/1000,3)+' cm³'],
+      ['Khối lượng bi','Ball mass',nf(m,2)+' g'],['Khối lượng riêng bi','Ball density',nf(rho,0)+' kg/m³']]);
+    const rows=S.log.slice(-6).map((x,k)=>'<tr><td>'+(S.log.length-Math.min(6,S.log.length)+k+1)+'</td><td>'+nf(x.tb,0)+'</td><td>'+nf(x.tr,0)+'</td><td>'+nf(x.gap,0)+'</td><td class="t">'+(x.ok?t('lọt','fits'):t('kẹt','stuck'))+'</td></tr>').join('');
+    $('#tb1').innerHTML='<tr><th>#</th><th>'+t('T bi (°C)','T ball (°C)')+'</th><th>'+t('T vòng (°C)','T ring (°C)')+'</th><th>'+t('khe hở (µm)','gap (µm)')+'</th><th>'+t('kết quả','result')+'</th></tr>'+(rows||'<tr><td colspan="5" class="t">'+t('Chưa có lần thử nào.','No trials yet.')+'</td></tr>');
+    $('#st1').textContent=S.msg?S.msg():t('Kéo bi hoặc vòng vào lửa hay nước đá, rồi bấm “Thử cho bi lọt vòng”.','Drag the ball or ring into the flame or ice water, then press “Try the ball through the ring”.');
+  }
+  function startTest(){
+    if(S.anim) return; const b=S.ball,r=S.ring;
+    S.anim={ph:'move',t:0,x0:b.x,y0:b.y,x1:r.x,y1:Math.max(30,r.y-90)};
+  }
+  function finish(){
+    const b=S.ball,r=S.ring,ok=dia(b.T)<hole(r.T);
+    S.log.push({tb:b.T,tr:r.T,gap:(hole(r.T)-dia(b.T))*1000,ok});
+    S.msg=()=>ok?t('Bi lọt qua vòng (d < D).','The ball falls through the ring (d < D).'):t('Bi bị kẹt trên vòng (d > D). Làm nguội bi hoặc làm nóng vòng rồi thử lại.','The ball is stuck on the ring (d > D). Cool the ball or heat the ring and try again.');
+    if(S.log.length>=2) unlock('1'); readout();
+  }
+  const cv=A.cv;
+  cv.addEventListener('pointerdown',e=>{
+    if(S.anim) return; const p=A.pt(e), b=S.ball, r=S.ring; let hit=null;
+    if(Math.hypot(p.x-b.x,p.y-b.y)<28) hit=b;
+    else if(((p.x-r.x)/42)**2+((p.y-r.y)/20)**2<1) hit=r;
+    if(hit){ S.drag=hit; S.off={x:hit.x-p.x,y:hit.y-p.y}; cv.setPointerCapture(e.pointerId); }
+  });
+  cv.addEventListener('pointermove',e=>{ if(!S.drag) return; const p=A.pt(e); S.drag.x=clamp(p.x+S.off.x,45,595); S.drag.y=clamp(p.y+S.off.y,60,290); });
+  const up=()=>{S.drag=null;}; cv.addEventListener('pointerup',up); cv.addEventListener('pointercancel',up);
+  $('#b1test').onclick=startTest; $('#b1rst').onclick=reset;
+  $('#b1bf').onclick=()=>{put(S.ball,ZF);}; $('#b1bi').onclick=()=>{put(S.ball,ZI);}; $('#b1rf').onclick=()=>{put(S.ring,ZF);}; $('#b1ri').onclick=()=>{put(S.ring,ZI);};
+  readout();
+  return {
+    refresh:readout,
+    frame(dt){
+      S.ph+=dt;
+      for(const o of [S.ball,S.ring]){
+        const f=inZ(o,ZF),i=inZ(o,ZI), Tt=f?600:(i?0:20), k=f?0.25:(i?0.3:0.03);
+        o.T+=(Tt-o.T)*(1-Math.exp(-k*dt));
+      }
+      const a=S.anim;
+      if(a){
+        a.t+=dt; const b=S.ball,r=S.ring;
+        if(a.ph==='move'){ const u=clamp(a.t/0.7,0,1); b.x=lerp(a.x0,a.x1,u); b.y=lerp(a.y0,a.y1,u); if(u>=1){ a.ph='fall'; a.vy=0; a.pass=dia(b.T)<hole(r.T); a.yEnd=a.pass?Math.min(r.y+90,300):r.y-17; } }
+        else if(a.ph==='fall'){ a.vy+=900*dt; b.y+=a.vy*dt; if(b.y>=a.yEnd){ b.y=a.yEnd; S.anim=null; finish(); } }
+      }
+      drawScene(); drawMag();
+      if((S.acc+=dt)>0.12){ S.acc=0; readout(); }
+    }
+  };
+})();
+/* ============ TAB 2: Các chất rắn nở vì nhiệt khác nhau ============ */
+VID[2]=[
+ {id:'n42_1Gy12ug',k:'tn',f:'tab2-cac-kim-loai',t:'Thermal Expansion Experiment: Copper vs Brass vs Aluminum',look:['thanh nào dài thêm nhiều nhất khi cùng được đun nóng.','which rod gets longest when they are heated together.']}];
+const RODS=[
+ {vi:'Nhôm',en:'Aluminium',a:23,col:'laneA'},{vi:'Đồng thau',en:'Brass',a:19,col:'gold'},{vi:'Đồng',en:'Copper',a:17,col:'laneB'},
+ {vi:'Sắt (thép)',en:'Iron (steel)',a:12,col:'c3'},{vi:'Thuỷ tinh',en:'Glass',a:9,col:'c5'}];
+build(2,{
+ req:'<b>'+I('Yêu cầu cần đạt (KHTN 8, Nhiệt): ','Learning goal (Grade 8, Heat): ')+'</b>'+I('thực hiện thí nghiệm chứng tỏ các chất khác nhau nở vì nhiệt khác nhau.','run an experiment showing that different materials expand by different amounts.'),
+ stage:
+  '<p class="hint">'+I('Năm thanh dài như nhau được nhúng trong cùng một bể nước. Kéo thanh trượt nhiệt độ hoặc bấm “Đun nóng”, rồi so độ dài thêm ở đầu phải (đã phóng đại 40 lần).','Five equally long rods sit in the same water bath. Move the temperature slider or press “Heat”, then compare the extra length at the right-hand ends (magnified 40 times).')+'</p>'+
+  '<canvas id="cv2a" aria-label="five rods in a water bath"></canvas>'+
+  '<div class="controls"><button class="btn primary" id="b2h">'+I('Đun nóng đến 100 °C','Heat to 100 °C')+'</button><button class="btn" id="b2c">'+I('Làm nguội về 20 °C','Cool to 20 °C')+'</button></div>'+
+  '<canvas id="cv2b" aria-label="extension versus temperature rise"></canvas>'+
+  '<p class="fine">'+I('Giả thiết: các thanh có cùng nhiệt độ với bể (có độ trễ vài giây), α không đổi trong khoảng 20–100 °C. Phần nở thêm được vẽ phóng đại 40 lần; thực tế Δl chỉ cỡ 1 mm với thanh dài 1 m.','Assumptions: all rods are at the bath temperature (with a lag of a few seconds); α is constant between 20 and 100 °C. The extension is drawn 40 times larger; in reality Δl is only about 1 mm for a 1 m rod.')+'</p>',
+ side:
+  '<div class="card"><h2>'+I('Thiết lập','Set-up')+'</h2><div id="sl2a"></div><div id="sl2b"></div></div>'+
+  '<div class="card"><h2>'+I('Số liệu đang đo','Live readings')+'</h2><div class="tblwrap"><table class="log" id="tb2"></table></div></div>'+
+  predict('2a',I('Thanh nhôm và thanh sắt dài bằng nhau, cùng được nung từ 20 °C lên 100 °C. Thanh nào dài thêm nhiều hơn?','An aluminium and an iron rod of equal length are heated from 20 °C to 100 °C. Which gets longer by more?'),
+    [I('thanh nhôm','the aluminium rod'),I('thanh sắt','the iron rod'),I('dài thêm bằng nhau','both the same')],0,
+    I('Nhôm có hệ số nở dài lớn hơn sắt (23 so với 12, đơn vị 10⁻⁶ K⁻¹) nên dài thêm gần gấp đôi.','Aluminium’s coefficient of linear expansion is larger than iron’s (23 vs 12, in 10⁻⁶ K⁻¹), so it grows almost twice as much.'))+
+  predict('2b',I('Nếu dùng thanh nhôm dài gấp đôi, cùng tăng nhiệt độ như cũ, độ dài thêm sẽ…','If the aluminium rod is twice as long and warmed by the same amount, the extra length will be…'),
+    [I('bằng một nửa','half as much'),I('như cũ','the same'),I('gấp đôi','twice as much')],2,
+    I('Δl = α·l₀·Δt, tỉ lệ thuận với chiều dài ban đầu l₀: dùng thanh trượt chiều dài để kiểm tra.','Δl = α·l₀·Δt is proportional to the original length l₀: use the length slider to check.'))+
+  concl('2','<p>'+I('1) Cùng tăng nhiệt độ, các chất rắn khác nhau nở vì nhiệt khác nhau: nhôm nở nhiều hơn đồng, đồng nhiều hơn sắt, sắt nhiều hơn thuỷ tinh.','1) For the same temperature rise different solids expand by different amounts: aluminium more than copper, copper more than iron, iron more than glass.')+'</p><p>'+I('2) Độ dài thêm tỉ lệ thuận với chiều dài ban đầu và với độ tăng nhiệt độ (đồ thị là đường thẳng).','2) The extra length is proportional to the original length and to the temperature rise (the graph is a straight line).')+'</p>'),
+ mech:
+  '<p>'+I('Mức nở phụ thuộc độ mạnh của liên kết giữa các nguyên tử. Liên kết càng yếu, giếng thế năng càng “lệch”, khoảng cách trung bình tăng nhiều hơn khi nhiệt độ tăng, nên hệ số nở dài α lớn (nhôm). Liên kết cộng hoá trị mạnh trong thuỷ tinh silicat thì α nhỏ. Với mọi chất: Δl = α·l₀·Δt.','How much a material expands depends on how strongly its atoms are bound. The weaker the bond, the more lopsided the potential well, so the mean spacing grows more for each degree: a large coefficient α (aluminium). The strong covalent bonds in silicate glass give a small α. For every material Δl = α·l₀·Δt.')+'</p>',
+ simple:
+  '<p>'+I('Mỗi chất “nở” một kiểu riêng, như mỗi người dang tay rộng một mức khác nhau khi được sưởi ấm. Nhôm “dang tay” nhiều, thuỷ tinh dang rất ít. Thanh càng dài thì tổng phần nở thêm càng nhiều.','Each material expands in its own way, like people stretching their arms by different amounts when they warm up. Aluminium stretches a lot, glass very little. The longer the rod, the more total growth.')+'</p>',
+ wrong:
+  '<ul><li>'+I('“Kim loại dẫn nhiệt tốt thì nở nhiều.” Sai: mức nở phụ thuộc hệ số α, không phải khả năng dẫn nhiệt (bạc dẫn nhiệt tốt hơn nhôm nhưng nở ít hơn).','“Metals that conduct heat well expand more.” Wrong: expansion depends on α, not on conductivity (silver conducts better than aluminium but expands less).')+'</li><li>'+I('“Vật nặng hơn nở nhiều hơn.” Sai: khối lượng không quyết định mức nở.','“Heavier objects expand more.” Wrong: mass does not decide it.')+'</li></ul>',
+ word:
+  '<table class="etym"><tr><td>'+I('hệ số 係數','coefficient')+'</td><td>'+I('Hệ số: Hán Việt 係數 (liên hệ + số). Coefficient: Latinh co- (cùng) + efficere (tạo ra), “cái cùng tạo ra kết quả”.','Vietnamese “hệ số” is Sino-Vietnamese 係數 (relation + number). Coefficient: Latin co- (together) + efficere (to bring about).')+'</td></tr><tr><td>alumin(i)um</td><td>'+I('Latinh alumen = phèn chua. Tiếng Mỹ viết aluminum. Tiếng Việt gọi “nhôm” theo âm Pháp aluminium.','Latin alumen = alum. American English writes aluminum. Vietnamese “nhôm” follows French aluminium.')+'</td></tr><tr><td>'+I('thuỷ tinh 水晶','glass')+'</td><td>'+I('水晶 = nước + tinh thể (vốn chỉ thạch anh). Tiếng Anh glass từ gốc German “sáng bóng”.','水晶 = water + crystal (originally quartz). English glass is from a Germanic root meaning “shiny”.')+'</td></tr></table>'
+});
+
+TABS[2]=(function(){
+  const A=mkCanvas($('#cv2a'),640,350), G=mkCanvas($('#cv2b'),640,290);
+  const S={Tb:20,Tr:20,tgt:20,L0:1000,acc:0};
+  const sL=mkSlider($('#sl2a'),{vi:'Chiều dài ban đầu l₀',en:'Original length l₀',min:200,max:1000,step:100,val:1000,unit:'mm'});
+  const sT=mkSlider($('#sl2b'),{vi:'Nhiệt độ bể nước (đích)',en:'Bath temperature (target)',min:20,max:100,step:1,val:20,unit:'°C',cb:v=>{S.tgt=v;}});
+  sL.cb=null;
+  $('#sl2a input').addEventListener('input',e=>{S.L0=+e.target.value;});
+  $('#b2h').onclick=()=>{S.tgt=100;sT.set(100);}; $('#b2c').onclick=()=>{S.tgt=20;sT.set(20);};
+  const dl=(r,L,T)=>L*r.a*1e-6*(T-20);
+  function tcol(T){ const u=clamp((T-20)/80,0,1); return 'rgb('+Math.round(lerp(150,238,u))+','+Math.round(lerp(200,110,u))+','+Math.round(lerp(236,70,u))+')'; }
+  function draw(){
+    const c=A.begin(); c.fillStyle=COL.lane; c.fillRect(0,0,640,350);
+    const x0=44,x1=404,Y0=52,DY=56;
+    // bể nước
+    c.fillStyle=tcol(S.Tr); c.globalAlpha=.35; rr(c,x0-8,Y0-26,x1-x0+16,DY*5+2,10); c.fill(); c.globalAlpha=1; c.strokeStyle=COL.metal; c.lineWidth=2; c.stroke();
+    c.fillStyle=COL.metal2; c.fillRect(x0-18,Y0-26,10,DY*5+2);
+    tx(c,t('Bể nước ','Water bath ')+nf(S.Tr,0)+' °C',x0+4,Y0-34,{size:14,w:700,mono:true,color:S.Tr>60?COL.warn:COL.ink});
+    // vạch chuẩn
+    c.setLineDash([5,4]); c.strokeStyle=COL.ink; c.lineWidth=1.2; c.beginPath(); c.moveTo(x1,Y0-26); c.lineTo(x1,Y0+DY*5-24); c.stroke(); c.setLineDash([]);
+    tx(c,t('đầu thanh ở 20 °C','rod end at 20 °C'),x1+2,Y0-30,{size:12,color:COL.muted,align:'center'});
+    RODS.forEach((r,i)=>{
+      const y=Y0+i*DY, d=dl(r,S.L0,S.Tr), px=d*40;
+      c.fillStyle=COL[r.col]; rr(c,x0,y-9,x1-x0+px,18,4); c.fill(); c.strokeStyle='rgba(0,0,0,.4)'; c.lineWidth=1; c.stroke();
+      tx(c,t(r.vi,r.en),x0+8,y+5,{size:13,w:700,color:'#fff'});
+      // thước mm phóng đại
+      c.strokeStyle=COL.ink; c.lineWidth=1; c.beginPath(); c.moveTo(x1,y+14); c.lineTo(x1+90,y+14); c.stroke();
+      for(let m=0;m<=2;m+=0.5){ c.beginPath(); c.moveTo(x1+m*40,y+14); c.lineTo(x1+m*40,y+(m%1===0?22:19)); c.stroke(); }
+      tx(c,'Δl = '+nf(d,3)+' mm',x1+104,y+5,{size:14,w:700,mono:true,color:COL[r.col]==='' ?COL.ink:COL.ink});
+    });
+    tx(c,'0',x1,Y0+DY*5-8,{size:11,color:COL.muted,align:'center'}); tx(c,'1',x1+40,Y0+DY*5-8,{size:11,color:COL.muted,align:'center'}); tx(c,'2 mm',x1+84,Y0+DY*5-8,{size:11,color:COL.muted,align:'center'});
+    // đồ thị
+    const g=G.begin(); g.fillStyle=COL.lane; g.fillRect(0,0,640,290);
+    const maxd=S.L0*23e-6*80, ym=Math.max(0.2,Math.ceil(maxd*5)/5), st=ym/4;
+    const ax=axes(g,{x:64,y:34,w:440,h:204},[0,80,20],[0,ym,st],t('Δt (K)','Δt (K)'),t('Δl (mm)','Δl (mm)'),0,2);
+    RODS.forEach((r,i)=>{
+      g.strokeStyle=COL[r.col]; g.lineWidth=2.5; g.beginPath(); g.moveTo(ax.X(0),ax.Y(0)); g.lineTo(ax.X(80),ax.Y(dl(r,S.L0,100))); g.stroke();
+      const dt=S.Tr-20; g.beginPath(); g.arc(ax.X(dt),ax.Y(dl(r,S.L0,S.Tr)),6,0,Math.PI*2); g.fillStyle=COL[r.col]; g.fill(); g.strokeStyle=COL.ink; g.lineWidth=1.5; g.stroke();
+      g.fillStyle=COL[r.col]; g.fillRect(520,46+i*26,16,6); tx(g,t(r.vi,r.en),544,54+i*26,{size:13,w:600});
+    });
+  }
+  function readout(){
+    const fe=dl(RODS[3],S.L0,S.Tr);
+    $('#tb2').innerHTML='<tr><th>'+t('Chất','Material')+'</th><th>α (10⁻⁶ K⁻¹)</th><th>Δl (mm)</th><th>'+t('so với sắt','vs iron')+'</th></tr>'+
+      RODS.map(r=>{const d=dl(r,S.L0,S.Tr);return '<tr><td class="t">'+t(r.vi,r.en)+'</td><td>'+r.a+'</td><td class="num">'+nf(d,3)+'</td><td class="num">'+(fe>1e-9?'× '+nf(d/fe,2):'—')+'</td></tr>';}).join('');
+  }
+  readout();
+  return {refresh:readout,
+    frame(dt){
+      S.Tr+=(S.tgt-S.Tr)*(1-Math.exp(-dt/2.5));
+      if(S.Tr>=95) unlock('2');
+      draw(); if((S.acc+=dt)>0.12){S.acc=0;readout();}
+    }};
+})();
+/* ============ TAB 3: Chất lỏng và chất khí nở vì nhiệt ============ */
+VID[3]=[
+ {id:'FHi_pLGXwn0',k:'tn',f:'tab3-chat-long',t:'Thermal Expansion of Liquids (flask and tube demonstration)',look:['mực chất lỏng dâng trong ống khi bình được làm nóng.','the liquid level rising in the tube as the flask is warmed.']},
+ {id:'AocRpXRnasM',k:'ph',f:'tab3-chat-khi',t:'Balloon Expands with Just Heat (thermal expansion trick)',look:['bóng bay phồng lên khi không khí trong bình nóng lên.','the balloon inflating as the air in the bottle warms.']}];
+build(3,{
+ req:'<b>'+I('Yêu cầu cần đạt (KHTN 8, Nhiệt): ','Learning goal (Grade 8, Heat): ')+'</b>'+I('thực hiện thí nghiệm chứng tỏ các chất khác nhau nở vì nhiệt khác nhau (chất lỏng, chất khí); lấy ví dụ công dụng của sự nở vì nhiệt (nhiệt kế).','run an experiment showing that different substances (liquids, gases) expand differently; give a use of thermal expansion (the thermometer).'),
+ stage:
+  '<div id="sg3"></div>'+
+  '<p class="hint" id="h3"></p>'+
+  '<canvas id="cv3a" aria-label="flasks with tubes and a balloon in a water bath"></canvas>'+
+  '<p class="status" id="st3"></p>'+
+  '<canvas id="cv3b" aria-label="relative volume change versus temperature"></canvas>'+
+  '<p class="fine" id="as3"></p>',
+ side:
+  '<div class="card"><h2>'+I('Thiết lập','Set-up')+'</h2><div id="sl3a"></div><div id="sl3b" hidden></div></div>'+
+  '<div class="card"><h2>'+I('Số liệu đang đo','Live readings')+'</h2><div class="tblwrap"><table class="log" id="tb3"></table></div></div>'+
+  '<div id="pr3box">'+predict('3a',I('Bốn bình giống nhau (nước, rượu, dầu ăn, không khí) cùng được nhúng vào nước nóng. Chất nào nở nhiều nhất?','Four identical flasks (water, ethanol, cooking oil, air) are dipped into hot water. Which expands the most?'),
+    [I('nước','water'),I('rượu','ethanol'),I('dầu ăn','cooking oil'),I('không khí','air')],3,
+    I('Chất khí nở nhiều nhất (cỡ 3,4·10⁻³ mỗi K), rồi đến chất lỏng, ít nhất là chất rắn. Trong các chất lỏng ở đây, rượu nở nhiều hơn dầu và nước.','Gases expand the most (about 3.4·10⁻³ per K), then liquids, and solids the least. Among these liquids ethanol expands more than oil and water.'))+'</div>'+
+  '<div id="pr3box2" hidden>'+predict('3c',I('Nước ở 10 °C được làm lạnh dần xuống 0 °C. Thể tích nước sẽ…','Water at 10 °C is cooled slowly to 0 °C. Its volume will…'),
+    [I('giảm liên tục','keep shrinking'),I('giảm đến 4 °C rồi lại tăng','shrink down to 4 °C and then grow'),I('tăng liên tục','keep growing')],1,
+    I('Nước đặc biệt: thể tích nhỏ nhất (khối lượng riêng lớn nhất) ở khoảng 4 °C; từ 4 °C xuống 0 °C nước lại nở ra.','Water is special: it has the smallest volume (greatest density) near 4 °C, and from 4 °C down to 0 °C it expands again.'))+'</div>'+
+  concl('3','<p>'+I('1) Chất lỏng, chất khí đều nở khi nóng lên, co lại khi lạnh đi.','1) Liquids and gases expand when heated and contract when cooled.')+'</p><p>'+I('2) Các chất khác nhau nở khác nhau; với cùng độ tăng nhiệt độ, chất khí nở nhiều hơn chất lỏng, chất lỏng nở nhiều hơn chất rắn.','2) Different substances expand differently: for the same temperature rise a gas expands more than a liquid, and a liquid more than a solid.')+'</p><p>'+I('3) Ứng dụng: nhiệt kế dùng sự nở vì nhiệt của chất lỏng (rượu, thuỷ ngân) làm cơ sở để đo nhiệt độ.','3) Application: a liquid thermometer uses the thermal expansion of the liquid (alcohol, mercury) to measure temperature.')+'</p>')+
+  '<div id="cc3bbox" hidden>'+concl('3b','<p>'+I('Nước là ngoại lệ: từ 4 °C xuống 0 °C nước nở ra thay vì co lại, nên băng nhẹ hơn nước và nổi, và hồ đóng băng từ trên mặt xuống.','Water is an exception: from 4 °C down to 0 °C it expands instead of contracting, so ice floats and lakes freeze from the top down.')+'</p>')+'</div>',
+ mech:
+  '<p>'+I('Các hạt trong chất lỏng và chất khí chuyển động nhanh hơn khi nóng lên và đẩy nhau ra xa hơn. Liên kết giữa các phân tử chất lỏng yếu hơn trong chất rắn nên chúng nở nhiều hơn. Trong chất khí hầu như không có lực liên kết: ở áp suất không đổi thể tích tỉ lệ với nhiệt độ tuyệt đối (V/T = hằng số), tức mỗi K nở thêm khoảng 1/293 thể tích ở 20 °C. Nước 0–4 °C là ngoại lệ vì các phân tử tạo liên kết hiđro, sắp xếp thành cấu trúc “thoáng” khi gần đóng băng.','The particles of liquids and gases move faster when heated and push further apart. Bonds between liquid molecules are weaker than in solids, so liquids expand more. In a gas there is almost no binding force: at constant pressure the volume is proportional to the absolute temperature (V/T = constant), i.e. about 1/293 of the volume at 20 °C for each kelvin. Water between 0 and 4 °C is an exception because hydrogen bonds arrange the molecules in an open structure near freezing.')+'</p>',
+ simple:
+  '<p>'+I('Khí giống một đám đông rất thoải mái: nóng lên là các hạt bay mạnh và chiếm rất nhiều chỗ. Chất lỏng thì các hạt còn “nắm tay” nhau nên giãn ít hơn, chất rắn “nắm tay” chặt nhất nên giãn ít nhất. Nước lạnh sắp thành đá thì các hạt xếp thành khung rỗng nên phình ra.','A gas is like a very relaxed crowd: heat it and the particles fly about and take up lots of room. In a liquid the particles still “hold hands” so they spread less, and in a solid they hold hands tightest so they spread least. Cold water about to become ice arranges itself in an open frame, so it swells.')+'</p>',
+ wrong:
+  '<ul><li>'+I('“Khí trong bóng nở là vì có thêm khí.” Sai: khối lượng khí không đổi, chỉ thể tích tăng.','“The balloon fills because more gas appears.” Wrong: the mass of gas is unchanged; only its volume grows.')+'</li><li>'+I('“Nước càng lạnh càng co.” Sai: dưới 4 °C nước lại nở ra.','“The colder the water, the more it shrinks.” Wrong: below 4 °C water expands again.')+'</li><li>'+I('“Bình thuỷ tinh không nở.” Thực ra bình cũng nở, nhưng ít hơn chất lỏng nên mực chất lỏng vẫn dâng (lúc mới nhúng nóng có thể thấy mực tụt nhẹ vì bình nở trước).','“The glass flask does not expand.” It does, but less than the liquid, so the level still rises (it may dip slightly at first because the flask warms first).')+'</li></ul>',
+ word:
+  '<table class="etym"><tr><td>thermometer</td><td>'+I('Hy Lạp thermē (nhiệt) + metron (đo): “dụng cụ đo nhiệt”. Vietnamese “nhiệt kế” = nhiệt 熱 + kế 計 (đếm, đo).','Greek thermē (heat) + metron (measure). Vietnamese “nhiệt kế” = nhiệt 熱 (heat) + kế 計 (to count, to measure).')+'</td></tr><tr><td>'+I('khí 氣','gas')+'</td><td>'+I('Khí 氣 nghĩa hơi, không khí. Từ gas do nhà hoá học Jan van Helmont (thế kỉ 17) đặt, lấy từ Hy Lạp khaos (hỗn mang).','氣 means vapour or air. The word gas was coined by the chemist Jan van Helmont (17th century) from Greek khaos (chaos).')+'</td></tr><tr><td>Celsius</td><td>'+I('Anders Celsius (Thuỵ Điển, 1742) đề xuất thang nhiệt độ chia 100 độ giữa nước đóng băng và nước sôi.','Anders Celsius (Sweden, 1742) proposed a 100-degree scale between freezing and boiling water.')+'</td></tr></table>'
+});
+
+TABS[3]=(function(){
+  const WT=[[0,999.84],[1,999.90],[2,999.94],[3,999.96],[4,999.97],[5,999.96],[6,999.94],[7,999.90],[8,999.85],[9,999.78],[10,999.70],[15,999.10],[20,998.21],[25,997.05],[30,995.65],[40,992.22],[50,988.04],[60,983.20],[70,977.76],[80,971.79]];
+  function rhoW(T){ T=clamp(T,0,80); for(let i=1;i<WT.length;i++) if(T<=WT[i][0]){ const a=WT[i-1],b=WT[i]; return lerp(a[1],b[1],(T-a[0])/(b[0]-a[0])); } return WT[WT.length-1][1]; }
+  const MAT=[
+    {vi:'Nước',en:'Water',col:'#3f9be0',gc:'laneA',f:T=>rhoW(20)/rhoW(T)-1,beta:'≈ 0,21'},
+    {vi:'Rượu (ethanol)',en:'Ethanol',col:'#e0556a',gc:'warn',f:T=>1.1e-3*(T-20),beta:'1,1'},
+    {vi:'Dầu ăn',en:'Cooking oil',col:'#e2b53a',gc:'gold',f:T=>0.7e-3*(T-20),beta:'0,7'},
+    {vi:'Không khí',en:'Air',col:'#cfe3f0',gc:'c3',f:T=>(T+273.15)/293.15-1,beta:'3,4'}];
+  const A=mkCanvas($('#cv3a'),640,420), G=mkCanvas($('#cv3b'),640,280);
+  const S={mode:0,Tb:20,Tf:20,acc:0};
+  const sg=mkSeg($('#sg3'),()=>[t('Nóng lên: chất lỏng và khí','Heating: liquids and gas'),t('Nước gần 0 °C','Water near 0 °C')],0,k=>{S.mode=k; S.Tb=k?10:20; S.Tf=S.Tb; (k?sB:sA).set(S.Tb); $('#sl3a').hidden=!!k; $('#sl3b').hidden=!k; $('#pr3box').hidden=!!k; $('#pr3box2').hidden=!k; $('#cc3bbox').hidden=!k; hint();});
+  const sA=mkSlider($('#sl3a'),{vi:'Nhiệt độ bể nước',en:'Water-bath temperature',min:5,max:80,step:1,val:20,unit:'°C',cb:v=>{S.Tb=v;}});
+  const sB=mkSlider($('#sl3b'),{vi:'Nhiệt độ bể nước (0–10 °C)',en:'Water-bath temperature (0–10 °C)',min:0,max:10,step:0.5,val:10,dec:1,unit:'°C',cb:v=>{S.Tb=v;}});
+  function hint(){
+    $('#h3').textContent=S.mode===0?t('Bốn bình 100 mL, ống nhỏ có tiết diện như nhau. Đổi nhiệt độ bể nước, quan sát mực chất lỏng trong ống và quả bóng bay. Vạch đứt là mức ở 20 °C.','Four 100 mL flasks with equal narrow tubes. Change the bath temperature and watch the liquid levels and the balloon. The dashed line is the level at 20 °C.'):
+      t('Bình 250 mL, ống rất mảnh (đường kính 2 mm) để thấy sự thay đổi nhỏ. Kéo nhiệt độ bể từ 10 °C xuống 0 °C. Vạch đứt là mức ở 10 °C.','A 250 mL flask with a very thin tube (2 mm) to show small changes. Lower the bath from 10 °C to 0 °C. The dashed line is the level at 10 °C.');
+    $('#as3').textContent=S.mode===0?t('Giả thiết: bình thuỷ tinh không nở (thực tế nở rất ít); khí ở áp suất không đổi; bóng bay mềm không cản trở. Khối lượng riêng nước lấy từ bảng số liệu thật.','Assumptions: the glass flask does not expand (in reality very slightly); gas at constant pressure; a soft balloon offers no resistance. Water density comes from real tables.'):
+      t('Giả thiết: bỏ qua sự nở của bình thuỷ tinh. Khối lượng riêng nước từ bảng số liệu thật (cực đại ≈ 999,97 kg/m³ ở 4 °C).','Assumption: expansion of the glass is ignored. Water density from real tables (maximum ≈ 999.97 kg/m³ at 4 °C).');
+    readout();
+  }
+  function flask(c,cx,mat,lvPx,i){
+    const cy=306,R=38,by=cy-R+6;
+    c.fillStyle=mat.col; c.globalAlpha=.9; c.beginPath(); c.arc(cx,cy,R,0,Math.PI*2); c.fill();
+    if(i<3){ const top=190-lvPx; c.fillRect(cx-4,top,8,by-top+4); }
+    c.globalAlpha=1; c.strokeStyle=COL.ink; c.lineWidth=2; c.beginPath(); c.arc(cx,cy,R,-Math.PI*0.43,Math.PI*1.43); c.stroke();
+    c.beginPath(); c.moveTo(cx-5,cy-R*0.9); c.lineTo(cx-5,i<3?60:190); c.moveTo(cx+5,cy-R*0.9); c.lineTo(cx+5,i<3?60:190); c.stroke();
+  }
+  function draw(){
+    const c=A.begin(); c.fillStyle=COL.lane; c.fillRect(0,0,640,420);
+    if(S.mode===0){
+      const xs=[100,235,370,505], A_=50.27;
+      MAT.forEach((m,i)=>{
+        const r=m.f(S.Tf), dV=100000*r;
+        if(i<3){ const lv=clamp(dV/A_*0.85,-30,125); flask(c,xs[i],m,lv,i);
+          c.setLineDash([5,4]); c.strokeStyle=COL.muted; c.lineWidth=1; c.beginPath(); c.moveTo(xs[i]-18,190); c.lineTo(xs[i]+18,190); c.stroke(); c.setLineDash([]);
+          if(dV!==0||i===0) tx(c,(dV/A_>=0?'+':'')+nf(dV/A_,1)+' mm',xs[i],178-Math.max(lv,0),{size:13,w:700,mono:true,align:'center',color:COL.ink}); }
+        else { flask(c,xs[i],m,0,i);
+          const rcm=dV>0?Math.cbrt(3*(dV/1000)/(4*Math.PI)):0, rp=dV>=0?11+13*rcm:Math.max(7,11*(1+dV/1000/30));
+          c.beginPath(); c.arc(xs[i],190-rp,rp,0,Math.PI*2); c.fillStyle='#e8486a'; c.globalAlpha=.85; c.fill(); c.globalAlpha=1; c.strokeStyle='rgba(0,0,0,.45)'; c.lineWidth=1.5; c.stroke();
+          tx(c,(dV>=0?'+':'')+nf(dV/1000,1)+' mL',xs[i],190-2*rp-8,{size:13,w:700,mono:true,align:'center'}); }
+        tx(c,t(m.vi,m.en),xs[i],405,{size:14,w:700,align:'center'});
+      });
+    } else {
+      const cx=320, m=MAT[0], r=rhoW(10)/rhoW(S.Tf)-1, dV=250000*r, dh=dV/3.14, lv=dh*2.2;
+      flask(c,cx,{col:'#3f9be0'},lv,0);
+      c.setLineDash([5,4]); c.strokeStyle=COL.muted; c.lineWidth=1; c.beginPath(); c.moveTo(cx-36,190); c.lineTo(cx+36,190); c.stroke(); c.setLineDash([]);
+      tx(c,t('mức ở 10 °C','level at 10 °C'),cx+42,194,{size:12.5,color:COL.muted});
+      tx(c,(dh>=0?'+':'')+nf(dh,1)+' mm',cx-42,190-lv+4,{size:14,w:700,mono:true,align:'right'});
+      tx(c,t('Nước 250 mL','Water 250 mL'),cx,405,{size:14,w:700,align:'center'});
+      if(S.Tf<2) { for(let k=0;k<5;k++){ c.fillStyle='#ffffffcc'; rr(c,cx-100+k*40,330+(k%2)*8,22,20,4); c.fill(); } }
+    }
+    // bể nước
+    const u=clamp((S.Tf-0)/80,0,1);
+    c.fillStyle='rgb('+Math.round(lerp(120,238,u))+','+Math.round(lerp(190,120,u))+','+Math.round(lerp(236,80,u))+')'; c.globalAlpha=.4; rr(c,20,262,600,110,10); c.fill(); c.globalAlpha=1; c.strokeStyle=COL.metal; c.lineWidth=2.5; c.stroke();
+    tx(c,t('Bể nước ','Water bath ')+nf(S.Tf,1)+' °C',612,386,{size:14,w:700,mono:true,align:'right',color:S.Tf>50?COL.warn:COL.ink});
+    // đồ thị
+    const g=G.begin(); g.fillStyle=COL.lane; g.fillRect(0,0,640,280);
+    if(S.mode===0){
+      const ax=axes(g,{x:64,y:34,w:430,h:196},[20,80,10],[0,22,4],t('T (°C)','T (°C)'),t('ΔV/V₀ (%)','ΔV/V₀ (%)'),0,0);
+      MAT.forEach((m,i)=>{ g.strokeStyle=COL[m.gc]; g.lineWidth=2.6; g.beginPath(); for(let T=20;T<=80;T+=2){ const x=ax.X(T),y=ax.Y(m.f(T)*100); T===20?g.moveTo(x,y):g.lineTo(x,y);} g.stroke();
+        g.beginPath(); g.arc(ax.X(clamp(S.Tf,20,80)),ax.Y(m.f(Math.max(S.Tf,20))*100),6,0,Math.PI*2); g.fillStyle=COL[m.gc]; g.fill(); g.strokeStyle=COL.ink; g.lineWidth=1.5; g.stroke();
+        g.fillStyle=COL[m.gc]; g.fillRect(512,46+i*26,16,6); tx(g,t(m.vi,m.en),536,54+i*26,{size:12.5,w:600}); });
+      g.strokeStyle=COL.muted; g.setLineDash([4,3]); g.lineWidth=2; g.beginPath(); g.moveTo(ax.X(20),ax.Y(0)); g.lineTo(ax.X(80),ax.Y(3*9e-6*60*100)); g.stroke(); g.setLineDash([]);
+      g.fillStyle=COL.muted; g.fillRect(512,46+4*26,16,6); tx(g,t('Thuỷ tinh (rắn)','Glass (solid)'),536,54+4*26,{size:12.5,w:600});
+    } else {
+      const ax=axes(g,{x:80,y:34,w:420,h:196},[0,10,2],[1000,1000.32,0.08],t('T (°C)','T (°C)'),t('Thể tích 1 kg nước (cm³)','Volume of 1 kg of water (cm³)'),0,2);
+      g.strokeStyle=COL.laneA; g.lineWidth=2.6; g.beginPath(); for(let T=0;T<=10;T+=0.25){ const x=ax.X(T),y=ax.Y(1e6/rhoW(T)); T===0?g.moveTo(x,y):g.lineTo(x,y);} g.stroke();
+      g.beginPath(); g.arc(ax.X(S.Tf),ax.Y(1e6/rhoW(S.Tf)),6,0,Math.PI*2); g.fillStyle=COL.laneA; g.fill(); g.strokeStyle=COL.ink; g.lineWidth=1.5; g.stroke();
+      tx(g,t('nhỏ nhất ≈ 4 °C','smallest ≈ 4 °C'),ax.X(4),ax.Y(1e6/rhoW(4))+24,{size:13,w:700,align:'center',color:COL.warn});
+    }
+  }
+  function readout(){
+    if(S.mode===0){
+      $('#tb3').innerHTML='<tr><th>'+t('Chất','Substance')+'</th><th>β (10⁻³ K⁻¹)</th><th>ΔV (mL)</th><th>'+t('Mực trong ống (mm)','Level in tube (mm)')+'</th></tr>'+
+        MAT.map((m,i)=>{const r=m.f(S.Tf);return '<tr><td class="t">'+t(m.vi,m.en)+'</td><td>'+m.beta+'</td><td class="num">'+nf(100*r,2)+'</td><td class="num">'+(i<3?nf(1e5*r/50.27,1):t('bóng bay','balloon'))+'</td></tr>';}).join('')+
+        '<tr><td class="t">'+t('Thuỷ tinh (rắn)','Glass (solid)')+'</td><td>0,027</td><td class="num">'+nf(100*3*9e-6*(S.Tf-20),3)+'</td><td>—</td></tr>';
+    } else {
+      const dV=250000*(rhoW(10)/rhoW(S.Tf)-1);
+      $('#tb3').innerHTML='<tr><th>'+t('Đại lượng','Quantity')+'</th><th>'+t('Giá trị','Value')+'</th></tr><tr><td class="t">T</td><td class="num">'+nf(S.Tf,1)+' °C</td></tr><tr><td class="t">'+t('Khối lượng riêng','Density')+'</td><td class="num">'+nf(rhoW(S.Tf),2)+' kg/m³</td></tr><tr><td class="t">ΔV so với 10 °C</td><td class="num">'+nf(dV,0)+' mm³</td></tr><tr><td class="t">'+t('Mực nước đổi','Level change')+'</td><td class="num">'+nf(dV/3.14,1)+' mm</td></tr>';
+    }
+    $('#st3').textContent=S.mode===0?(S.Tf>=40?t('Khí nở nhiều nhất, thuỷ tinh gần như không đáng kể.','The gas expands the most; the glass hardly matters.'):t('Tăng nhiệt độ bể nước để quan sát.','Raise the bath temperature to observe.')):(S.Tf<4.5&&S.Tf>3.5?t('Ở khoảng 4 °C nước có thể tích nhỏ nhất.','Near 4 °C the water has its smallest volume.'):'');
+  }
+  hint();
+  return {refresh(){hint();}, onShow(){}, 
+    frame(dt){
+      S.Tf+=(S.Tb-S.Tf)*(1-Math.exp(-dt/2.2));
+      if(S.mode===0&&S.Tf>=60) unlock('3'); if(S.mode===1&&S.Tf<=1.2) unlock('3b');
+      draw(); if((S.acc+=dt)>0.15){S.acc=0;readout();}
+    }};
+})();
+/* ============ TAB 4: Băng kép và rơ le nhiệt ============ */
+VID[4]=[
+ {id:'82FPQ6z8vcE',k:'ph',f:'tab4-bang-kep',t:'Thermal Expansion Demo: Bimetallic Strip',look:['băng kép cong về phía nào khi hơ nóng, và cong ngược lại khi làm lạnh.','which way the strip bends when heated, and the opposite way when cooled.']},
+ {id:'q0rQb4gAtrs',k:'ud',f:'tab4-role-nhiet',t:'Thermostat with Bimetallic Strip',look:['băng kép nối/ngắt mạch điện như thế nào để giữ nhiệt độ.','how the strip makes and breaks the circuit to hold a temperature.']}];
+build(4,{
+ req:'<b>'+I('Yêu cầu cần đạt (KHTN 8, Nhiệt): ','Learning goal (Grade 8, Heat): ')+'</b>'+I('lấy ví dụ về công dụng của sự nở vì nhiệt (băng kép trong rơ le nhiệt); vận dụng giải thích hiện tượng đơn giản.','give an example of the use of thermal expansion (the bimetallic strip in a thermostat); apply it to explain a simple everyday device.'),
+ stage:
+  '<div id="sg4"></div>'+
+  '<p class="hint" id="h4"></p>'+
+  '<canvas id="cv4a" aria-label="bimetallic strip or iron thermostat"></canvas>'+
+  '<p class="status" id="st4"></p>'+
+  '<canvas id="cv4b" aria-label="graph"></canvas>'+
+  '<p class="fine" id="as4"></p>',
+ side:
+  '<div class="card" id="c4a"><h2>'+I('Thiết lập băng kép','Strip set-up')+'</h2><div id="sp4" class="seg"></div><div class="controls"><button class="btn" id="b4flip">'+I('Lật băng kép','Flip the strip')+'</button></div><div id="sl4a"></div><div class="controls"><button class="btn primary" id="b4hot">'+I('Hơ nóng 100 °C','Heat to 100 °C')+'</button><button class="btn" id="b4ice">'+I('Chườm đá −10 °C','Ice at −10 °C')+'</button><button class="btn" id="b4rt">'+I('Về 20 °C','Back to 20 °C')+'</button></div></div>'+
+  '<div class="card" id="c4b" hidden><h2>'+I('Thiết lập bàn là','Iron set-up')+'</h2><div id="sl4b"></div><label class="chk"><input type="checkbox" id="k4broken"> <span>'+I('Thay băng kép bằng thanh sắt đơn (hỏng rơ le)','Replace the strip with a plain iron bar (faulty thermostat)')+'</span></label><div class="controls"><div class="seg" id="sp4s"></div><button class="btn" id="b4rst">'+I('Đặt lại','Reset')+'</button></div></div>'+
+  '<div class="card"><h2>'+I('Số liệu đang đo','Live readings')+'</h2><dl class="kv" id="o4"></dl><div class="tblwrap"><table class="log" id="tb4"></table></div></div>'+
+  '<div id="pr4box">'+predict('4a',I('Băng kép gồm đồng dán với sắt, đồng ở trên. Hơ nóng cả hai. Băng kép sẽ cong…','A bimetallic strip is copper bonded to iron, copper on top. It is heated. The strip will bend…'),
+    [I('xuống, về phía thanh sắt','down, towards the iron'),I('lên, về phía thanh đồng','up, towards the copper'),I('không cong','not at all')],0,
+    I('Đồng nở nhiều hơn sắt nên bên đồng dài hơn và nằm ở phía ngoài (lồi) của chỗ cong: băng kép cong về phía kim loại nở ít hơn (sắt). Làm lạnh thì cong ngược lại.','Copper expands more than iron, so the copper side gets longer and lies on the outside of the curve: the strip bends towards the metal that expands less (iron). Cooling bends it the other way.'))+'</div>'+
+  '<div id="pr4box2" hidden>'+predict('4b',I('Bàn là đã đủ nóng. Băng kép sẽ…','The iron is hot enough. The bimetallic strip will…'),
+    [I('cong đi, ngắt mạch điện của dây đốt','bend away and break the heater circuit'),I('cong thêm để nối thêm điện','bend to supply even more current'),I('không làm gì','do nothing')],0,
+    I('Khi nóng đến mức đã đặt, băng kép cong đủ để tách tiếp điểm và ngắt mạch. Nguội đi, nó cong lại và nối mạch: nhiệt độ được giữ gần mức đặt.','At the set temperature the strip bends enough to separate the contacts and break the circuit. As it cools it bends back and reconnects: the temperature stays near the setting.'))+'</div>'+
+  concl('4','<p>'+I('1) Băng kép gồm hai kim loại có hệ số nở dài khác nhau dán chặt vào nhau. Khi nóng lên nó cong về phía kim loại nở ít hơn, khi lạnh đi cong ngược lại.','1) A bimetallic strip is two metals with different expansion bonded together. Heated, it bends towards the metal that expands less; cooled, it bends the other way.')+'</p><p>'+I('2) Hai kim loại càng khác nhau nhiều (đồng thau–invar) thì băng kép càng cong; hai thanh giống nhau (sắt–sắt) thì không cong.','2) The more different the metals (brass–invar), the more it bends; two identical bars (iron–iron) do not bend.')+'</p>')+
+  '<div id="cc4bbox" hidden>'+concl('4b','<p>'+I('Băng kép là công tắc tự động theo nhiệt độ: nóng thì cong, ngắt mạch; nguội thì cong lại, nối mạch. Nhờ vậy bàn là, ấm điện, nồi cơm giữ được nhiệt độ. Nếu hỏng băng kép, bàn là nóng mãi và nguy hiểm.','The bimetallic strip is a temperature-operated switch: hot, it bends and breaks the circuit; cooled, it bends back and reconnects. That is how irons, kettles and rice cookers hold a temperature. If it fails the iron keeps heating and becomes dangerous.')+'</p>')+'</div>',
+ mech:
+  '<p>'+I('Hai thanh kim loại dài như nhau ở nhiệt độ ban đầu được dán chặt vào nhau. Khi nóng lên, thanh có α lớn muốn dài hơn thanh có α nhỏ, nhưng vì dính vào nhau nên cả băng kép phải cong: bên nở nhiều nằm ở phía ngoài vòng cung (dài hơn), bên nở ít ở phía trong. Độ cong tăng khi hiệu hai hệ số nở và độ tăng nhiệt độ tăng, và giảm khi băng mỏng. Trong rơ le, độ cong này làm tách hoặc nối tiếp điểm điện.','Two metal bars of equal length at the starting temperature are bonded together. When heated, the bar with the larger α wants to become longer than the other, but because they are stuck together the whole strip must curve: the metal that expands more lies on the outside of the arc (longer), the other on the inside. The curvature grows with the difference of the two coefficients and with the temperature rise, and is larger for a thinner strip. In a thermostat this bending separates or joins an electrical contact.')+'</p>',
+ simple:
+  '<p>'+I('Hai người chạy cạnh nhau, tay nắm tay, một người bước dài hơn một người bước ngắn. Hai người bị kéo vòng ra: người bước dài đi vòng ngoài, người bước ngắn ở trong. Băng kép cũng vậy: kim loại “bước dài” (nở nhiều) nằm ngoài, nên băng cong về phía kim loại nở ít.','Two people run side by side holding hands, one with longer steps. They swing round in an arc: the long-stepper takes the outside track and the short-stepper the inside. The strip is the same: the metal that “steps longer” (expands more) is on the outside, so the strip bends towards the metal that expands less.')+'</p>',
+ wrong:
+  '<ul><li>'+I('“Băng kép cong về phía kim loại nở nhiều.” Sai: nó cong về phía kim loại nở ít, kim loại nở nhiều nằm phía ngoài chỗ cong.','“The strip bends towards the metal that expands more.” Wrong: it bends towards the metal that expands less; the more-expanding metal is on the outside.')+'</li><li>'+I('“Lạnh đi thì băng kép thẳng ra rồi dừng.” Sai: dưới nhiệt độ ban đầu nó cong ngược lại.','“When cooled it just goes back to straight.” Wrong: below the starting temperature it bends the other way.')+'</li><li>'+I('“Bàn là nóng dần mãi cho đến khi tắt điện.” Rơ le tự bật tắt liên tục nên nhiệt độ dao động quanh mức đặt.','“The iron heats until the power is switched off.” The thermostat cycles on and off, so the temperature oscillates around the setting.')+'</li></ul>',
+ word:
+  '<table class="etym"><tr><td>bimetal</td><td>'+I('Latinh bi- (hai) + metallum, từ Hy Lạp metallon (mỏ quặng, kim loại). Tiếng Việt “băng kép”: băng = dải mỏng, kép = đôi.','Latin bi- (two) + metallum, from Greek metallon (mine, metal). Vietnamese “băng kép”: băng = thin strip, kép = double.')+'</td></tr><tr><td>thermostat</td><td>'+I('Hy Lạp thermē (nhiệt) + statos (đứng yên, ổn định): “giữ nhiệt độ đứng yên”.','Greek thermē (heat) + statos (standing, steady): “keeping the heat steady”.')+'</td></tr><tr><td>'+I('rơ le','relay')+'</td><td>'+I('Từ tiếng Pháp relais, “trạm đổi ngựa” ngày xưa, nghĩa là chuyển tiếp. Hán Việt: 繼電器 (kế điện khí).','From French relais, the old “station for changing horses”, i.e. passing on. Sino-Vietnamese: 繼電器 (kế điện khí).')+'</td></tr><tr><td>invar</td><td>'+I('Rút từ Latinh invariabilis (không đổi): hợp kim sắt–niken nở rất ít, α ≈ 1,2·10⁻⁶ K⁻¹.','Short for Latin invariabilis (unchanging): an iron–nickel alloy that hardly expands, α ≈ 1.2·10⁻⁶ K⁻¹.')+'</td></tr></table>'
+});
+
+TABS[4]=(function(){
+  const MET={cu:{vi:'Đồng',en:'Copper',a:17,col:'laneB'},fe:{vi:'Sắt',en:'Iron',a:12,col:'metal2'},al:{vi:'Nhôm',en:'Aluminium',a:23,col:'laneA'},br:{vi:'Đồng thau',en:'Brass',a:19,col:'gold'},iv:{vi:'Invar',en:'Invar',a:1.2,col:'c3'}};
+  const PAIRS=[['cu','fe'],['al','fe'],['br','iv'],['fe','fe']];
+  const A=mkCanvas($('#cv4a'),640,380), B=mkCanvas($('#cv4b'),640,260);
+  const S={mode:0,pair:0,flip:false,Tt:20,T:20,acc:0,
+           // rơ le
+           Tp:20,Tset:120,on:true,broken:false,sp:10,hist:[],tsim:0,hacc:0,switches:0,sw:null};
+  const top=()=>MET[PAIRS[S.pair][S.flip?1:0]], bot=()=>MET[PAIRS[S.pair][S.flip?0:1]];
+  function kap(top,bot,T){ return 1.5*(top.a-bot.a)*1e-6*(T-20)/1.0; } // 1/mm, h = 1 mm
+  function tip(top,bot,T){ const k=kap(top,bot,T); if(Math.abs(k)<1e-10) return 0; return (1-Math.cos(k*200))/k; }
+  const sg=mkSeg($('#sg4'),()=>[t('Băng kép','Bimetallic strip'),t('Rơ le bàn là','Iron thermostat')],0,k=>{
+    S.mode=k; $('#c4a').hidden=!!k; $('#c4b').hidden=!k; $('#pr4box').hidden=!!k; $('#pr4box2').hidden=!k; $('#cc4bbox').hidden=!k; hint(); readout(); });
+  const sp=mkSeg($('#sp4'),()=>PAIRS.map(p=>t(MET[p[0]].vi,MET[p[0]].en)+' – '+t(MET[p[1]].vi,MET[p[1]].en)+(p[0]===p[1]?t(' (đối chứng)',' (control)'):'')),0,k=>{S.pair=k;readout();});
+  $('#sp4').style.flexDirection='column'; $('#sp4').style.display='flex';
+  const sl=mkSlider($('#sl4a'),{vi:'Nhiệt độ nguồn (đích)',en:'Heat-source temperature (target)',min:-20,max:150,step:1,val:20,unit:'°C',cb:v=>{S.Tt=v;}});
+  const sb=mkSlider($('#sl4b'),{vi:'Núm đặt nhiệt độ bàn là',en:'Iron temperature dial',min:60,max:200,step:5,val:120,unit:'°C',cb:v=>{S.Tset=v;}});
+  const ss=mkSeg($('#sp4s'),()=>['×1','×10','×30'],1,k=>{S.sp=[1,10,30][k];});
+  $('#b4flip').onclick=()=>{S.flip=!S.flip;readout();};
+  $('#b4hot').onclick=()=>{S.Tt=100;sl.set(100);}; $('#b4ice').onclick=()=>{S.Tt=-10;sl.set(-10);}; $('#b4rt').onclick=()=>{S.Tt=20;sl.set(20);};
+  $('#k4broken').onchange=e=>{S.broken=e.target.checked;};
+  function rst(){ S.Tp=20;S.on=true;S.hist=[];S.tsim=0;S.hacc=0;S.switches=0; }
+  $('#b4rst').onclick=rst;
+  function hint(){
+    $('#h4').textContent=S.mode===0?t('Chọn cặp kim loại, đổi nhiệt độ nguồn (hơ nóng hoặc chườm đá) và xem băng kép cong thế nào. Băng được vẽ dày hơn thực tế để dễ nhìn.','Choose a pair of metals, change the source temperature (heat or ice) and see how the strip bends. The strip is drawn thicker than in reality.'):
+      t('Bàn là có đế nhôm được dây điện đốt (1000 W). Băng kép gắn vào đế; khi nóng đến mức đặt, nó cong đủ để tách tiếp điểm. Đặt núm nhiệt độ, chọn tốc độ thời gian và quan sát đồ thị.','An iron with an aluminium sole plate is heated by a 1000 W element. The strip is attached to the plate; at the set temperature it bends enough to separate the contacts. Set the dial, choose the time speed and watch the graph.');
+    $('#as4').textContent=S.mode===0?t('Giả thiết: hai lớp cùng độ dày (tổng 1 mm), cùng mô-đun đàn hồi, dài 200 mm; công thức cong của Timoshenko; băng nhiệt độ đều. Mô hình đơn giản, chỉ dùng để vẽ; học sinh chỉ cần nhận ra chiều cong.','Assumptions: both layers equally thick (1 mm total), same elastic modulus, 200 mm long, uniform temperature; Timoshenko bending. A simple model used for drawing; students only need the bending direction.'):
+      t('Giả thiết: đế bàn là C = 600 J/K, hao phí ra không khí 3 W/K, băng kép đồng thau–invar dài 60 mm cùng nhiệt độ với đế, công tắc ngắt khi nhiệt độ đạt mức đặt và nối lại khi thấp hơn 2 K.','Assumptions: sole plate C = 600 J/K, loss to air 3 W/K, a 60 mm brass–invar strip at the plate temperature, the switch opens at the dial value and closes again 2 K lower.');
+  }
+  function rect(c,x,y,w,h,col,r){ rr(c,x,y,w,h,r||3); c.fillStyle=col; c.fill(); c.strokeStyle='rgba(0,0,0,.45)'; c.lineWidth=1.2; c.stroke(); }
+  function drawStrip(){
+    const c=A.begin(); c.fillStyle=COL.lane; c.fillRect(0,0,640,380);
+    const tp=top(),bt=bot(),k=kap(tp,bt,S.T),ax=110,ay=170,PX=1.8,hp=7;
+    rect(c,60,ay-60,50,120,COL.metal2,4);
+    c.setLineDash([6,4]); c.strokeStyle=COL.muted; c.lineWidth=1.2; c.beginPath(); c.moveTo(ax,ay); c.lineTo(ax+380,ay); c.stroke(); c.setLineDash([]);
+    tx(c,t('vị trí thẳng ở 20 °C','straight position at 20 °C'),ax+380,ay-8,{size:12,color:COL.muted,align:'right'});
+    function P(s,off){ const th=Math.abs(k)<1e-10?0:k*s, x=Math.abs(k)<1e-10?s:Math.sin(th)/k, y=Math.abs(k)<1e-10?0:(1-Math.cos(th))/k;
+      return [ax+(x+(-Math.sin(th))*off/PX)*PX, ay+(y+Math.cos(th)*off/PX)*PX]; }
+    function layer(o0,o1,col){ c.beginPath(); for(let i=0;i<=40;i++){ const p=P(i*5,o0); i?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1]); } for(let i=40;i>=0;i--){ const p=P(i*5,o1); c.lineTo(p[0],p[1]); } c.closePath(); c.fillStyle=col; c.fill(); c.strokeStyle='rgba(0,0,0,.5)'; c.lineWidth=1.2; c.stroke(); }
+    layer(-hp,0,COL[tp.col]); layer(0,hp,COL[bt.col]);
+    const e=P(200,0); const tipmm=(e[1]-ay)/PX;
+    tx(c,t(tp.vi,tp.en)+' (α = '+tp.a+')',ax+14,ay-18,{size:14,w:700,color:COL[tp.col]});
+    tx(c,t(bt.vi,bt.en)+' (α = '+bt.a+')',ax+14,ay+hp+22,{size:14,w:700,color:COL[bt.col]});
+    // nguồn nhiệt / đá
+    if(S.Tt>40){ for(let k2=0;k2<4;k2++){ const fx=ax+80+k2*60, fl=Math.sin(S.ph*9+k2)*3; c.beginPath(); c.moveTo(fx-12,350); c.quadraticCurveTo(fx-14,325+fl,fx,300+fl); c.quadraticCurveTo(fx+14,325-fl,fx+12,350); c.fillStyle='#ff8a1e'; c.globalAlpha=clamp((S.Tt-40)/80,.3,1); c.fill(); c.globalAlpha=1; } }
+    else if(S.Tt<5){ for(let k2=0;k2<5;k2++){ c.fillStyle='#e6f4ffcc'; rr(c,ax+60+k2*55,320+(k2%2)*8,34,30,5); c.fill(); c.strokeStyle='#7fb6e0'; c.stroke(); } }
+    tx(c,nf(S.T,0)+' °C',ax+380,350,{size:20,w:700,mono:true,align:'right',color:S.T>60?COL.warn:(S.T<5?COL.accent:COL.ink)});
+    return {k,tipmm,tp,bt};
+  }
+  function drawIron(){
+    const c=A.begin(); c.fillStyle=COL.lane; c.fillRect(0,0,640,380);
+    const T=S.Tp, g=clamp((T-80)/300,0,1);
+    // đế
+    rr(c,90,300,440,34,6); c.fillStyle='rgb('+Math.round(lerp(139,230,g))+','+Math.round(lerp(150,80,g))+','+Math.round(lerp(163,50,g))+')'; c.fill(); c.strokeStyle='rgba(0,0,0,.5)'; c.lineWidth=1.5; c.stroke();
+    tx(c,t('Đế bàn là (nhôm)','Sole plate (aluminium)'),310,322,{size:13,w:700,color:'#fff',align:'center'});
+    // dây đốt
+    c.strokeStyle=S.on?'#ff4020':COL.muted; c.lineWidth=S.on?3:2; c.beginPath(); for(let i=0;i<=18;i++){ const x=130+i*20, y=346+(i%2?8:-8); i?c.lineTo(x,y):c.moveTo(x,y);} c.stroke();
+    tx(c,t('dây đốt 1000 W','1000 W heating element'),310,372,{size:12.5,color:COL.muted,align:'center'});
+    // băng kép (đồng thau trên, invar dưới)
+    const dpm=0.060, gmm=(S.Tset-20)*dpm, dfree=S.broken?0:dpm*(T-20), PX=4, ax=170, ay=220;
+    const closed=S.on;
+    const tipy=S.broken?0:Math.max(dfree,gmm); // vị trí đầu băng (mm xuống)
+    const k=S.broken?0:(2*tipy)/(60*60); // 1/mm (xấp xỉ)
+    function P(s,off){ const th=k*s, x=Math.abs(k)<1e-10?s:Math.sin(th)/k, y=Math.abs(k)<1e-10?0:(1-Math.cos(th))/k; return [ax+(x-Math.sin(th)*off/PX)*PX, ay+(y+Math.cos(th)*off/PX)*PX]; }
+    function layer(o0,o1,col){ c.beginPath(); for(let i=0;i<=30;i++){ const p=P(i*2,o0); i?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1]); } for(let i=30;i>=0;i--){ const p=P(i*2,o1); c.lineTo(p[0],p[1]); } c.closePath(); c.fillStyle=col; c.fill(); c.strokeStyle='rgba(0,0,0,.5)'; c.lineWidth=1.2; c.stroke(); }
+    rect(c,128,ay-30,42,60,COL.metal2,4);
+    if(S.broken) { rect(c,ax,ay-2.5,240,5,COL.metal2,2); } else { layer(-1.6,0,COL.gold); layer(0,1.6,COL.c3); }
+    const e=P(60,0);
+    // vít chỉnh (tiếp điểm cố định) ở trên đầu băng
+    const sx=ax+240, sy=ay+gmm*PX-4;
+    rect(c,sx-4,ay-90,8,sy-(ay-90),COL.metal,2);
+    rect(c,sx-14,sy-6,28,8,closed?COL.ok:COL.warn,2);
+    rect(c,sx-18,ay-96,36,10,COL.metal2,3);
+    tx(c,t('núm chỉnh','dial screw'),sx,ay-102,{size:12.5,color:COL.muted,align:'center'});
+    tx(c,closed?t('tiếp điểm ĐÓNG','contact CLOSED'):t('tiếp điểm MỞ','contact OPEN'),sx+36,ay-30,{size:14,w:700,color:closed?COL.ok:COL.warn});
+    tx(c,t('băng kép đồng thau–invar','brass–invar strip'),ax+10,ay-36,{size:13,color:COL.muted});
+    // đèn báo
+    c.beginPath(); c.arc(560,240,14,0,Math.PI*2); c.fillStyle=S.on?'#ff9f1a':'#555'; c.fill(); c.strokeStyle='rgba(0,0,0,.5)'; c.lineWidth=2; c.stroke();
+    tx(c,t('đèn báo','lamp'),560,272,{size:12.5,color:COL.muted,align:'center'});
+    tx(c,nf(T,0)+' °C',560,200,{size:24,w:700,mono:true,align:'center',color:T>200?COL.warn:COL.ink});
+    if(S.broken&&T>250) tx(c,t('QUÁ NHIỆT!','OVERHEATING!'),310,80,{size:28,w:800,color:COL.warn,align:'center'});
+  }
+  function drawGraph0(info){
+    const g=B.begin(); g.fillStyle=COL.lane; g.fillRect(0,0,640,260);
+    let ym=10; PAIRS.forEach(p=>{ [-20,150].forEach(T=>{ym=Math.max(ym,Math.abs(tip(MET[p[0]],MET[p[1]],T)));}); }); ym=Math.ceil(ym/10)*10;
+    const ax=axes(g,{x:64,y:30,w:440,h:180},[-20,150,30],[-ym,ym,ym/2],t('T (°C)','T (°C)'),t('độ lệch đầu băng (mm, + = xuống)','tip deflection (mm, + = down)'),0,0);
+    PAIRS.forEach((p,i)=>{ const a=MET[p[S.flip?1:0]], b=MET[p[S.flip?0:1]], col=[COL.laneB,COL.laneA,COL.c3,COL.muted][i];
+      g.strokeStyle=col; g.lineWidth=i===S.pair?3.5:1.8; g.globalAlpha=i===S.pair?1:.6; g.beginPath(); for(let T=-20;T<=150;T+=5){ const x=ax.X(T),y=ax.Y(tip(a,b,T)); T===-20?g.moveTo(x,y):g.lineTo(x,y);} g.stroke(); g.globalAlpha=1;
+      g.fillStyle=col; g.fillRect(516,36+i*26,16,6); tx(g,t(MET[p[0]].vi,MET[p[0]].en)+'–'+t(MET[p[1]].vi,MET[p[1]].en),538,44+i*26,{size:12,w:i===S.pair?700:500}); });
+    g.beginPath(); g.arc(ax.X(S.T),ax.Y(info.tipmm),6,0,Math.PI*2); g.fillStyle=COL.warn; g.fill(); g.strokeStyle=COL.ink; g.lineWidth=1.5; g.stroke();
+  }
+  function drawGraph1(){
+    const g=B.begin(); g.fillStyle=COL.lane; g.fillRect(0,0,640,260);
+    const w=600, t1=Math.max(w,S.tsim), t0=t1-w;
+    const ax=axes(g,{x:64,y:30,w:540,h:180},[0,10,2],[0,400,100],t('thời gian (phút)','time (min)'),t('T đế (°C)','T plate (°C)'),0,0);
+    g.save(); g.beginPath(); g.rect(64,30,540,180); g.clip();
+    g.setLineDash([6,4]); g.strokeStyle=COL.warn; g.lineWidth=1.5; g.beginPath(); g.moveTo(ax.X(0),ax.Y(S.Tset)); g.lineTo(ax.X(10),ax.Y(S.Tset)); g.stroke(); g.setLineDash([]);
+    g.strokeStyle=COL.laneA; g.lineWidth=2.5; g.beginPath(); let first=true;
+    S.hist.forEach(h=>{ const m=(h[0]-t0)/60; if(m<0||m>10) return; const x=ax.X(m),y=ax.Y(Math.min(h[1],400)); if(first){g.moveTo(x,y);first=false;} else g.lineTo(x,y); }); g.stroke();
+    g.restore();
+    tx(g,t('mức đặt','dial setting')+' '+S.Tset+' °C',600,ax.Y(S.Tset)-6,{size:12.5,w:700,color:COL.warn,align:'right'});
+  }
+  function readout(){
+    if(S.mode===0){
+      const tp=top(),bt=bot(),k=kap(tp,bt,S.T),tm=tip(tp,bt,S.T);
+      const dirTxt=Math.abs(k)<1e-9?t('thẳng','straight'):(k>0?t('cong xuống, về phía ','bends down, towards ')+t(bt.vi,bt.en):t('cong lên, về phía ','bends up, towards ')+t(tp.vi,tp.en));
+      kv($('#o4'),[['Nhiệt độ băng','Strip temperature',nf(S.T,0)+' °C'],['Lớp trên','Top layer',t(tp.vi,tp.en)+' (α = '+tp.a+')'],['Lớp dưới','Bottom layer',t(bt.vi,bt.en)+' (α = '+bt.a+')'],['Độ lệch đầu băng','Tip deflection',nf(Math.abs(tm),1)+' mm'],['Chiều cong','Bending',dirTxt]]);
+      $('#tb4').innerHTML='<tr><th>'+t('Cặp (trên–dưới)','Pair (top–bottom)')+'</th><th>Δα</th><th>'+t('lệch ở 100 °C (mm)','tip at 100 °C (mm)')+'</th></tr>'+PAIRS.map((p,i)=>{const a=MET[p[S.flip?1:0]],b=MET[p[S.flip?0:1]];return '<tr><td class="t">'+t(a.vi,a.en)+'–'+t(b.vi,b.en)+'</td><td>'+nf(Math.abs(a.a-b.a),1)+'</td><td class="num">'+nf(tip(a,b,100),1)+'</td></tr>';}).join('');
+      $('#st4').textContent=Math.abs(k)<1e-9?t('Băng đang thẳng. Hơ nóng hoặc chườm đá để thấy nó cong.','The strip is straight. Heat it or put ice on it to see it bend.'):(dirTxt.charAt(0).toUpperCase()+dirTxt.slice(1)+'.');
+    } else {
+      kv($('#o4'),[['Nhiệt độ đế','Plate temperature',nf(S.Tp,0)+' °C'],['Mức đặt','Dial setting',S.Tset+' °C'],['Dây đốt','Heating element',S.on?t('đang chạy 1000 W','on, 1000 W'):t('ngắt','off')],['Số lần ngắt/nối','Switch cycles',String(S.switches)],['Thời gian mô phỏng','Simulated time',nf(S.tsim/60,1)+' '+t('phút','min')]]);
+      $('#tb4').innerHTML='';
+      $('#st4').textContent=S.broken?(S.Tp>250?t('Không có băng kép, bàn là nóng mãi và vượt xa mức đặt!','No bimetallic strip: the iron keeps heating far above the setting!'):t('Không có băng kép thì mạch không bao giờ ngắt.','Without the strip the circuit never opens.')):(S.switches>=2?t('Bàn là tự bật tắt, giữ nhiệt độ quanh mức đặt.','The iron switches itself on and off, holding the temperature near the setting.'):t('Bàn là đang nóng lên đến mức đặt.','The iron is warming up to the setting.'));
+    }
+  }
+  S.ph=0; hint(); readout();
+  return {refresh(){hint();readout();}, onShow(){hint();},
+    frame(dt){
+      S.ph+=dt;
+      if(S.mode===0){
+        S.T+=(S.Tt-S.T)*(1-Math.exp(-dt/2.2));
+        const info=drawStrip(); drawGraph0(info);
+        if(Math.abs(info.tipmm)>=5) unlock('4');
+      } else {
+        let rem=dt*S.sp; const h=0.25; // bước nhỏ để đúng ngưỡng
+        while(rem>1e-9){
+          const step=Math.min(rem,h); rem-=step;
+          const dpm=0.060, gmm=(S.Tset-20)*dpm, dfree=S.broken?0:dpm*(S.Tp-20);
+          const wasOn=S.on;
+          if(S.on&&!S.broken&&dfree>=gmm) S.on=false; else if(!S.on&&S.Tp<S.Tset-2) S.on=true;
+          if(wasOn!==S.on) { S.switches++; if(!S.on&&S.switches>=3) unlock('4b'); }
+          S.Tp+=((S.on?1000:0)-3*(S.Tp-20))/600*step; S.tsim+=step; S.hacc+=step;
+          if(S.hacc>=1){ S.hacc=0; S.hist.push([S.tsim,S.Tp]); if(S.hist.length>1500) S.hist.shift(); }
+        }
+        drawIron(); drawGraph1();
+      }
+      if((S.acc+=dt)>0.15){S.acc=0;readout();}
+    }};
+})();
+/* ============ TAB 5: Công dụng và tác hại ============ */
+VID[5]=[
+ {id:'umoHun-34mU',k:'ph',f:'tab5-duong-ray-cong',t:'Rare footage of railway line buckling due to high heat',look:['đường ray cong vênh dưới nắng nóng.','the rail line bending out of shape in the heat.']},
+ {id:'hdd3INceCBU',k:'ud',f:'tab5-khe-co-gian',t:'Why do Bridges & Railway tracks have expansion gaps?',look:['khe co giãn ở cầu và đường ray làm gì.','what the expansion gaps in bridges and tracks do.']},
+ {id:'WbyzSISbto0',k:'tn',f:'tab5-pha-thanh-sat',t:"Tyndall's bar breaker: the enormous forces of thermal expansion",look:['thanh sắt bị cản không cho nở thì gãy chốt như thế nào.','how a bar that is not allowed to expand snaps its pin.']}];
+build(5,{
+ req:'<b>'+I('Yêu cầu cần đạt (KHTN 8, Nhiệt): ','Learning goal (Grade 8, Heat): ')+'</b>'+I('lấy được ví dụ về công dụng và tác hại của sự nở vì nhiệt; vận dụng kiến thức giải thích hiện tượng đơn giản thường gặp.','give examples of the uses and harms of thermal expansion; apply it to explain simple everyday phenomena.'),
+ stage:
+  '<div id="sg5"></div>'+
+  '<p class="hint" id="h5"></p>'+
+  '<canvas id="cv5" aria-label="rail, bridge, power line"></canvas>'+
+  '<p class="status" id="st5"></p>'+
+  '<div id="cls5" hidden></div>'+
+  '<p class="fine" id="as5"></p>',
+ side:
+  '<div class="card" id="c5s"><h2>'+I('Thiết lập','Set-up')+'</h2><div id="q5a" class="seg"></div><div id="q5b" class="seg" hidden></div><div id="q5c" class="seg" hidden></div><div id="sl5a"></div><div id="sl5b" hidden></div><div id="sl5c" hidden></div></div>'+
+  '<div class="card" id="c5o"><h2>'+I('Số liệu đang đo','Live readings')+'</h2><dl class="kv" id="o5"></dl></div>'+
+  predict('5a',I('Vì sao giữa hai thanh ray kế tiếp người ta để một khe hở nhỏ?','Why is a small gap left between two neighbouring rails?'),
+    [I('để ray nóng lên có chỗ nở dài ra','so the rails have room to expand when they warm up'),I('để nước mưa thoát xuống','so rain can drain away'),I('để tàu chạy êm hơn khi lạnh','so trains run more smoothly in the cold')],0,
+    I('Mùa nóng ray dài ra. Nếu không có khe, các thanh đẩy nhau, ray bị cong vênh có thể làm tàu trật bánh.','In hot weather rails get longer. With no gap the rails push on each other and buckle, which can derail a train.'))+
+  predict('5b',I('Rót nước sôi vào cốc thuỷ tinh dày và cốc thuỷ tinh mỏng. Cốc nào dễ nứt hơn?','Boiling water is poured into a thick and a thin glass. Which cracks more easily?'),
+    [I('cốc dày','the thick glass'),I('cốc mỏng','the thin glass'),I('như nhau','both the same')],0,
+    I('Thuỷ tinh dẫn nhiệt kém: ở cốc dày, mặt trong nóng và nở trước trong khi mặt ngoài vẫn lạnh. Hai mặt nở không đều nên cốc dễ nứt. Cốc mỏng nóng gần như đều nên ít nứt hơn.','Glass conducts heat poorly: in a thick glass the inner face is hot and expanding while the outer face is still cold. The uneven expansion cracks it. A thin glass warms almost evenly.'))+
+  predict('5c',I('Vì sao dây điện giữa hai cột thường được căng chùng, võng xuống một chút?','Why are power lines between poles hung slack, with a slight sag?'),
+    [I('để đẹp mắt','it looks nicer'),I('để mùa lạnh dây co lại mà không bị kéo đứt','so the wire can contract in winter without being pulled apart'),I('để dòng điện chạy nhanh hơn','so the current flows faster')],1,
+    I('Dây nóng thì dài ra và võng thêm, lạnh thì co ngắn lại và căng hơn. Nếu căng sẵn, mùa đông dây có thể bị đứt hoặc kéo nghiêng cột.','A hot wire lengthens and sags more; a cold wire shortens and tightens. If strung tight, it can snap or pull the poles over in winter.'))+
+  concl('5','<p>'+I('Tác hại: vật rắn bị cản không cho nở (ray, cầu) sinh ra lực rất lớn gây cong, nứt. Cách khắc phục: chừa khe co giãn, để dây võng.','Harm: a solid that is prevented from expanding (rails, bridges) produces enormous forces that bend or crack things. Remedy: leave expansion gaps, hang wires slack.')+'</p><p>'+I('Công dụng: nhiệt kế, băng kép trong rơ le, lắp đai sắt nóng vào bánh xe, tán đinh nóng, mở nắp lọ bị kẹt bằng cách hơ nóng nắp.','Uses: thermometers, the bimetallic strip in thermostats, fitting hot iron tyres onto wheels, hot riveting, loosening a jammed jar lid by warming the lid.')+'</p>'),
+ mech:
+  '<p>'+I('Khi bị làm nóng, vật rắn muốn dài thêm Δl = α·l₀·Δt. Nếu hai đầu bị giữ chặt, vật không nở được và bị nén; vật rắn rất cứng nên lực nén rất lớn (ray thép dài 12,5 m tăng 40 K muốn dài thêm 6 mm, đủ để làm cong cả đoạn ray) và gây cong hay nứt. Khoảng hở co giãn cho phép phần nở thêm này diễn ra mà không sinh lực. Ngược lại, vật bị cản không cho co khi nguội sẽ bị kéo căng, có thể đứt. Chênh lệch nở giữa hai mặt (cốc dày) hoặc giữa hai chi tiết (đai sắt và bánh xe) cũng sinh ứng suất; con người tận dụng điều đó khi lắp đai nóng, tán đinh nóng.','When heated, a solid wants to lengthen by Δl = α·l₀·Δt. If both ends are held rigidly it cannot expand and is compressed; solids are so stiff that the force is huge (a 12.5 m steel rail warmed by 40 K wants to grow 6 mm, enough to buckle the whole stretch) and things bend or crack. An expansion gap lets the growth happen without force. Conversely, a body that is stopped from contracting when it cools is stretched and may snap. Unequal expansion between two faces (a thick glass) or between two parts (an iron tyre and a wheel) also creates stress, which people exploit in hot-fitting a tyre or hot riveting.')+'</p>',
+ simple:
+  '<p>'+I('Ray nóng lên muốn dài ra, giống bạn đang nằm duỗi chân mà bị hai bức tường ép hai đầu: bạn sẽ phải co người lại, lưng cong lên. Vì vậy phải để khe cho chân duỗi. Còn mùa lạnh dây điện co lại như người thu mình, nên phải chừa độ chùng.','A rail that warms wants to stretch, like lying down with your legs stretched and two walls squeezing you: you would have to curl up. So we leave room to stretch. In cold weather a power line shrinks like a person hugging themselves, so some slack must be left.')+'</p>',
+ wrong:
+  '<ul><li>'+I('“Khe hở trên đường ray là do lắp ẩu hoặc để thoát nước.” Sai: khe được tính toán để ray có chỗ nở.','“The gaps in a railway are sloppy work or for drainage.” Wrong: the gap is calculated to give the rail room to expand.')+'</li><li>'+I('“Dây điện mùa hè võng là do dây bị chùng.” Thực ra dây dài thêm thật khi nóng.','“Power lines sag in summer because they have gone slack.” The wire really does lengthen when hot.')+'</li><li>'+I('“Chỉ có nóng mới gây tác hại.” Lạnh làm vật co lại, nếu bị cản cũng nứt hoặc đứt.','“Only heat does harm.” Cold makes things contract, and if prevented they crack or snap.')+'</li></ul>',
+ word:
+  '<table class="etym"><tr><td>'+I('ray','rail')+'</td><td>'+I('Tiếng Việt “ray” mượn từ Pháp rail, gốc Anh rail, từ Latinh regula (thanh thẳng, thước, quy tắc).','Vietnamese “ray” is borrowed from French rail, from English rail, from Latin regula (straight rod, ruler, rule).')+'</td></tr><tr><td>'+I('cầu 橋','bridge')+'</td><td>'+I('橋 (kiều/cầu) nghĩa là cây cầu. Khe co giãn trong tiếng Anh gọi expansion joint (joint < Latinh iungere = nối).','橋 means bridge. In English the gap is an expansion joint (joint < Latin iungere = to join).')+'</td></tr><tr><td>'+I('ứng suất','stress')+'</td><td>'+I('Ứng 應 (đáp lại) + suất 率 (tỉ lệ): lực đáp lại trên mỗi đơn vị diện tích. Stress < Latinh strictus (bị siết chặt).','ứng 應 (to respond) + suất 率 (ratio): the force responding per unit area. Stress < Latin strictus (drawn tight).')+'</td></tr></table>'
+});
+
+TABS[5]=(function(){
+  const CV=mkCanvas($('#cv5'),640,360);
+  const S={sc:0,T:20,gR:4,gB:80,s0:2.0,ph:0,acc:0,flags:{}, cls:{}};
+  const sg=mkSeg($('#sg5'),()=>[t('Đường ray','Railway'),t('Cầu','Bridge'),t('Dây điện','Power line'),t('Phân loại','Sort')],0,k=>{
+    S.sc=k; ['a','b','c'].forEach((x,i)=>{ $('#q5'+x).hidden=(i!==k); $('#sl5'+x).hidden=(i!==k); });
+    $('#cv5').hidden=(k===3); $('#st5').hidden=(k===3); $('#cls5').hidden=(k!==3); $('#c5s').hidden=(k===3); $('#c5o').hidden=(k===3);
+    S.T=[S.Ta,S.Tb,S.Tc][k]!=null?[S.Ta,S.Tb,S.Tc][k]:20; hint(); readout(); });
+  S.Ta=20;S.Tb=20;S.Tc=20;
+  mkSeg($('#q5a'),()=>[t('Khe 0 mm','Gap 0 mm'),t('Khe 4 mm','Gap 4 mm'),t('Khe 8 mm','Gap 8 mm')],1,k=>{S.gR=[0,4,8][k];});
+  mkSeg($('#q5b'),()=>[t('Không có khe','No joint'),t('Khe 40 mm','Joint 40 mm'),t('Khe 80 mm','Joint 80 mm')],2,k=>{S.gB=[0,40,80][k];});
+  mkSeg($('#q5c'),()=>[t('Võng 0,5 m (căng)','Sag 0.5 m (tight)'),t('Võng 1 m','Sag 1 m'),t('Võng 2 m','Sag 2 m')],2,k=>{S.s0=[0.5,1,2][k];});
+  mkSlider($('#sl5a'),{vi:'Nhiệt độ không khí (ray lắp ở 20 °C)',en:'Air temperature (rails laid at 20 °C)',min:-10,max:65,step:1,val:20,unit:'°C',cb:v=>{S.T=v;S.Ta=v;}});
+  mkSlider($('#sl5b'),{vi:'Nhiệt độ không khí (cầu xây ở 20 °C)',en:'Air temperature (bridge built at 20 °C)',min:-10,max:45,step:1,val:20,unit:'°C',cb:v=>{S.T=v;S.Tb=v;}});
+  mkSlider($('#sl5c'),{vi:'Nhiệt độ không khí (dây căng ở 20 °C)',en:'Air temperature (wire strung at 20 °C)',min:-20,max:60,step:1,val:20,unit:'°C',cb:v=>{S.T=v;S.Tc=v;}});
+  function hint(){
+    $('#h5').textContent=[t('Hai thanh ray thép dài 12,5 m. Chọn khe hở lúc lắp, kéo nhiệt độ lên cao và xem điều gì xảy ra ở chỗ nối.','Two 12.5 m steel rails. Choose the gap left when laying, raise the temperature and see what happens at the joint.'),
+      t('Mặt cầu bê tông–thép dài 200 m. Chọn khe co giãn rồi đổi nhiệt độ từ −10 °C đến 45 °C.','A 200 m concrete-and-steel bridge deck. Choose the expansion joint and change the temperature from −10 °C to 45 °C.'),
+      t('Dây đồng dài 100 m giữa hai cột. Chọn độ võng lúc căng dây ở 20 °C, rồi hạ nhiệt độ xuống để xem dây co lại thế nào.','A 100 m copper wire between two poles. Choose the sag when strung at 20 °C, then lower the temperature and watch the wire shorten.'),
+      t('Với mỗi tình huống, chọn đây là công dụng hay tác hại của sự nở vì nhiệt.','For each situation, decide whether it is a use or a harm of thermal expansion.')][S.sc];
+    $('#as5').textContent=[t('Giả thiết: mỗi thanh ray được giữ ở giữa nên hai đầu cùng nở ra; α thép = 12·10⁻⁶ K⁻¹; khe vẽ phóng đại, độ cong vênh chỉ minh hoạ định tính.','Assumptions: each rail is held at its middle so both ends grow; α steel = 12·10⁻⁶ K⁻¹; gap drawn exaggerated, the buckling is only a qualitative illustration.'),
+      t('Giả thiết: mặt cầu một đầu cố định, α = 12·10⁻⁶ K⁻¹; khe vẽ phóng đại.','Assumptions: one end of the deck is fixed, α = 12·10⁻⁶ K⁻¹; joint drawn exaggerated.'),
+      t('Giả thiết: dây đồng α = 17·10⁻⁶ K⁻¹, hai đầu ngang nhau, độ võng gần đúng theo cung parabol; bỏ qua sự đàn hồi và sức gió.','Assumptions: copper wire α = 17·10⁻⁶ K⁻¹, equal-height ends, sag approximated by a parabola; elasticity and wind ignored.'),
+      ''][S.sc];
+  }
+  function sag(T){ const L=100,l0=L+8*S.s0*S.s0/(3*L),dl=l0*17e-6*(T-20), s2=S.s0*S.s0+3*L*dl/8; return s2>0?Math.sqrt(s2):0; }
+  function draw(){
+    const c=CV.begin(); c.fillStyle=COL.lane; c.fillRect(0,0,640,360);
+    // trời theo nhiệt độ
+    const u=clamp((S.T+20)/85,0,1); c.fillStyle='rgb('+Math.round(lerp(150,255,u))+','+Math.round(lerp(190,225,u))+','+Math.round(lerp(235,170,u))+')'; c.globalAlpha=.35; c.fillRect(0,0,640,230); c.globalAlpha=1;
+    if(S.sc===0) drawRail(c); else if(S.sc===1) drawBridge(c); else drawLine(c);
+    tx(c,nf(S.T,0)+' °C',622,30,{size:22,w:700,mono:true,align:'right',color:S.T>40?COL.warn:(S.T<5?COL.accent:COL.ink)});
+  }
+  function drawRail(c){
+    const dL=12.5*12e-6*(S.T-20)*1000, gap=S.gR-dL, exc=Math.max(0,-gap);
+    c.fillStyle='#8a7a6a'; c.fillRect(0,265,640,95);
+    for(let x=15;x<640;x+=26){ c.fillStyle='#6b4a2f'; c.fillRect(x,255,14,34); }
+    const gp=Math.max(gap,0)*9, cx=320, a=exc>0?Math.min(46,10*Math.sqrt(exc)):0;
+    function rail(x0,x1,sgn){ c.fillStyle=COL.metal2; c.strokeStyle='rgba(0,0,0,.55)'; c.lineWidth=1.5; c.beginPath();
+      const N=24; for(let i=0;i<=N;i++){ const x=lerp(x0,x1,i/N), d=a*Math.exp(-Math.pow((x-cx)/90,2)); i?c.lineTo(x,238-d):c.moveTo(x,238-d); }
+      for(let i=N;i>=0;i--){ const x=lerp(x0,x1,i/N), d=a*Math.exp(-Math.pow((x-cx)/90,2)); c.lineTo(x,254-d); } c.closePath(); c.fill(); c.stroke(); }
+    rail(10,cx-gp/2,-1); rail(cx+gp/2,630,1);
+    c.setLineDash([4,3]); c.strokeStyle=COL.ink; c.lineWidth=1.2; if(gp>2){ c.beginPath(); c.moveTo(cx-gp/2,226); c.lineTo(cx+gp/2,226); c.stroke(); } c.setLineDash([]);
+    tx(c,gap>0?t('khe ','gap ')+nf(gap,1)+' mm':(exc>0.05?t('KHE KÍN, ray bị nén: cong vênh!','NO GAP LEFT, rails pressed: buckling!'):t('khe vừa kín','gap just closed')),cx,206,{size:16,w:700,mono:true,align:'center',color:gap>0?COL.ink:COL.warn});
+    tx(c,t('Ray 1 (12,5 m)','Rail 1 (12.5 m)'),130,320,{size:13,color:'#fff',w:600,align:'center'}); tx(c,t('Ray 2 (12,5 m)','Rail 2 (12.5 m)'),510,320,{size:13,color:'#fff',w:600,align:'center'});
+    if(exc>0.05) S.flags.rail=1;
+    S.cur={r:[dL,gap,exc]};
+  }
+  function drawBridge(c){
+    const dL=200*12e-6*(S.T-20)*1000, gap=S.gB-dL, PX=1.6, crack=gap<=0;
+    c.fillStyle='#5a8cc0'; c.fillRect(0,300,640,60); // sông
+    c.fillStyle=COL.metal2; c.fillRect(40,150,60,170); c.fillRect(540,150,60,170); // mố
+    c.fillStyle=COL.metal2; c.fillRect(300,225,26,95);
+    const ex=100+Math.max(gap,0)*PX;
+    c.fillStyle=COL.metal; c.fillRect(ex,150,540-ex,22); c.strokeStyle='rgba(0,0,0,.5)'; c.lineWidth=1.5; c.strokeRect(ex,150,540-ex,22);
+    for(let x=ex+20;x<540;x+=40){ c.beginPath(); c.moveTo(x,150); c.lineTo(x+20,120); c.lineTo(x+40,150); c.strokeStyle=COL.metal2; c.stroke(); }
+    if(crack){ c.strokeStyle=COL.warn; c.lineWidth=3; c.beginPath(); c.moveTo(100,128); c.lineTo(112,148); c.lineTo(98,170); c.lineTo(112,200); c.stroke(); tx(c,t('Mặt cầu bị ép vào mố: NỨT, VỠ!','Deck jammed against the abutment: CRACKS!'),320,92,{size:17,w:800,color:COL.warn,align:'center'}); S.flags.bridge=1; }
+    else tx(c,t('khe co giãn ','expansion joint ')+nf(gap,0)+' mm',150,120,{size:16,w:700,mono:true,align:'center'});
+    c.setLineDash([4,3]); c.strokeStyle=COL.ink; c.lineWidth=1.2; if(!crack&&gap>1){ c.beginPath(); c.moveTo(100,186); c.lineTo(ex,186); c.stroke(); } c.setLineDash([]);
+    tx(c,t('Mố cầu','Abutment'),70,142,{size:13,color:COL.muted,align:'center'}); tx(c,t('Trụ (đầu phải cố định)','Pier (right end fixed)'),570,142,{size:13,color:COL.muted,align:'center'});
+    S.cur={b:[dL,gap]};
+  }
+  function drawLine(c){
+    const s=sag(S.T), taut=s<0.05, PX=40, x0=110, x1=530, y0=80;
+    c.fillStyle='#8a7a6a'; c.fillRect(0,320,640,40);
+    c.fillStyle='#6b4a2f'; c.fillRect(x0-8,y0-6,16,244); c.fillRect(x1-8,y0-6,16,244);
+    c.fillStyle=COL.wood; c.fillRect(x0-34,y0,68,8); c.fillRect(x1-34,y0,68,8);
+    c.strokeStyle=taut?COL.warn:COL.ink; c.lineWidth=taut?3:3.2; c.setLineDash(taut?[8,5]:[]); c.beginPath();
+    for(let i=0;i<=40;i++){ const x=lerp(x0,x1,i/40), y=y0+4*s*PX*(i/40)*(1-i/40); i?c.lineTo(x,y):c.moveTo(x,y);} c.stroke(); c.setLineDash([]);
+    tx(c,t('võng ','sag ')+nf(s,2)+' m',320,y0+s*PX+26,{size:16,w:700,mono:true,align:'center'});
+    if(taut){ tx(c,t('Dây bị kéo căng hết cỡ: dễ ĐỨT!','Wire stretched taut: it may SNAP!'),320,196,{size:18,w:800,color:COL.warn,align:'center'}); S.flags.line=1; }
+    S.cur={l:[s]};
+  }
+  const CARDS=[
+    ['Nhiệt kế thuỷ ngân, nhiệt kế rượu dùng sự nở của chất lỏng để đo nhiệt độ.','A mercury or alcohol thermometer uses the expansion of a liquid to measure temperature.',1,'Công dụng: chất lỏng nở đều theo nhiệt độ nên mực dâng cho biết nhiệt độ.','Use: the liquid expands steadily with temperature so its level shows the temperature.'],
+    ['Băng kép trong ấm điện, bàn là tự ngắt mạch khi đủ nóng.','The bimetallic strip in a kettle or iron breaks the circuit when hot enough.',1,'Công dụng: hai kim loại nở khác nhau làm băng kép cong để ngắt/nối mạch.','Use: two metals expanding differently bend the strip to break or make the circuit.'],
+    ['Đường ray cong vênh trong ngày nắng nóng.','A railway line buckling on a very hot day.',0,'Tác hại: ray bị cản không nở được nên cong vênh, nguy hiểm cho tàu.','Harm: the rail cannot expand freely, so it buckles, endangering trains.'],
+    ['Nung nóng vòng sắt rồi lắp vào bánh xe gỗ; nguội đi vòng siết chặt.','Heating an iron tyre and fitting it onto a wooden wheel; as it cools it grips tightly.',1,'Công dụng: vòng nóng nở rộng nên lắp vừa; nguội đi co lại ôm chặt bánh.','Use: the hot tyre is larger and slips on; as it cools it shrinks and grips the wheel.'],
+    ['Rót nước sôi vào cốc thuỷ tinh dày làm cốc nứt.','Pouring boiling water into a thick glass makes it crack.',0,'Tác hại: mặt trong nóng nở trước, mặt ngoài còn lạnh, nở không đều nên nứt.','Harm: the inner face expands first while the outer face is cold; the unequal expansion cracks it.'],
+    ['Tán đinh nóng: đinh tán nóng đỏ nguội đi co lại, kéo hai tấm thép ép sát.','Hot riveting: a red-hot rivet shrinks as it cools and pulls the steel plates tight together.',1,'Công dụng: đinh nguội co lại, siết chặt hai tấm.','Use: the cooling rivet contracts and clamps the plates.'],
+    ['Dây điện mùa đông căng thẳng, dễ đứt hoặc kéo nghiêng cột.','Power lines in winter pulled tight, liable to snap or pull poles over.',0,'Tác hại: dây co ngắn lại khi lạnh; nếu căng sẵn thì bị kéo đứt. Vì vậy phải để dây võng.','Harm: the wire shortens in the cold; if already tight it is pulled apart. That is why wires are left sagging.'],
+    ['Hơ nóng nắp kim loại của lọ thuỷ tinh để mở dễ hơn.','Warming the metal lid of a glass jar to open it more easily.',1,'Công dụng: nắp kim loại nở nhiều hơn miệng lọ thuỷ tinh nên lỏng ra.','Use: the metal lid expands more than the glass neck, so it loosens.']];
+  function buildCards(){
+    const sc=Object.values(S.cls).filter(x=>x.ok).length, nn=Object.keys(S.cls).length;
+    $('#cls5').innerHTML='<p class="muted">'+t('Đã làm đúng ','Correct: ')+sc+' / '+CARDS.length+'</p><div class="cards">'+CARDS.map((x,i)=>{
+      const d=S.cls[i];
+      return '<div class="cl'+(d?' done':'')+'"><p>'+t(x[0],x[1])+'</p>'+(d?'<div class="fb">'+(d.ok?'✓ ':'✗ ')+t(x[3],x[4])+'</div>':'<div class="row"><button class="btn" data-c="'+i+'" data-v="1">'+t('Công dụng','Use')+'</button><button class="btn" data-c="'+i+'" data-v="0">'+t('Tác hại','Harm')+'</button></div>')+'</div>';}).join('')+'</div>';
+    if(nn===CARDS.length&&sc>=6) S.flags.cls=1;
+  }
+  $('#cls5').addEventListener('click',e=>{ const b=e.target.closest('button[data-c]'); if(!b) return; const i=+b.dataset.c; S.cls[i]={ok:(+b.dataset.v===CARDS[i][2])}; buildCards(); });
+  function readout(){
+    const c=S.cur||{};
+    if(S.sc===0&&c.r) kv($('#o5'),[['Nhiệt độ','Temperature',nf(S.T,0)+' °C'],['Ray 1 dài thêm','Rail 1 extra length',nf(c.r[0],1)+' mm'],['Khe còn lại','Gap left',nf(Math.max(c.r[1],0),1)+' mm'],['Phần bị nén (ép)','Squeezed part',nf(c.r[2],1)+' mm']]);
+    if(S.sc===1&&c.b) kv($('#o5'),[['Nhiệt độ','Temperature',nf(S.T,0)+' °C'],['Mặt cầu dài thêm','Deck extra length',nf(c.b[0],0)+' mm'],['Khe còn lại','Joint left',nf(Math.max(c.b[1],0),0)+' mm']]);
+    if(S.sc===2&&c.l) kv($('#o5'),[['Nhiệt độ','Temperature',nf(S.T,0)+' °C'],['Độ võng','Sag',nf(c.l[0],2)+' m'],['Độ võng lúc 20 °C','Sag at 20 °C',nf(S.s0,1)+' m']]);
+    $('#st5').textContent=S.sc===0?t('Tăng nhiệt độ rồi so sánh khe 0 mm, 4 mm và 8 mm.','Raise the temperature and compare gaps of 0, 4 and 8 mm.'):S.sc===1?t('Thử hạ nhiệt độ xuống −10 °C để xem khe rộng ra.','Try lowering the temperature to −10 °C and see the joint open.'):t('Thử chọn võng 0,5 m rồi hạ nhiệt độ xuống thấp.','Try a 0.5 m sag then lower the temperature.');
+    if(Object.keys(S.flags).length>=2) unlock('5');
+    if(S.sc===3) buildCards();
+  }
+  hint(); buildCards(); readout();
+  return {refresh(){hint();readout();},
+    frame(dt){ S.ph+=dt; if(S.sc!==3) draw(); if((S.acc+=dt)>0.15){S.acc=0; if(S.sc!==3) readout();} }};
+})();
+/* ============ TAB 6: Đo năng lượng nhiệt bằng joulemeter ============ */
+VID[6]=[
+ {id:'YFt6ZnO6oUI',k:'tn',f:'tab6-joulemeter',t:'Determining Specific Heat Capacity with a Joulemeter (AQA GCSE required practical)',look:['số chỉ joulemeter (J) và nhiệt độ ghi lại theo thời gian.','the joulemeter reading (J) and the temperature recorded as time passes.']},
+ {id:'sEjF4R5B8C4',k:'tn',f:'tab6-khoi-kim-loai',t:'Specific Heat Capacity of a Metal Block (GCSE Physics required practical)',look:['khối kim loại có lỗ cho dây đốt và nhiệt kế, bọc cách nhiệt.','the metal block with holes for the heater and thermometer, wrapped in insulation.']}];
+build(6,{
+ req:'<b>'+I('Yêu cầu cần đạt (KHTN 8, Nhiệt): ','Learning goal (Grade 8, Heat): ')+'</b>'+I('đo được năng lượng nhiệt mà vật nhận được khi bị đun nóng bằng joulemeter hoặc oát kế; nêu được khi vật nóng lên, các phân tử chuyển động nhanh hơn và nội năng tăng.','measure the thermal energy an object receives when heated, using a joulemeter or a wattmeter; state that when an object warms its molecules move faster and its internal energy increases.'),
+ stage:
+  '<p class="hint">'+I('Hai vật A và B được đun bằng dây đốt cùng công suất. Joulemeter đo năng lượng điện đã cung cấp. Bấm “Bắt đầu”, chọn tốc độ thời gian, và “Ghi số liệu” vài lần.','Samples A and B are heated by identical heaters. The joulemeter measures the electrical energy supplied. Press “Start”, choose the time speed and “Record” a few readings.')+'</p>'+
+  '<canvas id="cv6a" aria-label="two samples heated with a joulemeter"></canvas>'+
+  '<div class="controls"><button class="btn primary" id="b6go"></button><button class="btn" id="b6rec">'+I('Ghi số liệu','Record')+'</button><button class="btn" id="b6rst">'+I('Đặt lại','Reset')+'</button><div class="seg" id="sp6"></div></div>'+
+  '<p class="status" id="st6"></p>'+
+  '<canvas id="cv6b" aria-label="temperature versus energy"></canvas>'+
+  '<p class="fine">'+I('Giả thiết: nhiệt độ mỗi vật đều trong toàn vật, khuấy đều; hao phí tỉ lệ với hiệu nhiệt độ so với phòng (20 °C): 0,8 W/K không cách nhiệt, 0,08 W/K có cách nhiệt; mô phỏng dừng khi một vật tới 95 °C. Dụng cụ đã loại bỏ thời gian trễ của dây đốt.','Assumptions: each sample is at one uniform temperature (stirred); the loss is proportional to the excess over room temperature (20 °C): 0.8 W/K uninsulated, 0.08 W/K insulated; the run stops when a sample reaches 95 °C. Heater warm-up delay is ignored.')+'</p>',
+ side:
+  '<div class="card"><h2>'+I('Vật A','Sample A')+'</h2><div class="seg" id="sa6"></div><div id="sl6a"></div></div>'+
+  '<div class="card"><h2>'+I('Vật B','Sample B')+'</h2><div class="seg" id="sb6"></div><div id="sl6b"></div></div>'+
+  '<div class="card"><h2>'+I('Nguồn điện và cách nhiệt','Power and insulation')+'</h2><div id="sl6p"></div><label class="chk"><input type="checkbox" id="k6ins"> <span>'+I('Bọc cách nhiệt (giảm hao phí)','Wrap in insulation (less loss)')+'</span></label></div>'+
+  '<div class="card"><h2>'+I('Số liệu đang đo','Live readings')+'</h2><dl class="kv" id="o6"></dl></div>'+
+  '<div class="card"><h2>'+I('Các lần ghi','Recorded readings')+'</h2><div class="tblwrap"><table class="log" id="tb6"></table></div></div>'+
+  predict('6a',I('A và B cùng khối lượng 0,5 kg, cùng nhận 10 000 J từ joulemeter. Vật nào nóng lên nhiều hơn: nước hay nhôm?','A and B both have a mass of 0.5 kg and both receive 10 000 J from the joulemeter. Which warms up more: water or aluminium?'),
+    [I('nước','water'),I('nhôm','aluminium'),I('như nhau','the same')],1,
+    I('Cùng năng lượng nhưng mỗi chất cần năng lượng khác nhau để tăng 1 °C: nhôm cần ít hơn nước nên nóng nhanh hơn (đặt A là nước, B là nhôm, 0,5 kg và chạy đến 10 kJ để kiểm tra).','The same energy, but each substance needs a different amount of energy to rise by 1 °C: aluminium needs less than water, so it heats faster (set A to water, B to aluminium, 0.5 kg each, and run to 10 kJ to check).'))+
+  predict('6b',I('Khối lượng nước gấp đôi, nhận cùng năng lượng từ joulemeter. Độ tăng nhiệt độ sẽ…','The mass of water is doubled while it receives the same energy from the joulemeter. The temperature rise will be…'),
+    [I('gấp đôi','doubled'),I('như cũ','unchanged'),I('chỉ còn một nửa','halved')],2,
+    I('Nhiều nước hơn thì cần nhiều năng lượng hơn để nóng thêm cùng một độ: độ tăng nhiệt độ giảm còn một nửa.','More water needs more energy for the same rise: the temperature rise is halved.'))+
+  concl('6','<p>'+I('1) Số chỉ joulemeter (J) cho biết năng lượng đã cung cấp. Năng lượng càng nhiều thì vật càng nóng, các phân tử chuyển động nhanh hơn, nội năng tăng.','1) The joulemeter reading (J) tells the energy supplied. The more energy, the hotter the object: its molecules move faster and its internal energy rises.')+'</p><p>'+I('2) Để tăng cùng một nhiệt độ, vật có khối lượng lớn hơn cần nhiều năng lượng hơn; các chất khác nhau cần năng lượng khác nhau.','2) To raise the temperature by the same amount a larger mass needs more energy, and different substances need different amounts.')+'</p><p>'+I('3) Một phần năng lượng bị hao phí ra môi trường; bọc cách nhiệt làm giảm hao phí.','3) Some energy is lost to the surroundings; insulation reduces that loss.')+'</p>')+
+  '<details><summary>'+I('Mở rộng (không bắt buộc): so với m·c·Δt','Extension (optional): compare with m·c·Δt')+'</summary><div class="tblwrap"><table class="log" id="tb6x"></table></div><p class="fine">'+I('Năng lượng nhiệt vật nhận được Q = m·c·Δt, c là nhiệt dung riêng. Chênh lệch giữa số chỉ joulemeter và Q là phần hao phí.','The thermal energy gained is Q = m·c·Δt, c is the specific heat capacity. The gap between the joulemeter reading and Q is the lost energy.')+'</p></details>',
+ mech:
+  '<p>'+I('Joulemeter đo năng lượng điện chuyển hoá qua dây đốt: E = P·t (P là công suất oát kế đo được, t là thời gian). Dây đốt tăng nội năng của vật bằng cách truyền năng lượng nhiệt: các phân tử của vật chuyển động hỗn loạn nhanh hơn, động năng trung bình của phân tử tăng nên nhiệt độ tăng. Do một phần năng lượng truyền ra không khí và cốc nên năng lượng nhiệt vật nhận được nhỏ hơn số chỉ joulemeter; bọc cách nhiệt giảm phần hao phí. Cùng năng lượng nhưng nhiệt độ tăng khác nhau vì mỗi chất, mỗi khối lượng, có “sức chứa nhiệt” khác nhau.','The joulemeter measures the electrical energy transferred in the heating element: E = P·t (P is the power read by a wattmeter, t the time). The element raises the object’s internal energy by transferring thermal energy: the molecules move faster and more randomly, their mean kinetic energy rises and so does the temperature. Because some energy leaks to the air and the container, the thermal energy the object gains is less than the joulemeter reading; insulation reduces the loss. The same energy gives different temperature rises because each substance, and each mass, has a different “capacity for heat”.')+'</p>',
+ simple:
+  '<p>'+I('Joulemeter như một cái “đồng hồ đếm tiền điện” bằng đơn vị J. Năng lượng đi vào vật làm các hạt rung nhanh hơn nên vật nóng lên. Giống như đổ nước vào các chậu: chậu to (khối lượng lớn) cần đổ nhiều nước mới đầy thêm một vạch; một số chậu (chất khác) hẹp hơn nên đầy nhanh hơn.','A joulemeter is like an electricity meter counting in joules. Energy flowing in makes the particles jiggle faster, so the object warms. Like pouring water into basins: a bigger basin (more mass) needs more water to rise one mark, and some basins (other substances) are narrower and fill faster.')+'</p>',
+ wrong:
+  '<ul><li>'+I('“Nhiệt độ chính là năng lượng nhiệt.” Sai: nhiệt độ cho biết mức nóng, còn năng lượng nhiệt phụ thuộc cả khối lượng và chất.','“Temperature is thermal energy.” Wrong: temperature tells how hot; thermal energy also depends on the mass and the substance.')+'</li><li>'+I('“Toàn bộ điện năng thành nhiệt trong vật.” Một phần hao phí ra môi trường.','“All the electrical energy ends up in the object.” Some is lost to the surroundings.')+'</li><li>'+I('“Vật dẫn nhiệt tốt thì tích được nhiều nhiệt.” Dẫn nhiệt tốt khác với chứa nhiệt nhiều.','“A good conductor stores more heat.” Conducting heat well is different from holding much heat.')+'</li></ul>',
+ word:
+  '<table class="etym"><tr><td>joule</td><td>'+I('Đặt theo James Prescott Joule (Anh, 1818–1889), người chứng minh công và nhiệt là hai dạng của năng lượng. Hán Việt phiên âm 焦耳 (Tiêu Nhĩ).','Named after James Prescott Joule (England, 1818–1889), who showed that work and heat are forms of energy. Chinese transliteration 焦耳 (Jiāo’ěr).')+'</td></tr><tr><td>watt / '+I('oát','watt')+'</td><td>'+I('Theo James Watt, nhà phát minh máy hơi nước. Hán 瓦特 (ngõa đặc); “oát” phiên âm theo tiếng Pháp/Anh.','After James Watt, the steam-engine inventor. Chinese 瓦特; Vietnamese “oát” is a phonetic spelling.')+'</td></tr><tr><td>'+I('nội năng 內能','internal energy')+'</td><td>'+I('內 (nội, bên trong) + 能 (năng, khả năng): năng lượng ở bên trong vật, gồm động năng và thế năng của các phân tử.','內 (inside) + 能 (energy, ability): the energy inside an object, from the kinetic and potential energy of its molecules.')+'</td></tr><tr><td>-meter</td><td>'+I('Hy Lạp metron = đo; joulemeter, wattmeter (oát kế), thermometer đều có đuôi này.','Greek metron = measure; joulemeter, wattmeter and thermometer share it.')+'</td></tr></table>'
+});
+
+TABS[6]=(function(){
+  const SUBS=[{vi:'Nước',en:'Water',c:4180,rho:1000,liq:1,col:'#4aa3e0'},{vi:'Dầu ăn',en:'Cooking oil',c:2000,rho:920,liq:1,col:'#e2b53a'},{vi:'Nhôm',en:'Aluminium',c:880,rho:2700,liq:0,col:'#a8bacd'},{vi:'Đồng',en:'Copper',c:385,rho:8960,liq:0,col:'#d9803a'}];
+  const A=mkCanvas($('#cv6a'),640,350), G=mkCanvas($('#cv6b'),640,280);
+  const S={a:{sub:0,m:0.5,T:20,h:[]},b:{sub:2,m:0.5,T:20,h:[]},P:50,E:0,t:0,run:false,sp:60,ins:false,rows:[],stopped:false,acc:0,ha:0};
+  mkSeg($('#sa6'),()=>SUBS.map(s=>t(s.vi,s.en)),0,k=>{S.a.sub=k;rst();});
+  mkSeg($('#sb6'),()=>SUBS.map(s=>t(s.vi,s.en)),2,k=>{S.b.sub=k;rst();});
+  mkSlider($('#sl6a'),{vi:'Khối lượng A',en:'Mass of A',min:0.1,max:1,step:0.1,val:0.5,dec:1,unit:'kg',cb:v=>{S.a.m=v;rst();}});
+  mkSlider($('#sl6b'),{vi:'Khối lượng B',en:'Mass of B',min:0.1,max:1,step:0.1,val:0.5,dec:1,unit:'kg',cb:v=>{S.b.m=v;rst();}});
+  mkSlider($('#sl6p'),{vi:'Công suất dây đốt P',en:'Heater power P',min:12,max:50,step:2,val:50,unit:'W',cb:v=>{S.P=v;rst();}});
+  mkSeg($('#sp6'),()=>['×1','×10','×60','×300'],2,k=>{S.sp=[1,10,60,300][k];});
+  $('#k6ins').onchange=e=>{S.ins=e.target.checked;rst();};
+  function rst(){ S.a.T=20;S.b.T=20;S.a.h=[];S.b.h=[];S.E=0;S.t=0;S.run=false;S.stopped=false;S.rows=[];S.ha=0; label(); readout(); }
+  function label(){ $('#b6go').textContent=S.run?t('Tạm dừng','Pause'):t('Bắt đầu','Start'); }
+  $('#b6go').onclick=()=>{ if(S.stopped) return; S.run=!S.run; label(); };
+  $('#b6rst').onclick=rst;
+  $('#b6rec').onclick=()=>{ if(S.t<=0) return; S.rows.push({t:S.t,E:S.E,Ta:S.a.T,Tb:S.b.T}); if(S.rows.length>=3) unlock('6'); readout(); };
+  const k=()=>S.ins?0.08:0.8;
+  function step(dt){
+    [S.a,S.b].forEach(o=>{ const s=SUBS[o.sub]; o.T+=(S.P-k()*(o.T-20))/(o.m*s.c)*dt; });
+    S.E+=S.P*dt; S.t+=dt;
+  }
+  function sample(c,o,cx,name){
+    const s=SUBS[o.sub], base=300, T=o.T;
+    if(s.liq){
+      const V=o.m/s.rho*1000, h=24+V*72; // lít -> px
+      rr(c,cx-62,base-124,124,124,6); c.fillStyle='rgba(255,255,255,.18)'; c.fill();
+      c.fillStyle=s.col; c.globalAlpha=.8; c.fillRect(cx-60,base-h,120,h-2); c.globalAlpha=1;
+      c.strokeStyle=COL.ink; c.lineWidth=2.5; c.beginPath(); c.moveTo(cx-62,base-124); c.lineTo(cx-62,base); c.lineTo(cx+62,base); c.lineTo(cx+62,base-124); c.stroke();
+    } else {
+      const side=Math.cbrt(o.m/s.rho)*100*13; // cm -> px
+      rr(c,cx-side/2,base-side,side,side,5); c.fillStyle=s.col; c.fill(); c.strokeStyle='rgba(0,0,0,.5)'; c.lineWidth=2; c.stroke();
+      c.fillStyle='rgba(0,0,0,.35)'; c.fillRect(cx-side*0.3,base-side,5,side*0.45); c.fillRect(cx+side*0.15,base-side,5,side*0.45);
+    }
+    const hot=clamp((T-20)/75,0,1);
+    // dây đốt (đỏ) và nhiệt kế
+    c.strokeStyle='rgb('+Math.round(lerp(120,255,hot))+','+Math.round(lerp(120,50,hot))+',40)'; c.lineWidth=5; c.beginPath(); c.moveTo(cx-24,base-140); c.lineTo(cx-24,base-30); c.stroke();
+    c.strokeStyle=COL.ink; c.lineWidth=3; c.beginPath(); c.moveTo(cx+24,base-146); c.lineTo(cx+24,base-24); c.stroke();
+    c.fillStyle='#d6362f'; c.fillRect(cx+22,base-24-clamp((T-10)/90,0,1)*96,4,clamp((T-10)/90,0,1)*96);
+    if(S.ins){ c.setLineDash([6,4]); c.strokeStyle=COL.muted; c.lineWidth=5; c.strokeRect(cx-76,base-138,152,142); c.setLineDash([]); }
+    tx(c,name+': '+t(s.vi,s.en)+' '+nf(o.m,1)+' kg',cx,334,{size:15,w:700,align:'center'});
+    tx(c,nf(T,1)+' °C',cx,base-158,{size:22,w:700,mono:true,align:'center',color:T>60?COL.warn:COL.ink});
+  }
+  function drawScene(){
+    const c=A.begin(); c.fillStyle=COL.lane; c.fillRect(0,0,640,350); c.fillStyle=COL.line; c.fillRect(0,301,640,6);
+    // joulemeter
+    rr(c,245,22,150,100,10); c.fillStyle=COL.space; c.fill(); c.strokeStyle=COL.metal; c.lineWidth=2.5; c.stroke();
+    tx(c,'JOULEMETER',320,40,{size:12,w:700,color:COL.star,align:'center'});
+    tx(c,nf(S.E,0)+' J',320,78,{size:28,w:700,mono:true,align:'center',color:'#7dffa1'});
+    tx(c,'P = '+nf(S.P,0)+' W · t = '+nf(S.t,0)+' s',320,104,{size:13,mono:true,align:'center',color:COL.star});
+    c.strokeStyle=S.run?'#ff4020':COL.muted; c.lineWidth=3; c.beginPath(); c.moveTo(290,122); c.bezierCurveTo(290,170,150,120,142,160); c.moveTo(350,122); c.bezierCurveTo(350,170,490,120,498,160); c.stroke();
+    sample(c,S.a,150,'A'); sample(c,S.b,490,'B');
+  }
+  function drawGraph(){
+    const g=G.begin(); g.fillStyle=COL.lane; g.fillRect(0,0,640,280);
+    const xm=Math.max(10,Math.ceil(S.E/1000*1.25/5)*5), Tm=Math.max(40,Math.ceil(Math.max(S.a.T,S.b.T)*1.1/10)*10);
+    const ax=axes(g,{x:64,y:30,w:540,h:196},[0,xm,xm/5],[20,Tm,(Tm-20)/4],t('E (kJ)','E (kJ)'),t('T (°C)','T (°C)'),0,0);
+    [[S.a,COL.laneA,'A'],[S.b,COL.laneB,'B']].forEach(([o,col,nm])=>{
+      g.strokeStyle=col; g.lineWidth=3; g.beginPath(); o.h.forEach((p,i)=>{ const x=ax.X(p[0]/1000),y=ax.Y(p[1]); i?g.lineTo(x,y):g.moveTo(x,y); }); g.stroke();
+      g.beginPath(); g.arc(ax.X(S.E/1000),ax.Y(o.T),6,0,Math.PI*2); g.fillStyle=col; g.fill(); g.strokeStyle=COL.ink; g.lineWidth=1.5; g.stroke();
+      tx(g,nm+' = '+t(SUBS[o.sub].vi,SUBS[o.sub].en),84,50+(nm==='A'?0:20),{size:13,w:700,color:col});
+    });
+    S.rows.forEach(r=>{ [[r.Ta,COL.laneA],[r.Tb,COL.laneB]].forEach(([T,col])=>{ g.beginPath(); g.rect(ax.X(r.E/1000)-4,ax.Y(T)-4,8,8); g.fillStyle=col; g.fill(); g.strokeStyle=COL.ink; g.lineWidth=1.5; g.stroke(); }); });
+  }
+  function readout(){
+    const qa=S.a.m*SUBS[S.a.sub].c*(S.a.T-20), qb=S.b.m*SUBS[S.b.sub].c*(S.b.T-20);
+    kv($('#o6'),[['Số chỉ joulemeter E','Joulemeter reading E',nf(S.E,0)+' J'],['Thời gian','Time',nf(S.t,0)+' s'],['Nhiệt độ A','Temperature A',nf(S.a.T,1)+' °C (+'+nf(S.a.T-20,1)+')'],['Nhiệt độ B','Temperature B',nf(S.b.T,1)+' °C (+'+nf(S.b.T-20,1)+')']]);
+    $('#tb6').innerHTML='<tr><th>#</th><th>t (s)</th><th>E (J)</th><th>T A (°C)</th><th>T B (°C)</th></tr>'+(S.rows.map((r,i)=>'<tr><td>'+(i+1)+'</td><td>'+nf(r.t,0)+'</td><td>'+nf(r.E,0)+'</td><td>'+nf(r.Ta,1)+'</td><td>'+nf(r.Tb,1)+'</td></tr>').join('')||'<tr><td colspan="5" class="t">'+t('Chưa ghi lần nào.','Nothing recorded yet.')+'</td></tr>');
+    const fq=(q)=>nf(q,0);
+    $('#tb6x').innerHTML='<tr><th></th><th>E (J)</th><th>Q = m·c·Δt (J)</th><th>'+t('hao phí (J)','lost (J)')+'</th></tr>'+
+      [['A',qa],['B',qb]].map(x=>'<tr><td class="t">'+x[0]+'</td><td>'+fq(S.E)+'</td><td>'+fq(x[1])+'</td><td>'+fq(S.E-x[1])+'</td></tr>').join('');
+    $('#st6').textContent=S.stopped?t('Đã dừng vì một vật đạt 95 °C. Bấm “Đặt lại” để làm lại.','Stopped because a sample reached 95 °C. Press “Reset” to start again.'):
+      (S.t<=0?t('Bấm “Bắt đầu” để đun.','Press “Start” to heat.'):(S.E<2000?t('Quan sát: E tăng thì nhiệt độ hai vật tăng, nhưng không như nhau.','Notice: as E grows both temperatures rise, but not equally.'):t('Ghi vài số liệu rồi so sánh độ tăng nhiệt độ của A và B với cùng E.','Record a few readings and compare the temperature rise of A and B for the same E.')));
+  }
+  label(); readout();
+  return {refresh(){label();readout();},
+    frame(dt){
+      if(S.run&&!S.stopped){
+        let rem=dt*S.sp; while(rem>1e-9){ const st=Math.min(rem,1); rem-=st; step(st); S.ha+=st;
+          if(S.ha>=Math.max(1,S.sp/6)||S.a.h.length===0){ S.ha=0; S.a.h.push([S.E,S.a.T]); S.b.h.push([S.E,S.b.T]); if(S.a.h.length>2500){S.a.h.shift();S.b.h.shift();} }
+          if(S.a.T>=95||S.b.T>=95){ S.run=false; S.stopped=true; label(); break; } }
+      }
+      drawScene(); drawGraph(); if((S.acc+=dt)>0.15){S.acc=0;readout();}
+    }};
+})();
+
+/* ============ Khởi động ============ */
+applyLang();
+showTab(1);
+requestAnimationFrame(t0=>{ last=t0; loop(t0); });
+</script>
+</body>
+</html>

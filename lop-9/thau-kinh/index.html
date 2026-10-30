@@ -1,0 +1,1926 @@
+<title>Thấu kính và sự tạo ảnh</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Bàn quang học: sân khấu canvas bên trái (giá quang học, tia sáng), sổ ghi chép bên phải; màn hứng ảnh là "phòng tối" luôn tối ở cả hai chế độ màu. Điện thoại xếp một cột. */
+:root{
+  --bg:#eef1f6; --panel:#ffffff; --lane:#f4f6fa; --ink:#121826; --muted:#566079; --line:#cfd6e3;
+  --accent:#2a4fb5; --accent-ink:#ffffff; --ok:#16834a; --warn:#c2410c;
+  --r1:#e2560f; --r2:#0e7c86; --r3:#9b2fae; --beam:#ee8a00;
+  --obj:#1d5fbf; --img:#c62a47; --glass:#bfe3f5; --glass2:#a5d4ee; --glass-edge:#3e8fc0;
+  --mask:#3b3f47; --axis:#7d879c; --grid:#e3e8f0; --wax:#e9dcc3; --flame:#ff9d1f; --zone1:#fde7c8; --zone2:#e2ecfb;
+  --room:#0f1216; --room-ink:#cfd6e3; --room-line:#2a313b; --screen:#1d2229; --skin:#e0b08a; --iris:#7a4a22; --wall:#d8d2c4; --floor:#b9b2a3;
+  --font-ui:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-num:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Consolas,monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0e1219; --panel:#161c26; --lane:#121822; --ink:#e4e9f2; --muted:#98a3b8; --line:#2a3344;
+  --accent:#86a0ff; --accent-ink:#0b1430; --ok:#45c47d; --warn:#f08a4b;
+  --r1:#ff8a4c; --r2:#38c2cc; --r3:#d27ae6; --beam:#ffb340;
+  --obj:#6aa6ff; --img:#ff6b85; --glass:#24475d; --glass2:#2d5670; --glass-edge:#6cbfe8;
+  --mask:#5a606b; --axis:#7c879d; --grid:#1f2735; --wax:#d9cbb0; --flame:#ffa733; --zone1:#3a2d18; --zone2:#1a2a44;
+  --room:#090b0e; --room-ink:#cfd6e3; --room-line:#262c35; --screen:#191d23; --skin:#d9a77f; --iris:#b07a4a; --wall:#4a463e; --floor:#3a362f;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1219; --panel:#161c26; --lane:#121822; --ink:#e4e9f2; --muted:#98a3b8; --line:#2a3344;
+  --accent:#86a0ff; --accent-ink:#0b1430; --ok:#45c47d; --warn:#f08a4b;
+  --r1:#ff8a4c; --r2:#38c2cc; --r3:#d27ae6; --beam:#ffb340;
+  --obj:#6aa6ff; --img:#ff6b85; --glass:#24475d; --glass2:#2d5670; --glass-edge:#6cbfe8;
+  --mask:#5a606b; --axis:#7c879d; --grid:#1f2735; --wax:#d9cbb0; --flame:#ffa733; --zone1:#3a2d18; --zone2:#1a2a44;
+  --room:#090b0e; --room-ink:#cfd6e3; --room-line:#262c35; --screen:#191d23; --skin:#d9a77f; --iris:#b07a4a; --wall:#4a463e; --floor:#3a362f;
+  color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-ui);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px 40px}
+.wrap{max-width:1320px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.eyebrow{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{margin:0;font-size:clamp(25px,3.4vw,36px);line-height:1.15;font-weight:800;text-wrap:balance;letter-spacing:-.01em}
+h2{margin:0;font-size:17px;font-weight:700;text-wrap:balance}
+h3{margin:0;font-size:15px;font-weight:700}
+.hdr-ctl{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{font:inherit;font-weight:600;font-size:15px;min-height:44px;padding:8px 14px;border-radius:8px;border:1px solid var(--line);
+  background:var(--panel);color:var(--ink);cursor:pointer;touch-action:manipulation}
+.btn:hover{border-color:var(--accent)}
+.btn:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel);max-width:100%}
+.seg .btn{border:0;border-radius:0;min-width:48px;padding:8px 12px}
+.seg .btn+.btn{border-left:1px solid var(--line)}
+.seg.full{display:flex}
+.seg.full .btn{flex:1 1 0;min-width:0}
+nav.tabs{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line)}
+nav.tabs button{font:inherit;font-size:15px;font-weight:600;white-space:nowrap;min-height:46px;padding:8px 14px;border:0;border-bottom:3px solid transparent;
+  background:none;color:var(--muted);cursor:pointer;margin-bottom:-1px}
+nav.tabs button.on{color:var(--ink);border-bottom-color:var(--accent)}
+.req{margin:0;font-size:14px;color:var(--muted);max-width:110ch}
+.req b{color:var(--ink);font-weight:600}
+.lab{display:grid;grid-template-columns:minmax(0,1fr) 370px;gap:14px;align-items:start}
+@media (max-width:1020px){.lab{grid-template-columns:minmax(0,1fr)}}
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.col{display:flex;flex-direction:column;gap:12px;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card p{margin:0}
+.card.predict{border-color:var(--accent);border-width:2px}
+canvas{display:block;width:100%;touch-action:none;border-radius:8px;background:var(--lane)}
+canvas.room{background:var(--room);touch-action:pan-y}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.hint{font-size:14px;color:var(--muted);margin:0}
+.status{font-size:16px;font-weight:600;margin:0;min-height:24px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.fld{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--muted);font-weight:600;min-width:0}
+.fld .val{color:var(--ink);font-family:var(--font-num);font-size:15px}
+.ends{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);font-weight:500;margin-top:-4px}
+input[type=range]{width:100%;min-width:0;height:32px;accent-color:var(--accent)}
+input[type=number]{font:inherit;font-family:var(--font-num);font-size:16px;min-height:44px;width:110px;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:var(--lane);color:var(--ink)}
+.chk{display:flex;align-items:center;gap:10px;font-size:15px;min-height:44px;cursor:pointer;color:var(--ink);font-weight:500}
+.chk input{width:22px;height:22px;accent-color:var(--accent);flex:none}
+.num{font-family:var(--font-num);font-variant-numeric:tabular-nums}
+.choices{display:flex;flex-wrap:wrap;gap:6px}
+.choices .btn{flex:1 1 120px;font-size:14px}
+.choices .btn.right{border-color:var(--ok);box-shadow:inset 0 0 0 2px var(--ok)}
+.choices .btn.wrong{border-color:var(--warn);box-shadow:inset 0 0 0 2px var(--warn)}
+.q{font-size:15px;font-weight:600}
+.fb{font-size:15px;padding:8px 10px;border-radius:8px;background:var(--lane)}
+.fb.good{color:var(--ok)} .fb.bad{color:var(--warn)}
+.tblwrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:6px 4px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.03em}
+td.n{font-family:var(--font-num);font-variant-numeric:tabular-nums;white-space:nowrap}
+.concl{font-size:15px;padding:10px 12px;border-radius:8px;border:1px dashed var(--accent);background:var(--lane)}
+.formula{font-family:var(--font-num);font-size:14px;background:var(--lane);padding:8px 10px;border-radius:8px;overflow-x:auto;white-space:nowrap;line-height:1.7}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--muted)}
+.legend i{display:inline-block;width:20px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}
+.legend i.dash{background:none!important;border-top:3px dashed currentColor;height:0}
+.obs{display:flex;flex-direction:column;gap:8px;font-size:15px}
+.obs p{margin:0}
+.rules{display:flex;flex-direction:column;gap:8px;margin:0;padding:0;list-style:none}
+.rules li{display:flex;gap:10px;align-items:flex-start;font-size:15px;padding:8px 10px;border-radius:8px;background:var(--lane)}
+.rules li .mk{flex:none;width:26px;height:26px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-weight:800;font-size:14px;color:var(--muted)}
+.rules li.done .mk{border-color:var(--ok);background:var(--ok);color:var(--panel)}
+.rules li .sw{flex:none;width:14px;height:4px;border-radius:2px;margin-top:11px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:15px;align-items:baseline}
+.kv dt{color:var(--muted);font-size:14px}
+.kv dd{margin:0;font-family:var(--font-num);font-variant-numeric:tabular-nums}
+.pill{display:inline-block;font-size:13px;font-weight:700;padding:2px 10px;border-radius:99px;border:1px solid currentColor}
+.pill.good{color:var(--ok)} .pill.mid{color:var(--warn)} .pill.off{color:var(--muted)}
+details{font-size:15px}
+summary{cursor:pointer;font-weight:600;color:var(--accent);min-height:32px}
+ol.steps{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px;font-size:15px}
+ol.steps li.done{color:var(--ok)}
+ol.steps li.cur{font-weight:700}
+.sub{display:flex;gap:6px;flex-wrap:wrap}
+.sub .btn{flex:1 1 120px}
+.nudge{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.nudge .btn{min-width:44px;padding:8px 10px}
+.nudge span{font-size:14px;color:var(--muted);font-weight:600}
+footer{font-size:13px;color:var(--muted)}
+footer p{margin:0 0 4px;max-width:120ch}
+@media (max-width:520px){ .seg .btn{padding:8px 8px;font-size:14px} nav.tabs button{padding:8px 10px;font-size:14px} }
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow" data-i18n="eyebrow"></div>
+      <h1 data-i18n="title"></h1>
+    </div>
+    <div class="hdr-ctl">
+      <div class="seg" role="group" aria-label="level">
+        <button class="btn" id="lvQual" data-i18n="lvQual"></button>
+        <button class="btn" id="lvQuant" data-i18n="lvQuant"></button>
+      </div>
+      <button class="btn" id="langBtn">EN</button>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="1" data-i18n="tab1"></button>
+    <button role="tab" data-tab="2" data-i18n="tab2"></button>
+    <button role="tab" data-tab="3" data-i18n="tab3"></button>
+    <button role="tab" data-tab="4" data-i18n="tab4"></button>
+    <button role="tab" data-tab="5" data-i18n="tab5"></button>
+    <button role="tab" data-tab="6" data-i18n="tab6"></button>
+  </nav>
+
+  <!-- ===================== TAB 1: Lăng kính → thấu kính ===================== -->
+  <section id="t1" class="col">
+    <p class="req" data-i18n-html="req1"></p>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" data-i18n="hint1"></p>
+        <canvas id="cv1" aria-label="prisms and lens"></canvas>
+        <div class="controls"><span class="hint" data-i18n="zoom"></span>
+          <div class="seg" id="zm1"><button class="btn" data-v="1">×1</button><button class="btn" data-v="2">×2</button><button class="btn" data-v="4">×4</button><button class="btn" data-v="8">×8</button></div>
+          <span class="hint" id="zmHint1"></span></div>
+        <p class="status" id="st1"></p>
+        <div class="legend">
+          <span><i style="background:var(--r1)"></i><span data-i18n="lgRay"></span></span>
+          <span style="color:var(--r1)"><i class="dash"></i><span style="color:var(--muted)" data-i18n="lgExt"></span></span>
+          <span><i style="background:var(--r3)"></i><span data-i18n="lgBase"></span></span>
+        </div>
+      </div>
+      <aside class="col">
+        <div class="card">
+          <h2 data-i18n="cLens1"></h2>
+          <div class="seg full" id="typ1"><button class="btn" data-v="conv" data-i18n="conv"></button><button class="btn" data-v="div" data-i18n="div"></button></div>
+          <div class="fld"><span data-i18n="nPrism"></span>
+            <div class="seg full" id="np1">
+              <button class="btn" data-v="2">2</button><button class="btn" data-v="3">3</button><button class="btn" data-v="5">5</button><button class="btn" data-v="9">9</button><button class="btn" data-v="0">∞</button>
+            </div></div>
+          <div class="fld"><span><span data-i18n="curv"></span> <span class="val" id="rTxt"></span></span>
+            <input type="range" id="rngR" min="7" max="24" step="0.5" value="19">
+            <div class="ends"><span data-i18n="curvLess"></span><span data-i18n="curvMore"></span></div></div>
+          <div class="seg full" id="beam1"><button class="btn" data-v="par" data-i18n="beamPar"></button><button class="btn" data-v="one" data-i18n="beamOne"></button></div>
+          <label class="chk"><input type="checkbox" id="nm1" checked> <span data-i18n="names"></span></label>
+        </div>
+        <div class="card predict">
+          <h2 data-i18n="cPred"></h2>
+          <p class="q" data-i18n="q1a"></p>
+          <div class="choices" id="pq1a"><button class="btn" data-p="0" data-i18n="q1a_0"></button><button class="btn" data-p="1" data-i18n="q1a_1"></button><button class="btn" data-p="2" data-i18n="q1a_2"></button></div>
+          <p class="fb" id="fb1a" hidden></p>
+          <p class="q" data-i18n="q1b"></p>
+          <div class="choices" id="pq1b"><button class="btn" data-p="0" data-i18n="q1b_0"></button><button class="btn" data-p="1" data-i18n="q1b_1"></button><button class="btn" data-p="2" data-i18n="q1b_2"></button></div>
+          <p class="fb" id="fb1b" hidden></p>
+        </div>
+        <div class="card">
+          <h2 data-i18n="cObs"></h2>
+          <div id="obs1" class="obs"></div>
+          <p class="concl" id="concl1" hidden></p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ===================== TAB 2: Đường đi tia sáng ===================== -->
+  <section id="t2" class="col" hidden>
+    <p class="req" data-i18n-html="req2"></p>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" data-i18n="hint2"></p>
+        <canvas id="cv2" aria-label="laser and lens"></canvas>
+        <p class="status" id="st2"></p>
+        <div class="controls">
+          <button class="btn" id="pre2par" data-i18n="prePar"></button>
+          <button class="btn" id="pre2o" data-i18n="preO"></button>
+          <button class="btn" id="pre2f"></button>
+        </div>
+        <div class="controls">
+          <button class="btn primary" id="keep2" data-i18n="keep"></button>
+          <button class="btn" id="clr2" data-i18n="clearKept"></button>
+        </div>
+      </div>
+      <aside class="col">
+        <div class="card">
+          <h2 data-i18n="cLens"></h2>
+          <div class="seg full" id="typ2"><button class="btn" data-v="conv" data-i18n="conv"></button><button class="btn" data-v="div" data-i18n="div"></button></div>
+          <div class="fld" id="f2box"><span><span data-i18n="focal"></span> <span class="val" id="f2Txt"></span></span>
+            <input type="range" id="rngF2" min="6" max="15" step="0.5" value="10"></div>
+          <dl class="kv" id="kv2"></dl>
+        </div>
+        <div class="card predict">
+          <h2 data-i18n="cPred"></h2>
+          <p class="q" id="q2"></p>
+          <div class="choices" id="pq2"><button class="btn" data-p="0"></button><button class="btn" data-p="1"></button><button class="btn" data-p="2"></button></div>
+          <p class="fb" id="fb2" hidden></p>
+        </div>
+        <div class="card">
+          <h2 data-i18n="cRules"></h2>
+          <ul class="rules" id="rules2"></ul>
+          <p class="concl" id="concl2" hidden></p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ===================== TAB 3: Sự tạo ảnh ===================== -->
+  <section id="t3" class="col" hidden>
+    <p class="req" data-i18n-html="req3"></p>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" data-i18n="hint3"></p>
+        <canvas id="cv3" aria-label="optical bench"></canvas>
+        <p class="status" id="st3"></p>
+        <div class="controls">
+          <div class="seg" id="rays3"><button class="btn" data-v="special" data-i18n="raySpecial"></button><button class="btn" data-v="beam" data-i18n="rayBeam"></button><button class="btn" data-v="both" data-i18n="rayBoth"></button></div>
+          <div class="seg" id="mode3"><button class="btn" data-v="screen" data-i18n="modeScreen"></button><button class="btn" data-v="eye" data-i18n="modeEye"></button></div>
+        </div>
+        <div class="controls">
+          <label class="chk"><input type="checkbox" id="mask3"> <span data-i18n="mask"></span></label>
+          <label class="chk"><input type="checkbox" id="zone3" checked> <span data-i18n="zones"></span></label>
+        </div>
+        <div class="legend">
+          <span><i style="background:var(--r1)"></i><span data-i18n="lg1"></span></span>
+          <span><i style="background:var(--r2)"></i><span data-i18n="lg2"></span></span>
+          <span><i style="background:var(--r3)"></i><span data-i18n="lg3"></span></span>
+          <span><i style="background:var(--obj)"></i><span data-i18n="lgObj"></span></span>
+          <span><i style="background:var(--img)"></i><span data-i18n="lgImg"></span></span>
+        </div>
+      </div>
+      <aside class="col">
+        <div class="card">
+          <h2 data-i18n="cSetup"></h2>
+          <div class="seg full" id="typ3"><button class="btn" data-v="conv" data-i18n="conv"></button><button class="btn" data-v="div" data-i18n="div"></button></div>
+          <div class="fld"><span><span data-i18n="focal"></span> <span class="val" id="f3Txt"></span></span>
+            <input type="range" id="rngF3" min="4" max="20" step="0.5" value="10"></div>
+          <div class="fld"><span data-i18n="objType"></span>
+            <div class="seg full" id="obj3"><button class="btn" data-v="arrow" data-i18n="oArrow"></button><button class="btn" data-v="F" data-i18n="oF"></button><button class="btn" data-v="candle" data-i18n="oCandle"></button></div></div>
+        </div>
+        <div class="card" id="scrCard3">
+          <h2 id="scrTitle3"></h2>
+          <canvas id="cv3s" class="room" aria-label="screen"></canvas>
+          <p class="hint" id="scrTxt3"></p>
+        </div>
+        <div class="card predict">
+          <h2 data-i18n="cPred"></h2>
+          <p class="hint" id="pr3intro"></p>
+          <button class="btn primary" id="pr3start" data-i18n="predStart"></button>
+          <div id="pr3box" class="col" hidden>
+            <div class="choices" data-g="kind"><button class="btn" data-v="real" data-i18n="pReal"></button><button class="btn" data-v="virt" data-i18n="pVirt"></button><button class="btn" data-v="none" data-i18n="pNone"></button></div>
+            <div class="choices" data-g="up"><button class="btn" data-v="up" data-i18n="pUp"></button><button class="btn" data-v="inv" data-i18n="pInv"></button></div>
+            <div class="choices" data-g="size"><button class="btn" data-v="big" data-i18n="pSize_big"></button><button class="btn" data-v="eq" data-i18n="pSize_eq"></button><button class="btn" data-v="small" data-i18n="pSize_small"></button></div>
+            <button class="btn primary" id="pr3check" data-i18n="check"></button>
+          </div>
+          <p class="fb" id="fb3" hidden></p>
+        </div>
+        <div class="card">
+          <h2 data-i18n="cResult"></h2>
+          <div id="res3" class="obs"></div>
+          <details id="ext3"><summary data-i18n="extend"></summary><div class="formula" id="lensEq3"></div></details>
+        </div>
+        <div class="card">
+          <h2 data-i18n="cTable"></h2>
+          <div class="row"><button class="btn primary" id="rec3" data-i18n="record"></button><button class="btn" id="clr3" data-i18n="clearTbl"></button></div>
+          <div class="tblwrap"><table id="tbl3"></table></div>
+          <canvas id="cv3g" aria-label="graph" hidden></canvas>
+          <label class="chk" id="crvBox3"><input type="checkbox" id="crv3"> <span data-i18n="showCurve"></span></label>
+          <button class="btn" id="sum3" data-i18n="summary"></button>
+          <div class="concl" id="concl3" hidden></div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ===================== TAB 4: Đo tiêu cự ===================== -->
+  <section id="t4" class="col" hidden>
+    <p class="req" data-i18n-html="req4"></p>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" data-i18n="hint4"></p>
+        <canvas id="cv4" aria-label="optical bench"></canvas>
+        <p class="status" id="st4"></p>
+        <div class="controls">
+          <div class="nudge"><span data-i18n="lensW"></span><button class="btn" id="l4m" aria-label="lens -1 mm">◀</button><button class="btn" id="l4p" aria-label="lens +1 mm">▶</button></div>
+          <div class="nudge"><span data-i18n="screenW"></span><button class="btn" id="s4m" aria-label="screen -1 mm">◀</button><button class="btn" id="s4p" aria-label="screen +1 mm">▶</button></div>
+          <label class="chk"><input type="checkbox" id="ray4"> <span data-i18n="showRays"></span></label>
+        </div>
+      </div>
+      <aside class="col">
+        <div class="card">
+          <h2 data-i18n="cMethod"></h2>
+          <div class="seg full" id="m4"><button class="btn" data-v="1" data-i18n="m4a"></button><button class="btn" data-v="2" data-i18n="m4b"></button></div>
+          <ol class="steps" id="steps4"></ol>
+          <label class="chk" id="lockBox4"><input type="checkbox" id="lock4" checked> <span data-i18n="lock4"></span></label>
+        </div>
+        <div class="card">
+          <h2 data-i18n="onScreen"></h2>
+          <canvas id="cv4s" class="room" aria-label="screen"></canvas>
+          <dl class="kv" id="kv4"></dl>
+        </div>
+        <div class="card">
+          <h2 data-i18n="cTable"></h2>
+          <div class="row"><button class="btn primary" id="rec4" data-i18n="record"></button><button class="btn" id="clr4" data-i18n="clearTbl"></button></div>
+          <div class="tblwrap"><table id="tbl4"></table></div>
+          <div class="row"><span data-i18n="yourF"></span><input type="number" id="ans4" step="0.1" min="0" inputmode="decimal"><span>cm</span><button class="btn primary" id="chk4" data-i18n="check"></button></div>
+          <p class="fb" id="fb4" hidden></p>
+          <button class="btn" id="new4" data-i18n="newLens"></button>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ===================== TAB 5: Kính lúp và ứng dụng ===================== -->
+  <section id="t5" class="col" hidden>
+    <p class="req" data-i18n-html="req5"></p>
+    <div class="sub" id="sub5">
+      <button class="btn" data-v="kl" data-i18n="s5kl"></button>
+      <button class="btn" data-v="ma" data-i18n="s5ma"></button>
+      <button class="btn" data-v="mat" data-i18n="s5mat"></button>
+      <button class="btn" data-v="mc" data-i18n="s5mc"></button>
+    </div>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" id="hint5"></p>
+        <h3 id="cap5a" hidden></h3>
+        <canvas id="cv5" aria-label="application"></canvas>
+        <h3 id="cap5b" hidden></h3>
+        <canvas id="cv5z" aria-label="zoomed optics" hidden></canvas>
+        <p class="status" id="st5"></p>
+        <div class="col" id="ctl5"></div>
+      </div>
+      <aside class="col">
+        <div class="card">
+          <h2 id="viewT5"></h2>
+          <canvas id="cv5v" class="room" aria-label="view"></canvas>
+          <dl class="kv" id="kv5"></dl>
+        </div>
+        <div class="card">
+          <h2 data-i18n="cWhy"></h2>
+          <div class="obs" id="why5"></div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ===================== TAB 6: Luyện vẽ ảnh ===================== -->
+  <section id="t6" class="col" hidden>
+    <p class="req" data-i18n-html="req6"></p>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" id="hint6"></p>
+        <canvas id="cv6" aria-label="ray drawing grid"></canvas>
+        <p class="status" id="st6"></p>
+        <div class="controls" id="rb6">
+          <button class="btn" data-k="par" data-i18n="prePar"></button>
+          <button class="btn" data-k="o" data-i18n="preO"></button>
+          <button class="btn" data-k="f" id="rb6f"></button>
+        </div>
+        <div class="controls">
+          <button class="btn primary" id="ok6" data-i18n="checkRay"></button>
+          <button class="btn" id="bp6" data-i18n="checkB"></button>
+          <button class="btn" id="new6" data-i18n="newProb"></button>
+        </div>
+      </div>
+      <aside class="col">
+        <div class="card">
+          <h2 data-i18n="cProb"></h2>
+          <p id="prob6"></p>
+          <ol class="steps" id="steps6"></ol>
+        </div>
+        <div class="card" id="pp6">
+          <h2 data-i18n="cProps"></h2>
+          <div class="choices" data-g="kind"><button class="btn" data-v="real" data-i18n="pReal"></button><button class="btn" data-v="virt" data-i18n="pVirt"></button></div>
+          <div class="choices" data-g="up"><button class="btn" data-v="up" data-i18n="pUp"></button><button class="btn" data-v="inv" data-i18n="pInv"></button></div>
+          <div class="choices" data-g="size"><button class="btn" data-v="big" data-i18n="pSize_big"></button><button class="btn" data-v="eq" data-i18n="pSize_eq"></button><button class="btn" data-v="small" data-i18n="pSize_small"></button></div>
+          <div class="col" id="num6">
+            <p class="hint" data-i18n="num6"></p>
+            <div class="row"><span>d′ =</span><input type="number" id="dp6" step="0.1" min="0" inputmode="decimal"><span>cm</span></div>
+            <div class="row"><span>h′ =</span><input type="number" id="hp6" step="0.1" min="0" inputmode="decimal"><span>cm</span></div>
+          </div>
+          <button class="btn primary" id="pchk6" data-i18n="check"></button>
+          <p class="fb" id="fb6" hidden></p>
+          <p class="hint" id="score6"></p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <footer id="foot"></footer>
+</div>
+
+<script>
+/* ============ Ngôn ngữ ============ */
+const I18N = {
+vi:{
+  eyebrow:'KHTN 9 · Ánh sáng', title:'Thấu kính và sự tạo ảnh', lvQual:'Định tính', lvQuant:'Định lượng',
+  tab1:'1. Lăng kính → thấu kính', tab2:'2. Đường đi tia sáng', tab3:'3. Sự tạo ảnh', tab4:'4. Đo tiêu cự', tab5:'5. Kính lúp và ứng dụng', tab6:'6. Luyện vẽ ảnh',
+  req1:'<b>Yêu cầu cần đạt:</b> Giải thích được nguyên lí hoạt động của thấu kính bằng việc sử dụng sự khúc xạ của một số các lăng kính nhỏ. Nêu được các khái niệm: quang tâm, trục chính, tiêu điểm chính và tiêu cự của thấu kính.',
+  req2:'<b>Yêu cầu cần đạt:</b> Tiến hành thí nghiệm rút ra được đường đi một số tia sáng qua thấu kính (tia qua quang tâm, tia song song quang trục chính).',
+  req3:'<b>Yêu cầu cần đạt:</b> Vẽ được ảnh qua thấu kính. Thực hiện thí nghiệm khẳng định được: ảnh thật là ảnh hứng được trên màn; ảnh ảo là ảnh không hứng được trên màn.',
+  req4:'<b>Yêu cầu cần đạt:</b> Đo được tiêu cự của thấu kính hội tụ bằng dụng cụ thực hành.',
+  req5:'<b>Yêu cầu cần đạt:</b> Mô tả được cấu tạo và sử dụng được kính lúp. Vận dụng kiến thức về sự truyền ánh sáng giải thích được một số hiện tượng đơn giản thường gặp trong thực tế.',
+  req6:'<b>Yêu cầu cần đạt:</b> Vẽ được ảnh qua thấu kính. Vẽ được sơ đồ tỉ lệ để giải các bài tập đơn giản về thấu kính hội tụ.',
+  conv:'Hội tụ', div:'Phân kì', cLens:'Thấu kính', focal:'Tiêu cự f:',
+  /* tab 1 */
+  hint1:'Đổi số lăng kính nhỏ, độ cong và loại thấu kính. Chọn "Một tia" rồi kéo đèn lên xuống để xem từng lăng kính bẻ tia sáng.',
+  cLens1:'Ghép lăng kính thành thấu kính', nPrism:'Số lăng kính nhỏ', curv:'Độ cong hai mặt', curvLess:'ít cong', curvMore:'cong nhiều',
+  zoom:'Phóng to:', zoomHint:'Kéo trên hình để di chuyển khung nhìn.',
+  beamPar:'Chùm song song', beamOne:'Một tia (kéo đèn)', names:'Hiện tên quang tâm, trục chính, tiêu điểm, tiêu cự',
+  lgRay:'Tia sáng', lgExt:'Đường kéo dài', lgBase:'Hướng về đáy lăng kính',
+  cPred:'Dự đoán trước', q1a:'Nếu thay 2 lăng kính bằng rất nhiều lăng kính nhỏ (bấm ∞), các tia ló sẽ thế nào?',
+  q1a_0:'Gặp nhau gần như tại một điểm', q1a_1:'Tản ra xa nhau hơn', q1a_2:'Không thay đổi',
+  q1b:'Mặt thấu kính cong hơn thì điểm các tia ló gặp nhau sẽ…', q1b_0:'Gần thấu kính hơn', q1b_1:'Xa thấu kính hơn', q1b_2:'Không đổi',
+  fbOk:'Đúng. ', fbNo:'Chưa đúng. ', fb1a:'Bấm ∞ và nhìn chỗ các tia cắt trục chính.', fb1b:'Kéo thanh "Độ cong" và theo dõi điểm F′.',
+  cObs:'Quan sát', axis:'trục chính', prismWord:'lăng kính', lensWord:'thấu kính',
+  st1prism:(n,c)=>`${n} lăng kính nhỏ ghép lại · ${c?'đáy quay vào trục chính':'đáy quay ra phía mép'}`,
+  st1lens:c=>c?'Thấu kính hội tụ (rìa mỏng): chùm tia song song hội tụ tại tiêu điểm F′':'Thấu kính phân kì (rìa dày): chùm tia ló loe ra, đường kéo dài đi qua tiêu điểm F',
+  o1base:c=>c?'Mỗi lăng kính nhỏ làm tia sáng lệch về phía <b>đáy</b> của nó. Ở thấu kính hội tụ, đáy các lăng kính đều quay về phía trục chính, nên mọi tia ló đều gập về trục chính.':'Mỗi lăng kính nhỏ làm tia sáng lệch về phía <b>đáy</b> của nó. Ở thấu kính phân kì, đáy các lăng kính quay ra phía mép, nên các tia ló bị đẩy ra xa trục chính.',
+  o1spreadQ:(a,b,c)=>c?`Các tia cắt trục chính ở nhiều điểm khác nhau, từ ${a} cm đến ${b} cm sau quang tâm.`:`Đường kéo dài của các tia cắt trục chính ở nhiều điểm khác nhau, từ ${a} cm đến ${b} cm trước quang tâm.`,
+  o1spread:c=>c?'Các tia cắt trục chính ở nhiều điểm khác nhau: chưa có một tiêu điểm rõ ràng.':'Đường kéo dài của các tia cắt trục chính ở nhiều điểm khác nhau.',
+  o1mid:'Lăng kính ở giữa thực chất là một tấm có hai mặt song song: tia đi qua giữa gần như không đổi hướng. Điểm giữa đó là <b>quang tâm O</b>.',
+  o1lens:c=>c?'Khi chia thật nhỏ, các mặt phẳng nghiêng trở thành mặt cong. Các tia song song với trục chính ló ra gặp nhau gần như tại một điểm: <b>tiêu điểm chính F′</b>.':'Khi chia thật nhỏ, các mặt trở thành mặt cong lõm. Đường kéo dài của các tia ló gặp nhau gần như tại một điểm ở phía trước thấu kính: <b>tiêu điểm chính F</b>.',
+  o1f:(f)=>`Tiêu cự đo được (tia gần trục chính): f ≈ ${f} cm.`,
+  o1aber:(a,b)=>`Tia ở sát mép gặp trục chính sớm hơn một chút (từ ${a} cm đến ${b} cm). Hiện tượng này gọi là quang sai cầu, nên thấu kính thường chỉ dùng phần gần trục chính.`,
+  st1blur:' · nhưng chùm tia bị nhoè (quang sai cầu)', rimRay:'tia ở mép', nearRay:'tia gần trục',
+  o1warn:c=>`<b>Vì sao chùm tia không còn gặp nhau tại một điểm?</b> Thấu kính đang bị làm cong quá. Khi đó phần mép thấu kính rất dốc, giống một lăng kính nhọn, nên bẻ tia sáng gập mạnh hơn mức cần. Vì vậy ${c?'tia đi qua mép cắt trục chính sớm (gần thấu kính), còn tia đi gần giữa cắt trục xa hơn':'đường kéo dài của tia ở mép cắt trục chính gần thấu kính hơn đường kéo dài của tia ở giữa'}. Các tia cắt trục ở nhiều điểm khác nhau (các chấm tròn trên trục chính), nên ảnh tạo ra sẽ bị nhoè. Hiện tượng này gọi là <b>quang sai cầu</b>.<br>Quy tắc "${c?'chùm tia song song hội tụ tại F′':'đường kéo dài của chùm tia ló đi qua F'}" chỉ đúng khi thấu kính mỏng (ít cong) và tia đi gần trục chính. Vì vậy kính thật thường làm mỏng hoặc che bớt phần mép.<br><i>Thử:</i> chọn "Một tia", kéo đèn từ giữa ra mép và xem chỗ tia cắt trục thay đổi; hoặc kéo độ cong nhỏ lại.`,
+  o1curv:'Mặt càng cong thì mỗi lăng kính nhỏ càng "nhọn", tia lệch càng mạnh nên tiêu điểm càng gần thấu kính (tiêu cự ngắn hơn).',
+  o1one:(i,n)=>`Tia đang đi qua lăng kính thứ ${i}/${n} (đếm từ dưới lên).`,
+  o1dev:d=>`Góc lệch giữa tia tới và tia ló: ${d}°.`,
+  o1slab:'Tia đang đi qua phần giữa (hai mặt song song): tia ló song song với tia tới.',
+  concl1:'<b>Kết luận.</b> Thấu kính giống như rất nhiều lăng kính nhỏ ghép lại. Thấu kính hội tụ (rìa mỏng) có đáy các lăng kính quay vào trục chính: chùm tia song song với trục chính hội tụ tại tiêu điểm F′. Thấu kính phân kì (rìa dày) có đáy quay ra ngoài: chùm tia ló loe ra, đường kéo dài đi qua tiêu điểm F. Quang tâm O là điểm giữa thấu kính, tia qua O truyền thẳng. Tiêu cự f = OF = OF′. Mặt thấu kính càng cong thì tiêu cự càng ngắn.',
+  /* tab 2 */
+  hint2:'Kéo thân đèn laser để dời đèn, kéo nút tròn trên tia để đổi hướng chiếu. Bấm "Giữ tia này" để so sánh nhiều tia.',
+  prePar:'Tia song song trục chính', preO:'Tia qua quang tâm', preFc:'Tia qua tiêu điểm F', preFd:'Tia hướng tới F′',
+  keep:'Giữ tia này', clearKept:'Xoá các tia đã giữ', cRules:'Quy luật em tìm được',
+  kvAng:'Góc tới', kvHit:'Điểm tới', kvOut:'Góc ló', above:'trên trục', below:'dưới trục',
+  missLens:'Tia không đi qua thấu kính.', st2:(c)=>c?'Thấu kính hội tụ':'Thấu kính phân kì',
+  ruleQ:{par:'Tia tới song song với trục chính → ?', o:'Tia tới đi qua quang tâm O → ?', fc:'Tia tới đi qua tiêu điểm F → ?', fd:'Tia tới hướng tới tiêu điểm F′ → ?'},
+  ruleC:{par:'Tia tới song song với trục chính → tia ló đi qua tiêu điểm F′.', o:'Tia tới đi qua quang tâm O → tia ló truyền thẳng, không đổi hướng.', f:'Tia tới đi qua tiêu điểm F → tia ló song song với trục chính.'},
+  ruleD:{par:'Tia tới song song với trục chính → tia ló loe ra, đường kéo dài đi qua tiêu điểm F.', o:'Tia tới đi qua quang tâm O → tia ló truyền thẳng, không đổi hướng.', f:'Tia tới hướng tới tiêu điểm F′ → tia ló song song với trục chính.'},
+  found:'Em vừa tìm ra một quy luật!',
+  q2c:'Tia tới song song với trục chính, sau khi qua thấu kính hội tụ sẽ…', q2c_0:'Đi qua tiêu điểm F′', q2c_1:'Vẫn song song với trục chính', q2c_2:'Đi qua quang tâm O',
+  q2d:'Tia tới song song với trục chính, sau khi qua thấu kính phân kì sẽ…', q2d_0:'Loe ra, đường kéo dài đi qua F', q2d_1:'Hội tụ tại F′ phía sau', q2d_2:'Vẫn song song với trục chính',
+  fb2:'Bấm "Tia song song trục chính" để kiểm tra.',
+  concl2c:'<b>Ghi nhớ (thấu kính hội tụ).</b> Tia qua quang tâm truyền thẳng. Tia song song trục chính ló ra đi qua F′. Tia qua F ló ra song song trục chính. Chỉ cần hai trong ba tia này là vẽ được ảnh.',
+  concl2d:'<b>Ghi nhớ (thấu kính phân kì).</b> Tia qua quang tâm truyền thẳng. Tia song song trục chính ló ra loe rộng, đường kéo dài qua F. Tia hướng tới F′ ló ra song song trục chính.',
+  /* tab 3 */
+  hint3:'Kéo vật (kéo đỉnh B để đổi chiều cao), kéo thấu kính, kéo màn. Chọn "Mắt nhìn" để cất màn và đặt mắt nhìn ảnh.',
+  raySpecial:'Tia đặc biệt', rayBeam:'Chùm tia', rayBoth:'Cả hai', modeScreen:'Màn hứng', modeEye:'Mắt nhìn',
+  mask:'Che nửa trên thấu kính', zones:'Tô các khoảng f, 2f',
+  lg1:'Tia song song trục chính', lg2:'Tia qua quang tâm', lg3:'Tia qua F (hoặc hướng tới F′)', lgObj:'Vật AB', lgImg:'Ảnh A′B′ (nét đứt: ảnh ảo)',
+  cSetup:'Bố trí thí nghiệm', objType:'Vật sáng', oArrow:'Mũi tên', oF:'Chữ F', oCandle:'Cây nến',
+  scrTitle:'Trên màn (nhìn từ phía sau màn)', eyeTitle:'Mắt nhìn qua thấu kính',
+  objThumb:'Vật', scrThumb:'Màn',
+  predStart:'Che ảnh để dự đoán', predAgain:'Dự đoán lần mới', check:'Kiểm tra',
+  pr3intro:'Đặt vật ở vị trí em muốn, bấm "Che ảnh", chọn tính chất ảnh rồi kiểm tra.',
+  pReal:'Ảnh thật', pVirt:'Ảnh ảo', pNone:'Không có ảnh', pUp:'Cùng chiều', pInv:'Ngược chiều',
+  pSize_big:'Lớn hơn vật', pSize_eq:'Bằng vật', pSize_small:'Nhỏ hơn vật',
+  noImage:'Không có ảnh: chùm tia ló song song, không gặp nhau',
+  needAll:'Chọn đủ ba ý rồi bấm Kiểm tra.', predRes:(n,m)=>`Em đúng ${n}/${m} ý.`, predNone:'Vật ở đúng tiêu điểm nên không có ảnh: các tia ló song song với nhau.',
+  cResult:'Kết quả', extend:'Mở rộng: công thức thấu kính', cTable:'Bảng số liệu', record:'Ghi số liệu', clearTbl:'Xoá bảng',
+  showCurve:'Hiện đường cong lí thuyết', summary:'Bảng tổng kết',
+  zOut2f:'Vật ở ngoài khoảng 2f (d > 2f)', z2f:'Vật ở vị trí d = 2f', zF2f:'Vật ở trong khoảng từ f đến 2f', zF:'Vật ở đúng tiêu điểm (d = f)', zInF:'Vật ở trong khoảng tiêu cự (d < f)', zDiv:'Thấu kính phân kì: vật ở vị trí bất kì',
+  zoneL:'Vị trí vật', imgL:'Ảnh',
+  scrSharp:'Ảnh rõ nét trên màn: đây là ảnh thật.', scrSoft:'Ảnh hơi mờ: dịch màn thêm một chút.', scrBlur:'Chỉ thấy vệt sáng mờ: dịch màn để tìm ảnh rõ nét.',
+  scrVirt:'Dịch màn đến đâu cũng chỉ thấy vệt sáng mờ: ảnh ảo không hứng được trên màn.', scrInf:'Chỉ thấy vệt sáng: vật ở tiêu điểm nên không có ảnh.',
+  scrBefore:'Màn đặt trước chỗ ảnh: các tia chưa kịp gặp nhau.', scrAfter:'Màn đặt sau chỗ ảnh: các tia đã gặp nhau rồi tách ra.',
+  maskNote:'Che nửa thấu kính: ảnh vẫn đủ hình, chỉ tối đi, vì mỗi điểm của ảnh nhận ánh sáng qua mọi phần của thấu kính.',
+  eyeReal:'Mắt nhìn thấy ảnh thật, ngược chiều, như đang lơ lửng trong không khí (không cần màn).',
+  eyeVirt:'Mắt nhìn thấy ảnh ảo, cùng chiều. Ảnh ảo vẫn nhìn thấy được qua thấu kính, chỉ là không hứng được trên màn.',
+  eyeInf:'Mắt thấy ảnh ở rất xa (tia ló song song).', eyeBetween:'Mắt ở giữa thấu kính và ảnh thật: chỉ thấy mờ.',
+  eyeMiss:'Chưa có tia sáng nào từ đỉnh B lọt vào mắt. Kéo mắt vào vùng có tia sáng.',
+  ghost:'ảnh (nếu cất màn)', far:'ảnh ở rất xa',
+  simTri:'Tam giác đồng dạng:', exReal:'Ảnh thật:', exVirt:'Ảnh ảo:', exDiv:'Thấu kính phân kì:',
+  colPos:'Vị trí vật', colProp:'Tính chất ảnh',
+  sumC:[['d > 2f','Ảnh thật, ngược chiều, nhỏ hơn vật'],['d = 2f','Ảnh thật, ngược chiều, bằng vật (d′ = 2f)'],['f < d < 2f','Ảnh thật, ngược chiều, lớn hơn vật'],['d = f','Không có ảnh'],['d < f','Ảnh ảo, cùng chiều, lớn hơn vật']],
+  sumD:'Thấu kính phân kì: vật đặt ở mọi vị trí đều cho ảnh ảo, cùng chiều, nhỏ hơn vật, nằm trong khoảng tiêu cự.',
+  sumHead:'<b>Tổng kết (thấu kính hội tụ).</b> Ảnh thật luôn ngược chiều và hứng được trên màn. Ảnh ảo luôn cùng chiều, không hứng được trên màn nhưng mắt nhìn thấy qua thấu kính.',
+  gX:'d (cm)', gY:'d′ (cm)', gReal:'ảnh thật', gVirt:'ảnh ảo (|d′|)',
+  /* tab 4 */
+  hint4:'Kéo thấu kính và màn trên giá quang học. Nút ◀ ▶ dịch từng 1 mm. Quan sát ảnh trên màn ở khung bên phải.',
+  lensW:'Thấu kính', screenW:'Màn', showRays:'Hiện đường tia sáng',
+  cMethod:'Cách đo', m4a:'Cách 1: ảnh bằng vật', m4b:'Cách 2: đo d và d′', lock4:'Giữ thấu kính ở chính giữa vật và màn',
+  steps4a:['Bật "Giữ thấu kính ở chính giữa" để luôn có d = d′.','Kéo màn ra xa hoặc lại gần (thấu kính tự đi theo) cho đến khi ảnh trên màn rõ nét.','Kiểm tra ảnh cao bằng vật (2 cm) và ngược chiều.','Đọc khoảng cách L từ vật đến màn. Khi đó d = d′ = 2f nên f = L/4.'],
+  steps4b:['Đặt thấu kính ở một vị trí (cách vật khá xa).','Dịch màn đến khi ảnh rõ nét nhất.','Đọc d (vật đến thấu kính) và d′ (thấu kính đến màn), ghi vào bảng.','Vẽ sơ đồ tỉ lệ hoặc dùng f = d·d′/(d + d′). Lặp lại 3 lần, lấy trung bình.'],
+  onScreen:'Ảnh trên màn', posLens:'Thấu kính ở vạch', posScreen:'Màn ở vạch', kvD:'d (vật → thấu kính)', kvDp:'d′ (thấu kính → màn)', kvL:'L (vật → màn)', kvHp:'h′ đo trên màn', kvSharp:'Độ nét',
+  sharp:'rõ nét', soft:'hơi mờ', blur:'mờ', noimg:'không có ảnh rõ',
+  colN:'Lần', colSharp:'Độ nét', yourF:'f em đo được:', newLens:'Thấu kính bí ẩn mới',
+  f4ok:(f)=>`Chính xác! Tiêu cự thật là ${f} cm.`, f4close:(f,e)=>`Gần đúng (sai ${e}%). Tiêu cự thật là ${f} cm. Thử chỉnh màn thật rõ nét rồi đo lại.`,
+  f4no:'Chưa đúng. Kiểm tra lại: ảnh đã thật rõ nét chưa? Với cách 1, ảnh phải cao bằng vật.',
+  st4:(s)=>`Ảnh trên màn: ${s}`, eqSize:' · ảnh cao bằng vật',
+  /* tab 5 */
+  s5kl:'Kính lúp', s5ma:'Máy ảnh', s5mat:'Mắt', s5mc:'Máy chiếu', cWhy:'Vì sao?',
+  hint5kl:'Kéo con kiến (vật) lại gần hoặc ra xa kính lúp. Mắt đặt sát sau kính.',
+  hint5ma:'Kéo khoảng cách tới người, rồi lấy nét bằng cách dịch cảm biến (phim).',
+  hint5mat:'Kéo khoảng cách tới vật. Mắt tự điều tiết: thể thuỷ tinh phồng lên hoặc dẹt xuống.',
+  hint5mc:'Kéo khoảng cách tới tường, rồi dịch phim để ảnh trên tường rõ nét.',
+  vKl:'Vật và ảnh (cùng tỉ lệ với hình vẽ)', klObj:'Vật AB (con kiến thật)', klImg:'Ảnh A′B′ mắt nhìn qua kính',
+  cap5a_mat:'Toàn cảnh: ánh sáng từ vật đi vào mắt', cap5b_mat:'Phóng to: bên trong mắt (đúng tỉ lệ)', cap5a_mc:'Toàn cảnh: máy chiếu chiếu lên tường (đúng tỉ lệ)', cap5b_mc:'Phóng to: hệ quang học bên trong máy chiếu',
+  pCornea:'giác mạc', pIris:'mống mắt (lòng đen)', pPupil:'con ngươi', pCiliary:'thể mi', pLens:'thể thuỷ tinh', pVitreous:'dịch thuỷ tinh', pRetina:'màng lưới', pFovea:'điểm vàng', pNerve:'dây thần kinh thị giác',
+  objAB:'Vật AB', notScale:'Hình không theo tỉ lệ', trueScale:'Hình đúng tỉ lệ', pProj:'máy chiếu', pWall:'tường (màn chiếu)', pLamp:'đèn', pMirror:'gương cầu lõm', pCond:'tụ quang', pSlide:'phim (lộn ngược)', pObj:'vật kính', vMa:'Ảnh trên cảm biến', vMat:'Ảnh trên màng lưới', vMc:'Ảnh trên tường',
+  klPick:'Kính lúp', klD:'Khoảng cách vật → kính', maD:'Khoảng cách tới người', maS:'Cảm biến cách vật kính', matD:'Khoảng cách tới vật', mcL:'Khoảng cách tới tường', mcD:'Phim cách vật kính',
+  focus:'Lấy nét tự động', flip:'Đặt phim lộn ngược',
+  naked:'Mắt thường (25 cm)', thru:'Qua kính lúp',
+  klOut:'Vật nằm ngoài tiêu cự: ảnh là ảnh thật, ngược chiều, mắt sát kính không nhìn rõ. Đưa vật lại gần kính hơn.',
+  kvG:'Số bội giác ghi trên kính G = 25/f', kvGm:'Ảnh trông to hơn', kvImg:'Ảnh ảo cách kính', kvHp5:'Chiều cao ảnh',
+  kvF5:'Tiêu cự', kvDp5:'Ảnh cách thấu kính', kvState:'Trạng thái',
+  matAcc:'Mắt đang điều tiết', matRelax:'Mắt không điều tiết', matNear:'Vật gần hơn điểm cực cận (~25 cm): mắt điều tiết hết mức vẫn không nhìn rõ.',
+  why5kl:['<b>Cấu tạo:</b> kính lúp là một thấu kính hội tụ có tiêu cự ngắn, lắp trong khung có tay cầm. Trên vành ghi số bội giác như 2x, 3x, 5x; G = 25/f với f tính bằng cm.','<b>Nguyên lí:</b> đặt vật trong khoảng tiêu cự (d < f) thì thấu kính hội tụ cho ảnh ảo, cùng chiều, lớn hơn vật. Mắt đặt sau kính nhìn ảnh ảo này dưới góc trông lớn hơn.','<b>Cách dùng:</b> đặt kính sát vật rồi từ từ đưa ra xa đến khi thấy ảnh rõ, to nhất; vật khi đó ở gần tiêu điểm.','<b>Nói gọn cho học sinh:</b> kính lúp "kéo" vật lại gần mắt hơn mà mắt vẫn nhìn rõ.'],
+  why5ma:['<b>Nguyên lí:</b> vật kính là thấu kính hội tụ. Người ở rất xa (d > 2f) nên cho ảnh thật, ngược chiều, nhỏ hơn vật, nằm ngay sau tiêu điểm F′.','<b>Lấy nét</b> là dịch vật kính (hoặc cảm biến) để ảnh rơi đúng lên cảm biến. Vật càng gần, ảnh càng lùi xa vật kính.','<b>Nói gọn cho học sinh:</b> máy ảnh là "màn hứng ảnh thật" đặt trong hộp tối; ảnh ngược chiều được phần mềm lật lại.'],
+  why5mat:['<b>Mô hình:</b> thể thuỷ tinh như một thấu kính hội tụ, màng lưới như màn hứng ảnh cách nó khoảng 2 cm và không dịch được. Ảnh trên màng lưới là ảnh thật, ngược chiều, rất nhỏ.','<b>Điều tiết:</b> vì không dịch được màn, mắt đổi tiêu cự: nhìn vật gần thì cơ vòng co, thể thuỷ tinh phồng lên, f giảm.','<b>Giới hạn:</b> mắt chỉ điều tiết được đến điểm cực cận (khoảng 25 cm với mắt tốt). Vật gần hơn thì ảnh rơi sau màng lưới, nhìn mờ.','<b>Nói gọn cho học sinh:</b> máy ảnh lấy nét bằng cách dịch thấu kính, còn mắt lấy nét bằng cách làm thấu kính phồng hay dẹt.'],
+  why5mc:['<b>Nguyên lí:</b> phim (vật) đặt ngoài tiêu cự nhưng rất gần F (f < d < 2f, sát f). Vật kính cho ảnh thật, ngược chiều, lớn hơn vật rất nhiều lần trên tường ở xa.','<b>Vì ảnh ngược chiều</b> nên phim phải đặt lộn ngược thì ảnh trên tường mới xuôi chiều.','<b>Lấy nét:</b> tường càng xa thì phim phải đặt càng gần tiêu điểm.','<b>Nói gọn cho học sinh:</b> máy chiếu là máy ảnh chạy ngược: vật nhỏ ở gần, ảnh to ở xa.'],
+  wallAt:L=>`→ tường cách ${L}`, farObj:'từ vật ở xa',
+  stKl:(g)=>`Ảnh ảo, cùng chiều, trông to gấp ${g} lần so với nhìn bằng mắt thường ở 25 cm`,
+  stMa:(s)=>`Ảnh thật, ngược chiều, nhỏ hơn vật · ${s}`, stMat:(s)=>`Ảnh thật, ngược chiều, rất nhỏ trên màng lưới · ${s}`, stMc:(s)=>`Ảnh thật, lớn hơn vật nhiều lần · ${s}`,
+  /* tab 6 */
+  hint6a:'Bước 1: chọn một tia đặc biệt, rồi kéo trên vùng bên phải thấu kính để vẽ tia ló. Bấm "Kiểm tra tia".',
+  hint6b:'Bước 2: kéo điểm B′ (hình thoi) tới chỗ hai tia ló (hoặc đường kéo dài của chúng) cắt nhau, rồi bấm "Kiểm tra B′".',
+  hint6c:'Bước 3: chọn tính chất ảnh ở khung bên phải.', hint6d:'Hoàn thành! Bấm "Bài mới" để luyện tiếp.',
+  checkRay:'Kiểm tra tia', checkB:'Kiểm tra B′', newProb:'Bài mới', cProb:'Đề bài', cProps:'Tính chất ảnh',
+  prob6:(c,f,d,h)=>`Thấu kính ${c?'hội tụ':'phân kì'} có tiêu cự f = ${f} cm. Vật sáng AB cao h = ${h} cm đặt vuông góc với trục chính, A nằm trên trục chính, cách thấu kính d = ${d} cm. Vẽ ảnh A′B′ (1 ô = 1 cm).`,
+  steps6:['Vẽ hai tia đặc biệt xuất phát từ B','Tìm điểm B′, hạ A′B′ vuông góc trục chính','Nêu tính chất ảnh'],
+  num6:'Dùng sơ đồ tỉ lệ (đếm ô) để đo d′ = OA′ và h′ = A′B′.',
+  pickRay:'Chọn một tia đặc biệt trước.', rayOk:'Đúng rồi!', rayNo:'Chưa đúng.', rayDup:'Tia này đã vẽ rồi, chọn tia khác.',
+  hintRay:{par:'Tia song song trục chính: thấu kính hội tụ cho tia ló đi qua F′; phân kì cho tia ló có đường kéo dài qua F.', o:'Tia qua quang tâm O đi thẳng, không đổi hướng.', fc:'Tia qua F cho tia ló song song với trục chính.', fd:'Tia hướng tới F′ cho tia ló song song với trục chính.'},
+  need2:'Vẽ đủ hai tia trước đã.', bpOk:'Chính xác! Đó là ảnh B′ của B.', bpNo:'Chưa trúng giao điểm, thử lại.',
+  p6ok:'Hoàn toàn đúng!', p6no:'Còn ý chưa đúng, xem lại hình vẽ.', score:n=>`Số bài đã làm đúng: ${n}`, needB:'Hoàn thành bước 2 trước.',
+  /* chân trang */
+  foot1:'<b>Giả thiết mô phỏng.</b> Thuỷ tinh chiết suất n = 1,5. Tia sáng khúc xạ theo định luật khúc xạ (n = sin i / sin r) tại từng mặt, tính chính xác cả phản xạ toàn phần nếu xảy ra. Hai mặt thấu kính là mặt cầu cùng bán kính R; với thấu kính mỏng thì f ≈ R. Hình vẽ đúng tỉ lệ.',
+  foot2:'<b>Giả thiết mô phỏng.</b> Thấu kính mỏng lí tưởng, đường kính 14 cm: tia sáng coi như khúc xạ một lần tại mặt phẳng giữa thấu kính. Hình vẽ đúng tỉ lệ.',
+  foot3:'<b>Giả thiết mô phỏng.</b> Thấu kính mỏng lí tưởng, đường kính 10 cm. Hình được phóng to theo chiều đứng cho dễ nhìn (đường thẳng vẫn thẳng, các giao điểm giữ nguyên). Tia đặc biệt có thể đi ra ngoài vành thấu kính; khi đó coi thấu kính được kéo dài (nét đứt) như cách vẽ trong SGK. Độ sáng và độ nhòe của ảnh trên màn tính theo chùm sáng thật đi qua thấu kính.',
+  foot4:'<b>Giả thiết mô phỏng.</b> Thấu kính bí ẩn có tiêu cự chọn ngẫu nhiên từ 8 cm đến 20 cm, đường kính 5 cm. Vật là chữ F phát sáng cao 2 cm đặt ở vạch 0. Độ nhòe của ảnh tính theo chùm sáng thật.',
+  foot5:'<b>Giả thiết mô phỏng.</b> Mỗi dụng cụ được mô hình hoá bằng một thấu kính hội tụ mỏng. Kính lúp: mắt đặt sát kính, G = 25/f; khung bên phải vẽ vật và ảnh cùng tỉ lệ với hình vẽ. Mắt: thực tế ánh sáng khúc xạ nhiều nhất ở giác mạc; ở đây gộp lại thành thể thuỷ tinh cách màng lưới 2 cm, điểm cực cận 25 cm; hình toàn cảnh của mắt không theo tỉ lệ. Máy chiếu: vật kính f = 10 cm, phim cao 2,4 cm; tụ quang hội tụ ánh sáng đèn vào vật kính.',
+  foot6:'<b>Giả thiết mô phỏng.</b> 1 ô = 1 cm. Tia em vẽ được chấp nhận khi lệch so với hướng đúng không quá 2,5°. Điểm B′ được chấp nhận khi cách giao điểm đúng không quá 0,4 ô.',
+  ly:'', cm:'cm', m:'m'
+},
+en:{
+  eyebrow:'Natural Science 9 · Light', title:'Lenses and image formation', lvQual:'Qualitative', lvQuant:'Quantitative',
+  tab1:'1. Prisms → lens', tab2:'2. Ray paths', tab3:'3. Image formation', tab4:'4. Measuring f', tab5:'5. Magnifier & uses', tab6:'6. Ray-drawing practice',
+  req1:'<b>Learning outcome:</b> Explain how a lens works using refraction through a set of small prisms. State the terms optical centre, principal axis, principal focus and focal length.',
+  req2:'<b>Learning outcome:</b> Carry out an experiment to find the paths of some rays through a lens (the ray through the optical centre, the ray parallel to the principal axis).',
+  req3:'<b>Learning outcome:</b> Draw the image formed by a lens. Show by experiment that a real image can be caught on a screen and a virtual image cannot.',
+  req4:'<b>Learning outcome:</b> Measure the focal length of a converging lens with lab equipment.',
+  req5:'<b>Learning outcome:</b> Describe and use a magnifying glass. Use ideas about light to explain everyday phenomena.',
+  req6:'<b>Learning outcome:</b> Draw the image formed by a lens. Use scale drawings to solve simple converging-lens problems.',
+  conv:'Converging', div:'Diverging', cLens:'Lens', focal:'Focal length f:',
+  hint1:'Change the number of small prisms, the curvature and the lens type. Choose "One ray" and drag the lamp up and down to see how each prism bends the ray.',
+  cLens1:'Build a lens from prisms', nPrism:'Number of small prisms', curv:'Surface curvature', curvLess:'flatter', curvMore:'more curved',
+  zoom:'Zoom:', zoomHint:'Drag the picture to pan.',
+  beamPar:'Parallel beam', beamOne:'One ray (drag lamp)', names:'Label optical centre, principal axis, focus, focal length',
+  lgRay:'Light ray', lgExt:'Extension line', lgBase:'Towards the prism base',
+  cPred:'Predict first', q1a:'If we replace 2 prisms with very many tiny prisms (press ∞), what will the outgoing rays do?',
+  q1a_0:'Meet at almost one point', q1a_1:'Spread further apart', q1a_2:'Nothing changes',
+  q1b:'If the lens surfaces are more curved, the point where the rays meet will be…', q1b_0:'Closer to the lens', q1b_1:'Further from the lens', q1b_2:'Unchanged',
+  fbOk:'Correct. ', fbNo:'Not quite. ', fb1a:'Press ∞ and watch where the rays cross the axis.', fb1b:'Drag the curvature slider and watch F′.',
+  cObs:'Observations', axis:'principal axis', prismWord:'prism', lensWord:'lens',
+  st1prism:(n,c)=>`${n} small prisms · ${c?'bases face the axis':'bases face the rim'}`,
+  st1lens:c=>c?'Converging lens (thin rim): a parallel beam converges at the focus F′':'Diverging lens (thick rim): the beam spreads out; extensions pass through the focus F',
+  o1base:c=>c?'Each small prism bends light towards its <b>base</b>. In a converging lens all the bases face the principal axis, so every ray bends towards the axis.':'Each small prism bends light towards its <b>base</b>. In a diverging lens the bases face the rim, so the rays are pushed away from the axis.',
+  o1spreadQ:(a,b,c)=>c?`The rays cross the axis at many different points, from ${a} cm to ${b} cm behind the centre.`:`The extensions cross the axis at many points, from ${a} cm to ${b} cm in front of the centre.`,
+  o1spread:c=>c?'The rays cross the axis at different points: there is no single focus yet.':'The extensions cross the axis at different points.',
+  o1mid:'The middle prism is really a slab with parallel faces: a ray through the middle keeps its direction. That point is the <b>optical centre O</b>.',
+  o1lens:c=>c?'With very many tiny prisms the flat faces become curved surfaces. Rays parallel to the axis meet at almost one point: the <b>principal focus F′</b>.':'With very many tiny prisms the faces become concave. Extensions of the outgoing rays meet at almost one point in front of the lens: the <b>principal focus F</b>.',
+  o1f:f=>`Measured focal length (rays near the axis): f ≈ ${f} cm.`,
+  o1aber:(a,b)=>`Rays near the rim cross a little earlier (${a} cm to ${b} cm). This is spherical aberration, so lenses mainly use the part near the axis.`,
+  st1blur:' · but the beam is blurred (spherical aberration)', rimRay:'rim rays', nearRay:'near-axis rays',
+  o1warn:c=>`<b>Why don't the rays meet at one point any more?</b> The lens is now too curved. Its rim is very steep, like a sharp prism, so it bends light more than needed. So ${c?'rays through the rim cross the axis early (close to the lens), while rays near the middle cross further away':'the extensions of rim rays cross the axis closer to the lens than those of middle rays'}. The rays cross the axis at many points (the dots on the axis), so the image would be blurred. This is called <b>spherical aberration</b>.<br>The rule "${c?'a parallel beam converges at F′':'the extensions of the outgoing beam pass through F'}" only holds for a thin (gently curved) lens and rays close to the axis. That is why real lenses are kept thin or have their rims masked.<br><i>Try:</i> choose "One ray" and drag the lamp from the middle to the rim, watching where the ray crosses the axis; or reduce the curvature.`,
+  o1curv:'The more curved the surfaces, the "sharper" each small prism, the more the rays bend, and the closer the focus (shorter focal length).',
+  o1one:(i,n)=>`The ray passes through prism ${i}/${n} (counted from the bottom).`,
+  o1dev:d=>`Deviation between incoming and outgoing ray: ${d}°.`,
+  o1slab:'The ray passes through the middle (parallel faces): it comes out parallel to the incoming ray.',
+  concl1:'<b>Conclusion.</b> A lens behaves like very many small prisms. A converging lens (thin rim) has its prism bases facing the axis: a beam parallel to the axis converges at focus F′. A diverging lens (thick rim) has its bases facing outwards: the beam spreads, and the extensions pass through focus F. The optical centre O is the middle of the lens; a ray through O goes straight. Focal length f = OF = OF′. More curved surfaces give a shorter focal length.',
+  hint2:'Drag the laser body to move it, drag the round knob on the beam to aim. Press "Keep this ray" to compare several rays.',
+  prePar:'Ray parallel to axis', preO:'Ray through centre', preFc:'Ray through focus F', preFd:'Ray aimed at F′',
+  keep:'Keep this ray', clearKept:'Clear kept rays', cRules:'Rules you found',
+  kvAng:'Angle in', kvHit:'Hits lens at', kvOut:'Angle out', above:'above axis', below:'below axis',
+  missLens:'The ray misses the lens.', st2:c=>c?'Converging lens':'Diverging lens',
+  ruleQ:{par:'Ray parallel to the axis → ?', o:'Ray through the optical centre O → ?', fc:'Ray through the focus F → ?', fd:'Ray aimed at the focus F′ → ?'},
+  ruleC:{par:'Ray parallel to the axis → leaves through the focus F′.', o:'Ray through the optical centre O → goes straight on.', f:'Ray through the focus F → leaves parallel to the axis.'},
+  ruleD:{par:'Ray parallel to the axis → spreads out; its extension passes through F.', o:'Ray through the optical centre O → goes straight on.', f:'Ray aimed at the focus F′ → leaves parallel to the axis.'},
+  found:'You found a rule!',
+  q2c:'A ray parallel to the axis, after a converging lens, will…', q2c_0:'Pass through the focus F′', q2c_1:'Stay parallel to the axis', q2c_2:'Pass through the centre O',
+  q2d:'A ray parallel to the axis, after a diverging lens, will…', q2d_0:'Spread out; its extension passes through F', q2d_1:'Converge at F′ behind the lens', q2d_2:'Stay parallel to the axis',
+  fb2:'Press "Ray parallel to axis" to test it.',
+  concl2c:'<b>Remember (converging lens).</b> A ray through the centre goes straight. A ray parallel to the axis leaves through F′. A ray through F leaves parallel to the axis. Any two of these rays are enough to draw an image.',
+  concl2d:'<b>Remember (diverging lens).</b> A ray through the centre goes straight. A ray parallel to the axis spreads out, with its extension through F. A ray aimed at F′ leaves parallel to the axis.',
+  hint3:'Drag the object (drag the tip B to change its height), the lens and the screen. Choose "Eye" to remove the screen and look at the image.',
+  raySpecial:'Key rays', rayBeam:'Beam', rayBoth:'Both', modeScreen:'Screen', modeEye:'Eye',
+  mask:'Cover the top half of the lens', zones:'Shade the f and 2f zones',
+  lg1:'Ray parallel to axis', lg2:'Ray through centre', lg3:'Ray through F (or aimed at F′)', lgObj:'Object AB', lgImg:'Image A′B′ (dashed: virtual)',
+  cSetup:'Set-up', objType:'Luminous object', oArrow:'Arrow', oF:'Letter F', oCandle:'Candle',
+  scrTitle:'On the screen (seen from behind it)', eyeTitle:'Eye looking through the lens',
+  objThumb:'Object', scrThumb:'Screen',
+  predStart:'Hide the image and predict', predAgain:'New prediction', check:'Check',
+  pr3intro:'Place the object where you like, press "Hide", choose the image properties, then check.',
+  pReal:'Real image', pVirt:'Virtual image', pNone:'No image', pUp:'Upright', pInv:'Inverted',
+  pSize_big:'Larger than object', pSize_eq:'Same size', pSize_small:'Smaller than object',
+  noImage:'No image: the outgoing rays are parallel and never meet',
+  needAll:'Choose all three, then press Check.', predRes:(n,m)=>`You got ${n}/${m} right.`, predNone:'The object is exactly at the focus, so there is no image: the outgoing rays are parallel.',
+  cResult:'Result', extend:'Extension: the lens formula', cTable:'Data table', record:'Record', clearTbl:'Clear table',
+  showCurve:'Show theoretical curve', summary:'Summary table',
+  zOut2f:'Object beyond 2f (d > 2f)', z2f:'Object at d = 2f', zF2f:'Object between f and 2f', zF:'Object exactly at the focus (d = f)', zInF:'Object inside the focal length (d < f)', zDiv:'Diverging lens: any object position',
+  zoneL:'Object position', imgL:'Image',
+  scrSharp:'A sharp image on the screen: this is a real image.', scrSoft:'Slightly blurred: move the screen a little.', scrBlur:'Only a blurred patch: move the screen to find a sharp image.',
+  scrVirt:'Wherever the screen goes there is only a blurred patch: a virtual image cannot be caught on a screen.', scrInf:'Only a patch of light: the object is at the focus, so there is no image.',
+  scrBefore:'The screen is in front of the image: the rays have not met yet.', scrAfter:'The screen is behind the image: the rays have met and spread again.',
+  maskNote:'Covering half the lens: the image is still complete, only dimmer, because every image point gets light through every part of the lens.',
+  eyeReal:'The eye sees a real, inverted image hanging in the air (no screen needed).',
+  eyeVirt:'The eye sees an upright virtual image. A virtual image can be seen through the lens; it just cannot be caught on a screen.',
+  eyeInf:'The eye sees the image very far away (parallel rays).', eyeBetween:'The eye is between the lens and the real image: it only sees a blur.',
+  eyeMiss:'No light from the tip B enters the eye. Drag the eye into the light.',
+  ghost:'image (if screen removed)', far:'image very far away',
+  simTri:'Similar triangles:', exReal:'Real image:', exVirt:'Virtual image:', exDiv:'Diverging lens:',
+  colPos:'Object position', colProp:'Image',
+  sumC:[['d > 2f','Real, inverted, smaller'],['d = 2f','Real, inverted, same size (d′ = 2f)'],['f < d < 2f','Real, inverted, larger'],['d = f','No image'],['d < f','Virtual, upright, larger']],
+  sumD:'Diverging lens: every object position gives a virtual, upright, smaller image inside the focal length.',
+  sumHead:'<b>Summary (converging lens).</b> A real image is always inverted and can be caught on a screen. A virtual image is always upright; it cannot be caught on a screen but the eye sees it through the lens.',
+  gX:'d (cm)', gY:'d′ (cm)', gReal:'real image', gVirt:'virtual image (|d′|)',
+  hint4:'Drag the lens and the screen along the bench. ◀ ▶ moves 1 mm. Watch the screen view on the right.',
+  lensW:'Lens', screenW:'Screen', showRays:'Show the rays',
+  cMethod:'Method', m4a:'Method 1: same-size image', m4b:'Method 2: measure d and d′', lock4:'Keep the lens halfway between object and screen',
+  steps4a:['Turn on "Keep the lens halfway" so that d = d′ always.','Move the screen (the lens follows) until the image is sharp.','Check the image is the same height as the object (2 cm) and inverted.','Read the object–screen distance L. Then d = d′ = 2f, so f = L/4.'],
+  steps4b:['Put the lens somewhere fairly far from the object.','Move the screen until the image is sharpest.','Read d (object to lens) and d′ (lens to screen) and record them.','Draw to scale, or use f = d·d′/(d + d′). Repeat 3 times and average.'],
+  onScreen:'Image on the screen', posLens:'Lens at mark', posScreen:'Screen at mark', kvD:'d (object → lens)', kvDp:'d′ (lens → screen)', kvL:'L (object → screen)', kvHp:'h′ measured', kvSharp:'Sharpness',
+  sharp:'sharp', soft:'slightly blurred', blur:'blurred', noimg:'no sharp image',
+  colN:'Trial', colSharp:'Sharpness', yourF:'Your f:', newLens:'New mystery lens',
+  f4ok:f=>`Spot on! The true focal length is ${f} cm.`, f4close:(f,e)=>`Close (${e}% off). The true focal length is ${f} cm. Make the image really sharp and try again.`,
+  f4no:'Not yet. Check: is the image really sharp? For method 1 the image must be the same height as the object.',
+  st4:s=>`Image on the screen: ${s}`, eqSize:' · same size as object',
+  s5kl:'Magnifier', s5ma:'Camera', s5mat:'Eye', s5mc:'Projector', cWhy:'Why?',
+  hint5kl:'Drag the ant (object) towards or away from the magnifier. The eye is right behind the lens.',
+  hint5ma:'Set the distance to the person, then focus by moving the sensor (film).',
+  hint5mat:'Set the distance to the object. The eye accommodates: the lens bulges or flattens.',
+  hint5mc:'Set the distance to the wall, then move the slide until the picture on the wall is sharp.',
+  vKl:'Object and image (same scale as the drawing)', klObj:'Object AB (the real ant)', klImg:'Image A′B′ seen through the lens',
+  cap5a_mat:'Overview: light from the object enters the eye', cap5b_mat:'Zoom: inside the eye (to scale)', cap5a_mc:'Overview: projector and wall (to scale)', cap5b_mc:'Zoom: the optics inside the projector',
+  pCornea:'cornea', pIris:'iris', pPupil:'pupil', pCiliary:'ciliary body', pLens:'eye lens', pVitreous:'vitreous humour', pRetina:'retina', pFovea:'yellow spot (fovea)', pNerve:'optic nerve',
+  objAB:'Object AB', notScale:'Not to scale', trueScale:'Drawn to scale', pProj:'projector', pWall:'wall (screen)', pLamp:'lamp', pMirror:'concave mirror', pCond:'condenser', pSlide:'slide (upside down)', pObj:'projection lens', vMa:'Image on the sensor', vMat:'Image on the retina', vMc:'Picture on the wall',
+  klPick:'Magnifier', klD:'Object → lens distance', maD:'Distance to the person', maS:'Sensor behind the lens', matD:'Distance to the object', mcL:'Distance to the wall', mcD:'Slide in front of the lens',
+  focus:'Auto focus', flip:'Put the slide in upside down',
+  naked:'Naked eye (25 cm)', thru:'Through magnifier',
+  klOut:'The object is beyond the focal length: the image is real and inverted, and an eye close to the lens cannot see it clearly. Move the object closer.',
+  kvG:'Marked magnification G = 25/f', kvGm:'Looks larger by', kvImg:'Virtual image from lens', kvHp5:'Image height',
+  kvF5:'Focal length', kvDp5:'Image from lens', kvState:'State',
+  matAcc:'Eye accommodating', matRelax:'Eye relaxed', matNear:'Closer than the near point (~25 cm): even fully accommodated the eye cannot focus.',
+  why5kl:['<b>Structure:</b> a magnifier is a short-focus converging lens in a frame with a handle. The rim shows the magnification, such as 2x, 3x, 5x; G = 25/f with f in cm.','<b>Principle:</b> with the object inside the focal length (d < f) a converging lens gives a virtual, upright, larger image. The eye behind the lens sees it at a larger angle.','<b>How to use it:</b> start with the lens close to the object and move it away until the image is clear and largest; the object is then near the focus.','<b>For students:</b> a magnifier lets you "bring the object closer" to your eye and still see it sharply.'],
+  why5ma:['<b>Principle:</b> the camera lens is a converging lens. The person is far away (d > 2f), so the image is real, inverted, smaller, just behind F′.','<b>Focusing</b> means moving the lens (or the sensor) so that the image falls exactly on the sensor. The closer the object, the further back the image.','<b>For students:</b> a camera is a screen for a real image inside a dark box; the inverted picture is turned the right way up by the software.'],
+  why5mat:['<b>Model:</b> the eye lens acts as a converging lens and the retina as a screen about 2 cm behind it that cannot move. The retinal image is real, inverted and tiny.','<b>Accommodation:</b> since the screen cannot move, the eye changes its focal length: for near objects the ciliary muscle contracts, the lens bulges and f decreases.','<b>Limit:</b> the eye can only accommodate down to the near point (about 25 cm for a healthy eye). Closer than that, the image falls behind the retina and looks blurred.','<b>For students:</b> a camera focuses by moving its lens; the eye focuses by making its lens fatter or thinner.'],
+  why5mc:['<b>Principle:</b> the slide (object) sits just outside the focal length (f < d < 2f, very close to f). The lens gives a real, inverted, much larger image on a distant wall.','<b>Because the image is inverted</b> the slide must go in upside down for the picture to be the right way up.','<b>Focusing:</b> the further the wall, the closer the slide must be to the focus.','<b>For students:</b> a projector is a camera run backwards: small object close by, large image far away.'],
+  wallAt:L=>`→ wall at ${L}`, farObj:'from a distant object',
+  stKl:g=>`Virtual, upright image; looks ${g} times larger than with the naked eye at 25 cm`,
+  stMa:s=>`Real, inverted, smaller image · ${s}`, stMat:s=>`Real, inverted, tiny image on the retina · ${s}`, stMc:s=>`Real image, many times larger · ${s}`,
+  hint6a:'Step 1: choose a key ray, then drag on the right of the lens to draw the outgoing ray. Press "Check ray".',
+  hint6b:'Step 2: drag the point B′ (diamond) to where the two outgoing rays (or their extensions) cross, then press "Check B′".',
+  hint6c:'Step 3: choose the image properties on the right.', hint6d:'Done! Press "New problem" to practise more.',
+  checkRay:'Check ray', checkB:'Check B′', newProb:'New problem', cProb:'Problem', cProps:'Image properties',
+  prob6:(c,f,d,h)=>`A ${c?'converging':'diverging'} lens has focal length f = ${f} cm. An object AB of height h = ${h} cm stands upright on the axis at d = ${d} cm from the lens. Draw the image A′B′ (1 square = 1 cm).`,
+  steps6:['Draw two key rays from B','Find B′ and drop A′B′ onto the axis','State the image properties'],
+  num6:'Use the scale drawing (count squares) to measure d′ = OA′ and h′ = A′B′.',
+  pickRay:'Choose a key ray first.', rayOk:'Correct!', rayNo:'Not yet.', rayDup:'You already drew that ray; choose another.',
+  hintRay:{par:'Ray parallel to the axis: a converging lens sends it through F′; a diverging lens spreads it so its extension passes through F.', o:'A ray through the centre O goes straight on.', fc:'A ray through F leaves parallel to the axis.', fd:'A ray aimed at F′ leaves parallel to the axis.'},
+  need2:'Draw two rays first.', bpOk:'Exactly! That is B′, the image of B.', bpNo:'Not on the crossing point yet; try again.',
+  p6ok:'All correct!', p6no:'Something is not right; look at your drawing again.', score:n=>`Problems solved: ${n}`, needB:'Finish step 2 first.',
+  foot1:'<b>Model.</b> Glass with refractive index n = 1.5. Rays refract by Snell\'s law (n = sin i / sin r) at every face, including total internal reflection if it happens. Both faces are spheres of radius R; for a thin lens f ≈ R. Drawn to scale.',
+  foot2:'<b>Model.</b> Ideal thin lens, 14 cm across: each ray refracts once at the lens\'s middle plane. Drawn to scale.',
+  foot3:'<b>Model.</b> Ideal thin lens, 10 cm across. The drawing is stretched vertically for clarity (straight lines stay straight, crossings stay put). Key rays may pass outside the rim; then the lens is treated as extended (dashed), as in textbooks. Brightness and blur on the screen follow the real light cone through the lens.',
+  foot4:'<b>Model.</b> The mystery lens has a random focal length between 8 cm and 20 cm and is 5 cm across. The object is a 2 cm luminous letter F at mark 0. Blur follows the real light cone.',
+  foot5:'<b>Model.</b> Each device is modelled as one thin converging lens. Magnifier: eye close to the lens, G = 25/f; the right panel shows object and image at the same scale as the drawing. Eye: in reality most refraction happens at the cornea; here it is combined into the eye lens 2 cm in front of the retina, near point 25 cm; the eye overview is not to scale. Projector: lens f = 10 cm, slide 2.4 cm tall; the condenser focuses the lamp light into the lens.',
+  foot6:'<b>Model.</b> 1 square = 1 cm. Your ray is accepted if it is within 2.5° of the correct direction. B′ is accepted within 0.4 squares of the true crossing.',
+  ly:'', cm:'cm', m:'m'
+}};
+
+/* ============ Tiện ích ============ */
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => [...r.querySelectorAll(s)];
+let lang='vi', level='quant', tab=1;
+try{ const sv=JSON.parse(localStorage.getItem('thaukinh-ui')||'{}'); if(sv.lang) lang=sv.lang; if(sv.level) level=sv.level; if(sv.tab) tab=sv.tab; }catch(e){}
+const HASH={'lang-kinh':1,'tia-sang':2,'tao-anh':3,'do-tieu-cu':4,'ung-dung':5,'luyen-ve':6};
+if (HASH[location.hash.slice(1)]) tab = HASH[location.hash.slice(1)];
+function save(){ try{ localStorage.setItem('thaukinh-ui', JSON.stringify({lang,level,tab})); }catch(e){} }
+function t(k, ...a){ let v = I18N[lang][k]; if (v===undefined) v = I18N.vi[k]; if (v===undefined) return k; return typeof v==='function' ? v(...a) : v; }
+function nf(x, d=1, min=0){ return new Intl.NumberFormat(lang==='vi'?'vi-VN':'en-US',{maximumFractionDigits:d,minimumFractionDigits:min}).format(x); }
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const snap=(v,s)=>Math.round(v/s)*s;
+const quant=()=>level==='quant';
+let C={};
+function readColors(){
+  const cs=getComputedStyle(document.documentElement);
+  for (const k of ['bg','panel','lane','ink','muted','line','accent','ok','warn','r1','r2','r3','beam','obj','img','glass','glass2','glass-edge','mask','axis','grid','wax','flame','zone1','zone2','room','room-ink','room-line','screen','skin','iris','wall','floor'])
+    C[k]=cs.getPropertyValue('--'+k).trim();
+}
+function fit(cv, aspect, minH, maxH){
+  const w=cv.clientWidth||300; const h=Math.round(clamp(w*aspect,minH,maxH));
+  cv.style.height=h+'px'; const dpr=window.devicePixelRatio||1;
+  cv.width=Math.round(w*dpr); cv.height=Math.round(h*dpr);
+  const ctx=cv.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0);
+  return {cv,ctx,w,h};
+}
+function ptr(cv,e){ const r=cv.getBoundingClientRect(); return {x:e.clientX-r.left, y:e.clientY-r.top}; }
+function font(ctx,size=13,weight=600){ ctx.font=`${weight} ${size}px "Be Vietnam Pro",system-ui,sans-serif`; }
+function label(ctx,txt,x,y,col,align='center',size=13,weight=600,bg){
+  font(ctx,size,weight); ctx.textAlign=align; ctx.textBaseline='middle';
+  if (bg){ const w=ctx.measureText(txt).width+8; const x0= align==='center'? x-w/2 : align==='right'? x-w+4 : x-4; ctx.fillStyle=bg; ctx.globalAlpha=.85; ctx.fillRect(x0,y-size*0.75,w,size*1.5); ctx.globalAlpha=1; }
+  ctx.fillStyle=col; ctx.fillText(txt,x,y);
+}
+/* Khung nhìn: toạ độ thế giới tính bằng cm, trục chính là y = 0 */
+function view(D,x0,x1,yHalf,trueScale,pad=0,oyFrac=0.5){
+  const k=(D.w-2*pad)/(x1-x0); const oy=D.h*oyFrac;
+  const ky= trueScale? k : Math.max(k,(Math.min(oy,D.h-oy)-14)/yHalf);
+  const V={k,ky,x0,x1,oy,X:x=>pad+(x-x0)*k, Y:y=>oy-y*ky, ix:px=>x0+(px-pad)/k, iy:py=>(oy-py)/ky, w:D.w,h:D.h};
+  V.box={x0:x0-2,x1:x1+2,y0:-(D.h-oy)/ky*1.4-1,y1:oy/ky*1.4+1};
+  return V;
+}
+function clipSeg(x1,y1,x2,y2,b){
+  let t0=0,t1=1; const dx=x2-x1, dy=y2-y1;
+  const p=[-dx,dx,-dy,dy], q=[x1-b.x0, b.x1-x1, y1-b.y0, b.y1-y1];
+  for(let i=0;i<4;i++){
+    if (p[i]===0){ if (q[i]<0) return null; }
+    else { const r=q[i]/p[i]; if (p[i]<0){ if (r>t1) return null; if (r>t0) t0=r; } else { if (r<t0) return null; if (r<t1) t1=r; } }
+  }
+  return [x1+t0*dx,y1+t0*dy,x1+t1*dx,y1+t1*dy];
+}
+function L(ctx,V,x1,y1,x2,y2,col,lw=2,dash=null,arrow=false,alpha=1){
+  const c=clipSeg(x1,y1,x2,y2,V.box); if (!c) return;
+  const X1=V.X(c[0]),Y1=V.Y(c[1]),X2=V.X(c[2]),Y2=V.Y(c[3]);
+  ctx.save(); ctx.globalAlpha=alpha; ctx.strokeStyle=col; ctx.lineWidth=lw; ctx.lineCap='round'; ctx.setLineDash(dash||[]);
+  ctx.beginPath(); ctx.moveTo(X1,Y1); ctx.lineTo(X2,Y2); ctx.stroke(); ctx.setLineDash([]);
+  if (arrow){ const len=Math.hypot(X2-X1,Y2-Y1); if (len>46){
+    const ux=(X2-X1)/len, uy=(Y2-Y1)/len, s=6+lw, mx=X1+(X2-X1)*0.5, my=Y1+(Y2-Y1)*0.5;
+    ctx.fillStyle=col; ctx.beginPath(); ctx.moveTo(mx+ux*s,my+uy*s); ctx.lineTo(mx-ux*s-uy*s*0.6,my-uy*s+ux*s*0.6); ctx.lineTo(mx-ux*s+uy*s*0.6,my-uy*s-ux*s*0.6); ctx.closePath(); ctx.fill(); } }
+  ctx.restore();
+}
+function arrowPx(ctx,x1,y1,x2,y2,col,lw=2.5){
+  const dx=x2-x1, dy=y2-y1, len=Math.hypot(dx,dy); if (len<3) return;
+  const ux=dx/len, uy=dy/len, hs=Math.min(10,len*0.45);
+  ctx.strokeStyle=col; ctx.fillStyle=col; ctx.lineWidth=lw; ctx.lineCap='round';
+  ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2-ux*hs*0.8,y2-uy*hs*0.8); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x2,y2); ctx.lineTo(x2-ux*hs-uy*hs*0.55,y2-uy*hs+ux*hs*0.55); ctx.lineTo(x2-ux*hs+uy*hs*0.55,y2-uy*hs-ux*hs*0.55); ctx.closePath(); ctx.fill();
+}
+/* Ảnh qua thấu kính mỏng: F > 0 hội tụ, F < 0 phân kì; d > 0 */
+function imageOf(d,F){
+  if (Math.abs(d-F)<1e-9) return {inf:true,dp:Infinity,m:Infinity,real:false};
+  const dp=d*F/(d-F); return {inf:false,dp,m:-dp/d,real:dp>0};
+}
+function propsOf(im){
+  if (im.inf) return {kind:'none'};
+  const a=Math.abs(im.m);
+  return {kind:im.real?'real':'virt', up:im.m>0?'up':'inv', size: Math.abs(a-1)<0.02?'eq':(a>1?'big':'small')};
+}
+function propText(p){ if (p.kind==='none') return t('noImage'); return t(p.kind==='real'?'pReal':'pVirt')+', '+t(p.up==='up'?'pUp':'pInv').toLowerCase()+', '+t('pSize_'+p.size).toLowerCase(); }
+
+/* ---- Vẽ chung: trục, thước, thấu kính, điểm, vật/ảnh nhìn ngang ---- */
+function drawAxis(ctx,V,col){ ctx.save(); ctx.strokeStyle=col||C.axis; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(0,V.Y(0)); ctx.lineTo(V.w,V.Y(0)); ctx.stroke(); ctx.restore(); }
+function drawRuler(ctx,V,y,labelEvery,origin=0,show=true){
+  ctx.save(); ctx.strokeStyle=C.muted; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(V.w,y); ctx.stroke();
+  const step= V.k>=6 ? 1 : (V.k>=2.5?2:5);
+  for (let x=Math.ceil(V.x0/step)*step; x<=V.x1; x+=step){
+    const r=Math.round(x-origin); const big = r%10===0, mid=r%5===0;
+    const px=V.X(x); ctx.beginPath(); ctx.moveTo(px,y); ctx.lineTo(px,y+(big?10:mid?7:4)); ctx.stroke();
+    if (show && big && r>=0 && r%labelEvery===0) label(ctx,nf(r,0),px,y+19,C.muted,'center',11,600);
+  }
+  ctx.restore();
+}
+function lensPath(ctx,x,yt,yb,conv,bw){
+  const ym=(yt+yb)/2; ctx.beginPath();
+  if (conv){ ctx.moveTo(x,yt); ctx.quadraticCurveTo(x+bw*2,ym,x,yb); ctx.quadraticCurveTo(x-bw*2,ym,x,yt); }
+  else { ctx.moveTo(x-bw,yt); ctx.lineTo(x+bw,yt); ctx.quadraticCurveTo(x+bw*0.1,ym,x+bw,yb); ctx.lineTo(x-bw,yb); ctx.quadraticCurveTo(x-bw*0.1,ym,x-bw,yt); }
+  ctx.closePath();
+}
+function drawLens(ctx,V,xL,H,conv,o={}){
+  const x=V.X(xL), yt=V.Y(H), yb=V.Y(-H);
+  if (o.plane!==false){ ctx.save(); ctx.strokeStyle=C['glass-edge']; ctx.globalAlpha=.45; ctx.setLineDash([5,6]); ctx.lineWidth=1.2;
+    ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,V.h); ctx.stroke(); ctx.restore(); }
+  const bw=o.bw ?? clamp((yb-yt)*0.06,4,12);
+  ctx.save(); lensPath(ctx,x,yt,yb,conv,bw); ctx.fillStyle=C.glass; ctx.globalAlpha=.85; ctx.fill(); ctx.globalAlpha=1;
+  ctx.strokeStyle=C['glass-edge']; ctx.lineWidth=2; ctx.stroke(); ctx.restore();
+  if (o.mask){ ctx.save(); ctx.fillStyle=C.mask; ctx.fillRect(x-bw*2.6,yt-6,bw*5.2,V.Y(0)-yt+5); ctx.restore(); }
+}
+function drawPt(ctx,V,x,txt,col,below=true){
+  const px=V.X(x), py=V.Y(0); ctx.save(); ctx.fillStyle=col; ctx.beginPath(); ctx.arc(px,py,4,0,7); ctx.fill(); ctx.restore();
+  label(ctx,txt,px,py+(below?16:-16),col,'center',13,700,C.panel);
+}
+/* Vật/ảnh nhìn ngang. h tính bằng cm (âm = lộn ngược, tức quay 180°) */
+function sideGlyph(ctx,V,type,x,h,col,o={}){
+  const px=V.X(x), y0=V.Y(0), y1=V.Y(h), hp=y0-y1, s=Math.sign(h)||1, ah=Math.abs(hp);
+  if (!isFinite(px)||!isFinite(y1)||ah<1) return;
+  ctx.save(); ctx.globalAlpha=o.alpha??1; ctx.strokeStyle=col; ctx.fillStyle=col; ctx.lineWidth=o.lw||3; ctx.lineCap='round'; ctx.lineJoin='round';
+  if (o.dash) ctx.setLineDash([6,5]);
+  if (type==='arrow'){
+    const hs=Math.min(12,ah*0.4);
+    ctx.beginPath(); ctx.moveTo(px,y0); ctx.lineTo(px,y1+s*hs*0.7); ctx.stroke();
+    ctx.setLineDash([]); ctx.beginPath(); ctx.moveTo(px,y1); ctx.lineTo(px-hs*0.6,y1+s*hs); ctx.lineTo(px+hs*0.6,y1+s*hs); ctx.closePath();
+    if (o.dash){ ctx.lineWidth=2; ctx.stroke(); } else ctx.fill();
+  } else if (type==='F'){
+    const bw=clamp(ah*0.45,6,70)*s;
+    ctx.beginPath(); ctx.moveTo(px,y0); ctx.lineTo(px,y1); ctx.lineTo(px+bw,y1); ctx.moveTo(px,y0-hp*0.52); ctx.lineTo(px+bw*0.72,y0-hp*0.52); ctx.stroke();
+  } else if (type==='candle'){
+    const ww=clamp(ah*0.13,3,40), yb=y0-hp*0.64;
+    ctx.beginPath(); ctx.rect(px-ww,Math.min(y0,yb),ww*2,Math.abs(yb-y0));
+    if (o.dash){ ctx.lineWidth=2; ctx.stroke(); } else { ctx.fillStyle=o.wax||C.wax; ctx.fill(); ctx.strokeStyle=col; ctx.lineWidth=2; ctx.stroke(); }
+    const fy0=yb, fy1=y1, fm=fy0+(fy1-fy0)*0.42, fw=ww*0.85*(o.flick||1);
+    ctx.beginPath(); ctx.moveTo(px,fy0); ctx.quadraticCurveTo(px+fw*1.4,fm,px,fy1); ctx.quadraticCurveTo(px-fw*1.4,fm,px,fy0); ctx.closePath();
+    if (o.dash){ ctx.strokeStyle=C.flame; ctx.lineWidth=2; ctx.stroke(); } else { ctx.fillStyle=C.flame; ctx.fill(); }
+  }
+  ctx.restore();
+}
+function drawEye(ctx,px,py,s,col){
+  ctx.save(); ctx.translate(px,py); ctx.strokeStyle=col; ctx.lineWidth=2.5; ctx.fillStyle=C.panel;
+  ctx.beginPath(); ctx.moveTo(-s,0); ctx.quadraticCurveTo(0,-s*0.9,s*0.9,0); ctx.quadraticCurveTo(0,s*0.9,-s,0); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillStyle=col; ctx.beginPath(); ctx.arc(-s*0.38,0,s*0.3,0,7); ctx.fill();
+  ctx.fillStyle=C.panel; ctx.beginPath(); ctx.arc(-s*0.45,-s*0.08,s*0.08,0,7); ctx.fill();
+  ctx.restore();
+}
+
+/* Cảnh quang học chung cho thấu kính mỏng: vật B ở (xo, h) */
+function opt(ctx,V,o){
+  const {xL,F,H,xo,h}=o, d=xL-xo, im=imageOf(d,F), conv=F>0;
+  const xi=xL+im.dp, yi=im.m*h;
+  const stop=(o.stopX!=null && o.stopX>xL)? o.stopX : xL+1e4;
+  const R=[];
+  if (o.special){
+    const want=k=>!o.only || o.only.includes(k);
+    if (want('par')) R.push({y:h,col:C.r1,k:'par'}); if (want('o')) R.push({y:0,col:C.r2,k:'o'});
+    if (want('f') && Math.abs(d-F)>0.05){ const u=-h/(d-F); R.push({y:h+u*d,col:C.r3,k:'f'}); }
+  }
+  if (o.beam){ const n=o.nb||9; for (let i=0;i<n;i++){ R.push({y:-H+2*H*(i+0.5)/n,col:C.beam,k:'b',thin:true}); } }
+  for (const r of R){
+    const u=(r.y-h)/d, lw=r.thin?1.4:2.4, al=r.thin?0.7:1;
+    const blocked=(o.mask && r.y>0.02);
+    const x0= o.farFrom!=null ? Math.max(xo,o.farFrom) : xo, y0=h+u*(x0-xo);
+    L(ctx,V,x0,y0,xL,r.y,r.col,lw,null,!r.thin,al);
+    if (r.k==='f' && !conv) L(ctx,V,xL,r.y,xL-F,0,r.col,1.3,[4,5],false,.6);
+    if (r.k==='f' && conv && d<F) L(ctx,V,xL-F,0,xo,h,r.col,1.3,[4,5],false,.6);
+    if (blocked){ const px=V.X(xL)-3, py=V.Y(r.y); ctx.save(); ctx.strokeStyle=r.col; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(px-5,py-5); ctx.lineTo(px+5,py+5); ctx.moveTo(px+5,py-5); ctx.lineTo(px-5,py+5); ctx.stroke(); ctx.restore(); continue; }
+    if (o.hideOut) continue;
+    const u2=u-r.y/F, xe=stop;
+    L(ctx,V,xL,r.y,xe,r.y+u2*(xe-xL),r.col,lw,null,!r.thin,al);
+    if (!im.inf && !im.real) L(ctx,V,xL,r.y,xi,yi,r.col,r.thin?1:1.4,[5,5],false,r.thin?0.5:0.8);
+  }
+  const res={im,xi,yi,d};
+  if (o.hideOut || o.showImg===false) return res;
+  if (!im.inf && Math.abs(im.dp)<800 && Math.abs(yi)<200){
+    if (im.real){
+      if (xi<=stop+1e-6) sideGlyph(ctx,V,o.obj,xi,yi,C.img,{lw:3,flick:o.flick});
+      else if (o.ghost!==false){ sideGlyph(ctx,V,o.obj,xi,yi,C.img,{lw:2,dash:true,alpha:.35}); res.ghost=true; }
+    } else sideGlyph(ctx,V,o.obj,xi,yi,C.img,{lw:2.2,dash:true});
+    if (o.labels!==false && (im.real? xi<=stop+1e-6 : true)){
+      label(ctx,'A′',V.X(xi),V.Y(0)+(yi>0?14:-14),C.img,'center',13,700,C.panel);
+      label(ctx,'B′',V.X(xi)+14,V.Y(yi),C.img,'left',13,700,C.panel);
+    }
+  }
+  return res;
+}
+
+/* ---- Màn nhìn chính diện (phòng tối) ---- */
+const SAMP=(()=>{ const a=[], N=48; for (let i=0;i<N;i++){ const r=Math.sqrt((i+0.5)/N), th=i*2.39996; a.push([r*Math.cos(th), r*Math.sin(th)]); } return a; })();
+const HAS_FILTER=(()=>{ try{ const c=document.createElement('canvas').getContext('2d'); return 'filter' in c; }catch(e){ return false; } })();
+function glyph2D(ctx,type,a){
+  if (type==='arrow'){ ctx.fillStyle=`rgba(255,228,176,${a})`; ctx.fillRect(-0.045,0,0.09,0.8); ctx.beginPath(); ctx.moveTo(-0.17,0.78); ctx.lineTo(0.17,0.78); ctx.lineTo(0,1); ctx.closePath(); ctx.fill(); }
+  else if (type==='F'){ ctx.fillStyle=`rgba(255,228,176,${a})`; ctx.fillRect(-0.07,0,0.14,1); ctx.fillRect(-0.07,0.87,0.6,0.13); ctx.fillRect(-0.07,0.45,0.44,0.13); }
+  else if (type==='candle'){ ctx.fillStyle=`rgba(240,214,170,${a*0.35})`; ctx.fillRect(-0.12,0,0.24,0.64);
+    ctx.fillStyle=`rgba(255,170,60,${a})`; ctx.beginPath(); ctx.ellipse(0,0.81,0.085,0.17,0,0,7); ctx.fill();
+    ctx.fillStyle=`rgba(255,240,200,${a})`; ctx.beginPath(); ctx.ellipse(0,0.78,0.035,0.08,0,0,7); ctx.fill(); }
+  else if (type==='person'){ ctx.fillStyle=`rgba(255,226,180,${a})`; ctx.beginPath(); ctx.arc(0,0.915,0.075,0,7); ctx.fill();
+    ctx.fillRect(-0.12,0.47,0.24,0.36); ctx.fillRect(-0.11,0,0.09,0.48); ctx.fillRect(0.02,0,0.09,0.48); ctx.fillRect(-0.2,0.5,0.07,0.31); ctx.fillRect(0.13,0.5,0.07,0.31); }
+}
+/* Ánh sáng từ vật (cao h, cách thấu kính d) đi qua thấu kính bán kính H, tới màn cách thấu kính s.
+   Điểm sáng (y,z) tới màn tại c·(y,z) + P·(1 − s/d′), với c = −s/d, P chạy trên phần mở của thấu kính. */
+function renderScreen(ctx,o){
+  const {cx,cy,ppc,type,h,d,dp,s,H,mask,gain=1,sref=20}=o;
+  const c=-s/d, fac= isFinite(dp)? 1-s/dp : 1;
+  const open= mask? SAMP.filter(p=>p[1]<0) : SAMP;
+  const blurPx=H*Math.abs(fac)*ppc;
+  const pts= blurPx<0.6 ? [[0,0]] : open;
+  const I= (mask?0.5:1)*gain*clamp((sref/s)**2,0.04,2.4);
+  const a=Math.min(1, pts.length>1 ? I/pts.length*1.2*clamp(blurPx/6,1,7) : I); // nhòe nhiều thì tăng nhẹ độ sáng cho dễ thấy vệt sáng
+  ctx.save(); ctx.globalCompositeOperation='lighter';
+  if (HAS_FILTER && blurPx>3) ctx.filter=`blur(${Math.min(14,blurPx/5).toFixed(1)}px)`;
+  for (const p of pts){
+    const ox= p[0]*H*fac*ppc, oy= -p[1]*H*fac*ppc;
+    ctx.setTransform(1,0,0,1,0,0); ctx.save();
+    const dpr=window.devicePixelRatio||1;
+    ctx.setTransform(dpr*c*h*ppc,0,0,-dpr*c*h*ppc,dpr*(cx+ox),dpr*(cy+oy));
+    glyph2D(ctx,type,a); ctx.restore();
+  }
+  ctx.restore();
+  const dpr=window.devicePixelRatio||1; ctx.setTransform(dpr,0,0,dpr,0,0);
+  return {blurCm:H*Math.abs(fac), size:Math.abs(c*h)};
+}
+function screenFrame(ctx,x,y,w,h,ppc,gridStep,labelStep){
+  ctx.save(); ctx.fillStyle=C.screen; ctx.fillRect(x,y,w,h);
+  ctx.strokeStyle=C['room-line']; ctx.lineWidth=1; ctx.beginPath();
+  const cx=x+w/2, cy=y+h/2;
+  for (let v=0; v<=w/2; v+=gridStep*ppc){ ctx.moveTo(cx+v,y); ctx.lineTo(cx+v,y+h); ctx.moveTo(cx-v,y); ctx.lineTo(cx-v,y+h); }
+  for (let v=0; v<=h/2; v+=gridStep*ppc){ ctx.moveTo(x,cy+v); ctx.lineTo(x+w,cy+v); ctx.moveTo(x,cy-v); ctx.lineTo(x+w,cy-v); }
+  ctx.stroke(); ctx.restore();
+}
+
+/* ============ TAB 1: lăng kính → thấu kính (dò tia theo định luật khúc xạ) ============ */
+const s1={type:'conv', N:2, R:12, beam:'par', laserY:2.2, names:true, p1:null, p2:null, zoom:1, cx:1, cy:0};
+const NG=1.5, H1=4, E1=0.15, X1A=-24, X1B=26;
+let D1=null, V1=null;
+function lens1(){
+  const R=s1.R, conv=s1.type==='conv', N=s1.N||400;
+  const sag=y=>R-Math.sqrt(R*R-y*y);
+  const tc= conv? E1+2*sag(H1) : 0.3;
+  const xr= y=> conv? tc/2-sag(y) : tc/2+sag(y);
+  const ys=[]; for (let i=0;i<=N;i++) ys.push(-H1+2*H1*i/N);
+  const P=[]; ys.forEach(y=>P.push([xr(y),y])); for (let i=N;i>=0;i--) P.push([-xr(ys[i]),ys[i]]);
+  return {P,ys,xr,N};
+}
+function trace1(P,p,d){
+  const pts=[p.slice()]; let cur=p.slice(), dir=d.slice();
+  for (let it=0; it<14; it++){
+    let best=Infinity, bn=null;
+    for (let i=0;i<P.length;i++){
+      const a=P[i], b=P[(i+1)%P.length], ex=b[0]-a[0], ey=b[1]-a[1];
+      const den=dir[0]*ey-dir[1]*ex; if (Math.abs(den)<1e-12) continue;
+      const wx=a[0]-cur[0], wy=a[1]-cur[1];
+      const tt=(wx*ey-wy*ex)/den, u=(wx*dir[1]-wy*dir[0])/den;
+      if (tt>1e-7 && u>=-1e-9 && u<=1+1e-9 && tt<best){ best=tt; const Lh=Math.hypot(ex,ey); bn=[ey/Lh,-ex/Lh]; }
+    }
+    if (!bn) break;
+    cur=[cur[0]+dir[0]*best, cur[1]+dir[1]*best]; pts.push(cur.slice());
+    let nn=bn, n1=1, n2=NG; const dn=dir[0]*bn[0]+dir[1]*bn[1];
+    if (dn>0){ nn=[-bn[0],-bn[1]]; n1=NG; n2=1; }
+    const ci=-(dir[0]*nn[0]+dir[1]*nn[1]), eta=n1/n2, k=1-eta*eta*(1-ci*ci);
+    if (k<0) dir=[dir[0]+2*ci*nn[0], dir[1]+2*ci*nn[1]];
+    else { const cc=eta*ci-Math.sqrt(k); dir=[eta*dir[0]+cc*nn[0], eta*dir[1]+cc*nn[1]]; }
+    const Ln=Math.hypot(dir[0],dir[1]); dir=[dir[0]/Ln,dir[1]/Ln];
+    cur=[cur[0]+dir[0]*1e-6, cur[1]+dir[1]*1e-6];
+  }
+  return {pts,dir,end:cur};
+}
+function rays1(){
+  const lp=lens1(), out=[];
+  let ys=[];
+  if (s1.beam==='one') ys=[s1.laserY];
+  else { for (let i=1;i<=5;i++){ ys.push(H1*0.9*i/5); ys.push(-H1*0.9*i/5); } if (s1.N%2===1 || s1.N===0) ys.push(0); }
+  for (const y of ys){ const r=trace1(lp.P,[X1A-1,y],[1,0]); r.y0=y; out.push(r); }
+  return {lp,out};
+}
+function crossX(r){ const e=r.end, d=r.dir; if (Math.abs(d[1])<1e-9) return null; return e[0]-e[1]*d[0]/d[1]; }
+/* Độ nhoè của chùm song song khi ghép ∞ lăng kính: tia mép cắt trục ở rim, tia gần trục ở near */
+function blur1(){
+  if (s1.N!==0) return null;
+  const lp=lens1(), conv=s1.type==='conv';
+  const near=crossX(trace1(lp.P,[X1A-1,H1*0.18],[1,0])), rim=crossX(trace1(lp.P,[X1A-1,H1*0.9],[1,0]));
+  if (near===null||rim===null) return null;
+  const ratio=Math.abs(near-rim)/Math.abs(near);
+  return {near,rim,ratio,bad:ratio>0.17};
+}
+function focus1(){ const lp=lens1(); const r=trace1(lp.P,[X1A-1,H1/lp.N],[1,0]); return crossX(r); } // tia gần trục, đi qua giữa dải sát trục
+function draw1(){
+  const {ctx,w,h}=D1; ctx.clearRect(0,0,w,h);
+  const span=(X1B-X1A)/s1.zoom, kz=w/span;
+  V1=view(D1,s1.cx-span/2,s1.cx+span/2,6,true,0,0.5+s1.cy*kz/h); const V=V1, conv=s1.type==='conv', LX=Math.max(V.X(X1A),0);
+  drawAxis(ctx,V);
+  const {lp,out}=rays1();
+  // các lăng kính nhỏ
+  const N=lp.N, smooth=s1.N===0;
+  for (let i=0;i<N;i++){
+    const a=lp.ys[i], b=lp.ys[i+1];
+    ctx.beginPath(); ctx.moveTo(V.X(lp.xr(a)),V.Y(a)); ctx.lineTo(V.X(lp.xr(b)),V.Y(b)); ctx.lineTo(V.X(-lp.xr(b)),V.Y(b)); ctx.lineTo(V.X(-lp.xr(a)),V.Y(a)); ctx.closePath();
+    ctx.fillStyle= smooth? C.glass : (i%2? C.glass2 : C.glass); ctx.fill();
+    if (!smooth){ ctx.strokeStyle=C['glass-edge']; ctx.lineWidth=1.5; ctx.stroke(); }
+  }
+  if (smooth){ ctx.beginPath(); lp.P.forEach((p,i)=>i? ctx.lineTo(V.X(p[0]),V.Y(p[1])) : ctx.moveTo(V.X(p[0]),V.Y(p[1]))); ctx.closePath(); ctx.strokeStyle=C['glass-edge']; ctx.lineWidth=2; ctx.stroke(); }
+  // lăng kính đang được chiếu (chế độ một tia) và hướng về đáy
+  if (!smooth){
+    let idx=null; if (s1.beam==='one') idx=clamp(Math.floor((s1.laserY+H1)/(2*H1)*N),0,N-1);
+    for (let i=0;i<N;i++){
+      if (s1.beam==='one' && i!==idx) continue;
+      const a=lp.ys[i], b=lp.ys[i+1], ta=lp.xr(a), tb=lp.xr(b);
+      if (Math.abs(ta-tb)<1e-6) continue;
+      const thick = ta>tb ? a : b, thin = ta>tb ? b : a; // đáy ở phía dày hơn
+      const ym=(a+b)/2, px=V.X(0), yb=V.Y(thick), ymPx=V.Y(ym);
+      if (s1.beam==='one'){ ctx.save(); ctx.beginPath(); ctx.moveTo(V.X(ta),V.Y(a)); ctx.lineTo(V.X(tb),V.Y(b)); ctx.lineTo(V.X(-tb),V.Y(b)); ctx.lineTo(V.X(-ta),V.Y(a)); ctx.closePath(); ctx.strokeStyle=C.r3; ctx.lineWidth=2.5; ctx.stroke(); ctx.restore(); }
+      ctx.save(); arrowPx(ctx,px,ymPx,px,ymPx+(yb-ymPx)*0.75,C.r3,2); ctx.restore();
+    }
+  }
+  // tia sáng
+  for (const r of out){
+    ctx.save(); ctx.strokeStyle=C.r1; ctx.lineWidth=s1.beam==='one'?2.6:1.8; ctx.lineCap='round'; ctx.beginPath();
+    r.pts.forEach((p,i)=>{ const P=[V.X(p[0]),V.Y(p[1])]; i? ctx.lineTo(...P) : ctx.moveTo(...P); }); ctx.stroke(); ctx.restore();
+    const e=r.end, d=r.dir; L(ctx,V,e[0],e[1],e[0]+d[0]*80,e[1]+d[1]*80,C.r1,s1.beam==='one'?2.6:1.8,null,true);
+    if (!conv && Math.abs(d[1])>1e-6){ const xc=crossX(r); if (xc!==null && xc<e[0]) L(ctx,V,e[0],e[1],Math.max(xc,X1A-2),e[1]+d[1]/d[0]*(Math.max(xc,X1A-2)-e[0]),C.r1,1.2,[5,5],false,.75); }
+  }
+  // đèn
+  if (s1.beam==='one'){ const px=LX+2, py=V.Y(s1.laserY); ctx.save(); ctx.fillStyle=C.ink; ctx.beginPath(); ctx.roundRect? ctx.roundRect(px-2,py-9,34,18,5) : ctx.rect(px-2,py-9,34,18); ctx.fill(); ctx.fillStyle=C.r1; ctx.fillRect(px+30,py-3,5,6);
+    ctx.strokeStyle=C.accent; ctx.lineWidth=2; ctx.setLineDash([3,3]); ctx.beginPath(); ctx.arc(px+14,py,16,0,7); ctx.stroke(); ctx.restore(); }
+  // vùng các tia cắt trục khi thấu kính quá cong
+  const B=blur1();
+  if (B && B.bad && s1.beam==='par'){
+    const y=V.Y(0);
+    for (const r of out){ if (Math.abs(r.y0)<0.1) continue; const xc=crossX(r); if (xc===null) continue;
+      ctx.save(); ctx.fillStyle=C.r2; ctx.strokeStyle=C.panel; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(V.X(xc),y,5,0,7); ctx.fill(); ctx.stroke(); ctx.restore(); }
+    label(ctx,t('rimRay'),V.X(B.rim),y+30,C.r2,'center',12,800,C.panel); label(ctx,t('nearRay'),V.X(B.near),y+48,C.r2,'center',12,800,C.panel);
+  }
+  // tên gọi
+  if (s1.names){
+    label(ctx,t('axis'),LX+40,V.Y(0)-12,C.muted,'left',13,600);
+    if (s1.zoom>1) label(ctx,'×'+s1.zoom,w-10,18,C.accent,'right',15,800,C.panel);
+    const O=[V.X(0),V.Y(0)]; ctx.fillStyle=C.ink; ctx.beginPath(); ctx.arc(O[0],O[1],3.5,0,7); ctx.fill(); label(ctx,'O',O[0]+10,O[1]+14,C.ink,'left',14,800);
+    if (smooth){ const f=focus1(); if (f!==null && isFinite(f)){
+      const fa=Math.abs(f), FR=conv? f : -f; // F′ bên phải
+      drawPt(ctx,V,fa,'F′',C.accent,false); drawPt(ctx,V,-fa,'F',C.accent,false);
+      const yd=V.Y(-H1-0.9), x0=V.X(0), x1=V.X(conv?fa:-fa);
+      ctx.save(); ctx.strokeStyle=C.accent; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(x0,yd-6); ctx.lineTo(x0,yd+6); ctx.moveTo(x1,yd-6); ctx.lineTo(x1,yd+6); ctx.stroke();
+      arrowPx(ctx,(x0+x1)/2,yd,x1,yd,C.accent,1.5); arrowPx(ctx,(x0+x1)/2,yd,x0,yd,C.accent,1.5); ctx.restore();
+      label(ctx, quant()? 'f ≈ '+nf(fa,1)+' cm' : 'f',(x0+x1)/2,yd+14,C.accent,'center',13,700,C.panel);
+    } }
+  }
+}
+function ui1(){
+  $$('#typ1 .btn').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===s1.type)));
+  $$('#np1 .btn').forEach(b=>{ b.setAttribute('aria-pressed',String(+b.dataset.v===s1.N)); if (b.dataset.v==='0') b.textContent='∞'; });
+  $$('#beam1 .btn').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===s1.beam)));
+  $$('#zm1 .btn').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.v===s1.zoom)));
+  $('#zmHint1').textContent= s1.zoom>1? t('zoomHint') : '';
+  $('#rngR').value=31-s1.R;
+  $('#rTxt').textContent= quant()? `R = ${nf(s1.R,1)} cm` : '';
+  const conv=s1.type==='conv', smooth=s1.N===0;
+  const B1=blur1();
+  $('#st1').textContent= smooth? t('st1lens',conv)+(B1&&B1.bad? t('st1blur') : '') : t('st1prism',s1.N,conv);
+  const {out}=rays1(), P=[];
+  P.push(`<p>${t('o1base',conv)}</p>`);
+  if (s1.beam==='one'){
+    const r=out[0], N=s1.N||400, i=clamp(Math.floor((s1.laserY+H1)/(2*H1)*N),0,N-1);
+    if (!smooth) P.push(`<p>${t('o1one',i+1,N)}</p>`);
+    const dev=Math.abs(Math.atan2(r.dir[1],r.dir[0]))*180/Math.PI;
+    if (dev<0.05 && !smooth) P.push(`<p>${t('o1slab')}</p>`);
+    if (quant()) P.push(`<p>${t('o1dev',nf(dev,1))}</p>`);
+  } else {
+    const xs=out.filter(r=>Math.abs(r.y0)>0.1).map(crossX).filter(x=>x!==null).map(Math.abs);
+    const a=Math.min(...xs), b=Math.max(...xs);
+    if (!smooth){
+      P.push(`<p>${quant()? t('o1spreadQ',nf(a,1),nf(b,1),conv) : t('o1spread',conv)}</p>`);
+      if (s1.N%2===1) P.push(`<p>${t('o1mid')}</p>`);
+    } else {
+      const bad=B1 && B1.bad;
+      if (bad) P.push(`<p class="fb bad">${t('o1warn',conv)}</p>`); else P.push(`<p>${t('o1lens',conv)}</p>`);
+      const f=focus1(); if (quant() && f!==null) P.push(`<p>${t('o1f',nf(Math.abs(f),1))}</p>`);
+      if (quant() && b-a>0.3) P.push(`<p>${bad? t('o1spreadQ',nf(a,1),nf(b,1),conv) : t('o1aber',nf(a,1),nf(b,1))}</p>`);
+      P.push(`<p>${t('o1curv')}</p>`);
+    }
+  }
+  $('#obs1').innerHTML=P.join('');
+  // dự đoán
+  [['#pq1a','p1',0,'#fb1a','fb1a'],['#pq1b','p2',0,'#fb1b','fb1b']].forEach(([sel,key,right,fb,hk])=>{
+    const v=s1[key];
+    $$(sel+' .btn').forEach(b=>{ const p=+b.dataset.p; b.classList.toggle('right',v!==null && p===right); b.classList.toggle('wrong',v!==null && p===v && p!==right); });
+    const el=$(fb); el.hidden= v===null; if (v!==null){ el.className='fb '+(v===right?'good':'bad'); el.textContent=(v===right?t('fbOk'):t('fbNo'))+t(hk); }
+  });
+  const c1=$('#concl1'); c1.hidden= !(s1.p1!==null && s1.p2!==null); c1.innerHTML=t('concl1');
+}
+function setup1(){
+  const cv=$('#cv1');
+  $$('#typ1 .btn').forEach(b=>b.onclick=()=>{ s1.type=b.dataset.v; ui1(); });
+  $$('#np1 .btn').forEach(b=>b.onclick=()=>{ s1.N=+b.dataset.v; ui1(); });
+  $$('#beam1 .btn').forEach(b=>b.onclick=()=>{ s1.beam=b.dataset.v; ui1(); });
+  $('#rngR').oninput=e=>{ s1.R=31-(+e.target.value); ui1(); };
+  $('#nm1').onchange=e=>{ s1.names=e.target.checked; };
+  $$('#pq1a .btn').forEach(b=>b.onclick=()=>{ s1.p1=+b.dataset.p; ui1(); });
+  $$('#pq1b .btn').forEach(b=>b.onclick=()=>{ s1.p2=+b.dataset.p; ui1(); });
+  $$('#zm1 .btn').forEach(b=>b.onclick=()=>{ s1.zoom=+b.dataset.v; if (s1.zoom===1){ s1.cx=1; s1.cy=0; } else { s1.cx=0; s1.cy= s1.beam==='one'? clamp(s1.laserY,-H1,H1)*0.7 : 0; } ui1(); });
+  let drag=null;
+  cv.addEventListener('pointerdown',e=>{ if (!V1) return; const p=ptr(cv,e), LX=Math.max(V1.X(X1A),0);
+    if (s1.beam==='one' && p.x<LX+90 && (s1.zoom===1 || Math.abs(p.y-V1.Y(s1.laserY))<44)) drag={k:'laser'};
+    else if (s1.zoom>1) drag={k:'pan',px:p.x,py:p.y,cx:s1.cx,cy:s1.cy};
+    if (!drag) return; cv.setPointerCapture(e.pointerId);
+    if (drag.k==='laser'){ s1.laserY=clamp(V1.iy(p.y),-H1*0.98,H1*0.98); ui1(); } });
+  cv.addEventListener('pointermove',e=>{ if (!drag) return; const p=ptr(cv,e);
+    if (drag.k==='laser'){ s1.laserY=clamp(V1.iy(p.y),-H1*0.98,H1*0.98); ui1(); }
+    else { s1.cx=clamp(drag.cx-(p.x-drag.px)/V1.k,X1A,X1B); s1.cy=clamp(drag.cy+(p.y-drag.py)/V1.k,-8,8); } });
+  const up=()=>drag=null; cv.addEventListener('pointerup',up); cv.addEventListener('pointercancel',up);
+}
+
+/* ============ TAB 2: đường đi tia sáng (thấu kính mỏng) ============ */
+const s2={type:'conv', f:10, lx:-22, ly:4, ang:-0.12, kept:[], found:{conv:{par:false,o:false,f:false},div:{par:false,o:false,f:false}}, pred:{conv:null,div:null}, flash:0};
+const H2=7, X2A=-30, X2B=30;
+let D2=null, V2=null, drag2=null;
+function F2(){ return s2.type==='conv'? s2.f : -s2.f; }
+function ray2(lx,ly,ang){
+  const u=Math.tan(ang), yh=ly+u*(0-lx), F=F2();
+  if (Math.abs(yh)>H2) return {hit:false,u,yh};
+  return {hit:true,u,yh,u2:u-yh/F};
+}
+function check2(){
+  const r=ray2(s2.lx,s2.ly,s2.ang), F=s2.found[s2.type]; if (!r.hit) return;
+  let nw=false;
+  if (Math.abs(s2.ang)<0.011 && Math.abs(r.yh)>0.3 && !F.par){ F.par=true; nw=true; }
+  if (Math.abs(r.yh)<0.2 && Math.abs(s2.ang)>0.03 && !F.o){ F.o=true; nw=true; }
+  if (Math.abs(r.u)>0.01 && Math.abs(r.yh)>0.3){ const x0=s2.lx-s2.ly/r.u; const target= s2.type==='conv'? -s2.f : s2.f; if (Math.abs(x0-target)<0.35 && !F.f){ F.f=true; nw=true; } }
+  if (nw) s2.flash=performance.now();
+}
+function draw2(){
+  const {ctx,w,h}=D2; ctx.clearRect(0,0,w,h);
+  V2=view(D2,X2A,X2B,10,true); const V=V2, conv=s2.type==='conv', f=s2.f;
+  drawAxis(ctx,V);
+  drawLens(ctx,V,0,H2,conv);
+  drawPt(ctx,V,-f,'F',C.accent); drawPt(ctx,V,f,'F′',C.accent);
+  label(ctx,'O',V.X(0)+10,V.Y(0)+14,C.ink,'left',14,800);
+  const drawRay=(lx,ly,ang,col,alpha,lw)=>{
+    const r=ray2(lx,ly,ang);
+    if (!r.hit){ L(ctx,V,lx,ly,lx+80,ly+r.u*80,col,lw,null,true,alpha); return; }
+    L(ctx,V,lx,ly,0,r.yh,col,lw,null,true,alpha);
+    L(ctx,V,0,r.yh,80,r.yh+r.u2*80,col,lw,null,true,alpha);
+    if (!conv) L(ctx,V,0,r.yh,-80,r.yh-r.u2*80,col,1.2,[5,5],false,alpha*0.7);
+  };
+  for (const k of s2.kept) drawRay(k.lx,k.ly,k.ang,k.col,.45,2);
+  drawRay(s2.lx,s2.ly,s2.ang,C.r1,1,3);
+  // đèn laser
+  const px=V.X(s2.lx), py=V.Y(s2.ly), ux=Math.cos(s2.ang), uy=-Math.sin(s2.ang);
+  ctx.save(); ctx.translate(px,py); ctx.rotate(Math.atan2(uy,ux)); ctx.fillStyle=C.ink; ctx.beginPath(); ctx.roundRect? ctx.roundRect(-46,-9,46,18,5) : ctx.rect(-46,-9,46,18); ctx.fill(); ctx.fillStyle=C.r1; ctx.fillRect(-4,-4,5,8); ctx.restore();
+  const kx=px+ux*58, ky=py+uy*58; ctx.save(); ctx.fillStyle=C.panel; ctx.strokeStyle=C.accent; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(kx,ky,10,0,7); ctx.fill(); ctx.stroke(); ctx.restore();
+  if (performance.now()-s2.flash<1600){ label(ctx,t('found'),w/2,22,C.ok,'center',16,800,C.panel); }
+}
+function ui2(){
+  $$('#typ2 .btn').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===s2.type)));
+  $('#f2Txt').textContent= nf(s2.f,1)+' cm'; $('#rngF2').value=s2.f;
+  const conv=s2.type==='conv';
+  $('#pre2f').textContent= conv? t('preFc') : t('preFd');
+  const r=ray2(s2.lx,s2.ly,s2.ang);
+  $('#st2').textContent= t('st2',conv)+(r.hit?'':' · '+t('missLens'));
+  const deg=a=>nf(Math.atan(a)*180/Math.PI,1)+'°';
+  $('#kv2').hidden=!quant();
+  $('#kv2').innerHTML= r.hit? `<dt>${t('kvAng')}</dt><dd>${deg(r.u)}</dd><dt>${t('kvHit')}</dt><dd>${nf(Math.abs(r.yh),1)} cm ${Math.abs(r.yh)<0.05?'':(r.yh>0?t('above'):t('below'))}</dd><dt>${t('kvOut')}</dt><dd>${deg(r.u2)}</dd>` : '';
+  const F=s2.found[s2.type], RR= conv? t('ruleC') : t('ruleD'), Q=t('ruleQ');
+  const rows=[['par',C.r1,Q.par],['o',C.r2,Q.o],['f',C.r3,conv?Q.fc:Q.fd]];
+  $('#rules2').innerHTML=rows.map(([k,col,q])=>`<li class="${F[k]?'done':''}"><span class="mk">${F[k]?'✓':'?'}</span><span>${F[k]?RR[k]:q}</span></li>`).join('');
+  const c2=$('#concl2'); c2.hidden=!(F.par&&F.o&&F.f); c2.innerHTML= conv? t('concl2c') : t('concl2d');
+  const pk= conv? 'q2c':'q2d', pv=s2.pred[s2.type];
+  $('#q2').textContent=t(pk);
+  $$('#pq2 .btn').forEach(b=>{ const p=+b.dataset.p; b.textContent=t(pk+'_'+p); b.classList.toggle('right',pv!==null&&p===0); b.classList.toggle('wrong',pv!==null&&p===pv&&p!==0); });
+  const fb=$('#fb2'); fb.hidden=pv===null; if (pv!==null){ fb.className='fb '+(pv===0?'good':'bad'); fb.textContent=(pv===0?t('fbOk'):t('fbNo'))+t('fb2'); }
+}
+function setup2(){
+  const cv=$('#cv2');
+  $$('#typ2 .btn').forEach(b=>b.onclick=()=>{ s2.type=b.dataset.v; s2.kept=[]; ui2(); });
+  $('#rngF2').oninput=e=>{ s2.f=+e.target.value; check2(); ui2(); };
+  const ensureY=()=>{ if (Math.abs(s2.ly)<0.8) s2.ly=4; };
+  $('#pre2par').onclick=()=>{ ensureY(); s2.ang=0; check2(); ui2(); };
+  $('#pre2o').onclick=()=>{ ensureY(); s2.ang=Math.atan2(-s2.ly,-s2.lx); check2(); ui2(); };
+  $('#pre2f').onclick=()=>{ ensureY(); if (s2.type==='conv'){ if (s2.lx>-s2.f-3) s2.lx=-s2.f-9; s2.ang=Math.atan2(-s2.ly,-s2.f-s2.lx); } else s2.ang=Math.atan2(-s2.ly,s2.f-s2.lx); check2(); ui2(); };
+  $('#keep2').onclick=()=>{ const cols=[C.r2,C.r3,C.beam,C.obj,C.img]; s2.kept.push({lx:s2.lx,ly:s2.ly,ang:s2.ang,col:cols[s2.kept.length%cols.length]}); if (s2.kept.length>8) s2.kept.shift(); };
+  $('#clr2').onclick=()=>{ s2.kept=[]; };
+  $$('#pq2 .btn').forEach(b=>b.onclick=()=>{ s2.pred[s2.type]=+b.dataset.p; ui2(); });
+  cv.addEventListener('pointerdown',e=>{
+    if (!V2) return; const p=ptr(cv,e), px=V2.X(s2.lx), py=V2.Y(s2.ly), ux=Math.cos(s2.ang), uy=-Math.sin(s2.ang);
+    const kx=px+ux*58, ky=py+uy*58;
+    if (Math.hypot(p.x-kx,p.y-ky)<24) drag2={k:'aim'};
+    else { const lx=(p.x-px)*ux+(p.y-py)*uy, ly=-(p.x-px)*uy+(p.y-py)*ux; if (lx>-56 && lx<12 && Math.abs(ly)<20) drag2={k:'move',ox:V2.ix(p.x)-s2.lx,oy:V2.iy(p.y)-s2.ly}; }
+    if (drag2) cv.setPointerCapture(e.pointerId);
+  });
+  cv.addEventListener('pointermove',e=>{
+    if (!drag2) return; const p=ptr(cv,e);
+    if (drag2.k==='aim'){ const wx=V2.ix(p.x)-s2.lx, wy=V2.iy(p.y)-s2.ly; if (wx>0.3){ let a=Math.atan2(wy,wx); if (Math.abs(a)<0.012) a=0; s2.ang=clamp(a,-1.2,1.2); } }
+    else { s2.lx=clamp(V2.ix(p.x)-drag2.ox,X2A+2,-1.5); s2.ly=clamp(V2.iy(p.y)-drag2.oy,-14,14); }
+    check2(); ui2();
+  });
+  const up=()=>{ drag2=null; }; cv.addEventListener('pointerup',up); cv.addEventListener('pointercancel',up);
+}
+
+/* ============ TAB 3: sự tạo ảnh ============ */
+const s3={type:'conv',f:10,xL:42,xo:14,h:3,obj:'arrow',xs:72,mode:'screen',xe:80,ye:-1,rays:'special',mask:false,zones:true,pred:false,ans:{},graded:null,rec:[],sumOpen:false,curve:false};
+const H3=5, SCRH=12, X3A=-2, X3B=92;
+let D3=null, V3=null, D3s=null, D3g=null, drag3=null;
+function F3(){ return s3.type==='conv'? s3.f : -s3.f; }
+function cur3(){ const d=s3.xL-s3.xo, im=imageOf(d,F3()); return {d,im,p:propsOf(im),xi:s3.xL+im.dp,yi:im.m*s3.h}; }
+function zone3(d,f){ if (s3.type==='div') return t('zDiv'); if (Math.abs(d-2*f)<0.01) return t('z2f'); if (d>2*f) return t('zOut2f'); if (Math.abs(d-f)<0.01) return t('zF'); if (d>f) return t('zF2f'); return t('zInF'); }
+function eye3(){
+  const {im,xi,yi}=cur3(), F=F3();
+  if (im.inf){ const u2=-s3.h/s3.f; const yAt=s3.ye-u2*(s3.xe-s3.xL); return {ok:Math.abs(yAt)<=H3 && !(s3.mask&&yAt>0.02), yAt, kind:'inf', u2}; }
+  const yAt=yi+(s3.ye-yi)*(s3.xL-xi)/(s3.xe-xi);
+  const ok=Math.abs(yAt)<=H3 && !(s3.mask&&yAt>0.02);
+  if (im.real && s3.xe<xi) return {ok,yAt,kind:'between'};
+  return {ok,yAt,kind:im.real?'real':'virt'};
+}
+function draw3(){
+  const {ctx,w,h}=D3; ctx.clearRect(0,0,w,h);
+  V3=view(D3,X3A,X3B,8.6,false,0,0.47); const V=V3, f=s3.f, conv=s3.type==='conv';
+  const {d,im,xi,yi}=cur3();
+  if (s3.zones){
+    const z=(a,b,col,txt)=>{ const x0=V.X(Math.max(a,X3A)), x1=V.X(b); if (x1<=x0) return; ctx.fillStyle=col; ctx.fillRect(x0,V.Y(H3+1.2),x1-x0,V.Y(-H3-1.2)-V.Y(H3+1.2)); label(ctx,txt,(x0+x1)/2,V.Y(H3+0.6),C.muted,'center',12,700); };
+    if (conv){ z(s3.xL-f,s3.xL,C.zone1,'d < f'); z(s3.xL-2*f,s3.xL-f,C.zone2,'f < d < 2f'); if (s3.xL-2*f>X3A+4) z(X3A,s3.xL-2*f,C.lane,'d > 2f'); }
+    else z(s3.xL-f,s3.xL,C.zone1,'f');
+  }
+  drawAxis(ctx,V);
+  drawRuler(ctx,V,h-26,10,0,quant());
+  drawLens(ctx,V,s3.xL,H3,conv,{mask:s3.mask});
+  drawPt(ctx,V,s3.xL-f,'F',C.accent); drawPt(ctx,V,s3.xL+f,'F′',C.accent);
+  if (s3.xL-2*f>X3A) drawPt(ctx,V,s3.xL-2*f,'2F',C.muted); if (s3.xL+2*f<X3B) drawPt(ctx,V,s3.xL+2*f,'2F′',C.muted);
+  label(ctx,'O',V.X(s3.xL)+10,V.Y(0)+14,C.ink,'left',13,800,C.panel);
+  // màn
+  const scr= s3.mode==='screen';
+  if (scr){ const x=V.X(s3.xs), yt=Math.max(V.Y(SCRH),6), yb=Math.min(V.Y(-SCRH),h-40); ctx.save(); ctx.fillStyle=C.ink; ctx.globalAlpha=.85; ctx.fillRect(x-2,yt,5,yb-yt); ctx.globalAlpha=1; ctx.fillStyle=C.muted; ctx.fillRect(x-10,yb,22,5); ctx.restore(); }
+  const flick=1+0.08*Math.sin(performance.now()/90)+0.05*Math.sin(performance.now()/37);
+  sideGlyph(ctx,V,s3.obj,s3.xo,s3.h,C.obj,{lw:3,flick});
+  label(ctx,'A',V.X(s3.xo),V.Y(0)+14,C.obj,'center',13,700,C.panel);
+  label(ctx,'B',V.X(s3.xo)-14,V.Y(s3.h),C.obj,'right',13,700,C.panel);
+  ctx.save(); ctx.strokeStyle=C.obj; ctx.lineWidth=2; ctx.setLineDash([2,3]); ctx.beginPath(); ctx.arc(V.X(s3.xo),V.Y(s3.h),9,0,7); ctx.stroke(); ctx.restore();
+  opt(ctx,V,{xL:s3.xL,F:F3(),H:H3,xo:s3.xo,h:s3.h,obj:s3.obj,special:s3.rays!=='beam',beam:s3.rays!=='special',mask:s3.mask,hideOut:s3.pred,stopX:scr?s3.xs:null,flick});
+  // mắt
+  if (!scr){
+    const E=eye3();
+    if (E.ok && !s3.pred){
+      if (E.kind==='inf'){ L(ctx,V,s3.xo,s3.h,s3.xL,E.yAt,C.img,3,null,false,.9); L(ctx,V,s3.xL,E.yAt,s3.xe,s3.ye,C.img,3,null,true,.9); }
+      else { L(ctx,V,s3.xo,s3.h,s3.xL,E.yAt,C.img,3,null,false,.9); L(ctx,V,s3.xL,E.yAt,s3.xe,s3.ye,C.img,3,null,true,.9); if (E.kind==='virt') L(ctx,V,s3.xL,E.yAt,xi,yi,C.img,1.6,[6,5],false,.9); }
+    }
+    drawEye(ctx,V.X(s3.xe),V.Y(s3.ye),17,C.ink);
+  }
+  if (!im.inf && !s3.pred && (Math.abs(im.dp)>=800 || (im.real && xi>X3B+1) || (!im.real && xi<X3A-1))){
+    label(ctx,t('far')+(quant()?` (d′ ≈ ${nf(Math.abs(im.dp),0)} cm)`:'' ),w-8,18,C.img,'right',13,700,C.panel);
+  }
+}
+function drawScreen3(){
+  const {ctx,w,h}=D3s; ctx.clearRect(0,0,w,h); ctx.fillStyle=C.room; ctx.fillRect(0,0,w,h);
+  const gap=10, bw=(w-gap*3)/2, top=26, bh=h-top-10;
+  // vật
+  label(ctx,t('objThumb'),gap+bw/2,13,C['room-ink'],'center',12,600);
+  label(ctx,t(s3.mode==='screen'?'scrThumb':'eyeTitle'),gap*2+bw+bw/2,13,C['room-ink'],'center',12,600);
+  ctx.save(); ctx.fillStyle=C.screen; ctx.fillRect(gap,top,bw,bh); ctx.beginPath(); ctx.rect(gap,top,bw,bh); ctx.clip();
+  const ppcO=bh/(2*SCRH), cyO=top+bh/2;
+  const dpr=window.devicePixelRatio||1; ctx.setTransform(dpr*s3.h*ppcO,0,0,-dpr*s3.h*ppcO,dpr*(gap+bw/2),dpr*cyO); glyph2D(ctx,s3.obj,1); ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.restore();
+  const x2=gap*2+bw;
+  ctx.save(); ctx.beginPath(); ctx.rect(x2,top,bw,bh); ctx.clip();
+  const ppc=bh/(2*SCRH);
+  if (s3.mode==='screen'){
+    screenFrame(ctx,x2,top,bw,bh,ppc,1,5);
+    if (s3.pred){ label(ctx,'?',x2+bw/2,top+bh/2,C['room-ink'],'center',40,800); }
+    else { const {d,im}=cur3(); renderScreen(ctx,{cx:x2+bw/2,cy:top+bh/2,ppc,type:s3.obj,h:s3.h,d,dp:im.dp,s:s3.xs-s3.xL,H:H3,mask:s3.mask,gain:1,sref:2*s3.f}); }
+  } else {
+    ctx.fillStyle=C.screen; ctx.fillRect(x2,top,bw,bh);
+    const E=eye3(), {im}=cur3();
+    if (!s3.pred && E.ok && (E.kind==='real'||E.kind==='virt')){
+      const m=im.m, sc=clamp(Math.abs(m),0.15,3.2)*Math.sign(m);
+      const gh=s3.h*sc*ppc*0.9; ctx.setTransform(dpr*gh,0,0,-dpr*gh,dpr*(x2+bw/2),dpr*(top+bh/2+gh/2)); glyph2D(ctx,s3.obj,1); ctx.setTransform(dpr,0,0,dpr,0,0);
+    } else if (!s3.pred && E.ok){ ctx.save(); if (HAS_FILTER) ctx.filter='blur(10px)'; ctx.fillStyle='rgba(255,226,170,.35)'; ctx.beginPath(); ctx.arc(x2+bw/2,top+bh/2,bw*0.25,0,7); ctx.fill(); ctx.restore(); }
+    else label(ctx,s3.pred?'?':'—',x2+bw/2,top+bh/2,C['room-ink'],'center',s3.pred?40:22,800);
+  }
+  ctx.restore();
+}
+function scrState3(){
+  const {d,im}=cur3(); const s=s3.xs-s3.xL;
+  if (im.inf) return t('scrInf');
+  if (!im.real) return t('scrVirt');
+  const blur=H3*Math.abs(1-s/im.dp);
+  if (blur<0.12) return t('scrSharp');
+  const pos= s<im.dp? t('scrBefore') : t('scrAfter');
+  return (blur<0.5? t('scrSoft') : t('scrBlur'))+' '+pos;
+}
+function ui3(){
+  $$('#typ3 .btn').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===s3.type)));
+  $$('#obj3 .btn').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===s3.obj)));
+  $$('#rays3 .btn').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===s3.rays)));
+  $$('#mode3 .btn').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===s3.mode)));
+  $('#rngF3').value=s3.f; $('#f3Txt').textContent= quant()? nf(s3.f,1)+' cm' : '';
+  $('#mask3').checked=s3.mask; $('#zone3').checked=s3.zones;
+  const {d,im,p}=cur3(), Q=quant();
+  $('#scrTitle3').textContent= s3.mode==='screen'? t('scrTitle') : t('eyeTitle');
+  let scrTxt='';
+  if (!s3.pred){
+    if (s3.mode==='screen') scrTxt=scrState3();
+    else { const E=eye3(); scrTxt= !E.ok? t('eyeMiss') : E.kind==='real'? t('eyeReal') : E.kind==='virt'? t('eyeVirt') : E.kind==='inf'? t('eyeInf') : t('eyeBetween'); }
+    if (s3.mask) scrTxt+=' '+t('maskNote');
+  }
+  $('#scrTxt3').textContent=scrTxt;
+  $('#st3').textContent= s3.pred? zone3(d,s3.f) : zone3(d,s3.f)+' → '+propText(p);
+  // kết quả
+  const R=[];
+  R.push(`<p><b>${t('zoneL')}:</b> ${zone3(d,s3.f)}</p>`);
+  if (!s3.pred){
+    R.push(`<p><b>${t('imgL')}:</b> ${propText(p)}</p>`);
+    if (Q){
+      const hp= im.inf? null : Math.abs(im.m*s3.h), dp= im.inf? null : Math.abs(im.dp);
+      R.push(`<dl class="kv"><dt>d = OA</dt><dd>${nf(d,1)} cm</dd><dt>d′ = OA′</dt><dd>${dp===null?'∞':nf(dp,1)+' cm'}</dd><dt>h = AB</dt><dd>${nf(s3.h,1)} cm</dd><dt>h′ = A′B′</dt><dd>${hp===null?'—':nf(hp,2)+' cm'}</dd></dl>`);
+      if (!im.inf) R.push(`<div class="formula">${t('simTri')} h′/h = d′/d<br>${nf(hp,2)} / ${nf(s3.h,1)} = ${nf(dp,1)} / ${nf(d,1)} = ${nf(dp/d,2)}</div>`);
+    }
+  }
+  $('#res3').innerHTML=R.join('');
+  const ext=$('#ext3'); ext.hidden= !Q || s3.pred || im.inf;
+  if (!ext.hidden){
+    const dp=Math.abs(im.dp), f=s3.f, fmt=x=>nf(x,4);
+    let eq;
+    if (s3.type==='div') eq=`${t('exDiv')} 1/f = 1/d′ − 1/d<br>1/${nf(f,1)} = 1/${nf(dp,2)} − 1/${nf(d,1)}<br>${fmt(1/f)} ≈ ${fmt(1/dp-1/d)}`;
+    else if (im.real) eq=`${t('exReal')} 1/f = 1/d + 1/d′<br>1/${nf(f,1)} = 1/${nf(d,1)} + 1/${nf(dp,2)}<br>${fmt(1/f)} ≈ ${fmt(1/d+1/dp)}`;
+    else eq=`${t('exVirt')} 1/f = 1/d − 1/d′<br>1/${nf(f,1)} = 1/${nf(d,1)} − 1/${nf(dp,2)}<br>${fmt(1/f)} ≈ ${fmt(1/d-1/dp)}`;
+    $('#lensEq3').innerHTML=eq;
+  }
+  // dự đoán
+  $('#pr3intro').textContent=t('pr3intro');
+  $('#pr3start').textContent= s3.graded? t('predAgain') : t('predStart');
+  $('#pr3start').hidden=s3.pred; $('#pr3box').hidden=!s3.pred;
+  $$('#pr3box .choices').forEach(g=>{ const k=g.dataset.g; $$('.btn',g).forEach(b=>{ b.setAttribute('aria-pressed',String(s3.ans[k]===b.dataset.v)); b.classList.remove('right','wrong'); }); });
+  const fb=$('#fb3');
+  if (s3.graded){ fb.hidden=false; fb.className='fb '+(s3.graded.ok?'good':'bad'); fb.textContent=s3.graded.msg; } else fb.hidden=true;
+  // bảng
+  const tb=$('#tbl3');
+  if (!s3.rec.length) tb.innerHTML='';
+  else if (Q) tb.innerHTML=`<tr><th>f</th><th>d</th><th>d′</th><th>h′</th><th>${t('colProp')}</th></tr>`+s3.rec.map(r=>`<tr><td class="n">${r.type==='div'?'−':''}${nf(r.f,1)}</td><td class="n">${nf(r.d,1)}</td><td class="n">${r.dp===null?'∞':nf(Math.abs(r.dp),1)}</td><td class="n">${r.hp===null?'—':nf(r.hp,2)}</td><td>${propText(r.p)}</td></tr>`).join('');
+  else tb.innerHTML=`<tr><th>${t('colPos')}</th><th>${t('colProp')}</th></tr>`+s3.rec.map(r=>`<tr><td>${r.zone}</td><td>${propText(r.p)}</td></tr>`).join('');
+  $('#cv3g').hidden=!Q; $('#crvBox3').hidden=!Q; $('#crv3').checked=s3.curve;
+  const c3=$('#concl3'); c3.hidden=!s3.sumOpen;
+  if (s3.sumOpen){
+    c3.innerHTML= s3.type==='conv'? `<p>${t('sumHead')}</p><div class="tblwrap"><table>${t('sumC').map(([a,b])=>`<tr><td class="n">${a}</td><td>${b}</td></tr>`).join('')}</table></div>` : `<p>${t('sumD')}</p>`;
+  }
+  if (Q && tab===3) drawGraph3();
+}
+function drawGraph3(){
+  D3g=fit($('#cv3g'),0.62,190,260); const {ctx,w,h}=D3g; ctx.clearRect(0,0,w,h);
+  const padL=40,padB=30,padT=12,padR=10, xm=90, ym=90;
+  const X=x=>padL+(x/xm)*(w-padL-padR), Y=y=>h-padB-(y/ym)*(h-padB-padT);
+  ctx.strokeStyle=C.line; ctx.lineWidth=1; ctx.beginPath();
+  for (let v=0; v<=90; v+=10){ ctx.moveTo(X(v),Y(0)); ctx.lineTo(X(v),Y(ym)); ctx.moveTo(X(0),Y(v)); ctx.lineTo(X(xm),Y(v)); }
+  ctx.stroke();
+  for (let v=0; v<=90; v+=30){ label(ctx,nf(v,0),X(v),h-padB+12,C.muted,'center',11,500); label(ctx,nf(v,0),padL-6,Y(v),C.muted,'right',11,500); }
+  label(ctx,t('gX'),w-padR,h-8,C.muted,'right',12,600); label(ctx,t('gY'),padL+4,padT+2,C.muted,'left',12,600);
+  const f=s3.f, conv=s3.type==='conv';
+  if (s3.curve){
+    const path=(fn,a,b,col,dash)=>{ ctx.save(); ctx.strokeStyle=col; ctx.lineWidth=2; ctx.setLineDash(dash||[]); ctx.beginPath(); let st=false;
+      for (let x=a;x<=b;x+=0.25){ const y=fn(x); if (!isFinite(y)||y>ym||y<0){ st=false; continue; } st? ctx.lineTo(X(x),Y(y)) : ctx.moveTo(X(x),Y(y)); st=true; } ctx.stroke(); ctx.restore(); };
+    if (conv){ path(x=>x*f/(x-f),f+0.05,xm,C.img); path(x=>x*f/(f-x),0.25,f-0.05,C.img,[5,4]);
+      ctx.save(); ctx.strokeStyle=C.muted; ctx.setLineDash([3,4]); ctx.beginPath(); ctx.moveTo(X(f),Y(0)); ctx.lineTo(X(f),Y(ym)); ctx.stroke(); ctx.restore(); label(ctx,'d = f',X(f)+4,padT+12,C.muted,'left',11,600); }
+    else path(x=>x*f/(x+f),0.25,xm,C.img,[5,4]);
+  }
+  for (const r of s3.rec){ if (r.dp===null) continue; const y=Math.abs(r.dp); if (y>ym) continue; const same=r.f===s3.f&&r.type===s3.type;
+    ctx.save(); ctx.globalAlpha=same?1:0.35; ctx.strokeStyle=C.img; ctx.fillStyle=C.img; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(X(r.d),Y(y),5,0,7); r.p.kind==='real'? ctx.fill() : ctx.stroke(); ctx.restore(); }
+  font(ctx,11,600); ctx.fillStyle=C.img; ctx.beginPath(); ctx.arc(w-130,padT+8,4,0,7); ctx.fill(); label(ctx,t('gReal'),w-122,padT+8,C.muted,'left',11,600);
+  ctx.strokeStyle=C.img; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(w-130,padT+24,4,0,7); ctx.stroke(); label(ctx,t('gVirt'),w-122,padT+24,C.muted,'left',11,600);
+}
+function setup3(){
+  const cv=$('#cv3');
+  $$('#typ3 .btn').forEach(b=>b.onclick=()=>{ s3.type=b.dataset.v; s3.graded=null; ui3(); });
+  $$('#obj3 .btn').forEach(b=>b.onclick=()=>{ s3.obj=b.dataset.v; ui3(); });
+  $$('#rays3 .btn').forEach(b=>b.onclick=()=>{ s3.rays=b.dataset.v; ui3(); });
+  $$('#mode3 .btn').forEach(b=>b.onclick=()=>{ s3.mode=b.dataset.v; if (s3.mode==='eye'){ s3.xe=clamp(Math.max(s3.xe,s3.xL+8),s3.xL+2,91); } ui3(); });
+  $('#rngF3').oninput=e=>{ s3.f=+e.target.value; ui3(); };
+  $('#mask3').onchange=e=>{ s3.mask=e.target.checked; ui3(); };
+  $('#zone3').onchange=e=>{ s3.zones=e.target.checked; };
+  $('#pr3start').onclick=()=>{ s3.pred=true; s3.ans={}; s3.graded=null; ui3(); };
+  $$('#pr3box .choices').forEach(g=>$$('.btn',g).forEach(b=>b.onclick=()=>{ s3.ans[g.dataset.g]=b.dataset.v; ui3(); }));
+  $('#pr3check').onclick=()=>{
+    const {p}=cur3(), A=s3.ans;
+    if (A.kind==='none' || p.kind==='none'){
+      const ok=A.kind===p.kind; s3.graded={ok,msg:(ok?t('fbOk'):t('fbNo'))+t('predNone')};
+    } else {
+      if (!A.kind||!A.up||!A.size){ s3.graded={ok:false,msg:t('needAll')}; ui3(); return; }
+      const n=(A.kind===p.kind)+(A.up===p.up)+(A.size===p.size);
+      s3.graded={ok:n===3,msg:t('predRes',n,3)+' '+propText(p)+'.'};
+    }
+    s3.pred=false; ui3();
+    $$('#pr3box .choices').forEach(g=>{ const k=g.dataset.g; $$('.btn',g).forEach(b=>{ if (A[k]===b.dataset.v) b.classList.add(b.dataset.v===p[k]?'right':'wrong'); }); });
+  };
+  $('#rec3').onclick=()=>{ const {d,im,p}=cur3(); s3.rec.push({f:s3.f,type:s3.type,d,dp:im.inf?null:im.dp,hp:im.inf?null:Math.abs(im.m*s3.h),p,zone:zone3(d,s3.f)}); if (s3.rec.length>12) s3.rec.shift(); ui3(); };
+  $('#clr3').onclick=()=>{ s3.rec=[]; ui3(); };
+  $('#crv3').onchange=e=>{ s3.curve=e.target.checked; ui3(); };
+  $('#sum3').onclick=()=>{ s3.sumOpen=!s3.sumOpen; ui3(); };
+  cv.addEventListener('pointerdown',e=>{
+    if (!V3) return; const p=ptr(cv,e), V=V3;
+    const ox=V.X(s3.xo), oy0=V.Y(0), oy1=V.Y(s3.h);
+    if (Math.hypot(p.x-ox,p.y-oy1)<20) drag3={k:'top'};
+    else if (Math.abs(p.x-ox)<18 && p.y>Math.min(oy0,oy1)-6 && p.y<Math.max(oy0,oy1)+10) drag3={k:'obj',off:V.ix(p.x)-s3.xo};
+    else if (s3.mode==='eye' && Math.hypot(p.x-V.X(s3.xe),p.y-V.Y(s3.ye))<26) drag3={k:'eye'};
+    else if (s3.mode==='screen' && Math.abs(p.x-V.X(s3.xs))<18 && Math.abs(V.iy(p.y))<SCRH+1) drag3={k:'scr',off:V.ix(p.x)-s3.xs};
+    else if (Math.abs(p.x-V.X(s3.xL))<20 && Math.abs(V.iy(p.y))<H3+1) drag3={k:'lens',off:V.ix(p.x)-s3.xL};
+    if (drag3) cv.setPointerCapture(e.pointerId);
+  });
+  cv.addEventListener('pointermove',e=>{
+    if (!drag3) return; const p=ptr(cv,e), V=V3, x=V.ix(p.x);
+    if (drag3.k==='top') s3.h=clamp(snap(V.iy(p.y),0.5),1,6);
+    else if (drag3.k==='obj') s3.xo=clamp(snap(x-drag3.off,0.5),0,s3.xL-1);
+    else if (drag3.k==='lens'){ s3.xL=clamp(snap(x-drag3.off,0.5),s3.xo+1,89); s3.xs=clamp(Math.max(s3.xs,s3.xL+1),0,90); s3.xe=clamp(Math.max(s3.xe,s3.xL+2),0,91); }
+    else if (drag3.k==='scr') s3.xs=clamp(snap(x-drag3.off,0.5),s3.xL+1,90);
+    else if (drag3.k==='eye'){ s3.xe=clamp(x,s3.xL+2,91); s3.ye=clamp(V.iy(p.y),-7,7); }
+    ui3();
+  });
+  const up=()=>{ drag3=null; }; cv.addEventListener('pointerup',up); cv.addEventListener('pointercancel',up);
+}
+
+/* ============ TAB 4: đo tiêu cự ============ */
+const F_POOL=[8,9,10,11,12,12.5,13,14,15,16,18,20];
+const s4={f:12.5,xL:20,xs:70,method:1,lock:true,rays:false,rec:[],chk:null};
+const H4=2.5, h4=2, X4A=-5, X4B=103;
+let D4=null, V4=null, D4s=null, drag4=null;
+function st4(){ const d=s4.xL, s=s4.xs-s4.xL, im=imageOf(d,s4.f); let blur, sharp;
+  if (im.inf || !im.real){ blur=Infinity; sharp='noimg'; }
+  else { blur=H4*Math.abs(1-s/im.dp); sharp= blur<0.06?'sharp': blur<0.25?'soft':'blur'; }
+  const hp=Math.abs(-s/d*h4); return {d,s,im,blur,sharp,hp}; }
+function draw4(){
+  const {ctx,w,h}=D4; ctx.clearRect(0,0,w,h);
+  V4=view(D4,X4A,X4B,4.2,false,0,0.45); const V=V4;
+  // giá quang học
+  ctx.save(); ctx.fillStyle=C.line; ctx.fillRect(V.X(-2),V.Y(-3.6),V.X(102)-V.X(-2),8); ctx.restore();
+  drawAxis(ctx,V);
+  drawRuler(ctx,V,h-26,10,0,true);
+  // hộp đèn và vật
+  ctx.save(); ctx.fillStyle=C.ink; ctx.fillRect(V.X(-4.5),V.Y(3.2),V.X(0)-V.X(-4.5)-2,V.Y(-3.2)-V.Y(3.2)); ctx.restore();
+  sideGlyph(ctx,V,'F',0,h4,C.obj,{lw:3});
+  if (s4.rays) opt(ctx,V,{xL:s4.xL,F:s4.f,H:H4,xo:0,h:h4,obj:'F',special:false,beam:true,nb:7,stopX:s4.xs,labels:false,ghost:false,showImg:false});
+  drawLens(ctx,V,s4.xL,H4,true,{plane:false});
+  const x=V.X(s4.xs); ctx.save(); ctx.fillStyle=C.ink; ctx.globalAlpha=.85; ctx.fillRect(x-2,V.Y(4),5,V.Y(-4)-V.Y(4)); ctx.globalAlpha=1; ctx.restore();
+  // con trỏ vị trí
+  const tag=(xx,txt,col)=>{ const px=V.X(xx); ctx.save(); ctx.strokeStyle=col; ctx.lineWidth=1.5; ctx.setLineDash([3,3]); ctx.beginPath(); ctx.moveTo(px,V.Y(-3.6)); ctx.lineTo(px,h-26); ctx.stroke(); ctx.restore(); label(ctx,txt,px,h-40,col,'center',12,700,C.panel); };
+  tag(s4.xL,nf(s4.xL,1),C.accent); tag(s4.xs,nf(s4.xs,1),C.ink);
+}
+function drawScreen4(){
+  const {ctx,w,h}=D4s; ctx.clearRect(0,0,w,h); ctx.fillStyle=C.room; ctx.fillRect(0,0,w,h);
+  const S=Math.min(w-20,h-20), x0=(w-S)/2, y0=(h-S)/2, ppc=S/10;
+  screenFrame(ctx,x0,y0,S,S,ppc,0.5,1);
+  ctx.save(); ctx.beginPath(); ctx.rect(x0,y0,S,S); ctx.clip();
+  ctx.strokeStyle=C['room-ink']; ctx.globalAlpha=.25; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(x0+S/2,y0); ctx.lineTo(x0+S/2,y0+S); ctx.moveTo(x0,y0+S/2); ctx.lineTo(x0+S,y0+S/2); ctx.stroke(); ctx.globalAlpha=1;
+  const {d,s,im}=st4();
+  renderScreen(ctx,{cx:x0+S/2,cy:y0+S/2,ppc,type:'F',h:h4,d,dp:im.dp,s,H:H4,mask:false,gain:1.1,sref:2*s4.f});
+  ctx.restore();
+  for (let v=-4; v<=4; v+=2) if (v) label(ctx,nf(v,0),x0+S/2+v*ppc,y0+S-8,C['room-ink'],'center',10,500);
+}
+function ui4(){
+  $$('#m4 .btn').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.v===s4.method)));
+  $('#m4').querySelector('[data-v="2"]').hidden=!quant(); if (!quant() && s4.method===2) s4.method=1;
+  $('#lockBox4').hidden= s4.method!==1; $('#lock4').checked=s4.lock; $('#ray4').checked=s4.rays;
+  $('#steps4').innerHTML=t(s4.method===1?'steps4a':'steps4b').map(x=>`<li>${x}</li>`).join('');
+  const S=st4(), sh=t(S.sharp), eq= S.sharp==='sharp' && Math.abs(S.hp-h4)<0.05;
+  $('#st4').textContent=t('st4',sh)+(eq?t('eqSize'):'');
+  const pill= `<span class="pill ${S.sharp==='sharp'?'good':S.sharp==='soft'?'mid':'off'}">${sh}</span>`;
+  $('#kv4').innerHTML=`<dt>${t('posLens')}</dt><dd>${nf(s4.xL,1)} cm</dd><dt>${t('posScreen')}</dt><dd>${nf(s4.xs,1)} cm</dd>`+
+    `<dt>${t('kvD')}</dt><dd>${nf(S.d,1)} cm</dd><dt>${t('kvDp')}</dt><dd>${nf(S.s,1)} cm</dd>`+(s4.method===1?`<dt>${t('kvL')}</dt><dd>${nf(s4.xs,1)} cm</dd>`:'')+
+    (quant() && S.sharp!=='noimg' && S.sharp!=='blur' ? `<dt>${t('kvHp')}</dt><dd>≈ ${nf(S.hp,1)} cm</dd>`:'')+`<dt>${t('kvSharp')}</dt><dd>${pill}</dd>`;
+  const tb=$('#tbl4');
+  tb.innerHTML= s4.rec.length? `<tr><th>${t('colN')}</th><th>d</th><th>d′</th>${s4.method===1?'<th>L</th>':''}<th>h′</th><th>${t('colSharp')}</th></tr>`+s4.rec.map((r,i)=>`<tr><td class="n">${i+1}</td><td class="n">${nf(r.d,1)}</td><td class="n">${nf(r.s,1)}</td>${s4.method===1?`<td class="n">${nf(r.d+r.s,1)}</td>`:''}<td class="n">${r.sharp==='blur'||r.sharp==='noimg'?'—':nf(r.hp,1)}</td><td>${t(r.sharp)}</td></tr>`).join('') : '';
+  const fb=$('#fb4'); if (s4.chk){ fb.hidden=false; fb.className='fb '+(s4.chk.ok?'good':'bad'); fb.textContent=s4.chk.msg; } else fb.hidden=true;
+}
+function move4(which,x){
+  const lock=s4.method===1&&s4.lock;
+  if (which==='lens'){
+    if (lock){ s4.xL=clamp(Math.round(x*10)/10,2,50); s4.xs=Math.round(s4.xL*20)/10; }
+    else { s4.xL=clamp(Math.round(x*10)/10,2,98); if (s4.xs<s4.xL+1) s4.xs=Math.min(100,s4.xL+1); }
+  } else {
+    if (lock){ s4.xs=clamp(Math.round(x*10)/10,4,100); s4.xL=Math.round(s4.xs*50)/100; }
+    else s4.xs=clamp(Math.round(x*10)/10,s4.xL+1,100);
+  }
+  s4.chk=null; ui4();
+}
+function setup4(){
+  const cv=$('#cv4');
+  s4.f=F_POOL[Math.floor(Math.random()*F_POOL.length)];
+  $$('#m4 .btn').forEach(b=>b.onclick=()=>{ s4.method=+b.dataset.v; s4.rec=[]; if (s4.method===1&&s4.lock) s4.xL=s4.xs/2; ui4(); });
+  $('#lock4').onchange=e=>{ s4.lock=e.target.checked; if (s4.lock) s4.xL=s4.xs/2; ui4(); };
+  $('#ray4').onchange=e=>{ s4.rays=e.target.checked; };
+  $('#l4m').onclick=()=>move4('lens',s4.xL-0.1); $('#l4p').onclick=()=>move4('lens',s4.xL+0.1);
+  $('#s4m').onclick=()=>move4('scr',s4.xs-(s4.method===1&&s4.lock?0.2:0.1)); $('#s4p').onclick=()=>move4('scr',s4.xs+(s4.method===1&&s4.lock?0.2:0.1));
+  $('#rec4').onclick=()=>{ const S=st4(); s4.rec.push({d:S.d,s:S.s,hp:S.hp,sharp:S.sharp}); if (s4.rec.length>8) s4.rec.shift(); ui4(); };
+  $('#clr4').onclick=()=>{ s4.rec=[]; ui4(); };
+  $('#chk4').onclick=()=>{ const v=parseFloat(String($('#ans4').value).replace(',','.')); if (!isFinite(v)) return;
+    const e=Math.abs(v-s4.f)/s4.f*100; s4.chk= Math.abs(v-s4.f)<=0.3? {ok:true,msg:t('f4ok',nf(s4.f,1))} : e<=8? {ok:true,msg:t('f4close',nf(s4.f,1),nf(e,0))} : {ok:false,msg:t('f4no')}; ui4(); };
+  $('#new4').onclick=()=>{ let f; do f=F_POOL[Math.floor(Math.random()*F_POOL.length)]; while (f===s4.f); s4.f=f; s4.rec=[]; s4.chk=null; $('#ans4').value=''; ui4(); };
+  cv.addEventListener('pointerdown',e=>{
+    if (!V4) return; const p=ptr(cv,e), V=V4;
+    const dl=Math.abs(p.x-V.X(s4.xL)), ds=Math.abs(p.x-V.X(s4.xs));
+    if (Math.min(dl,ds)<24){ drag4= dl<=ds ? 'lens' : 'scr'; cv.setPointerCapture(e.pointerId); }
+  });
+  cv.addEventListener('pointermove',e=>{ if (!drag4) return; const p=ptr(cv,e), x=snap(V4.ix(p.x),0.5); move4(drag4,x); });
+  const up=()=>{ drag4=null; }; cv.addEventListener('pointerup',up); cv.addEventListener('pointercancel',up);
+}
+
+/* ============ TAB 5: kính lúp và ứng dụng ============ */
+const s5={sub:'kl', kl:{f:5,d:4}, ma:{D:8,s:5}, mat:{D:100}, mc:{L:300,d:10.4,flip:true}};
+const KL_F=[[12.5,'2x'],[25/3,'3x'],[5,'5x']];
+let D5=null, D5v=null, D5z=null, V5=null, drag5=null;
+function lg(v,a,b){ return Math.exp(Math.log(a)+(Math.log(b)-Math.log(a))*v/1000); }
+function ilg(x,a,b){ return 1000*(Math.log(x)-Math.log(a))/(Math.log(b)-Math.log(a)); }
+function fmtLen(cm){ return cm>=100? nf(cm/100,cm>=1000?1:2)+' m' : nf(cm,1)+' cm'; }
+function ctl5(){
+  const c=$('#ctl5'), s=s5.sub; let html='';
+  if (s==='kl') html=`<div class="fld"><span>${t('klPick')}</span><div class="seg full" id="klf">${KL_F.map(([f,n])=>`<button class="btn" data-f="${f}">${n}</button>`).join('')}</div></div>
+    <div class="fld"><span>${t('klD')}: <span class="val" id="klDt"></span></span><input type="range" id="klD" min="0" max="1000" step="1"></div>`;
+  if (s==='ma') html=`<div class="fld"><span>${t('maD')}: <span class="val" id="maDt"></span></span><input type="range" id="maD" min="0" max="1000" step="1"></div>
+    <div class="fld"><span>${t('maS')}: <span class="val" id="maSt"></span></span><input type="range" id="maS" min="5" max="5.6" step="0.005"></div><div class="row"><button class="btn primary" id="maF">${t('focus')}</button></div>`;
+  if (s==='mat') html=`<div class="fld"><span>${t('matD')}: <span class="val" id="matDt"></span></span><input type="range" id="matD" min="0" max="1000" step="1"></div>`;
+  if (s==='mc') html=`<div class="fld"><span>${t('mcL')}: <span class="val" id="mcLt"></span></span><input type="range" id="mcL" min="100" max="600" step="10"></div>
+    <div class="fld"><span>${t('mcD')}: <span class="val" id="mcDt"></span></span><input type="range" id="mcD" min="10.1" max="11.5" step="0.01"></div>
+    <div class="row"><button class="btn primary" id="mcF">${t('focus')}</button><label class="chk"><input type="checkbox" id="mcFl"> <span>${t('flip')}</span></label></div>`;
+  c.innerHTML=html;
+  if (s==='kl'){ $$('#klf .btn').forEach(b=>b.onclick=()=>{ const fr=s5.kl.d/s5.kl.f; s5.kl.f=+b.dataset.f; s5.kl.d=fr*s5.kl.f; ui5(); }); $('#klD').oninput=e=>{ s5.kl.d=s5.kl.f*(0.2+1.4*e.target.value/1000); ui5(); }; }
+  if (s==='ma'){ $('#maD').oninput=e=>{ s5.ma.D=lg(+e.target.value,2,40); ui5(); }; $('#maS').oninput=e=>{ s5.ma.s=+e.target.value; ui5(); }; $('#maF').onclick=()=>{ const D=s5.ma.D*100; s5.ma.s=D*5/(D-5); ui5(); }; }
+  if (s==='mat'){ $('#matD').oninput=e=>{ s5.mat.D=lg(+e.target.value,10,2000); ui5(); }; }
+  if (s==='mc'){ $('#mcL').oninput=e=>{ s5.mc.L=+e.target.value; ui5(); }; $('#mcD').oninput=e=>{ s5.mc.d=+e.target.value; ui5(); }; $('#mcF').onclick=()=>{ s5.mc.d=s5.mc.L*10/(s5.mc.L-10); ui5(); }; $('#mcFl').onchange=e=>{ s5.mc.flip=e.target.checked; ui5(); }; }
+}
+function matF(D){ const fmin=25*2/27, f=D*2/(D+2); return Math.max(fmin,Math.min(2,f)); }
+function ui5(){
+  const s=s5.sub;
+  $$('#sub5 .btn').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===s)));
+  $('#hint5').textContent=t('hint5'+s);
+  $('#viewT5').textContent=t({kl:'vKl',ma:'vMa',mat:'vMat',mc:'vMc'}[s]);
+  $('#why5').innerHTML=t('why5'+s).map(x=>`<p>${x}</p>`).join('');
+  if (s==='mat'||s==='mc'){ $('#cap5a').textContent=t('cap5a_'+s); $('#cap5b').textContent=t('cap5b_'+s); }
+  const Q=quant(); let kv='', st='';
+  if (s==='kl'){
+    const {f,d}=s5.kl; $$('#klf .btn').forEach(b=>b.setAttribute('aria-pressed',String(Math.abs(+b.dataset.f-f)<1e-6)));
+    if ($('#klD')) $('#klD').value=Math.round((d/f-0.2)/1.4*1000); $('#klDt').textContent= nf(d,1)+' cm';
+    const im=imageOf(d,f), G=25/f;
+    if (d<f-1e-6){ const gm=25/(Math.abs(im.dp)+1)*Math.abs(im.m); st=t('stKl',nf(gm,1));
+      if (Q) kv=`<dt>${t('kvG')}</dt><dd>${nf(G,1)}</dd><dt>${t('kvImg')}</dt><dd>${nf(Math.abs(im.dp),1)} cm</dd><dt>${t('kvHp5')}</dt><dd>${nf(Math.abs(im.m)*0.4,2)} cm</dd><dt>${t('kvGm')}</dt><dd>${nf(gm,1)} ×</dd>`;
+      else kv=`<dt>${t('kvG')}</dt><dd>${KL_F.find(x=>Math.abs(x[0]-f)<1e-6)[1]}</dd>`;
+    } else { st=t('klOut'); kv= Q? `<dt>${t('kvG')}</dt><dd>${nf(G,1)}</dd>`:''; }
+  }
+  if (s==='ma'){
+    const {D,s:ss}=s5.ma, Dc=D*100, im=imageOf(Dc,5), blur=1.6*Math.abs(1-ss/im.dp), sh= blur<0.012?'sharp':blur<0.04?'soft':'blur';
+    if ($('#maD')) $('#maD').value=ilg(D,2,40); if ($('#maS')) $('#maS').value=ss;
+    $('#maDt').textContent=fmtLen(Dc); $('#maSt').textContent=nf(ss,2)+' cm';
+    st=t('stMa',t(sh));
+    kv=`<dt>${t('kvF5')}</dt><dd>5 cm</dd>`+(Q?`<dt>${t('kvDp5')}</dt><dd>${nf(im.dp,2)} cm</dd><dt>${t('kvHp5')}</dt><dd>${nf(170*im.dp/Dc,2)} cm</dd>`:'')+`<dt>${t('kvSharp')}</dt><dd><span class="pill ${sh==='sharp'?'good':sh==='soft'?'mid':'off'}">${t(sh)}</span></dd>`;
+  }
+  if (s==='mat'){
+    const {D}=s5.mat, f=matF(D), im=imageOf(D,f), blur=0.2*Math.abs(1-2/im.dp), sh= blur<0.006?'sharp':blur<0.02?'soft':'blur';
+    if ($('#matD')) $('#matD').value=ilg(D,10,2000); $('#matDt').textContent=fmtLen(D);
+    const state= D<25? t('matNear') : (f<1.995? t('matAcc') : t('matRelax'));
+    st=t('stMat',t(sh));
+    kv=(Q?`<dt>${t('kvF5')}</dt><dd>${nf(f,3)} cm</dd>`:'')+`<dt>${t('kvState')}</dt><dd style="font-family:var(--font-ui)">${state}</dd><dt>${t('kvSharp')}</dt><dd><span class="pill ${sh==='sharp'?'good':sh==='soft'?'mid':'off'}">${t(sh)}</span></dd>`;
+  }
+  if (s==='mc'){
+    const {L,d,flip}=s5.mc, im=imageOf(d,10), blur=3*Math.abs(1-L/im.dp), sh= blur<0.6?'sharp':blur<2?'soft':'blur';
+    if ($('#mcL')) $('#mcL').value=L; if ($('#mcD')) $('#mcD').value=d; if ($('#mcFl')) $('#mcFl').checked=flip;
+    $('#mcLt').textContent=fmtLen(L); $('#mcDt').textContent=nf(d,2)+' cm';
+    st=t('stMc',t(sh));
+    kv=`<dt>${t('kvF5')}</dt><dd>10 cm</dd>`+(Q?`<dt>${t('kvDp5')}</dt><dd>${fmtLen(im.dp)}</dd><dt>${t('kvHp5')}</dt><dd>${fmtLen(2.4*L/d)}</dd>`:'')+`<dt>${t('kvSharp')}</dt><dd><span class="pill ${sh==='sharp'?'good':sh==='soft'?'mid':'off'}">${t(sh)}</span></dd>`;
+  }
+  $('#st5').textContent=st; $('#kv5').innerHTML=kv;
+}
+function ant(ctx,cx,cy,size,alpha=1,rot=0){
+  size=Math.max(3,size); ctx.save(); ctx.globalAlpha=alpha; ctx.translate(cx,cy); ctx.rotate(rot);
+  ctx.font=`${size*1.15}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('🐜',0,0); ctx.restore();
+}
+function lead(ctx,ax,ay,lx,ly,txt,col,align='left'){
+  ctx.save(); ctx.strokeStyle=col; ctx.globalAlpha=.7; ctx.lineWidth=1.2; ctx.beginPath(); ctx.moveTo(ax,ay); ctx.lineTo(lx,ly); ctx.stroke();
+  ctx.globalAlpha=1; ctx.fillStyle=col; ctx.beginPath(); ctx.arc(ax,ay,2.5,0,7); ctx.fill(); ctx.restore();
+  label(ctx,txt,lx+(align==='left'?4:align==='right'?-4:0),ly,col,align,12,700,C.panel);
+}
+function hitCircle(px,py,ux,uy,cx,cy,R){ // tia từ (px,py) theo (ux,uy) gặp đường tròn, lấy giao điểm phía trước
+  const fx=px-cx, fy=py-cy, b=fx*ux+fy*uy, c=fx*fx+fy*fy-R*R, disc=b*b-c; if (disc<0) return null;
+  const tt=-b+Math.sqrt(disc); return tt>0? [px+ux*tt,py+uy*tt] : null;
+}
+function draw5(){
+  const {ctx,w,h}=D5; ctx.clearRect(0,0,w,h); const s=s5.sub;
+  if (s==='kl'){
+    const {f,d}=s5.kl, im=imageOf(d,f), h0=0.4, x0=-Math.min(Math.max(6*f,30),70);
+    const virt=d<f-1e-6 && Math.abs(im.dp)<800, hp= virt? Math.abs(im.m)*h0 : h0;
+    V5=view(D5,x0,f*1.3+3,Math.min(Math.max(3.2,hp*1.25),40),false); const V=V5;
+    drawAxis(ctx,V); drawLens(ctx,V,0,2.5,true); drawPt(ctx,V,-f,'F',C.accent); drawPt(ctx,V,f,'F′',C.accent);
+    ctx.save(); ctx.fillStyle=C.muted; ctx.fillRect(V.X(0)-4,V.Y(-2.5),8,Math.min(60,V.Y(-3.6)-V.Y(-2.5))); ctx.restore();
+    const objPx=h0*V.ky;
+    ant(ctx,V.X(-d)-objPx*0.7,V.Y(h0/2),objPx);
+    sideGlyph(ctx,V,'arrow',-d,h0,C.obj,{lw:3});
+    opt(ctx,V,{xL:0,F:f,H:2.5,xo:-d,h:h0,obj:'arrow',special:true,beam:false,ghost:false});
+    const imgPx=hp*V.ky;
+    if (virt) ant(ctx,V.X(im.dp)-imgPx*0.7,V.Y(hp/2),imgPx,0.5);
+    drawEye(ctx,V.X(1.2)+16,V.Y(0),16,C.ink);
+    s5.px={obj:objPx, img: virt? imgPx : null, real:!virt && !im.inf, rimg: (!virt && !im.inf)? Math.min(Math.abs(im.m)*h0*V.ky, 400) : null};
+  }
+  if (s==='ma'){
+    const {D,s:ss}=s5.ma, Dc=D*100, H=1.6;
+    V5=view(D5,-7,8,2.6,false); const V=V5;
+    drawAxis(ctx,V);
+    ctx.save(); ctx.strokeStyle=C.muted; ctx.lineWidth=2; ctx.strokeRect(V.X(0.3),V.Y(2.3),V.X(ss+0.4)-V.X(0.3),V.Y(-2.3)-V.Y(2.3)); ctx.restore();
+    drawLens(ctx,V,0,H,true,{plane:false}); drawPt(ctx,V,5,'F′',C.accent);
+    opt(ctx,V,{xL:0,F:5,H,xo:-Dc,h:170,obj:'arrow',special:true,only:['o','f'],beam:true,nb:5,stopX:ss,farFrom:-7,labels:false,ghost:true});
+    ctx.save(); ctx.fillStyle=C.ink; ctx.fillRect(V.X(ss)-2,V.Y(1.2),5,V.Y(-1.2)-V.Y(1.2)); ctx.restore();
+    label(ctx,t('farObj')+' ('+fmtLen(Dc)+')',8,18,C.muted,'left',13,600);
+  }
+  if (s==='mat') drawEyeScene(ctx,w,h);
+  if (s==='mc') drawProjScene(ctx,w,h);
+}
+function draw5z(){ const {ctx,w,h}=D5z; ctx.clearRect(0,0,w,h); if (s5.sub==='mat') drawEyeZoom(ctx,w,h); else drawProjZoom(ctx,w,h); }
+/* Mắt – toàn cảnh (không theo tỉ lệ): vật ở bên trái, mắt người bên phải; tia từ A, B qua con ngươi tới màng lưới */
+function drawEyeScene(ctx,w,h){
+  const {D}=s5.mat, f=matF(D), im=imageOf(D,f);
+  const R=Math.min(h*0.27,w*0.15), ex=w-R*1.2-12, ey=h*0.5, lx=ex-R*0.8, pr=R*0.2;
+  // đầu người (mờ) để nhận ra đây là mắt
+  ctx.save(); ctx.fillStyle=C.skin; ctx.globalAlpha=.3; ctx.beginPath(); ctx.ellipse(ex+R*1.7,ey-R*0.35,R*2.3,R*2.9,0,0,7); ctx.fill(); ctx.restore();
+  // nhãn cầu
+  ctx.save(); ctx.fillStyle=C.zone2; ctx.strokeStyle=C.muted; ctx.lineWidth=2.5; ctx.beginPath(); ctx.arc(ex,ey,R,0,7); ctx.fill(); ctx.stroke();
+  ctx.strokeStyle=C.img; ctx.lineWidth=5; ctx.beginPath(); ctx.arc(ex,ey,R-3,-1.0,1.0); ctx.stroke();
+  ctx.fillStyle=C.glass; ctx.strokeStyle=C['glass-edge']; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(ex-R*0.86,ey-R*0.5); ctx.quadraticCurveTo(ex-R*1.3,ey,ex-R*0.86,ey+R*0.5); ctx.fill(); ctx.stroke();
+  ctx.fillStyle=C.iris; ctx.fillRect(lx-R*0.07,ey-R*0.55,R*0.07,R*0.55-pr); ctx.fillRect(lx-R*0.07,ey+pr,R*0.07,R*0.55-pr);
+  const lw=R*(0.1+clamp((2-f)/0.148,0,1)*0.08); ctx.fillStyle=C.glass; ctx.strokeStyle=C['glass-edge']; ctx.beginPath(); ctx.ellipse(lx+lw*0.6,ey,lw,R*0.36,0,0,7); ctx.fill(); ctx.stroke();
+  ctx.restore();
+  // trục
+  ctx.save(); ctx.strokeStyle=C.axis; ctx.setLineDash([4,6]); ctx.lineWidth=1.2; ctx.beginPath(); ctx.moveTo(20,ey); ctx.lineTo(ex+R,ey); ctx.stroke(); ctx.restore();
+  // vật: càng gần càng sát mắt (thang log)
+  const t01=clamp((Math.log(D)-Math.log(10))/(Math.log(2000)-Math.log(10)),0,1);
+  const ox=lx-R*0.9-t01*(lx-R*0.9-40), oh=h*0.36;
+  arrowPx(ctx,ox,ey,ox,ey-oh,C.obj,3.5);
+  label(ctx,'A',ox,ey+14,C.obj,'center',13,700,C.panel); label(ctx,'B',ox-12,ey-oh,C.obj,'right',13,700,C.panel);
+  label(ctx,t('objAB'),ox+8,ey-oh-14,C.obj,'left',12,700,C.panel);
+  // điểm hội tụ: tỉ lệ thật giữa d′ và khoảng cách 2 cm tới màng lưới
+  const xr=ex+R-3, ppcm=(xr-lx)/2, xi=lx+im.dp*ppcm, sl=oh/(lx-ox), yi=ey+sl*(xi-lx);
+  const ray=(sx,sy,py,tx,ty,col)=>{
+    ctx.save(); ctx.strokeStyle=col; ctx.lineWidth=2; ctx.lineCap='round'; ctx.beginPath(); ctx.moveTo(sx,sy); ctx.lineTo(lx,py);
+    const ux=tx-lx, uy=ty-py, Ln=Math.hypot(ux,uy), q=hitCircle(lx,py,ux/Ln,uy/Ln,ex,ey,R-3) || [xr,py];
+    ctx.lineTo(q[0],q[1]); ctx.stroke(); ctx.restore(); return q; };
+  for (const py of [-pr,0,pr]) ray(ox,ey-oh,ey+py,xi,yi,C.r1);
+  for (const py of [-pr,pr]) ray(ox,ey,ey+py,xi,ey,C.r2);
+  // ảnh trên màng lưới
+  const focused=Math.abs(xi-xr)<3;
+  if (focused){ const yb=ey+sl*(xr-lx); arrowPx(ctx,xr-2,ey,xr-2,yb,C.img,3); label(ctx,'A′B′',xr-10,(ey+yb)/2,C.img,'right',12,800,C.panel); }
+  // chú thích
+  label(ctx,t('pLens'),lx+lw,ey-R*0.36-12,C['glass-edge'],'center',12,700,C.panel);
+  label(ctx,t('pRetina'),Math.min(ex+R*0.5,w-6),ey-R-10,C.img,'right',12,700,C.panel);
+  const yd=Math.min(h-14,ey+R*1.15);
+  ctx.save(); ctx.strokeStyle=C.muted; ctx.lineWidth=1.2; ctx.beginPath(); ctx.moveTo(ox,yd); ctx.lineTo(lx,yd); ctx.stroke(); ctx.restore();
+  arrowPx(ctx,(ox+lx)/2,yd,ox,yd,C.muted,1.2); arrowPx(ctx,(ox+lx)/2,yd,lx,yd,C.muted,1.2);
+  label(ctx,fmtLen(D),(ox+lx)/2,yd-10,C.ink,'center',13,700,C.panel);
+  label(ctx,t('notScale'),10,16,C.muted,'left',12,600);
+}
+/* Mắt – phóng to hệ quang học (đúng tỉ lệ, đơn vị cm) */
+function drawEyeZoom(ctx,w,h){
+  const {D}=s5.mat, f=matF(D);
+  const V=view(D5z,-1.3,3.4,1.3,true), cX=V.X(0.9), cY=V.Y(0), R=1.1*V.k;
+  ctx.save();
+  ctx.fillStyle=C.zone2; ctx.strokeStyle=C.muted; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(cX,cY,R,0,7); ctx.fill(); ctx.stroke();
+  // dây thần kinh thị giác
+  const th=0.3, nx=cX+R*Math.cos(th), ny=cY+R*Math.sin(th);
+  ctx.fillStyle=C.wax; ctx.strokeStyle=C.muted; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(nx-2,ny-0.13*V.k); ctx.lineTo(w+5,ny-0.1*V.k); ctx.lineTo(w+5,ny+0.3*V.k); ctx.lineTo(nx-2,ny+0.17*V.k); ctx.closePath(); ctx.fill(); ctx.stroke();
+  // màng lưới, điểm vàng
+  ctx.strokeStyle=C.img; ctx.lineWidth=5; ctx.beginPath(); ctx.arc(cX,cY,R-4,-1.25,1.25); ctx.stroke();
+  ctx.fillStyle=C.flame; ctx.beginPath(); ctx.arc(cX+R-5,cY,6,0,7); ctx.fill();
+  // giác mạc
+  ctx.fillStyle=C.glass; ctx.strokeStyle=C['glass-edge']; ctx.lineWidth=2.5; ctx.beginPath(); ctx.moveTo(V.X(-0.1),V.Y(0.62)); ctx.quadraticCurveTo(V.X(-0.62),V.Y(0),V.X(-0.1),V.Y(-0.62)); ctx.closePath(); ctx.globalAlpha=.8; ctx.fill(); ctx.globalAlpha=1; ctx.stroke();
+  // mống mắt (chừa lỗ con ngươi)
+  ctx.fillStyle=C.iris; const pr=0.24;
+  ctx.fillRect(V.X(-0.11),V.Y(0.64),V.X(-0.04)-V.X(-0.11),V.Y(pr)-V.Y(0.64)); ctx.fillRect(V.X(-0.11),V.Y(-pr),V.X(-0.04)-V.X(-0.11),V.Y(-0.64)-V.Y(-pr));
+  // thể mi và dây treo
+  const lwc=(0.12+clamp((2-f)/0.148,0,1)*0.09)*V.k, lh=0.44*V.k;
+  ctx.strokeStyle=C.muted; ctx.lineWidth=1; ctx.beginPath();
+  for (const sg of [1,-1]) for (const k of [-0.6,0,0.6]){ ctx.moveTo(V.X(0.05),V.Y(sg*0.7)); ctx.lineTo(V.X(0)+k*lwc,cY-sg*lh*0.95); }
+  ctx.stroke();
+  ctx.fillStyle=C.iris; for (const sg of [1,-1]){ ctx.beginPath(); ctx.ellipse(V.X(0.06),V.Y(sg*0.76),0.07*V.k,0.11*V.k,0,0,7); ctx.fill(); }
+  // thể thuỷ tinh (phồng lên khi điều tiết)
+  ctx.fillStyle=C.glass; ctx.strokeStyle=C['glass-edge']; ctx.lineWidth=2.5; ctx.beginPath(); ctx.ellipse(V.X(0),cY,lwc,lh,0,0,7); ctx.globalAlpha=.9; ctx.fill(); ctx.globalAlpha=1; ctx.stroke();
+  ctx.restore();
+  drawAxis(ctx,V);
+  // tia sáng từ đỉnh B của vật ở xa
+  opt(ctx,V,{xL:0,F:f,H:pr,xo:-D,h:10,obj:'arrow',special:true,only:['o'],beam:true,nb:4,stopX:2,farFrom:-1.3,labels:false,ghost:true});
+  // chú thích
+  const L_=8, Rr=w-8;
+  lead(ctx,V.X(-0.42),V.Y(0.35),L_,V.Y(0.95),t('pCornea'),C['glass-edge'],'left');
+  lead(ctx,V.X(-0.08),V.Y(-0.45),L_,V.Y(-0.95),t('pIris'),C.iris,'left');
+  lead(ctx,V.X(-0.08),V.Y(-0.1),L_,V.Y(-0.62),t('pPupil'),C.ink,'left');
+  lead(ctx,V.X(0.06),V.Y(0.85),V.X(0.25),V.Y(1.12),t('pCiliary'),C.iris,'left');
+  lead(ctx,V.X(0)+lwc*0.3,V.Y(0.3),V.X(0.55),V.Y(0.75),t('pLens'),C['glass-edge'],'left');
+  label(ctx,t('pVitreous'),V.X(1.05),V.Y(0.62),C.muted,'center',12,700);
+  lead(ctx,cX+R*Math.cos(-0.85),cY+R*Math.sin(-0.85),Rr,V.Y(1.1),t('pRetina'),C.img,'right');
+  lead(ctx,cX+R-5,cY,Rr,V.Y(0.45),t('pFovea'),C.flame,'right');
+  lead(ctx,Math.min(w-30,nx+0.35*V.k),ny+0.08*V.k,Rr,V.Y(-0.9),t('pNerve'),C.muted,'right');
+}
+/* Máy chiếu – toàn cảnh (đúng tỉ lệ, đơn vị cm) */
+function drawProjScene(ctx,w,h){
+  const {L:Lw,d,flip}=s5.mc, h0=flip?-2.4:2.4, im=imageOf(d,10), span=Math.max(Lw+130,420), x0=-90;
+  const V=view(D5,x0,x0+span,1,true,0,0.4), yB=-Lw/d*h0, blur=3*Math.abs(1-Lw/im.dp), sharp=blur<0.6;
+  // sàn, tường
+  const fy=V.Y(-100); ctx.save(); ctx.fillStyle=C.floor; ctx.globalAlpha=.6; ctx.fillRect(0,fy,w,h-fy); ctx.globalAlpha=1;
+  ctx.fillStyle=C.wall; ctx.fillRect(V.X(Lw),0,Math.max(10,V.X(Lw+12)-V.X(Lw)),fy); ctx.restore();
+  // bàn
+  ctx.save(); ctx.strokeStyle=C.muted; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(V.X(-60),V.Y(-12)); ctx.lineTo(V.X(20),V.Y(-12)); ctx.moveTo(V.X(-52),V.Y(-12)); ctx.lineTo(V.X(-52),fy); ctx.moveTo(V.X(12),V.Y(-12)); ctx.lineTo(V.X(12),fy); ctx.stroke(); ctx.restore();
+  // chùm sáng tới tường
+  ctx.save(); ctx.fillStyle=C.beam; ctx.globalAlpha= sharp? .22 : .14; ctx.beginPath(); ctx.moveTo(V.X(3),V.Y(3)); ctx.lineTo(V.X(3),V.Y(-3)); ctx.lineTo(V.X(Lw),V.Y(Math.min(0,yB))); ctx.lineTo(V.X(Lw),V.Y(Math.max(0,yB))); ctx.closePath(); ctx.fill(); ctx.restore();
+  L(ctx,V,0,0,Lw,yB,C.r2,1.5,[6,5],false,.8);
+  // ảnh trên tường
+  ctx.save(); ctx.strokeStyle=C.flame; ctx.lineWidth=7; ctx.globalAlpha= sharp?1:.45; ctx.lineCap='round'; ctx.beginPath(); ctx.moveTo(V.X(Lw)+3,V.Y(0)); ctx.lineTo(V.X(Lw)+3,V.Y(yB)); ctx.stroke(); ctx.restore();
+  label(ctx,(yB>0?'↑ ':'↓ ')+fmtLen(Math.abs(yB)),V.X(Lw)-8,V.Y(yB/2),C.ink,'right',13,700,C.panel);
+  // máy chiếu
+  ctx.save(); ctx.fillStyle=C.ink; ctx.beginPath(); ctx.roundRect? ctx.roundRect(V.X(-40),V.Y(10),V.X(0)-V.X(-40),V.Y(-10)-V.Y(10),4) : ctx.rect(V.X(-40),V.Y(10),V.X(0)-V.X(-40),V.Y(-10)-V.Y(10)); ctx.fill();
+  ctx.fillStyle=C.muted; ctx.fillRect(V.X(0),V.Y(4),Math.max(4,V.X(4)-V.X(0)),V.Y(-4)-V.Y(4)); ctx.restore();
+  label(ctx,t('pProj'),V.X(-20),V.Y(10)-12,C.ink,'center',12,700,C.panel);
+  label(ctx,t('pWall'),V.X(Lw)-6,16,C.ink,'right',12,700,C.panel);
+  // khoảng cách Lw
+  const yd=fy+16; arrowPx(ctx,(V.X(0)+V.X(Lw))/2,yd,V.X(0),yd,C.muted,1.2); arrowPx(ctx,(V.X(0)+V.X(Lw))/2,yd,V.X(Lw),yd,C.muted,1.2);
+  label(ctx,'L = '+fmtLen(Lw),(V.X(0)+V.X(Lw))/2,Math.min(h-10,yd+14),C.ink,'center',13,700,C.panel);
+  label(ctx,t('trueScale'),10,16,C.muted,'left',12,600);
+}
+/* Máy chiếu – phóng to hệ quang học */
+function drawProjZoom(ctx,w,h){
+  const {L:Lw,d,flip}=s5.mc, h0=flip?-2.4:2.4;
+  const V=view(D5z,-30,16,5.2,false);
+  // vỏ máy
+  ctx.save(); ctx.strokeStyle=C.muted; ctx.setLineDash([6,5]); ctx.lineWidth=1.5; ctx.strokeRect(V.X(-29.5),V.Y(5.4),V.X(1.5)-V.X(-29.5),V.Y(-5.4)-V.Y(5.4)); ctx.restore();
+  drawAxis(ctx,V);
+  // gương cầu lõm và đèn
+  ctx.save(); ctx.strokeStyle=C.ink; ctx.lineWidth=4; ctx.beginPath(); ctx.ellipse(V.X(-24),V.Y(0),2.8*V.k,2.8*V.ky,0,Math.PI*0.62,Math.PI*1.38); ctx.stroke();
+  const g=ctx.createRadialGradient(V.X(-24),V.Y(0),2,V.X(-24),V.Y(0),40); g.addColorStop(0,'rgba(255,200,90,.9)'); g.addColorStop(1,'rgba(255,200,90,0)');
+  ctx.fillStyle=g; ctx.beginPath(); ctx.arc(V.X(-24),V.Y(0),40,0,7); ctx.fill(); ctx.fillStyle=C.flame; ctx.beginPath(); ctx.arc(V.X(-24),V.Y(0),7,0,7); ctx.fill(); ctx.restore();
+  // chùm sáng chiếu: đèn → tụ quang → hội tụ vào vật kính
+  for (const yk of [-3.4,-1.7,1.7,3.4]){
+    L(ctx,V,-24,0,-19,yk,C.beam,1.6,null,true,.75); L(ctx,V,-19,yk,-16.5,yk*0.96,C.beam,1.6,null,false,.75);
+    L(ctx,V,-16.5,yk*0.96,0,0,C.beam,1.6,null,true,.75); L(ctx,V,0,0,16,-yk*0.96*16/16.5,C.beam,1.2,[4,5],false,.5);
+  }
+  drawLens(ctx,V,-19,4,true,{plane:false}); drawLens(ctx,V,-16.5,4,true,{plane:false});
+  // phim
+  ctx.save(); ctx.strokeStyle=C.muted; ctx.lineWidth=2; ctx.strokeRect(V.X(-d)-5,V.Y(2.9),10,V.Y(-2.9)-V.Y(2.9)); ctx.restore();
+  sideGlyph(ctx,V,'F',-d,h0,C.obj,{lw:3});
+  // vật kính
+  ctx.save(); ctx.fillStyle=C.muted; ctx.globalAlpha=.5; ctx.fillRect(V.X(-1.2),V.Y(2.9),V.X(1.2)-V.X(-1.2),V.Y(2.4)-V.Y(2.9)); ctx.fillRect(V.X(-1.2),V.Y(-2.4),V.X(1.2)-V.X(-1.2),V.Y(-2.9)-V.Y(-2.4)); ctx.restore();
+  drawLens(ctx,V,0,2.3,true,{plane:false}); drawPt(ctx,V,-10,'F',C.accent); drawPt(ctx,V,10,'F′',C.accent);
+  opt(ctx,V,{xL:0,F:10,H:2.3,xo:-d,h:h0,obj:'F',special:true,only:['par','o'],beam:false,labels:false,ghost:false,showImg:false});
+  // chú thích
+  label(ctx,t('pLamp'),V.X(-24),V.Y(-1.6),C.ink,'center',12,700,C.panel);
+  label(ctx,t('pMirror'),Math.max(4,V.X(-29.3)),V.Y(4.4),C.ink,'left',12,700,C.panel);
+  label(ctx,t('pCond'),V.X(-17.7),V.Y(4.75),C['glass-edge'],'center',12,700,C.panel);
+  label(ctx,t('pSlide'),V.X(-d),V.Y(-3.6),C.obj,'center',12,700,C.panel);
+  label(ctx,t('pObj'),V.X(0),V.Y(3.5),C['glass-edge'],'center',12,700,C.panel);
+  label(ctx,t('wallAt',fmtLen(Lw)),w-8,18,C.muted,'right',13,600);
+}
+function drawView5(){
+  const {ctx,w,h}=D5v; ctx.clearRect(0,0,w,h); ctx.fillStyle=C.room; ctx.fillRect(0,0,w,h); const s=s5.sub;
+  if (s==='kl'){
+    const P=s5.px||{obj:12,img:null}, g=10, bw=(w-3*g)/2, top=28, bh=h-top-g;
+    label(ctx,t('klObj'),g+bw/2,14,C['room-ink'],'center',11,600); label(ctx,t('klImg'),2*g+bw+bw/2,14,C['room-ink'],'center',11,600);
+    for (const x of [g,2*g+bw]){ ctx.fillStyle=C.screen; ctx.fillRect(x,top,bw,bh); }
+    ctx.save(); ctx.beginPath(); ctx.rect(g,top,bw,bh); ctx.clip(); ant(ctx,g+bw/2,top+bh/2,P.obj); ctx.restore();
+    ctx.save(); ctx.beginPath(); ctx.rect(2*g+bw,top,bw,bh); ctx.clip();
+    if (P.img) ant(ctx,2*g+bw*1.5,top+bh/2,P.img);
+    else { if (HAS_FILTER) ctx.filter='blur(6px)'; ant(ctx,2*g+bw*1.5,top+bh/2,Math.min(bh*0.8,P.rimg||P.obj),0.6,Math.PI); }
+    ctx.restore();
+  } else {
+    if (s==='ma'){ const {D,s:ss}=s5.ma, Dc=D*100; const S=Math.min((w-20)/3.6,(h-20)/2.4); const x0=(w-3.6*S)/2,y0=(h-2.4*S)/2;
+      screenFrame(ctx,x0,y0,3.6*S,2.4*S,S,0.5,1); ctx.save(); ctx.beginPath(); ctx.rect(x0,y0,3.6*S,2.4*S); ctx.clip();
+      const ch=(-ss/Dc)*170; renderScreen(ctx,{cx:w/2,cy:h/2+ch*S/2,ppc:S,type:'person',h:170,d:Dc,dp:imageOf(Dc,5).dp,s:ss,H:1.6,gain:1.2,sref:ss}); ctx.restore(); }
+    if (s==='mat'){ const {D}=s5.mat, f=matF(D); const S=Math.min(w,h)-20, hp=10*2/D, ppc=0.55*S/hp, ch=(-2/D)*10;
+      ctx.save(); ctx.fillStyle=C.screen; ctx.beginPath(); ctx.arc(w/2,h/2,S/2,0,7); ctx.fill(); ctx.clip();
+      renderScreen(ctx,{cx:w/2,cy:h/2+ch*ppc/2,ppc,type:'F',h:10,d:D,dp:imageOf(D,f).dp,s:2,H:0.25,gain:1.2,sref:2}); ctx.restore();
+      label(ctx,(lang==='vi'?'phóng to ×':'magnified ×')+nf(ppc/37.8,0),w-8,h-10,C['room-ink'],'right',11,600); }
+    if (s==='mc'){ const {L,d,flip}=s5.mc; const S=Math.min(w-20,(h-20)*1.5), ppc=S/240, x0=(w-S)/2, hh=S/1.5, y0=(h-hh)/2;
+      ctx.save(); ctx.fillStyle=C.screen; ctx.fillRect(x0,y0,S,hh); ctx.beginPath(); ctx.rect(x0,y0,S,hh); ctx.clip();
+      const h0=flip?-2.4:2.4, ch=(-L/d)*h0; renderScreen(ctx,{cx:w/2,cy:h/2+ch*ppc/2,ppc,type:'F',h:h0,d,dp:imageOf(d,10).dp,s:L,H:3,gain:1.3,sref:L}); ctx.restore(); }
+  }
+}
+function setup5(){
+  $$('#sub5 .btn').forEach(b=>b.onclick=()=>{ s5.sub=b.dataset.v; ctl5(); ui5(); resize(); });
+  const cv=$('#cv5');
+  cv.addEventListener('pointerdown',e=>{ if (s5.sub!=='kl'||!V5) return; const p=ptr(cv,e); if (Math.abs(p.x-V5.X(-s5.kl.d))<26){ drag5=true; cv.setPointerCapture(e.pointerId); } });
+  cv.addEventListener('pointermove',e=>{ if (!drag5) return; const p=ptr(cv,e); s5.kl.d=clamp(-V5.ix(p.x),0.2*s5.kl.f,1.6*s5.kl.f); ui5(); });
+  const up=()=>{ drag5=false; }; cv.addEventListener('pointerup',up); cv.addEventListener('pointercancel',up);
+}
+
+/* ============ TAB 6: luyện vẽ ảnh ============ */
+const CASES6=[['conv',4,12],['conv',4,8],['conv',4,6],['conv',4,2],['conv',3,9],['conv',3,6],['conv',3,5],['conv',3,2],['conv',2,3],['div',4,4],['div',4,12],['div',3,6],['div',6,6],['div',4,8]];
+const s6={prob:null, rays:[], cur:null, hint:'', step:1, bp:{x:8,y:-5}, bpOk:false, ans:{}, done:false, score:0, msg:'', msgOk:true, last:-1};
+let D6=null, V6=null, drag6=null;
+function newProb6(){
+  let i; do i=Math.floor(Math.random()*CASES6.length); while (i===s6.last); s6.last=i;
+  const [type,f,d]=CASES6[i], F=type==='conv'?f:-f, im=imageOf(d,F);
+  const hs=[1.5,2,2.5,3].filter(h=>Math.abs(im.m*h)<=6.5);
+  const h=hs[Math.floor(Math.random()*hs.length)];
+  s6.prob={type,f,d,h,F,im}; s6.rays=[]; s6.cur=null; s6.step=1; s6.bp={x:9,y:-5.5}; s6.bpOk=false; s6.ans={}; s6.done=false; s6.msg=''; s6.hint=''; $('#fb6').hidden=true;
+  $('#dp6').value=''; $('#hp6').value='';
+}
+function in6(k){ const {d,h,F}=s6.prob; let y; if (k==='par') y=h; else if (k==='o') y=0; else { if (Math.abs(d-F)<1e-6) return null; y=h+(-h/(d-F))*d; } const u=(y-h)/d; return {y,u,u2:u-y/F}; }
+function draw6(){
+  const {ctx,w,h}=D6; ctx.clearRect(0,0,w,h);
+  V6=view(D6,-14,14,7,true); const V=V6, P=s6.prob, conv=P.type==='conv';
+  // lưới ô vuông
+  ctx.save(); ctx.strokeStyle=C.grid; ctx.lineWidth=1; ctx.beginPath();
+  for (let x=-14;x<=14;x++){ ctx.moveTo(V.X(x),0); ctx.lineTo(V.X(x),h); }
+  for (let y=-8;y<=8;y++){ ctx.moveTo(0,V.Y(y)); ctx.lineTo(w,V.Y(y)); }
+  ctx.stroke(); ctx.restore();
+  drawAxis(ctx,V,C.ink);
+  drawLens(ctx,V,0,6.5,conv,{bw:6});
+  drawPt(ctx,V,-P.f,'F',C.accent); drawPt(ctx,V,P.f,'F′',C.accent);
+  label(ctx,'O',V.X(0)+9,V.Y(0)+13,C.ink,'left',13,800);
+  sideGlyph(ctx,V,'arrow',-P.d,P.h,C.obj,{lw:3});
+  label(ctx,'A',V.X(-P.d),V.Y(0)+13,C.obj,'center',13,700,C.panel); label(ctx,'B',V.X(-P.d)-12,V.Y(P.h),C.obj,'right',13,700,C.panel);
+  const col={par:C.r1,o:C.r2,f:C.r3};
+  const drawR=(k,u2,alpha,lw)=>{ const r=in6(k); if (!r) return;
+    L(ctx,V,-P.d,P.h,0,r.y,col[k],lw,null,true,alpha);
+    if (k==='f' && !conv) L(ctx,V,0,r.y,-P.F,0,col[k],1.2,[4,5],false,.6);
+    if (k==='f' && conv && P.d<P.f) L(ctx,V,-P.f,0,-P.d,P.h,col[k],1.2,[4,5],false,.6);
+    L(ctx,V,0,r.y,40,r.y+u2*40,col[k],lw,null,true,alpha);
+    L(ctx,V,0,r.y,-40,r.y-u2*40,col[k],1.2,[5,5],false,alpha*0.6);
+  };
+  for (const k of s6.rays){ const r=in6(k); drawR(k,r.u2,1,2.6); }
+  if (s6.cur){ drawR(s6.cur.k,s6.cur.u2,.9,2.6); const r=in6(s6.cur.k); const px=V.X(4), py=V.Y(r.y+s6.cur.u2*4); ctx.save(); ctx.fillStyle=C.panel; ctx.strokeStyle=col[s6.cur.k]; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(px,py,9,0,7); ctx.fill(); ctx.stroke(); ctx.restore(); }
+  if (s6.step>=2){
+    const im=P.im, yi=im.m*P.h;
+    if (s6.bpOk){ sideGlyph(ctx,V,'arrow',im.dp,yi,C.img,{lw:3,dash:!im.real}); label(ctx,'A′',V.X(im.dp),V.Y(0)+(yi>0?13:-13),C.img,'center',13,700,C.panel); label(ctx,'B′',V.X(im.dp)+12,V.Y(yi),C.img,'left',13,700,C.panel); }
+    else { const px=V.X(s6.bp.x), py=V.Y(s6.bp.y); ctx.save(); ctx.fillStyle=C.img; ctx.translate(px,py); ctx.rotate(Math.PI/4); ctx.fillRect(-7,-7,14,14); ctx.restore(); label(ctx,'B′',px+14,py-12,C.img,'left',13,800,C.panel); }
+  }
+  if (s6.msg) label(ctx,s6.msg,w/2,20,s6.msgOk?C.ok:C.warn,'center',15,800,C.panel);
+}
+function ui6(){
+  const P=s6.prob, conv=P.type==='conv', Q=quant();
+  $('#prob6').textContent=t('prob6',conv,nf(P.f,1),nf(P.d,1),nf(P.h,1));
+  $('#rb6f').textContent= conv? t('preFc') : t('preFd');
+  $('#rb6f').disabled= Math.abs(P.d-P.F)<1e-6;
+  $$('#rb6 .btn').forEach(b=>{ b.setAttribute('aria-pressed',String(s6.cur&&s6.cur.k===b.dataset.k)); b.classList.toggle('right',s6.rays.includes(b.dataset.k)); });
+  $('#hint6').textContent= s6.done? t('hint6d') : s6.step===1? t('hint6a') : s6.step===2? t('hint6b') : t('hint6c');
+  $('#ok6').hidden=s6.step!==1; $('#bp6').hidden=s6.step!==2; $$('#rb6 .btn').forEach(b=>b.disabled= s6.step!==1 || (b.id==='rb6f' && Math.abs(P.d-P.F)<1e-6));
+  $('#steps6').innerHTML=t('steps6').map((x,i)=>`<li class="${s6.step>i+1||s6.done?'done':s6.step===i+1?'cur':''}">${x}</li>`).join('');
+  $('#pp6').hidden= s6.step<3; $('#num6').hidden=!Q;
+  $$('#pp6 .choices').forEach(g=>{ const k=g.dataset.g; $$('.btn',g).forEach(b=>b.setAttribute('aria-pressed',String(s6.ans[k]===b.dataset.v))); });
+  $('#score6').textContent=t('score',s6.score);
+  $('#st6').textContent= s6.hint || (s6.step===1 && s6.rays.length? s6.rays.length+'/2' : '');
+}
+function setup6(){
+  const cv=$('#cv6');
+  newProb6();
+  $$('#rb6 .btn').forEach(b=>b.onclick=()=>{ const k=b.dataset.k; if (s6.rays.includes(k)){ s6.msg=t('rayDup'); s6.msgOk=false; ui6(); return; } const r=in6(k); if (!r) return;
+    s6.cur={k, u2: k==='o'? 0 : r.u}; s6.msg=''; s6.hint=''; ui6(); });
+  $('#ok6').onclick=()=>{ if (!s6.cur){ s6.msg=t('pickRay'); s6.msgOk=false; ui6(); return; }
+    const k=s6.cur.k, r=in6(k), e=Math.abs(Math.atan(s6.cur.u2)-Math.atan(r.u2))*180/Math.PI;
+    if (e<=2.5){ s6.rays.push(k); s6.cur=null; s6.msg=t('rayOk'); s6.msgOk=true; s6.hint=''; if (s6.rays.length>=2) s6.step=2; }
+    else { s6.msg=t('rayNo'); s6.msgOk=false; s6.hint=t('hintRay')[k==='f'? (s6.prob.type==='conv'?'fc':'fd') : k]; }
+    ui6();
+  };
+  $('#bp6').onclick=()=>{ const im=s6.prob.im, yi=im.m*s6.prob.h; if (Math.hypot(s6.bp.x-im.dp,s6.bp.y-yi)<=0.4){ s6.bpOk=true; s6.step=3; s6.msg=t('bpOk'); s6.msgOk=true; } else { s6.msg=t('bpNo'); s6.msgOk=false; } ui6(); };
+  $('#new6').onclick=()=>{ newProb6(); ui6(); };
+  $$('#pp6 .choices').forEach(g=>$$('.btn',g).forEach(b=>b.onclick=()=>{ s6.ans[g.dataset.g]=b.dataset.v; ui6(); }));
+  $('#pchk6').onclick=()=>{ const p=propsOf(s6.prob.im), A=s6.ans; let ok=A.kind===p.kind && A.up===p.up && A.size===p.size;
+    if (quant()){ const dp=parseFloat(String($('#dp6').value).replace(',','.')), hp=parseFloat(String($('#hp6').value).replace(',','.'));
+      const tdp=Math.abs(s6.prob.im.dp), thp=Math.abs(s6.prob.im.m*s6.prob.h);
+      ok = ok && Math.abs(dp-tdp)<=Math.max(0.25,tdp*0.05) && Math.abs(hp-thp)<=Math.max(0.2,thp*0.05); }
+    const fb=$('#fb6'); fb.hidden=false; fb.className='fb '+(ok?'good':'bad');
+    fb.textContent= ok? t('p6ok')+' '+propText(p)+(quant()?`; d′ = ${nf(Math.abs(s6.prob.im.dp),2)} cm, h′ = ${nf(Math.abs(s6.prob.im.m*s6.prob.h),2)} cm.`:'.') : t('p6no');
+    if (ok && !s6.done){ s6.done=true; s6.score++; } ui6(); };
+  cv.addEventListener('pointerdown',e=>{
+    if (!V6) return; const p=ptr(cv,e), x=V6.ix(p.x), y=V6.iy(p.y);
+    if (s6.step===1 && s6.cur && x>0.3){ drag6='aim'; }
+    else if (s6.step===2 && !s6.bpOk){ drag6='bp'; }
+    if (drag6){ cv.setPointerCapture(e.pointerId); move6(x,y); }
+  });
+  const move6=(x,y)=>{ if (drag6==='aim'){ const r=in6(s6.cur.k); if (x>0.3) s6.cur.u2=(y-r.y)/x; }
+    if (drag6==='bp'){ s6.bp={x:clamp(Math.round(x*4)/4,-13.5,13.5), y:clamp(Math.round(y*4)/4,-7,7)}; } s6.msg=''; };
+  cv.addEventListener('pointermove',e=>{ if (!drag6) return; const p=ptr(cv,e); move6(V6.ix(p.x),V6.iy(p.y)); });
+  const up=()=>{ drag6=null; ui6(); }; cv.addEventListener('pointerup',up); cv.addEventListener('pointercancel',up);
+}
+
+/* ============ Chung ============ */
+function applyLang(){
+  document.documentElement.lang=lang;
+  $$('[data-i18n]').forEach(el=>el.textContent=t(el.dataset.i18n));
+  $$('[data-i18n-html]').forEach(el=>el.innerHTML=t(el.dataset.i18nHtml));
+  $('#langBtn').textContent= lang==='vi'?'EN':'VI';
+  ctl5(); renderAll();
+}
+function renderAll(){
+  $('#lvQual').setAttribute('aria-pressed',String(level==='qual')); $('#lvQuant').setAttribute('aria-pressed',String(level==='quant'));
+  $$('nav.tabs button').forEach(b=>{ const on=+b.dataset.tab===tab; b.classList.toggle('on',on); b.setAttribute('aria-selected',String(on)); });
+  for (const i of [1,2,3,4,5,6]) $('#t'+i).hidden = i!==tab;
+  $('#foot').innerHTML=`<p>${t('foot'+tab)}</p>`;
+  resize();
+  ui1(); ui2(); ui3(); ui4(); ui5(); ui6();
+}
+function resize(){
+  if (tab===1) D1=fit($('#cv1'),0.5,250,470);
+  if (tab===2) D2=fit($('#cv2'),0.55,280,480);
+  if (tab===3){ D3=fit($('#cv3'),0.5,300,480); D3s=fit($('#cv3s'),0.95,280,400); if (quant() && !$('#cv3g').hidden) drawGraph3(); }
+  if (tab===4){ D4=fit($('#cv4'),0.36,230,360); D4s=fit($('#cv4s'),0.75,200,280); }
+  if (tab===5){ const sb=s5.sub, two= sb==='mat'||sb==='mc';
+    $('#cv5z').hidden=!two; $('#cap5a').hidden=!two; $('#cap5b').hidden=!two;
+    D5=fit($('#cv5'),sb==='mc'?0.56:0.5,260,460); if (two) D5z=fit($('#cv5z'),0.56,270,460);
+    D5v= sb==='kl'? fit($('#cv5v'),0.85,230,320) : fit($('#cv5v'),0.6,170,240); }
+  if (tab===6) D6=fit($('#cv6'),0.5,260,520);
+}
+function loop(){
+  try{
+    if (tab===1 && D1) draw1();
+    if (tab===2 && D2) draw2();
+    if (tab===3 && D3){ draw3(); drawScreen3(); }
+    if (tab===4 && D4){ draw4(); drawScreen4(); }
+    if (tab===5 && D5){ draw5(); if (D5z && !$('#cv5z').hidden) draw5z(); drawView5(); }
+    if (tab===6 && D6) draw6();
+  }catch(err){ console.error(err); }
+  requestAnimationFrame(loop);
+}
+function init(){
+  readColors();
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change',readColors);
+  new MutationObserver(readColors).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+  setup1(); setup2(); setup3(); setup4(); setup5(); setup6();
+  $('#langBtn').onclick=()=>{ lang= lang==='vi'?'en':'vi'; save(); applyLang(); };
+  $('#lvQual').onclick=()=>{ level='qual'; save(); renderAll(); };
+  $('#lvQuant').onclick=()=>{ level='quant'; save(); renderAll(); };
+  $$('nav.tabs button').forEach(b=>b.onclick=()=>{ tab=+b.dataset.tab; save(); renderAll(); });
+  window.addEventListener('resize',()=>{ resize(); });
+  applyLang();
+  requestAnimationFrame(loop);
+}
+init();
+</script>

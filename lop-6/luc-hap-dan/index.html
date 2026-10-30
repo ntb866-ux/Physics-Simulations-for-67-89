@@ -1,0 +1,1297 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Lực hấp dẫn và trọng lượng</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Phòng thí nghiệm lực hấp dẫn: dải video thực tế trên cùng, sân khấu canvas bên trái, sổ ghi chép bên phải. Điện thoại xếp một cột.
+   Cùng hệ màu, phông với bộ mô phỏng KHTN 6 (Lực ma sát). */
+:root{
+  --bg:#edf0f3; --panel:#ffffff; --lane:#f4f6f9; --ink:#141c26; --muted:#556170; --line:#c9d1db;
+  --accent:#1d5fa8; --accent-ink:#ffffff; --ok:#1d8a4b; --warn:#c2410c;
+  --force:#d1323b; --vel:#1f6fd1; --mass:#7a3fc2; --spring:#5d6b7a; --spring2:#e07b00;
+  --earth:#2f78c4; --land:#4f9a5b; --moon:#a9adb3; --space:#0d1626; --star:#e9eef7;
+  --gold:#c99a2e; --metal:#8b96a3; --metal2:#5b6673; --wood:#b07a45;
+  --laneA:#0f7c8a; --laneB:#d0661c; --c3:#7a3fc2; --c4:#1d8a4b; --c5:#b8326a;
+  --font-ui:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-num:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Consolas,monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0e131a; --panel:#161e28; --lane:#111821; --ink:#e3e9f0; --muted:#97a3b2; --line:#2a3644;
+  --accent:#5ea6ec; --accent-ink:#04182c; --ok:#47c47d; --warn:#f08a4b;
+  --force:#ff5f67; --vel:#5aa2ff; --mass:#b28cff; --spring:#9aa8b8; --spring2:#ffa630;
+  --earth:#3b86d4; --land:#4c8a55; --moon:#8d9197; --space:#060a12; --star:#cfd8e6;
+  --gold:#e0b24a; --metal:#7c8794; --metal2:#a9b4c1; --wood:#9a6a3c;
+  --laneA:#3cc3d2; --laneB:#ff9a4d; --c3:#b28cff; --c4:#47c47d; --c5:#f06aa2;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e131a; --panel:#161e28; --lane:#111821; --ink:#e3e9f0; --muted:#97a3b2; --line:#2a3644;
+  --accent:#5ea6ec; --accent-ink:#04182c; --ok:#47c47d; --warn:#f08a4b;
+  --force:#ff5f67; --vel:#5aa2ff; --mass:#b28cff; --spring:#9aa8b8; --spring2:#ffa630;
+  --earth:#3b86d4; --land:#4c8a55; --moon:#8d9197; --space:#060a12; --star:#cfd8e6;
+  --gold:#e0b24a; --metal:#7c8794; --metal2:#a9b4c1; --wood:#9a6a3c;
+  --laneA:#3cc3d2; --laneB:#ff9a4d; --c3:#b28cff; --c4:#47c47d; --c5:#f06aa2;
+  color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-ui);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px 40px}
+.wrap{max-width:1320px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.hbtns{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.eyebrow{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{margin:0;font-size:clamp(25px,3.4vw,36px);line-height:1.15;font-weight:800;text-wrap:balance;letter-spacing:-.01em}
+h2{margin:0;font-size:17px;font-weight:700;text-wrap:balance}
+h3{margin:0;font-size:15px;font-weight:700}
+.btn{font:inherit;font-weight:600;font-size:15px;min-height:44px;padding:8px 14px;border-radius:8px;border:1px solid var(--line);
+  background:var(--panel);color:var(--ink);cursor:pointer;touch-action:manipulation}
+.btn:hover{border-color:var(--accent)}
+.btn:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
+.seg .btn{border:0;border-radius:0;min-width:52px}
+.places{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:6px}
+.places .btn{font-size:14px;padding:6px 8px;line-height:1.25}
+.places .btn small{display:block;font-family:var(--font-num);font-size:12px;font-weight:500;opacity:.8}
+nav.tabs{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line)}
+nav.tabs button{font:inherit;font-size:15px;font-weight:600;white-space:nowrap;min-height:46px;padding:8px 14px;border:0;border-bottom:3px solid transparent;
+  background:none;color:var(--muted);cursor:pointer;margin-bottom:-1px}
+nav.tabs button.on{color:var(--ink);border-bottom-color:var(--accent)}
+.req{margin:0;font-size:14px;color:var(--muted);max-width:110ch}
+.req b{color:var(--ink);font-weight:600}
+.lab{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:14px;align-items:start}
+@media (max-width:1020px){.lab{grid-template-columns:minmax(0,1fr)}}
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.col{display:flex;flex-direction:column;gap:12px;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card p{margin:0}
+canvas{display:block;width:100%;border-radius:8px;background:var(--lane);touch-action:pan-y;user-select:none;-webkit-user-select:none}
+canvas.drag{touch-action:none}
+.hint{margin:0;font-size:14px;color:var(--muted)}
+.status{margin:0;font-weight:600;min-height:1.5em}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chk{display:inline-flex;align-items:center;gap:8px;min-height:44px;font-size:15px;cursor:pointer}
+.chk input{width:22px;height:22px;accent-color:var(--accent)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:14px;color:var(--muted)}
+.legend i{display:inline-block;width:18px;height:5px;border-radius:3px;margin-right:6px;vertical-align:middle}
+.sl{display:flex;flex-direction:column;gap:4px}
+.sl .top{display:flex;justify-content:space-between;gap:8px;font-size:15px}
+.sl .val{font-family:var(--font-num);font-weight:600;text-align:right}
+.sl .ends{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+input[type=range]{width:100%;height:44px;accent-color:var(--accent);margin:0}
+select{font:inherit;font-size:15px;min-height:44px;padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);width:100%}
+.kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;font-size:15px;margin:0}
+.kv dt{color:var(--muted)} .kv dd{margin:0;font-family:var(--font-num);font-variant-numeric:tabular-nums;text-align:right;overflow-wrap:anywhere}
+.bigfig{font-family:var(--font-num);font-size:clamp(22px,2.6vw,30px);font-weight:600;line-height:1.2;overflow-wrap:anywhere}
+.cmp{font-size:15px;background:var(--lane);border-radius:8px;padding:8px 12px}
+.opts{display:flex;flex-direction:column;gap:6px}
+.opts .btn{text-align:left;font-size:14px}
+.opts .btn.picked{border:2px solid var(--accent)}
+.opts .btn.right{background:color-mix(in srgb,var(--ok) 18%,var(--panel));border-color:var(--ok)}
+.ans{background:var(--lane);border-left:4px solid var(--ok);padding:8px 12px;border-radius:6px;font-size:15px}
+.muted{color:var(--muted);font-size:14px}
+details{border:1px solid var(--line);border-radius:var(--r);background:var(--panel);padding:0 14px}
+details[open]{padding-bottom:12px}
+summary{cursor:pointer;font-weight:700;min-height:44px;display:flex;align-items:center;font-size:15px}
+details p,details ul{margin:6px 0;font-size:15px;max-width:95ch}
+details ul{padding-left:20px}
+.fine{font-size:13px;color:var(--muted);margin:0}
+.two4{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media (max-width:560px){.two4{grid-template-columns:1fr}}
+.tblwrap{overflow-x:auto}
+table.log{border-collapse:collapse;width:100%;font-size:14px}
+table.log th,table.log td{padding:4px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+table.log th:first-child,table.log td:first-child{text-align:left}
+table.log td{font-family:var(--font-num);font-variant-numeric:tabular-nums}
+table.log th{color:var(--muted);font-weight:600}
+.kv dd.t,table.log td.t{font-family:var(--font-ui)}
+/* Dải video thực tế */
+.video{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center;background:var(--space);color:var(--star);
+  border-radius:var(--r);padding:12px 14px}
+.video .play{width:52px;height:52px;border-radius:50%;background:var(--force);display:grid;place-items:center;flex:none}
+.video .play::before{content:"";border-style:solid;border-width:10px 0 10px 17px;border-color:transparent transparent transparent #fff;margin-left:4px}
+.video .vt{display:flex;flex-direction:column;gap:2px;min-width:0}
+.video .lbl{font-size:12px;letter-spacing:.08em;text-transform:uppercase;opacity:.75;font-weight:600}
+.video .ttl{font-weight:700;font-size:16px;line-height:1.3}
+.video .look{font-size:14px;opacity:.9}
+.video .links{display:flex;flex-direction:column;gap:6px;align-items:stretch}
+.video a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:6px 14px;border-radius:8px;font-weight:700;font-size:15px;text-decoration:none;
+  background:var(--star);color:var(--space);white-space:nowrap}
+.video a.alt{background:transparent;color:var(--star);border:1px solid color-mix(in srgb,var(--star) 45%,transparent);font-weight:600;font-size:14px}
+.video .src{font-size:13px;opacity:.75}
+@media (max-width:720px){.video{grid-template-columns:auto minmax(0,1fr)}.video .links{grid-column:1/-1;flex-direction:row;flex-wrap:wrap}.video a{flex:1 1 160px}}
+/* Chế độ giáo viên: che số liệu để lớp dự đoán */
+body.hideNums .num{filter:blur(7px);user-select:none}
+body.hideNums .num:hover{filter:none}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow" data-i18n="eyebrow"></div>
+      <h1 data-i18n="title"></h1>
+    </div>
+    <div class="hbtns">
+      <div class="seg" id="gSeg" title="g"></div>
+      <button class="btn" id="gvBtn" aria-pressed="false" data-i18n="gvBtn"></button>
+      <button class="btn" id="langBtn">EN</button>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="1" data-i18n="tab1"></button>
+    <button role="tab" data-tab="2" data-i18n="tab2"></button>
+    <button role="tab" data-tab="3" data-i18n="tab3"></button>
+    <button role="tab" data-tab="4" data-i18n="tab4"></button>
+    <button role="tab" data-tab="5" data-i18n="tab5"></button>
+  </nav>
+
+  <!-- ===================== TAB 1: MỌI VẬT ĐỀU HÚT NHAU ===================== -->
+  <section id="t1" class="col">
+    <p class="req" data-i18n-html="req1"></p>
+    <div class="video" id="v1"></div>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" data-i18n="hint1"></p>
+        <canvas id="cv1" class="drag" aria-label="two bodies attracting"></canvas>
+        <p class="status" id="st1"></p>
+        <div class="legend">
+          <span><i style="background:var(--force)"></i><span data-i18n="lgGrav"></span></span>
+        </div>
+        <p class="fine" data-i18n="assume1"></p>
+      </div>
+      <div class="col">
+        <div class="card">
+          <label for="pair1"><h2 data-i18n="pairT"></h2></label>
+          <select id="pair1"></select>
+          <div class="sl"><div class="top"><span id="mALbl"></span><span class="val" id="mAV"></span></div>
+            <input type="range" id="mA" min="-1" max="1" step="0.01" value="0"><div class="ends"><span>× 0,1</span><span>× 10</span></div></div>
+          <div class="sl"><div class="top"><span id="mBLbl"></span><span class="val" id="mBV"></span></div>
+            <input type="range" id="mB" min="-1" max="1" step="0.01" value="0"><div class="ends"><span>× 0,1</span><span>× 10</span></div></div>
+          <div class="sl"><div class="top"><span data-i18n="dist"></span><span class="val" id="dV"></span></div>
+            <input type="range" id="d1" min="0" max="1" step="0.001" value="0.2"><div class="ends"><span data-i18n="near"></span><span data-i18n="far"></span></div></div>
+          <button class="btn" id="rst1" data-i18n="resetPair"></button>
+        </div>
+        <div class="card">
+          <h2 data-i18n="obs"></h2>
+          <div><div class="muted" data-i18n="o1F"></div><div class="bigfig num" id="o1F"></div></div>
+          <dl class="kv">
+            <dt data-i18n="o1FA"></dt><dd class="num" id="o1FA"></dd>
+            <dt data-i18n="o1FB"></dt><dd class="num" id="o1FB"></dd>
+            <dt data-i18n="o1rel"></dt><dd class="num" id="o1rel"></dd>
+          </dl>
+          <p class="cmp num" id="o1cmp"></p>
+        </div>
+        <div class="card" id="p1"></div>
+        <div class="card" id="p1b"></div>
+      </div>
+    </div>
+    <details open><summary data-i18n="mechT"></summary><div data-i18n-html="mech1"></div></details>
+    <details><summary data-i18n="simpleT"></summary><div data-i18n-html="simple1"></div></details>
+    <details><summary data-i18n="wordT1"></summary><div data-i18n-html="word1"></div></details>
+  </section>
+
+  <!-- ===================== TAB 2: HƯỚNG VỀ TÂM TRÁI ĐẤT ===================== -->
+  <section id="t2" class="col" hidden>
+    <p class="req" data-i18n-html="req2"></p>
+    <div class="video" id="v2"></div>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" data-i18n="hint2"></p>
+        <canvas id="cv2" class="drag" aria-label="Earth with people standing around it"></canvas>
+        <p class="status" id="st2"></p>
+        <div class="controls">
+          <button class="btn primary" id="drop2" data-i18n="drop2"></button>
+          <label class="chk"><input type="checkbox" id="rot2"> <span data-i18n="rot2"></span></label>
+          <label class="chk"><input type="checkbox" id="pair2"> <span data-i18n="pair2"></span></label>
+        </div>
+        <div class="legend">
+          <span><i style="background:var(--force)"></i><span data-i18n="lgP"></span></span>
+          <span><i style="background:var(--spring)"></i><span data-i18n="lgPlumb"></span></span>
+        </div>
+        <p class="fine" data-i18n="assume2"></p>
+      </div>
+      <div class="col">
+        <div class="card">
+          <h2 data-i18n="sel2"></h2>
+          <div class="places" id="where2"></div>
+          <div class="sl"><div class="top"><span data-i18n="mKid"></span><span class="val" id="m2V"></span></div>
+            <input type="range" id="m2" min="20" max="80" step="1" value="40"></div>
+        </div>
+        <div class="card">
+          <h2 data-i18n="obs"></h2>
+          <dl class="kv">
+            <dt data-i18n="o2who"></dt><dd class="t" id="o2who"></dd>
+            <dt data-i18n="o2lat"></dt><dd id="o2lat"></dd>
+            <dt data-i18n="o2g"></dt><dd class="num" id="o2g"></dd>
+            <dt data-i18n="o2P"></dt><dd class="num" id="o2P"></dd>
+            <dt data-i18n="o2dir"></dt><dd class="t" id="o2dir"></dd>
+          </dl>
+          <p class="fine" data-i18n="o2note"></p>
+        </div>
+        <div class="card" id="p2"></div>
+        <div class="card" id="p2b"></div>
+      </div>
+    </div>
+    <details open><summary data-i18n="mechT"></summary><div data-i18n-html="mech2"></div></details>
+    <details><summary data-i18n="simpleT"></summary><div data-i18n-html="simple2"></div></details>
+    <details><summary data-i18n="wordT2"></summary><div data-i18n-html="word2"></div></details>
+  </section>
+
+  <!-- ===================== TAB 3: KHỐI LƯỢNG VÀ TRỌNG LƯỢNG Ở CÁC NƠI ===================== -->
+  <section id="t3" class="col" hidden>
+    <p class="req" data-i18n-html="req3"></p>
+    <div class="video" id="v3"></div>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" data-i18n="hint3"></p>
+        <canvas id="cv3" aria-label="balance, spring scale and bathroom scale"></canvas>
+        <p class="status" id="st3"></p>
+        <div class="controls">
+          <button class="btn primary" id="log3" data-i18n="log3"></button>
+          <button class="btn" id="clr3" data-i18n="clr"></button>
+        </div>
+        <p class="fine" data-i18n="assume3"></p>
+      </div>
+      <div class="col">
+        <div class="card">
+          <h2 data-i18n="place3"></h2>
+          <div class="places" id="where3"></div>
+          <label for="obj3" class="muted" data-i18n="obj3"></label>
+          <select id="obj3"></select>
+          <div class="sl"><div class="top"><span data-i18n="m3"></span><span class="val" id="m3V"></span></div>
+            <input type="range" id="m3" min="0.1" max="100" step="0.1" value="5"></div>
+        </div>
+        <div class="card">
+          <h2 data-i18n="obs"></h2>
+          <dl class="kv">
+            <dt data-i18n="o3m"></dt><dd class="num" id="o3m"></dd>
+            <dt data-i18n="o3g"></dt><dd class="num" id="o3g"></dd>
+            <dt data-i18n="o3P"></dt><dd class="num" id="o3P"></dd>
+            <dt data-i18n="o3bath"></dt><dd class="num" id="o3bath"></dd>
+            <dt data-i18n="o3cmp"></dt><dd class="num" id="o3cmp"></dd>
+          </dl>
+        </div>
+        <div class="card">
+          <h2 data-i18n="tbl3"></h2>
+          <div class="tblwrap"><table class="log" id="tb3"></table></div>
+          <canvas id="g3" aria-label="weight versus mass graph"></canvas>
+          <p class="fine" data-i18n="g3note"></p>
+        </div>
+        <div class="card" id="p3"></div>
+        <div class="card" id="p3b"></div>
+      </div>
+    </div>
+    <details open><summary data-i18n="mechT"></summary><div data-i18n-html="mech3"></div></details>
+    <details><summary data-i18n="simpleT"></summary><div data-i18n-html="simple3"></div></details>
+    <details><summary data-i18n="wordT3"></summary><div data-i18n-html="word3"></div></details>
+  </section>
+
+  <!-- ===================== TAB 4: LÒ XO GIÃN, LÒ XO NÉN ===================== -->
+  <section id="t4" class="col" hidden>
+    <p class="req" data-i18n-html="req4"></p>
+    <div class="video" id="v4"></div>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" data-i18n="hint4"></p>
+        <canvas id="cv4" class="drag" aria-label="hanging spring and compression spring"></canvas>
+        <p class="status" id="st4"></p>
+        <div class="two4">
+          <div class="controls"><b data-i18n="sprA"></b>
+            <button class="btn" id="addA" aria-label="+">＋ 50 g</button><button class="btn" id="subA" aria-label="−">− 50 g</button></div>
+          <div class="controls"><b data-i18n="sprB"></b>
+            <button class="btn" id="addB" aria-label="+">＋ 50 g</button><button class="btn" id="subB" aria-label="−">− 50 g</button></div>
+        </div>
+        <div class="legend">
+          <span><i style="background:var(--laneA)"></i><span data-i18n="lgStretch"></span></span>
+          <span><i style="background:var(--laneB)"></i><span data-i18n="lgComp"></span></span>
+          <span><i style="background:var(--force)"></i><span data-i18n="lgP"></span></span>
+        </div>
+        <p class="fine" data-i18n="assume4"></p>
+      </div>
+      <div class="col">
+        <div class="card">
+          <h2 data-i18n="set4"></h2>
+          <div><div class="muted" data-i18n="stiff4"></div><div class="seg" id="kSeg"></div></div>
+          <div><div class="muted" data-i18n="where4"></div><div class="seg" id="pl4"></div></div>
+        </div>
+        <div class="card">
+          <h2 data-i18n="obs"></h2>
+          <dl class="kv">
+            <dt data-i18n="o4mA"></dt><dd class="num" id="o4mA"></dd>
+            <dt data-i18n="o4dA"></dt><dd class="num" id="o4dA"></dd>
+            <dt data-i18n="o4mB"></dt><dd class="num" id="o4mB"></dd>
+            <dt data-i18n="o4dB"></dt><dd class="num" id="o4dB"></dd>
+          </dl>
+          <p class="cmp" id="o4warn" hidden></p>
+        </div>
+        <div class="card">
+          <h2 data-i18n="tbl4"></h2>
+          <p class="muted" data-i18n="tbl4h"></p>
+          <div class="tblwrap"><table class="log" id="tb4"></table></div>
+          <canvas id="g4" aria-label="extension versus mass graph"></canvas>
+          <button class="btn" id="clr4" data-i18n="clr"></button>
+        </div>
+        <div class="card" id="p4"></div>
+        <div class="card" id="p4b"></div>
+      </div>
+    </div>
+    <details open><summary data-i18n="mechT"></summary><div data-i18n-html="mech4"></div></details>
+    <details><summary data-i18n="simpleT"></summary><div data-i18n-html="simple4"></div></details>
+    <details><summary data-i18n="wordT4"></summary><div data-i18n-html="word4"></div></details>
+  </section>
+
+  <!-- ===================== TAB 5: "MẤT TRỌNG LƯỢNG" ===================== -->
+  <section id="t5" class="col" hidden>
+    <p class="req" data-i18n-html="req5"></p>
+    <div class="video" id="v5"></div>
+    <div class="seg" id="mode5"></div>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" id="hint5"></p>
+        <canvas id="cv5" aria-label="Newton's cannon or free-falling cabin"></canvas>
+        <p class="status" id="st5"></p>
+        <div class="controls" id="ctlA5">
+          <button class="btn primary" id="fire5" data-i18n="fire5"></button>
+          <button class="btn" id="clr5" data-i18n="clr5"></button>
+          <div class="seg" id="spd5"></div>
+        </div>
+        <div class="controls" id="ctlB5" hidden>
+          <button class="btn primary" id="dropB5" data-i18n="dropB5"></button>
+          <button class="btn" id="rstB5" data-i18n="reset"></button>
+          <div class="seg" id="spdB5"></div>
+        </div>
+        <div class="legend">
+          <span><i style="background:var(--force)"></i><span data-i18n="lgGrav5"></span></span>
+          <span><i style="background:var(--vel)"></i><span data-i18n="lgVel"></span></span>
+        </div>
+        <p class="fine" id="assume5"></p>
+      </div>
+      <div class="col">
+        <div class="card" id="cardA5">
+          <div class="sl"><div class="top"><span data-i18n="v5"></span><span class="val" id="v5V"></span></div>
+            <input type="range" id="v5in" min="0" max="8.5" step="0.1" value="4"><div class="ends"><span>0</span><span>8,5 km/s</span></div></div>
+          <div class="controls"><button class="btn" id="vISS" data-i18n="vISS"></button></div>
+        </div>
+        <div class="card">
+          <h2 data-i18n="obs"></h2>
+          <dl class="kv" id="o5"></dl>
+          <canvas id="g5" aria-label="scale reading versus time" hidden></canvas>
+        </div>
+        <div class="card" id="p5"></div>
+        <div class="card" id="p5b"></div>
+      </div>
+    </div>
+    <details open><summary data-i18n="mechT"></summary><div data-i18n-html="mech5"></div></details>
+    <details><summary data-i18n="simpleT"></summary><div data-i18n-html="simple5"></div></details>
+    <details><summary data-i18n="wordT5"></summary><div data-i18n-html="word5"></div></details>
+  </section>
+
+  <p class="fine" data-i18n-html="footer"></p>
+</div>
+<script>
+"use strict";
+/* ================= I18N ================= */
+const I18N={
+vi:{
+eyebrow:'KHTN 6 · Lực · Mô phỏng',title:'Lực hấp dẫn, khối lượng và trọng lượng',
+tab1:'1. Mọi vật đều hút nhau',tab2:'2. Trọng lượng hướng về tâm Trái Đất',tab3:'3. Khối lượng và trọng lượng ở các nơi',tab4:'4. Lò xo giãn, lò xo nén',tab5:'5. “Mất trọng lượng”?',
+gvBtn:'Che số liệu',g98:'g = 9,8 N/kg',g10:'P = 10·m',
+obs:'Quan sát',run:'▶ Chạy',pause:'⏸ Tạm dừng',reset:'Đặt lại',clr:'Xoá bảng',
+mechT:'Cơ chế (giải thích khoa học)',simpleT:'Nói cho học sinh dễ hiểu',
+predTitle:'Dự đoán trước',predThen:'Giờ hãy làm thí nghiệm trong mô phỏng để kiểm tra.',showAns:'Xem đáp án',hideAns:'Ẩn đáp án',
+vLbl:'Video thực tế',vOpen:'Mở video',vAlt:'Video khác',vNote:'Video mở ở thẻ mới (YouTube).',
+footer:'Số liệu: hằng số hấp dẫn G = 6,674 × 10⁻¹¹ N·m²/kg² (CODATA 2018); khối lượng, bán kính và g của các thiên thể theo NASA Planetary Fact Sheet. Mô phỏng thuộc bộ “Mô phỏng Vật lí 6789”, bám chương trình KHTN 2018.',
+lgGrav:'lực hấp dẫn (hai lực bằng nhau, ngược chiều)',lgP:'trọng lượng P (lực hút của Trái Đất)',lgPlumb:'dây dọi',lgStretch:'lò xo treo (bị giãn)',lgComp:'lò xo đặt đứng (bị nén)',
+lgGrav5:'lực hút của Trái Đất',lgVel:'vận tốc',
+
+/* tab 1 */
+req1:'<b>Yêu cầu cần đạt:</b> Nêu được khái niệm lực hấp dẫn (lực hút giữa các vật có khối lượng). Nêu được lực không tiếp xúc xuất hiện khi vật gây ra lực không tiếp xúc với vật chịu lực; lấy được ví dụ. Biểu diễn được lực bằng mũi tên.',
+hint1:'Chọn một cặp vật. Kéo vật bên phải lại gần hoặc ra xa, đổi khối lượng bằng thanh trượt. Hai mũi tên đỏ là hai lực hút: chúng thay đổi thế nào?',
+assume1:'Độ dài mũi tên tỉ lệ với độ lớn lực, so với lúc bắt đầu chọn cặp vật (mũi tên quá dài thì bị cắt bớt, có dấu ⋯). Kích thước vật và khoảng cách trên hình không theo tỉ lệ (riêng cặp học sinh và Trái Đất vẽ đúng tỉ lệ khoảng cách); số đo khoảng cách là số thật, tính giữa hai tâm.',
+pairT:'Cặp vật',dist:'Khoảng cách giữa hai tâm',near:'gần',far:'xa',resetPair:'Về số liệu thật ban đầu',
+pApple:'Hai quả táo trên bàn',pKids:'Hai bạn học sinh ngồi cạnh nhau',pCav:'Hai quả cầu chì (thí nghiệm Cavendish)',pKidEarth:'Một bạn học sinh và Trái Đất',pEarthMoon:'Trái Đất và Mặt Trăng',
+bApple:'Quả táo',bAppleL:'Táo trái',bAppleR:'Táo phải',bKidA:'Bạn An',bKidB:'Bạn Bình',bLeadBig:'Quả cầu chì lớn',bLeadSmall:'Quả cầu chì nhỏ',bKid:'Bạn học sinh',bEarth:'Trái Đất',bMoon:'Mặt Trăng',
+mOf:'Khối lượng: {n}',
+o1F:'Độ lớn lực hút giữa hai vật',o1FA:'Lực vật phải hút vật trái',o1FB:'Lực vật trái hút vật phải',o1rel:'So với lúc đầu',
+cmpBig:'Lực này gấp khoảng {r} lần trọng lượng của {x} (trên Trái Đất).',cmpEq:'Lực này xấp xỉ bằng trọng lượng của {x} (trên Trái Đất).',cmpSmall:'Lực này chỉ bằng khoảng 1/{r} trọng lượng của {x} (trên Trái Đất).',
+xBact:'một con vi khuẩn',xPollen:'một hạt phấn hoa',xSand:'một hạt cát mịn',xSalt:'một hạt muối ăn',xMosq:'một con muỗi',xRice:'một hạt gạo',xChalk:'một viên phấn',xApple:'một quả táo',xKid:'một bạn học sinh 40 kg',xElephant:'một con voi',xTanker:'một tàu chở dầu khổng lồ',xHumans:'toàn bộ loài người',xAir:'toàn bộ bầu khí quyển',xOcean:'toàn bộ nước các đại dương',
+st1Small:'Hai vật hút nhau thật, nhưng lực quá nhỏ nên ta không cảm thấy và chúng không tự lăn lại gần nhau (ma sát lớn hơn nhiều).',st1Earth:'Lực hút của Trái Đất lên bạn chính là trọng lượng của bạn. Kéo bạn lên cao xem lực thay đổi thế nào.',st1Moon:'Lực hút khổng lồ này giữ Mặt Trăng quay quanh Trái Đất, và Mặt Trăng cũng kéo nước biển gây ra thuỷ triều.',
+st1Cav:'Năm 1798, Cavendish treo quả cầu nhỏ trên sợi dây mảnh để không còn ma sát, và đo được lực hút cỡ này.',lbSurf:'mặt đất',lbH:'độ cao {h}',notScale:'hình không theo tỉ lệ: đọc khoảng cách ở số đo',
+p1q:'Hai quả táo đặt cạnh nhau trên bàn. Chúng có hút nhau không?',p1a:'Không, chỉ Trái Đất mới hút được vật.',p1b:'Có, nhưng lực hút rất nhỏ.',p1c:'Chỉ hút nhau khi chạm vào nhau.',
+p1e:'Mọi vật có khối lượng đều hút nhau, kể cả hai quả táo, hai bạn học sinh. Lực hút giữa hai quả táo chỉ cỡ 10⁻¹⁰ N (một phần mười tỉ niu tơn), nhỏ hơn trọng lượng một hạt cát, nên ta không nhận ra. Lực hấp dẫn là lực không tiếp xúc: hai vật không cần chạm nhau.',
+p1bq:'Trái Đất hút bạn với lực khoảng 400 N. Bạn hút Trái Đất với lực bao nhiêu?',p1ba:'0 N, vì bạn quá nhỏ.',p1bb:'Rất nhỏ, khoảng 1 N.',p1bc:'Cũng khoảng 400 N.',
+p1be:'Lực hút luôn đi thành từng cặp: hai lực bằng nhau, ngược chiều, đặt vào hai vật. Bạn hút Trái Đất đúng bằng 400 N. Trái Đất không “nhúc nhích” vì khối lượng của nó lớn gấp khoảng 10²³ lần bạn.',
+mech1:`<p><b>Định luật vạn vật hấp dẫn (Newton, 1687).</b> Hai vật bất kì có khối lượng m₁, m₂, đặt cách nhau r (tính giữa hai tâm) thì hút nhau với lực F = G·m₁·m₂ / r², trong đó G = 6,674 × 10⁻¹¹ N·m²/kg². Lớp 6 chưa học công thức; giáo viên dùng để kiểm tra số liệu trong mô phỏng.</p>
+<ul><li><b>Khối lượng càng lớn, lực càng lớn:</b> gấp đôi khối lượng của một vật thì lực gấp đôi.</li>
+<li><b>Càng xa, lực càng nhỏ, và nhỏ rất nhanh:</b> khoảng cách gấp đôi thì lực chỉ còn 1/4; gấp ba thì còn 1/9.</li>
+<li><b>Lực không tiếp xúc, luôn là lực hút, đi thành cặp:</b> lực A hút B và lực B hút A bằng nhau, ngược chiều (định luật III Newton).</li>
+<li><b>Vì sao bình thường không thấy?</b> G rất nhỏ. Hai quả táo 0,1 kg cách nhau 10 cm hút nhau chỉ 6,7 × 10⁻¹¹ N. Lực ma sát giữ quả táo trên bàn lớn hơn hàng tỉ lần. Chỉ khi một vật có khối lượng khổng lồ như Trái Đất (5,97 × 10²⁴ kg) thì lực mới đủ lớn để cảm thấy: đó là trọng lượng.</li>
+<li><b>Thí nghiệm Cavendish (1798):</b> treo hai quả cầu chì nhỏ (0,73 kg) ở hai đầu một thanh nhẹ bằng một sợi dây mảnh, đặt hai quả cầu chì lớn (158 kg) lại gần. Lực hút khoảng 1,5 × 10⁻⁷ N làm thanh xoay một góc rất nhỏ. Đây là lần đầu tiên con người đo được lực hấp dẫn giữa hai vật trong phòng thí nghiệm, và từ đó “cân” được Trái Đất.</li></ul>`,
+simple1:`<ul><li>Vật nào có khối lượng cũng “kéo” vật khác về phía mình, dù không chạm vào nhau. Lực kéo đó gọi là <b>lực hấp dẫn</b>.</li>
+<li>Vật càng nặng (khối lượng càng lớn) thì kéo càng mạnh; ở càng xa thì kéo càng yếu.</li>
+<li>Bạn và bạn ngồi bên cạnh cũng đang kéo nhau, nhưng yếu lắm, yếu hơn cả trọng lượng một hạt muối. Trái Đất thì khổng lồ nên kéo mọi vật rất mạnh: vì thế đồ vật rơi xuống đất.</li>
+<li>Kéo là kéo cả hai phía: Trái Đất kéo quả táo, quả táo cũng kéo Trái Đất một lực đúng bằng thế.</li></ul>`,
+wordT1:'Nguồn gốc từ “hấp dẫn”',
+word1:`<p><b>Hấp dẫn</b> là từ Hán Việt 吸引. <b>Hấp</b> (吸) là hút, hít vào (như <i>hô hấp</i>: thở ra, hít vào); <b>dẫn</b> (引) là kéo, dắt (như <i>dẫn đường</i>). Ghép lại: hút và kéo về phía mình. Trong đời thường “hấp dẫn” còn có nghĩa bóng là lôi cuốn, thu hút sự chú ý.</p>
+<p>Tiếng Trung gọi lực này là 萬有引力 (vạn hữu dẫn lực: lực hút mà muôn vật đều có), rất gần với ý “mọi vật đều hút nhau”. Tiếng Nhật 万有引力 (ban’yū inryoku), tiếng Hàn 만유인력 (manyu illyeok), cùng gốc chữ Hán.</p>
+<p>Tiếng Anh <b>gravitation, gravity</b> đến từ tiếng Latinh <i>gravitas</i> “sự nặng nề”, gốc là tính từ <i>gravis</i> “nặng” (cùng gốc với <i>grave</i>: nghiêm trọng). Newton viết bằng tiếng Latinh và dùng <i>gravitas</i> theo nghĩa “sức nặng”, về sau từ này chuyển hẳn sang nghĩa lực hút. Tiếng Pháp <i>gravitation</i>, tiếng Đức <i>Gravitation</i> hoặc <i>Schwerkraft</i> (lực nặng), tiếng Nga <i>тяготение</i> (sự kéo, sự hút).</p>`,
+
+/* tab 2 */
+req2:'<b>Yêu cầu cần đạt:</b> Nêu được khái niệm trọng lượng của vật (độ lớn lực hút của Trái Đất tác dụng lên vật). Biểu diễn được lực bằng mũi tên có điểm đặt, hướng và độ lớn.',
+hint2:'Kéo các bạn nhỏ đi quanh Trái Đất. Bấm “Thả bóng” để mọi người cùng thả quả bóng. Bóng rơi về đâu? Dây dọi chỉ hướng nào?',
+assume2:'Hình vẽ sơ lược: các nơi được xếp lên cùng một mặt cắt của Trái Đất; người, quả bóng, dây dọi vẽ to hơn thật rất nhiều. Coi Trái Đất là quả cầu; g theo công thức trọng lực quốc tế (đã gồm ảnh hưởng của sự tự quay).',
+drop2:'Thả bóng',rot2:'Xoay để bạn đang chọn ở phía trên',pair2:'Hiện lực bạn hút Trái Đất',
+sel2:'Chọn bạn',mKid:'Khối lượng của bạn',
+o2who:'Bạn đang chọn',o2lat:'Vĩ độ',o2g:'g ở nơi đó',o2P:'Trọng lượng P',o2dir:'Hướng của P',o2dirV:'về tâm Trái Đất',
+o2note:'g thay đổi rất ít trên mặt đất: từ 9,78 N/kg ở xích đạo đến 9,83 N/kg ở hai cực, vì Trái Đất tự quay và hơi dẹt ở hai cực.',
+wHN:'Hà Nội',wNP:'Bắc Cực',wEq:'Xích đạo',wBA:'Argentina',wSP:'Nam Cực',wFree:'Bạn tự chọn',
+latN:'{d}° Bắc',latS:'{d}° Nam',lat0:'0° (xích đạo)',
+st2Ready:'Mũi tên đỏ của mọi bạn đều chỉ vào tâm Trái Đất.',st2Fall:'Mọi quả bóng đều rơi về phía tâm Trái Đất, tức là rơi xuống dưới chân mỗi bạn.',
+lbCenter:'tâm Trái Đất',lbUp:'trên',lbDown:'dưới',
+p2q:'Một bạn ở Argentina (phía bên kia Trái Đất so với Việt Nam) thả quả bóng. Quả bóng sẽ…',p2a:'bay ra ngoài vũ trụ.',p2b:'rơi xuống đất, dưới chân bạn ấy.',p2c:'rơi về phía Việt Nam.',
+p2e:'Ở đâu trên Trái Đất, trọng lượng cũng hướng về tâm Trái Đất. Với mỗi người, “xuống dưới” là về phía tâm, nên bóng luôn rơi xuống dưới chân người thả. Ở Argentina, mọi người đứng vững như ở Việt Nam.',
+p2bq:'Dây dọi treo ở Hà Nội và dây dọi treo ở Argentina có song song với nhau không?',p2ba:'Có, mọi dây dọi đều song song.',p2bb:'Không, cả hai đều chỉ về tâm Trái Đất nên không song song.',p2bc:'Dây dọi ở Argentina chỉ lên trời.',
+p2be:'Dây dọi chỉ phương của trọng lực, tức là hướng về tâm Trái Đất. Hai nơi khác nhau thì hai dây dọi lệch nhau. Ngay cả Hà Nội (vĩ độ 21,0°) và TP Hồ Chí Minh (vĩ độ 10,8°) cách nhau khoảng 1 140 km, hai dây dọi cũng lệch nhau khoảng 10°.',
+mech2:`<p><b>Trọng lượng là lực hút của Trái Đất.</b> Mỗi phần nhỏ của Trái Đất đều hút vật. Newton chứng minh: một quả cầu đồng đều hút vật bên ngoài giống hệt như khi toàn bộ khối lượng dồn vào tâm. Vì vậy trọng lực có phương thẳng đứng, chiều hướng về tâm Trái Đất.</p>
+<ul><li><b>Phương thẳng đứng</b> là phương của dây dọi. Dây dọi ở hai nơi khác nhau không song song: chúng gặp nhau (gần đúng) ở tâm Trái Đất. Khoảng 240 năm trước Công nguyên, Eratosthenes dùng đúng ý này (bóng nắng ở hai thành phố lệch nhau 7,2°) để ước lượng chu vi Trái Đất.</li>
+<li><b>Độ lớn:</b> P = m·g. Trên mặt đất g gần như không đổi, từ 9,780 N/kg ở xích đạo đến 9,832 N/kg ở hai cực (công thức trọng lực quốc tế: g = 9,780327·(1 + 0,0053024·sin²φ − 0,0000058·sin²2φ), φ là vĩ độ). Hà Nội: g ≈ 9,787 N/kg. Đơn vị N/kg bằng đúng m/s².</li>
+<li><b>Lực hút hai chiều:</b> người cũng hút Trái Đất một lực bằng P, đặt ở tâm Trái Đất, hướng về phía người.</li></ul>`,
+simple2:`<ul><li>“Xuống dưới” nghĩa là <b>về phía tâm Trái Đất</b>. Ở đâu cũng vậy.</li>
+<li>Tưởng tượng những chú kiến bò trên một quả bóng: chú nào cũng thấy mặt bóng ở dưới chân, bầu trời ở trên đầu, dù chú đó đang ở “đáy” quả bóng.</li>
+<li>Muốn biết chính xác hướng “xuống dưới”, thợ xây treo một quả nặng vào sợi dây: đó là <b>dây dọi</b>.</li></ul>`,
+wordT2:'Nguồn gốc từ “trọng lượng”, “dây dọi”',
+word2:`<p><b>Trọng lượng</b> là từ Hán Việt 重量: <b>trọng</b> (重) là nặng (như <i>trọng tải</i>, <i>quan trọng</i>: nặng ký, có sức nặng), <b>lượng</b> (量) là mức đo, số đo (như <i>đo lượng</i>, <i>số lượng</i>). Nghĩa đen: số đo độ nặng. <b>Trọng lực</b> 重力 là “lực nặng”, lực làm vật nặng.</p>
+<p>Tiếng Anh <b>weight</b> từ tiếng Anh cổ <i>wiht, gewiht</i>, cùng gốc với động từ <i>weigh</i> (cân, nâng lên để thử độ nặng). Tiếng Pháp <i>poids</i> (từ Latinh <i>pensum</i>: lượng len đã cân), tiếng Đức <i>Gewicht</i>. Lưu ý: tiếng Trung hiện đại dùng 重量 (zhòngliàng) cả cho nghĩa “độ nặng tính bằng kg” trong đời thường; trong vật lí, trọng lượng (lực) là 重力 hoặc 重量, khối lượng là 质量.</p>
+<p><b>Dây dọi</b>: “dọi” là từ thuần Việt chỉ quả nặng treo để lấy phương thẳng đứng. Tiếng Anh <b>plumb line</b>, <i>plumb</i> từ Latinh <i>plumbum</i> là chì, vì quả dọi xưa làm bằng chì (kí hiệu hoá học của chì là Pb cũng từ <i>plumbum</i>).</p>`,
+
+/* tab 3 */
+req3:'<b>Yêu cầu cần đạt:</b> Nêu được các khái niệm: khối lượng (số đo lượng chất của một vật), trọng lượng của vật (độ lớn lực hút của Trái Đất tác dụng lên vật). Đo được lực bằng lực kế, đơn vị niu tơn (N).',
+hint3:'Chọn một vật, rồi mang nó đi các nơi. Ba dụng cụ đo cùng lúc: cân đòn, lực kế và cân sức khoẻ. Số chỉ nào giữ nguyên, số chỉ nào thay đổi? Bấm “Ghi kết quả” sau mỗi lần đo.',
+assume3:'Ở mỗi nơi lấy g tại bề mặt (Sao Mộc, Sao Thổ không có mặt rắn: lấy g ở tầng mây; Mặt Trời: chỉ để so sánh, không thể đứng trên đó). Cân sức khoẻ được chia vạch theo g của Trái Đất. Bỏ qua sức đẩy của không khí.',
+log3:'Ghi kết quả',place3:'Mang vật đến',obj3:'Vật',m3:'Khối lượng của vật',
+o3m:'Khối lượng (cân đòn)',o3g:'g ở nơi đó',o3P:'Trọng lượng (lực kế)',o3bath:'Cân sức khoẻ chỉ',o3cmp:'So với ở Trái Đất',
+tbl3:'Bảng kết quả',g3note:'Đồ thị trọng lượng theo khối lượng: mỗi nơi là một đường thẳng đi qua gốc toạ độ. Nơi nào g lớn thì đường dốc hơn.',
+th3place:'Nơi',th3m:'m (kg)',th3P:'P (N)',th3b:'Cân sức khoẻ',noRow:'Chưa ghi lần nào.',
+gx3:'m (kg)',gy3:'P (N)',
+oApple:'Quả táo (0,1 kg)',oSugar:'Gói đường (1 kg)',oRice:'Bao gạo (5 kg)',oKid:'Bạn học sinh (40 kg)',oCustom:'Tự chọn khối lượng',
+plEarth:'Trái Đất',plMoon:'Mặt Trăng',plMercury:'Sao Thuỷ',plVenus:'Sao Kim',plMars:'Sao Hoả',plJupiter:'Sao Mộc',plSaturn:'Sao Thổ',plSun:'Mặt Trời',
+inBal:'Cân đòn',inSpring:'Lực kế',inBath:'Cân sức khoẻ',over:'quá tải!',range:'GHĐ {r} N',
+st3:'Ở {p}: cân đòn vẫn chỉ {m}, nhưng lực kế chỉ {P}.',st3E:'Ở Trái Đất, cân sức khoẻ chỉ đúng khối lượng vì nó được chia vạch ở Trái Đất.',
+st3Off:'Cân sức khoẻ chỉ {b}, sai so với khối lượng thật {m}: nó đo lực ép lên mặt cân rồi đổi ra kg theo g của Trái Đất.',
+cmpTimes:'gấp {r} lần',cmpPart:'bằng {r} lần',
+p3q:'Bạn có khối lượng 40 kg bay lên Mặt Trăng. Ở Mặt Trăng, khối lượng của bạn là…',p3a:'vẫn là 40 kg.',p3b:'khoảng 6,6 kg.',p3c:'0 kg, vì Mặt Trăng không có không khí.',
+p3e:'Khối lượng là lượng chất làm nên cơ thể bạn, mang đi đâu cũng không đổi: vẫn 40 kg. Cái thay đổi là trọng lượng: Mặt Trăng hút yếu hơn nên trọng lượng chỉ còn khoảng 65 N thay vì 392 N.',
+p3bq:'Mang cân sức khoẻ lên Mặt Trăng, bạn 40 kg đứng lên cân. Cân sẽ chỉ…',p3ba:'40 kg.',p3bb:'khoảng 6,6 kg.',p3bc:'không chỉ gì, cân hỏng.',
+p3be:'Cân sức khoẻ thật ra đo lực ép (trọng lượng) bằng một lò xo bị nén, rồi in vạch kg theo g của Trái Đất. Ở Mặt Trăng trọng lượng nhỏ hơn khoảng 6 lần nên cân chỉ khoảng 6,6 kg. Cân chỉ sai, chứ khối lượng của bạn không đổi. Muốn đo đúng khối lượng ở Mặt Trăng, hãy dùng cân đòn.',
+mech3:`<p><b>Khối lượng</b> (kí hiệu m, đơn vị kg) cho biết lượng chất của vật. Nó chỉ đổi khi thêm hoặc bớt chất, không phụ thuộc vật ở đâu.</p>
+<p><b>Trọng lượng</b> (kí hiệu P, đơn vị N) là độ lớn lực hút của Trái Đất (hay của thiên thể nơi vật đang ở) lên vật: P = m·g. Giá trị g phụ thuộc khối lượng và bán kính của thiên thể (g = G·M/R²). Trên Trái Đất g ≈ 9,8 N/kg, SGK làm tròn thành P = 10·m.</p>
+<ul><li><b>Cân đòn</b> so sánh trọng lượng của vật với trọng lượng của quả cân <i>ở cùng một nơi</i>. Hai bên cùng chịu một g nên cân thăng bằng khi hai khối lượng bằng nhau: cân đòn cho đúng khối lượng ở mọi nơi có trọng lực.</li>
+<li><b>Lực kế</b> đo lực, nên chỉ trọng lượng: đổi theo nơi.</li>
+<li><b>Cân sức khoẻ, cân đồng hồ, cân điện tử</b> đều đo lực ép lên mặt cân (bằng lò xo bị nén hoặc cảm biến lực), rồi chia cho 9,8 để in ra kg. Mang ra khỏi Trái Đất là chỉ sai.</li>
+<li>Số liệu g (NASA): Sao Thuỷ 3,7; Sao Kim 8,87; Trái Đất 9,8; Mặt Trăng 1,62; Sao Hoả 3,71; Sao Mộc 24,79; Sao Thổ 10,44; Mặt Trời 274 N/kg. Sao Thổ nặng gấp 95 lần Trái Đất nhưng g chỉ hơn một chút vì bán kính lớn gấp 9 lần.</li></ul>`,
+simple3:`<ul><li><b>Khối lượng</b>: cơ thể bạn được làm từ bao nhiêu “chất”. Lên Mặt Trăng bạn không mất miếng thịt nào, nên khối lượng vẫn thế.</li>
+<li><b>Trọng lượng</b>: Trái Đất (hay Mặt Trăng) kéo bạn mạnh cỡ nào. Mặt Trăng nhỏ hơn nên kéo yếu hơn khoảng 6 lần: bạn nhảy cao gấp mấy lần.</li>
+<li>Nói “tôi nặng 40 cân” là nói khối lượng (kg). Trọng lượng phải đo bằng niu tơn (N), bằng lực kế.</li></ul>`,
+wordT3:'Nguồn gốc từ “khối lượng”',
+word3:`<p><b>Khối lượng</b> ghép từ <b>khối</b> (塊: cục, tảng, phần vật chất liền một khối) và <b>lượng</b> (量: số đo). Nghĩa đen: số đo của khối chất. Tiếng Trung và tiếng Nhật dùng 質量 (chất lượng: lượng chất; tiếng Trung giản thể 质量 zhìliàng, tiếng Nhật shitsuryō), rất khớp với định nghĩa “số đo lượng chất của một vật”. Lưu ý trong tiếng Việt, “chất lượng” lại có nghĩa khác (độ tốt xấu), nên ta dùng “khối lượng”.</p>
+<p>Tiếng Anh <b>mass</b> từ Latinh <i>massa</i> “khối, cục bột nhào”, mượn từ Hy Lạp <i>mâza</i> (μᾶζα) “bánh bột lúa mạch”, liên quan động từ <i>mássein</i> “nhào bột”. Từ “một khối bột” chuyển thành “một khối chất”, rồi Newton dùng <i>quantitas materiae</i> (lượng vật chất) và về sau gọi là <i>mass</i>. Tiếng Pháp <i>masse</i>, tiếng Đức <i>Masse</i>, tiếng Nga <i>масса</i>.</p>
+<p>Từ “cân” trong “nặng 40 cân” vốn là đơn vị cũ 斤 (cân ta ≈ 0,6 kg), nay người Việt dùng “cân” để chỉ kg trong đời thường.</p>`,
+
+/* tab 4 */
+req4:'<b>Yêu cầu cần đạt:</b> Thực hiện thí nghiệm chứng minh được độ giãn của lò xo treo thẳng đứng tỉ lệ với khối lượng của vật treo. Mở rộng: lò xo bị nén cũng biến dạng tỉ lệ với khối lượng vật đặt lên.',
+hint4:'Kéo quả nặng 50 g từ khay lên móc của lò xo treo (bên trái) hoặc lên đĩa của lò xo đặt đứng (bên phải). Kéo quả trên cùng ra để bớt. Mỗi lần lò xo đứng yên, kết quả được ghi vào bảng.',
+assume4:'Bỏ qua khối lượng của móc, đĩa và của chính lò xo. Lò xo mềm: treo k = 20 N/m, nén k = 40 N/m; lò xo cứng gấp đôi. Thước chia đến milimét. Mô phỏng có dao động nhỏ rồi tắt dần, giống lò xo thật.',
+sprA:'Lò xo treo',sprB:'Lò xo nén',set4:'Thiết lập',stiff4:'Loại lò xo',where4:'Làm thí nghiệm ở',kSoft:'Mềm',kHard:'Cứng',
+o4mA:'Khối lượng treo',o4dA:'Độ giãn Δl',o4mB:'Khối lượng đặt lên',o4dB:'Độ nén Δl',
+tbl4:'Bảng kết quả',tbl4h:'Cột cuối là độ biến dạng ứng với mỗi 100 g. Nếu cột này không đổi thì độ biến dạng tỉ lệ với khối lượng.',
+th4s:'Lò xo',th4m:'m (g)',th4d:'Δl (cm)',th4r:'Δl/100 g',
+gx4:'m (g)',gy4:'Δl (cm)',tray:'khay quả nặng 50 g',lbL0:'l₀ = {v} cm',lbL:'l = {v} cm',lbDl:'Δl = {v} cm',
+warnYield:'Lò xo treo đã bị kéo quá giới hạn đàn hồi: bỏ hết quả nặng ra, nó không còn trở lại độ dài ban đầu. Bấm “Thay lò xo mới”.',warnSolid:'Lò xo nén đã bị nén hết cỡ (các vòng chạm nhau): đặt thêm cũng không ngắn thêm được.',
+newSpring:'Thay lò xo mới',
+st4Idle:'Lò xo chưa chịu lực: độ dài tự nhiên l₀.',st4:'Treo {mA} g: lò xo giãn {dA} cm. Đặt {mB} g: lò xo nén {dB} cm.',
+p4q:'Treo 1 quả nặng 50 g, lò xo giãn 2,5 cm. Treo 3 quả như thế, lò xo giãn bao nhiêu?',p4a:'2,5 cm',p4b:'5 cm',p4c:'7,5 cm',
+p4e:'Khối lượng gấp 3 thì trọng lượng gấp 3, lực kéo lò xo gấp 3, nên độ giãn cũng gấp 3: 7,5 cm (khi chưa vượt giới hạn đàn hồi). Đó là ý nghĩa của “tỉ lệ”.',
+p4bq:'Mang lò xo và 4 quả nặng lên Mặt Trăng làm lại thí nghiệm. Độ giãn sẽ…',p4ba:'như ở Trái Đất, vì khối lượng không đổi.',p4bb:'nhỏ hơn khoảng 6 lần.',p4bc:'lớn hơn, vì trên Mặt Trăng mọi thứ nhẹ bẫng.',
+p4be:'Lò xo giãn vì bị trọng lượng của vật kéo, không phải vì khối lượng. Ở Mặt Trăng trọng lượng nhỏ hơn khoảng 6 lần nên độ giãn nhỏ hơn khoảng 6 lần. Nhưng ở cùng một nơi, độ giãn vẫn tỉ lệ với khối lượng vật treo: đồ thị vẫn là đường thẳng, chỉ thoải hơn.',
+mech4:`<p><b>Định luật Hooke (1660).</b> Khi bị kéo hoặc nén trong giới hạn đàn hồi, độ biến dạng của lò xo Δl = |l − l₀| tỉ lệ với lực tác dụng: F = k·Δl. Hệ số k (N/m) gọi là độ cứng, lò xo càng cứng thì k càng lớn. Năm 1676 Hooke công bố định luật dưới dạng một câu đố chữ, lời giải bằng tiếng Latinh là “ut tensio, sic vis”: giãn bao nhiêu, lực bấy nhiêu.</p>
+<ul><li><b>Lò xo treo:</b> khi vật đứng yên, lực lò xo kéo lên cân bằng với trọng lượng: k·Δl = m·g, nên Δl = (g/k)·m. Ở cùng một nơi g không đổi, vậy Δl tỉ lệ với m. Đây là nguyên lí của lực kế.</li>
+<li><b>Lò xo nén:</b> vật đặt trên đĩa ép xuống bằng trọng lượng, lò xo đẩy lên bằng k·Δl. Cũng có Δl tỉ lệ với m. Đây là nguyên lí của cân đồng hồ, cân sức khoẻ, giảm xóc xe máy, đệm lò xo.</li>
+<li><b>Giới hạn đàn hồi:</b> kéo quá mạnh thì lò xo biến dạng vĩnh viễn, không còn tỉ lệ. Nén thì có giới hạn khi các vòng chạm nhau.</li>
+<li>Với lò xo mềm (k = 20 N/m), mỗi quả 50 g làm lò xo giãn 0,05 × 9,8 / 20 = 0,0245 m = 2,45 cm (nếu lấy P = 10·m thì đúng 2,5 cm).</li></ul>`,
+simple4:`<ul><li>Lò xo giống một người “biết đếm”: kéo bằng 1 quả nặng thì dài thêm 1 đoạn, 2 quả thì dài thêm 2 đoạn, 3 quả thì 3 đoạn.</li>
+<li>Nén cũng vậy: đặt càng nhiều quả lên, lò xo càng ngắn lại, mỗi quả ngắn đi một đoạn bằng nhau.</li>
+<li>Nhưng đừng kéo quá tay: lò xo bị “dãn hỏng” sẽ không co lại như cũ.</li></ul>`,
+wordT4:'Nguồn gốc từ “lò xo”, “đàn hồi”',
+word4:`<p><b>Lò xo</b> là từ mượn tiếng Pháp <i>ressort</i> (đọc gần như “rơ-xo”), nghĩa là lò xo, sức bật; người Việt đọc trại thành “lò xo”. <i>Ressort</i> từ động từ <i>ressortir</i> “bật ra, trồi ra lại”.</p>
+<p>Tiếng Anh <b>spring</b> cũng có nghĩa gốc là “bật lên, nảy lên” (cùng từ với <i>spring</i> mùa xuân: lúc cây cỏ nảy mầm, và <i>spring</i> con suối: nước trồi lên). Tiếng Trung gọi lò xo là 彈簧 (đạn hoàng: “lưỡi bật”), tiếng Nhật ばね (bane).</p>
+<p><b>Đàn hồi</b> 彈回: <b>đàn</b> (彈) là bật, nảy (như dây đàn bật lại); <b>hồi</b> (回) là trở về. Nghĩa đen: bật trở về hình cũ. Tiếng Anh <i>elastic</i> từ Hy Lạp <i>elastós</i> “dễ kéo dãn”, gốc <i>elaúnein</i> “đẩy, kéo”.</p>`,
+
+/* tab 5 */
+req5:'<b>Yêu cầu cần đạt:</b> Nêu được trọng lượng là lực hút của Trái Đất; lực hấp dẫn là lực không tiếp xúc. Chương trình KHTN gợi ý dùng học liệu điện tử về hiện tượng “mất trọng lượng”. Phần này giúp học sinh không hiểu sai rằng ngoài vũ trụ “không có lực hút”.',
+modeA5:'Súng đại bác của Newton',modeB5:'Cabin rơi tự do',
+hintA5:'Newton tưởng tượng một khẩu đại bác trên đỉnh núi rất cao. Chọn tốc độ bắn rồi bấm “Bắn”. Bắn càng nhanh, viên đạn rơi càng xa. Đến một tốc độ nào đó, nó rơi mãi mà không chạm đất.',
+hintB5:'Một cabin trò chơi “tháp rơi” có bạn đứng trên cân sức khoẻ, một lực kế treo quả nặng 1 kg và một chai nước thủng lỗ. Bấm “Thả rơi”: cabin rơi tự do rồi được phanh lại. Theo dõi số chỉ cân và tia nước.',
+assumeA5:'Bỏ qua sức cản không khí và sự tự quay của Trái Đất; coi Trái Đất là quả cầu đều. Núi tưởng tượng cao 400 km, bằng độ cao trạm vũ trụ ISS. Thời gian được tua nhanh.',
+assumeB5:'Bỏ qua sức cản không khí. Cabin rơi tự do 2,5 s (khoảng 31 m) rồi phanh với gia tốc bằng g đến khi dừng. Bạn đứng trên cân có khối lượng 40 kg.',
+fire5:'Bắn',clr5:'Xoá đường bay',dropB5:'Thả rơi',v5:'Tốc độ bắn',vISS:'Tốc độ của trạm ISS (7,7 km/s)',
+o5v0:'Tốc độ bắn',o5v:'Tốc độ hiện tại',o5h:'Độ cao',o5g:'g ở độ cao đó',o5F:'Lực hút lên phi hành gia 60 kg',o5pct:'So với ở mặt đất',o5fate:'Kết quả',
+fateFly:'đang bay',fateHit:'chạm đất cách chân núi {d} km',fateOrbit:'bay vòng quanh Trái Đất (1 vòng ≈ {t} phút)',
+st5A0:'Chọn tốc độ rồi bấm “Bắn”.',st5Fly:'Viên đạn đang bay. Mũi tên đỏ là lực hút của Trái Đất, luôn hướng về tâm Trái Đất và kéo đường bay cong xuống.',st5Hit:'Viên đạn vẫn bị Trái Đất hút nên rơi xuống, bắn càng nhanh thì rơi càng xa.',st5Orbit:'Viên đạn vẫn đang rơi về phía Trái Đất, nhưng nó bay ngang nhanh đến mức mặt đất cong đi kịp, nên không bao giờ chạm đất. Trạm ISS và các phi hành gia cũng đang “rơi” như vậy.',
+lbISS:'quỹ đạo trạm ISS',lbMount:'núi tưởng tượng cao 400 km',
+o5ph:'Giai đoạn',o5a:'Gia tốc của cabin',o5P:'Lực hút của Trái Đất lên bạn (trọng lượng)',o5N:'Số chỉ cân sức khoẻ',o5Nkg:'Cân hiện số',o5sp:'Lực kế (quả nặng 1 kg)',
+phReady:'đứng yên ở đỉnh tháp',phFall:'rơi tự do',phBrake:'đang phanh',phStop:'đã dừng ở chân tháp',
+st5B0:'Cabin đứng yên: cân chỉ đúng trọng lượng, nước chảy ra khỏi lỗ chai.',st5BFall:'Rơi tự do: cân chỉ 0, lực kế chỉ 0, nước ngừng chảy. Nhưng Trái Đất vẫn hút bạn đúng 392 N, mũi tên đỏ không hề mất đi!',st5BBrake:'Đang phanh: cân chỉ gấp đôi bình thường, bạn cảm thấy mình “nặng” hơn.',st5BStop:'Đã dừng: mọi thứ trở lại như lúc đầu.',
+gx5:'t (s)',gy5:'số chỉ cân (N)',lbScale:'số chỉ cân',lbWeight:'trọng lượng P (không đổi)',
+p5q:'Trạm vũ trụ ISS bay ở độ cao khoảng 400 km. Ở đó Trái Đất còn hút phi hành gia không?',p5a:'Không, ngoài vũ trụ không có lực hút.',p5b:'Có, nhưng chỉ còn rất nhỏ, khoảng 1%.',p5c:'Có, vẫn còn gần 90% so với ở mặt đất.',
+p5e:'Ở độ cao 400 km, lực hút của Trái Đất vẫn còn khoảng 89% so với mặt đất (g ≈ 8,7 N/kg). Phi hành gia lơ lửng không phải vì hết lực hút, mà vì cả trạm và người đang cùng rơi tự do quanh Trái Đất. Không gì đỡ họ, nên họ không cảm thấy trọng lượng.',
+p5bq:'Cabin rơi tự do. Bạn đứng trên cân sức khoẻ trong cabin. Cân chỉ…',p5ba:'như lúc đứng yên.',p5bb:'0.',p5bc:'gấp đôi.',
+p5be:'Khi rơi tự do, bạn và cân cùng rơi nhanh như nhau, bạn không còn ép lên mặt cân nên cân chỉ 0. Đó là “mất trọng lượng” (tình trạng không trọng lượng). Thực ra trọng lượng, tức lực hút của Trái Đất, vẫn còn nguyên: chính nó làm bạn rơi.',
+mech5:`<p><b>“Mất trọng lượng” không phải là mất lực hút.</b> Cái ta cảm thấy là “nặng” chính là lực đỡ của mặt sàn, mặt cân ép ngược lên người ta. Khi ta và mọi vật xung quanh cùng rơi tự do, không gì đỡ ai cả: cân chỉ 0, nước không chảy khỏi lỗ chai, vật buông tay ra vẫn lơ lửng cạnh ta. Trong khi đó lực hút của Trái Đất vẫn tác dụng đầy đủ.</p>
+<ul><li><b>Súng đại bác của Newton</b> (trong sách “Về hệ thống thế giới”, 1728): bắn ngang càng nhanh, viên đạn rơi càng xa. Ở độ cao 400 km, khi tốc độ đạt khoảng 7,7 km/s (gần 28 000 km/h), đường rơi cong đúng bằng độ cong của Trái Đất: viên đạn rơi mãi quanh Trái Đất. Đó là một vệ tinh. Trạm ISS bay đúng như vậy, mỗi vòng khoảng 92 phút.</li>
+<li><b>Lực hút ở độ cao h:</b> g = G·M/(R + h)². Ở 400 km: g ≈ 8,7 N/kg, còn 89%. Muốn lực hút còn một nửa phải lên cao khoảng 2 640 km.</li>
+<li>Trên tàu lượn, máy bay bay theo đường parabol, cabin tháp rơi… người ta cũng có vài giây không trọng lượng. Phi hành gia tập luyện trên máy bay kiểu này.</li></ul>`,
+simple5:`<ul><li>Khi đứng trên cân, cân bị bạn ép xuống nên nó chỉ số. Nếu cả bạn và cái cân cùng rơi, bạn không ép được lên cân nữa: cân chỉ 0.</li>
+<li>Phi hành gia trên trạm vũ trụ đang rơi cùng con tàu suốt ngày đêm, nhưng tàu bay ngang nhanh quá nên rơi mãi mà không chạm đất. Vì vậy họ lơ lửng.</li>
+<li>Trái Đất vẫn kéo họ, nếu không thì con tàu đã bay thẳng ra xa mất rồi!</li></ul>`,
+wordT5:'Nguồn gốc từ “quỹ đạo”, “vệ tinh”',
+word5:`<p><b>Quỹ đạo</b> 軌道: <b>quỹ</b> (軌) là vết bánh xe, đường ray; <b>đạo</b> (道) là con đường. Thật thú vị: tiếng Anh <b>orbit</b> từ Latinh <i>orbita</i> cũng có nghĩa gốc là “vết bánh xe, lối mòn”, từ <i>orbis</i> “vòng tròn, bánh xe”. Hai nền văn hoá cùng hình dung đường bay của thiên thể như một vệt bánh xe lăn mãi.</p>
+<p><b>Vệ tinh</b> 衛星: <b>vệ</b> (衛) là bảo vệ, hộ tống; <b>tinh</b> (星) là sao. “Ngôi sao hộ tống” đi theo hành tinh. Tiếng Anh <b>satellite</b> từ Latinh <i>satelles</i> “người hầu cận, vệ sĩ”, do Kepler dùng năm 1611 cho các mặt trăng của Sao Mộc. Cả hai đều mang ý “kẻ đi kèm bảo vệ”.</p>
+<p>“Không trọng lượng” tiếng Anh là <i>weightlessness</i>; các nhà khoa học thích gọi <i>microgravity</i> (vi trọng lực), tiếng Nga <i>невесомость</i> (không có sức nặng).</p>`,
+},
+en:{
+eyebrow:'Science 6 · Forces · Simulation',title:'Gravity, mass and weight',
+tab1:'1. Everything attracts everything',tab2:'2. Weight points to Earth’s centre',tab3:'3. Mass and weight in different places',tab4:'4. Stretched and compressed springs',tab5:'5. “Weightless”?',
+gvBtn:'Hide numbers',g98:'g = 9.8 N/kg',g10:'W = 10·m',
+obs:'Observe',run:'▶ Run',pause:'⏸ Pause',reset:'Reset',clr:'Clear table',
+mechT:'Mechanism (the science)',simpleT:'Explaining it to students',
+predTitle:'Predict first',predThen:'Now test it with the simulation.',showAns:'Show answer',hideAns:'Hide answer',
+vLbl:'Real-world video',vOpen:'Open video',vAlt:'Another video',vNote:'Videos open in a new tab (YouTube).',
+footer:'Data: gravitational constant G = 6.674 × 10⁻¹¹ N·m²/kg² (CODATA 2018); masses, radii and g of bodies from the NASA Planetary Fact Sheet. Part of the “Physics Simulations 6789” set, following the Vietnamese 2018 science curriculum.',
+lgGrav:'gravitational force (equal and opposite pair)',lgP:'weight W (Earth’s pull)',lgPlumb:'plumb line',lgStretch:'hanging spring (stretched)',lgComp:'standing spring (compressed)',
+lgGrav5:'Earth’s pull',lgVel:'velocity',
+
+req1:'<b>Learning outcome:</b> State that gravity is the attraction between objects that have mass. State that non-contact forces act without the objects touching, with examples. Represent a force with an arrow.',
+hint1:'Choose a pair of objects. Drag the right-hand object nearer or farther and change the masses with the sliders. The two red arrows are the attractive forces: how do they change?',
+assume1:'Arrow length is proportional to force, compared with the force when the pair was chosen (very long arrows are cut and marked ⋯). Sizes and distances in the picture are not to scale (except the student and Earth pair, where distance is to scale); the distance label is the real value, centre to centre.',
+pairT:'Pair of objects',dist:'Centre-to-centre distance',near:'near',far:'far',resetPair:'Back to the real values',
+pApple:'Two apples on a table',pKids:'Two students sitting side by side',pCav:'Two lead spheres (Cavendish experiment)',pKidEarth:'A student and the Earth',pEarthMoon:'Earth and Moon',
+bApple:'Apple',bAppleL:'Left apple',bAppleR:'Right apple',bKidA:'An',bKidB:'Binh',bLeadBig:'Large lead sphere',bLeadSmall:'Small lead sphere',bKid:'Student',bEarth:'Earth',bMoon:'Moon',
+mOf:'Mass: {n}',
+o1F:'Size of the attraction',o1FA:'Pull of right object on left one',o1FB:'Pull of left object on right one',o1rel:'Compared with the start',
+cmpBig:'This is about {r} times the weight of {x} (on Earth).',cmpEq:'This is about the weight of {x} (on Earth).',cmpSmall:'This is only about 1/{r} of the weight of {x} (on Earth).',
+xBact:'a bacterium',xPollen:'a pollen grain',xSand:'a fine sand grain',xSalt:'a grain of salt',xMosq:'a mosquito',xRice:'a grain of rice',xChalk:'a stick of chalk',xApple:'an apple',xKid:'a 40 kg student',xElephant:'an elephant',xTanker:'a supertanker',xHumans:'all humans together',xAir:'the whole atmosphere',xOcean:'all the water in the oceans',
+st1Small:'The two objects really do attract, but the force is so small that we cannot feel it and they do not roll together (friction is far bigger).',st1Earth:'Earth’s pull on you is your weight. Drag yourself higher and watch the force.',st1Moon:'This huge pull keeps the Moon orbiting Earth, and the Moon’s pull on the oceans causes tides.',
+st1Cav:'In 1798 Cavendish hung the small spheres on a thin wire so there was no friction, and measured a force this size.',lbSurf:'ground',lbH:'height {h}',notScale:'not to scale: read the distance from the label',
+p1q:'Two apples sit side by side on a table. Do they attract each other?',p1a:'No, only the Earth can pull objects.',p1b:'Yes, but the pull is tiny.',p1c:'Only when they touch.',
+p1e:'Every object with mass attracts every other, even two apples or two students. The pull between two apples is about 10⁻¹⁰ N, less than the weight of a grain of sand, so we do not notice it. Gravity is a non-contact force: the objects need not touch.',
+p1bq:'The Earth pulls you with about 400 N. How hard do you pull the Earth?',p1ba:'0 N, you are too small.',p1bb:'Very little, about 1 N.',p1bc:'Also about 400 N.',
+p1be:'Forces come in pairs: equal in size, opposite in direction, acting on the two objects. You pull the Earth with exactly 400 N. The Earth does not visibly move because its mass is about 10²³ times yours.',
+mech1:`<p><b>Newton’s law of universal gravitation (1687).</b> Two objects of mass m₁ and m₂ a distance r apart (centre to centre) attract with F = G·m₁·m₂ / r², where G = 6.674 × 10⁻¹¹ N·m²/kg². Grade 6 does not use the formula; teachers can use it to check the numbers.</p>
+<ul><li><b>More mass, more force:</b> double one mass and the force doubles.</li>
+<li><b>Farther away, much less force:</b> double the distance and the force drops to 1/4; triple it and it drops to 1/9.</li>
+<li><b>Non-contact, always attractive, always a pair:</b> A pulls B exactly as hard as B pulls A (Newton’s third law).</li>
+<li><b>Why don’t we notice it?</b> G is tiny. Two 0.1 kg apples 10 cm apart attract with only 6.7 × 10⁻¹¹ N; friction holding them on the table is billions of times larger. Only something as massive as the Earth (5.97 × 10²⁴ kg) pulls hard enough to feel: that is weight.</li>
+<li><b>Cavendish (1798)</b> hung two small lead spheres (0.73 kg) on a light rod from a thin wire, then brought two large lead spheres (158 kg) close. A pull of about 1.5 × 10⁻⁷ N twisted the rod very slightly. It was the first laboratory measurement of gravity between objects, and it let us “weigh” the Earth.</li></ul>`,
+simple1:`<ul><li>Anything with mass pulls other things towards it, without touching. That pull is <b>gravity</b>.</li>
+<li>The more mass, the stronger the pull; the farther away, the weaker.</li>
+<li>You and your neighbour are pulling on each other right now, but weaker than the weight of a grain of salt. The Earth is enormous, so it pulls hard: that is why things fall.</li>
+<li>The pull goes both ways: the Earth pulls the apple and the apple pulls the Earth just as hard.</li></ul>`,
+wordT1:'Where the word “gravity” comes from',
+word1:`<p>The Vietnamese word <b>hấp dẫn</b> (吸引) means “suck in and pull along”: <i>hấp</i> = to draw in (as in breathing), <i>dẫn</i> = to lead, to pull. Chinese calls the force 萬有引力, “the pulling force that all things have”; Japanese 万有引力, Korean 만유인력.</p>
+<p>English <b>gravity</b> comes from Latin <i>gravitas</i> “heaviness”, from <i>gravis</i> “heavy” (also the root of <i>grave</i>, serious). Newton, writing in Latin, used <i>gravitas</i> for heaviness; the word later came to mean the force itself. German also says <i>Schwerkraft</i>, “heaviness force”.</p>`,
+
+req2:'<b>Learning outcome:</b> State that the weight of an object is the size of the Earth’s pull on it. Represent a force with an arrow showing its point of action, direction and size.',
+hint2:'Drag the children around the Earth. Press “Drop balls” so everyone drops a ball. Where do the balls fall? Which way do the plumb lines point?',
+assume2:'Sketch only: the places are placed on one cross-section of the Earth; people, balls and plumb lines are drawn far larger than real. Earth treated as a sphere; g from the international gravity formula (includes the effect of Earth’s rotation).',
+drop2:'Drop balls',rot2:'Rotate so the chosen child is on top',pair2:'Show the child’s pull on the Earth',
+sel2:'Choose a child',mKid:'Mass of the child',
+o2who:'Chosen child',o2lat:'Latitude',o2g:'g there',o2P:'Weight W',o2dir:'Direction of W',o2dirV:'towards Earth’s centre',
+o2note:'g hardly changes over Earth’s surface: from 9.78 N/kg at the equator to 9.83 N/kg at the poles, because the Earth spins and is slightly flattened.',
+wHN:'Hanoi',wNP:'North Pole',wEq:'Equator',wBA:'Argentina',wSP:'South Pole',wFree:'Your choice',
+latN:'{d}° N',latS:'{d}° S',lat0:'0° (equator)',
+st2Ready:'Every child’s red arrow points to the centre of the Earth.',st2Fall:'Every ball falls towards Earth’s centre, that is, down to each child’s feet.',
+lbCenter:'Earth’s centre',lbUp:'up',lbDown:'down',
+p2q:'A child in Argentina (on the other side of the Earth from Vietnam) drops a ball. The ball will…',p2a:'fly off into space.',p2b:'fall to the ground at the child’s feet.',p2c:'fall towards Vietnam.',
+p2e:'Everywhere on Earth, weight points to the centre of the Earth. For everyone, “down” means towards the centre, so a dropped ball lands at your feet. People in Argentina stand just as firmly as in Vietnam.',
+p2bq:'Is a plumb line in Hanoi parallel to a plumb line in Argentina?',p2ba:'Yes, all plumb lines are parallel.',p2bb:'No, both point to Earth’s centre, so they are not parallel.',p2bc:'The one in Argentina points at the sky.',
+p2be:'A plumb line shows the direction of gravity, towards the centre of the Earth, so plumb lines in different places are not parallel. Even Hanoi (21.0°) and Ho Chi Minh City (10.8°), about 1,140 km apart, have plumb lines about 10° apart.',
+mech2:`<p><b>Weight is the Earth’s pull.</b> Every small part of the Earth pulls on an object. Newton proved that a uniform sphere pulls on outside objects exactly as if all its mass were at its centre. So gravity acts vertically, towards the centre of the Earth.</p>
+<ul><li><b>Vertical</b> is the direction of a plumb line. Plumb lines in different places are not parallel; they meet (roughly) at Earth’s centre. Around 240 BC Eratosthenes used this idea (sun shadows in two cities differing by 7.2°) to estimate Earth’s circumference.</li>
+<li><b>Size:</b> W = m·g. On the surface g is almost constant, from 9.780 N/kg at the equator to 9.832 N/kg at the poles (international gravity formula g = 9.780327·(1 + 0.0053024·sin²φ − 0.0000058·sin²2φ), φ = latitude). Hanoi: g ≈ 9.787 N/kg. N/kg equals m/s².</li>
+<li><b>Two-way pull:</b> the child also pulls the Earth with a force equal to W, acting at Earth’s centre, towards the child.</li></ul>`,
+simple2:`<ul><li>“Down” means <b>towards the centre of the Earth</b>, everywhere.</li>
+<li>Imagine ants crawling on a ball: each ant feels the ball under its feet and the sky above its head, even the one on the “bottom”.</li>
+<li>To find “down” exactly, builders hang a weight on a string: a <b>plumb line</b>.</li></ul>`,
+wordT2:'Where “weight” and “plumb line” come from',
+word2:`<p>Vietnamese <b>trọng lượng</b> (重量): <i>trọng</i> = heavy, <i>lượng</i> = measure, so “measure of heaviness”. <b>Trọng lực</b> (重力) = “heavy force”, gravity on Earth.</p>
+<p>English <b>weight</b> comes from Old English <i>wiht, gewiht</i>, related to <i>weigh</i> (to lift and judge heaviness). French <i>poids</i> (from Latin <i>pensum</i>, a weighed amount of wool), German <i>Gewicht</i>.</p>
+<p><b>Plumb line</b>: <i>plumb</i> comes from Latin <i>plumbum</i>, lead, because plumb bobs were made of lead (the symbol Pb comes from the same word). Vietnamese <i>dây dọi</i> is a native word.</p>`,
+
+req3:'<b>Learning outcome:</b> State that mass measures the amount of matter in an object, and that weight is the size of the Earth’s pull on it. Measure force with a spring balance, in newtons (N).',
+hint3:'Pick an object and take it to different places. Three instruments measure at once: a beam balance, a spring balance and a bathroom scale. Which reading stays the same and which changes? Press “Record” after each measurement.',
+assume3:'Surface g for each body (Jupiter and Saturn have no solid surface: g at the cloud tops; the Sun is for comparison only, you cannot stand on it). The bathroom scale is marked using Earth’s g. Air buoyancy ignored.',
+log3:'Record',place3:'Take the object to',obj3:'Object',m3:'Mass of the object',
+o3m:'Mass (beam balance)',o3g:'g there',o3P:'Weight (spring balance)',o3bath:'Bathroom scale shows',o3cmp:'Compared with Earth',
+tbl3:'Results table',g3note:'Weight against mass: each place gives a straight line through the origin. The bigger g, the steeper the line.',
+th3place:'Place',th3m:'m (kg)',th3P:'W (N)',th3b:'Bathroom scale',noRow:'Nothing recorded yet.',
+gx3:'m (kg)',gy3:'W (N)',
+oApple:'Apple (0.1 kg)',oSugar:'Bag of sugar (1 kg)',oRice:'Sack of rice (5 kg)',oKid:'Student (40 kg)',oCustom:'Choose a mass',
+plEarth:'Earth',plMoon:'Moon',plMercury:'Mercury',plVenus:'Venus',plMars:'Mars',plJupiter:'Jupiter',plSaturn:'Saturn',plSun:'Sun',
+inBal:'Beam balance',inSpring:'Spring balance',inBath:'Bathroom scale',over:'overload!',range:'max {r} N',
+st3:'On {p}: the beam balance still shows {m}, but the spring balance shows {P}.',st3E:'On Earth the bathroom scale shows the correct mass because it was marked on Earth.',
+st3Off:'The bathroom scale shows {b}, not the true mass {m}: it measures the push on it and converts to kg using Earth’s g.',
+cmpTimes:'{r} times',cmpPart:'{r} times',
+p3q:'A 40 kg student flies to the Moon. On the Moon the student’s mass is…',p3a:'still 40 kg.',p3b:'about 6.6 kg.',p3c:'0 kg, because there is no air.',
+p3e:'Mass is the amount of matter in your body; it does not change from place to place: still 40 kg. What changes is weight: the Moon pulls less, so the weight is about 65 N instead of 392 N.',
+p3bq:'You take a bathroom scale to the Moon and a 40 kg student stands on it. It shows…',p3ba:'40 kg.',p3bb:'about 6.6 kg.',p3bc:'nothing, it breaks.',
+p3be:'A bathroom scale really measures the push (weight) with a compressed spring, marked in kg using Earth’s g. On the Moon the weight is about 6 times smaller, so it shows about 6.6 kg. The scale is wrong; your mass has not changed. To measure mass on the Moon, use a beam balance.',
+mech3:`<p><b>Mass</b> (m, in kg) is the amount of matter. It only changes if matter is added or removed, not when the object moves.</p>
+<p><b>Weight</b> (W, in N) is the size of the pull of the Earth (or whatever body the object is on): W = m·g, where g depends on that body’s mass and radius (g = G·M/R²). On Earth g ≈ 9.8 N/kg; Vietnamese textbooks round to W = 10·m.</p>
+<ul><li>A <b>beam balance</b> compares the object’s weight with standard masses <i>in the same place</i>; both feel the same g, so it balances when the masses are equal. It gives the true mass anywhere with gravity.</li>
+<li>A <b>spring balance</b> measures force, so it shows weight, which changes from place to place.</li>
+<li><b>Bathroom, kitchen and electronic scales</b> measure the push on them (with a compressed spring or a force sensor) and divide by 9.8 to show kg. Away from Earth they read wrong.</li>
+<li>g values (NASA): Mercury 3.7; Venus 8.87; Earth 9.8; Moon 1.62; Mars 3.71; Jupiter 24.79; Saturn 10.44; Sun 274 N/kg. Saturn has 95 times Earth’s mass but only slightly larger g because its radius is 9 times larger.</li></ul>`,
+simple3:`<ul><li><b>Mass</b>: how much “stuff” your body is made of. On the Moon you lose none of it.</li>
+<li><b>Weight</b>: how hard the Earth (or Moon) pulls you. The Moon pulls about 6 times less, so you can jump much higher.</li>
+<li>“I weigh 40 kilos” is really about mass. Weight is measured in newtons with a spring balance.</li></ul>`,
+wordT3:'Where the word “mass” comes from',
+word3:`<p>Vietnamese <b>khối lượng</b>: <i>khối</i> (塊, lump, block) + <i>lượng</i> (量, measure), “measure of the lump of matter”. Chinese and Japanese use 質量 (“amount of substance”), which matches the definition exactly.</p>
+<p>English <b>mass</b> comes from Latin <i>massa</i> “lump, kneaded dough”, borrowed from Greek <i>mâza</i> (μᾶζα) “barley cake”, related to <i>mássein</i> “to knead”. A lump of dough became a lump of matter; Newton wrote <i>quantitas materiae</i>, quantity of matter, later called mass.</p>`,
+
+req4:'<b>Learning outcome:</b> Carry out an experiment to show that the extension of a vertically hanging spring is proportional to the mass hung on it. Extension: a compressed spring also deforms in proportion to the mass placed on it.',
+hint4:'Drag 50 g masses from the tray onto the hook of the hanging spring (left) or the plate of the standing spring (right). Drag the top mass off to remove it. Each time a spring settles, the result goes into the table.',
+assume4:'Mass of hook, plate and spring ignored. Soft springs: hanging k = 20 N/m, standing k = 40 N/m; stiff springs are twice as stiff. Ruler marked in millimetres. The springs bounce a little and settle, like real ones.',
+sprA:'Hanging spring',sprB:'Standing spring',set4:'Set-up',stiff4:'Spring type',where4:'Do the experiment on',kSoft:'Soft',kHard:'Stiff',
+o4mA:'Mass hung',o4dA:'Extension Δl',o4mB:'Mass placed on top',o4dB:'Compression Δl',
+tbl4:'Results table',tbl4h:'The last column is the change in length per 100 g. If it stays the same, the change in length is proportional to the mass.',
+th4s:'Spring',th4m:'m (g)',th4d:'Δl (cm)',th4r:'Δl/100 g',
+gx4:'m (g)',gy4:'Δl (cm)',tray:'tray of 50 g masses',lbL0:'l₀ = {v} cm',lbL:'l = {v} cm',lbDl:'Δl = {v} cm',
+warnYield:'The hanging spring has been stretched past its elastic limit: with all masses removed it no longer returns to its original length. Press “New spring”.',warnSolid:'The standing spring is fully compressed (coils touching): adding more cannot shorten it further.',
+newSpring:'New spring',
+st4Idle:'No load: the springs are at their natural length l₀.',st4:'Hanging {mA} g: stretched {dA} cm. Standing {mB} g: compressed {dB} cm.',
+p4q:'One 50 g mass stretches the spring 2.5 cm. How much do three of them stretch it?',p4a:'2.5 cm',p4b:'5 cm',p4c:'7.5 cm',
+p4e:'Three times the mass means three times the weight pulling the spring, so three times the extension: 7.5 cm (within the elastic limit). That is what “proportional” means.',
+p4bq:'You redo the experiment on the Moon with the same spring and 4 masses. The extension will be…',p4ba:'the same as on Earth, because the mass is the same.',p4bb:'about 6 times smaller.',p4bc:'bigger, because everything is lighter on the Moon.',
+p4be:'The spring stretches because the weight pulls it, not because of mass itself. On the Moon the weight is about 6 times smaller, so the extension is about 6 times smaller. But in one place, extension is still proportional to mass: the graph is still a straight line, just less steep.',
+mech4:`<p><b>Hooke’s law (1660).</b> Within the elastic limit, a spring’s change in length Δl = |l − l₀| is proportional to the force: F = k·Δl, where k (N/m) is the stiffness. In 1676 Hooke published the law as a letter puzzle whose Latin answer is “ut tensio, sic vis”: as the stretch, so the force.</p>
+<ul><li><b>Hanging spring:</b> at rest, the spring’s upward pull balances the weight: k·Δl = m·g, so Δl = (g/k)·m. In one place g is fixed, so Δl is proportional to m. This is how a spring balance works.</li>
+<li><b>Standing spring:</b> the object presses down with its weight and the spring pushes up with k·Δl; again Δl is proportional to m. This is how kitchen and bathroom scales, motorbike shock absorbers and spring mattresses work.</li>
+<li><b>Elastic limit:</b> pull too hard and the spring is permanently deformed. A compressed spring stops when the coils touch.</li>
+<li>Soft spring (k = 20 N/m): each 50 g mass stretches it 0.05 × 9.8 / 20 = 0.0245 m = 2.45 cm (exactly 2.5 cm with W = 10·m).</li></ul>`,
+simple4:`<ul><li>A spring “counts”: one mass, one step longer; two masses, two steps; three masses, three steps.</li>
+<li>Squashing works the same way: each mass on top makes it one equal step shorter.</li>
+<li>Don’t overdo it: an over-stretched spring will not spring back.</li></ul>`,
+wordT4:'Where “spring” and “elastic” come from',
+word4:`<p>Vietnamese <b>lò xo</b> is borrowed from French <i>ressort</i> (“spring, bounce”), from <i>ressortir</i> “to come out again”.</p>
+<p>English <b>spring</b> originally means “to leap, to burst out” (the same word as the season when plants spring up, and a spring of water). Chinese 彈簧, Japanese ばね.</p>
+<p><b>Elastic</b> comes from Greek <i>elastós</i> “easily stretched”, from <i>elaúnein</i> “to drive, to beat out”. Vietnamese <i>đàn hồi</i> (彈回) means “bounce back”.</p>`,
+
+req5:'<b>Learning outcome:</b> State that weight is the Earth’s pull and that gravity is a non-contact force. The curriculum suggests digital resources on “weightlessness”. This part tackles the misconception that there is “no gravity in space”.',
+modeA5:'Newton’s cannon',modeB5:'Free-falling cabin',
+hintA5:'Newton imagined a cannon on top of a very high mountain. Choose a launch speed and press “Fire”. The faster the shot, the farther it falls. At some speed it keeps falling without ever hitting the ground.',
+hintB5:'A drop-tower cabin holds a child on a bathroom scale, a spring balance with a 1 kg mass and a bottle of water with a hole. Press “Drop”: the cabin falls freely, then brakes. Watch the scale and the water jet.',
+assumeA5:'Air resistance and Earth’s rotation ignored; Earth treated as a uniform sphere. Imaginary mountain 400 km high, the height of the ISS. Time is sped up.',
+assumeB5:'Air resistance ignored. The cabin falls freely for 2.5 s (about 31 m), then brakes at g until it stops. The child on the scale has mass 40 kg.',
+fire5:'Fire',clr5:'Clear paths',dropB5:'Drop',v5:'Launch speed',vISS:'ISS speed (7.7 km/s)',
+o5v0:'Launch speed',o5v:'Current speed',o5h:'Height',o5g:'g at that height',o5F:'Pull on a 60 kg astronaut',o5pct:'Compared with the ground',o5fate:'Result',
+fateFly:'flying',fateHit:'lands {d} km from the mountain',fateOrbit:'orbits the Earth (one lap ≈ {t} min)',
+st5A0:'Choose a speed and press “Fire”.',st5Fly:'The cannonball is flying. The red arrow is the Earth’s pull, always towards Earth’s centre, bending the path downwards.',st5Hit:'The cannonball is still pulled by the Earth, so it falls; the faster it goes, the farther it lands.',st5Orbit:'The cannonball is still falling towards the Earth, but it moves sideways so fast that the ground curves away beneath it, so it never lands. The ISS and its astronauts are “falling” in exactly this way.',
+lbISS:'ISS orbit',lbMount:'imaginary 400 km mountain',
+o5ph:'Stage',o5a:'Cabin acceleration',o5P:'Earth’s pull on the child (weight)',o5N:'Bathroom scale reading',o5Nkg:'Scale display',o5sp:'Spring balance (1 kg mass)',
+phReady:'at rest at the top',phFall:'free fall',phBrake:'braking',phStop:'stopped at the bottom',
+st5B0:'Cabin at rest: the scale shows the true weight and water runs out of the hole.',st5BFall:'Free fall: scale 0, spring balance 0, water stops. Yet the Earth still pulls the child with 392 N: the red arrow has not gone!',st5BBrake:'Braking: the scale shows twice the normal reading; the child feels “heavier”.',st5BStop:'Stopped: everything is back to normal.',
+gx5:'t (s)',gy5:'scale reading (N)',lbScale:'scale reading',lbWeight:'weight W (constant)',
+p5q:'The ISS flies about 400 km up. Does the Earth still pull the astronauts there?',p5a:'No, there is no gravity in space.',p5b:'Yes, but only about 1%.',p5c:'Yes, still almost 90% of the pull on the ground.',
+p5e:'At 400 km the Earth’s pull is still about 89% of that on the ground (g ≈ 8.7 N/kg). Astronauts float not because gravity has gone, but because they and the station are falling freely around the Earth together. Nothing supports them, so they feel no weight.',
+p5bq:'The cabin is in free fall. You stand on a bathroom scale inside. The scale shows…',p5ba:'the same as at rest.',p5bb:'0.',p5bc:'double.',
+p5be:'In free fall you and the scale fall together at the same rate, so you no longer press on it: it reads 0. That is “weightlessness”. Your real weight, the Earth’s pull, is still there: it is what makes you fall.',
+mech5:`<p><b>“Weightless” does not mean no gravity.</b> What we feel as heaviness is the floor or scale pushing back up on us. When we and everything around us fall freely together, nothing supports anything: the scale reads 0, water does not leave the hole, a released object hovers beside us. Meanwhile the Earth’s pull acts in full.</p>
+<ul><li><b>Newton’s cannon</b> (from “A Treatise of the System of the World”, 1728): the faster a horizontal shot, the farther it falls. At 400 km up, at about 7.7 km/s (nearly 28,000 km/h), the falling path curves exactly as fast as the Earth curves: the ball falls around the Earth for ever. That is a satellite. The ISS does exactly this, one lap every 92 minutes or so.</li>
+<li><b>Pull at height h:</b> g = G·M/(R + h)². At 400 km, g ≈ 8.7 N/kg, still 89%. To halve it you must go about 2,640 km up.</li>
+<li>Roller coasters, parabolic flights and drop towers also give a few seconds of weightlessness; astronauts train on such flights.</li></ul>`,
+simple5:`<ul><li>A scale shows a number because you press on it. If you and the scale fall together, you cannot press on it: it reads 0.</li>
+<li>Astronauts on the space station are falling with their ship all day long, but the ship moves sideways so fast that it never lands. So they float.</li>
+<li>The Earth is still pulling them; otherwise the ship would fly off in a straight line!</li></ul>`,
+wordT5:'Where “orbit” and “satellite” come from',
+word5:`<p>English <b>orbit</b> comes from Latin <i>orbita</i> “wheel track, rut”, from <i>orbis</i> “circle, wheel”. Remarkably, Vietnamese <b>quỹ đạo</b> (軌道) also means “wheel-track road”: <i>quỹ</i> = wheel rut, <i>đạo</i> = road.</p>
+<p><b>Satellite</b> comes from Latin <i>satelles</i> “attendant, bodyguard”, used by Kepler in 1611 for Jupiter’s moons. Vietnamese <b>vệ tinh</b> (衛星) means “guarding star”: both mean an escort.</p>
+<p>Scientists prefer <i>microgravity</i> to “weightlessness”; Russian <i>невесомость</i> means “without heaviness”.</p>`,
+}};
+
+/* ================= Tiện ích ================= */
+let lang='vi';
+const $=id=>document.getElementById(id);
+const T=k=>(I18N[lang][k]!==undefined?I18N[lang][k]:(I18N.vi[k]!==undefined?I18N.vi[k]:k));
+const fill=(s,o)=>String(s).replace(/\{(\w+)\}/g,(_,k)=>o[k]!==undefined?o[k]:'');
+const loc=()=>lang==='vi'?'vi-VN':'en-US';
+const nf=(x,d=1)=>new Intl.NumberFormat(loc(),{minimumFractionDigits:d,maximumFractionDigits:d}).format(x);
+const nfs=(x,s=3)=>new Intl.NumberFormat(loc(),{maximumSignificantDigits:s}).format(x);
+const SUP={'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};
+function sci(x,s=3){if(!isFinite(x))return '—';if(x===0)return '0';const a=Math.abs(x);
+  if(a>=0.01&&a<1e6)return nfs(x,s);
+  const [mm,ee]=x.toExponential(s-1).split('e');return nf(+mm,s-1)+' × 10'+String(+ee).split('').map(c=>SUP[c]).join('');}
+const FONT='"Be Vietnam Pro",system-ui,sans-serif', MONO='"IBM Plex Mono",ui-monospace,monospace';
+const G=6.674e-11, ME=5.972e24, RE=6.371e6, MM=7.342e22, RM=1.737e6, GM=G*ME;
+const DT=1/600;
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const R=(desk,phone)=>innerWidth<640?phone:desk;
+let gMode=9.8; const gE=()=>gMode;
+const store={get(k){try{return localStorage.getItem(k);}catch(e){return null;}},set(k,v){try{localStorage.setItem(k,v);}catch(e){}}};
+
+/* ================= Màu ================= */
+let C={};
+function readColors(){const cs=getComputedStyle(document.documentElement);
+  ['ink','muted','line','panel','lane','accent','ok','warn','force','vel','mass','spring','spring2','earth','land','moon','space','star','gold','metal','metal2','wood','laneA','laneB','c3','c4','c5']
+  .forEach(k=>C[k]=cs.getPropertyValue('--'+k).trim());}
+readColors();
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',readColors);
+new MutationObserver(readColors).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+
+/* ================= Vẽ chung ================= */
+function size(cv,ratio,maxH,minH=160){
+  const w=cv.clientWidth||300; let h=Math.round(w*ratio); if(maxH)h=Math.min(h,maxH); h=Math.max(h,minH);
+  if(cv._h!==h){cv.style.height=h+'px';cv._h=h;}
+  const d=window.devicePixelRatio||1,W=Math.round(w*d),H=Math.round(h*d);
+  if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H;}
+  const ctx=cv.getContext('2d');ctx.setTransform(d,0,0,d,0,0);ctx.clearRect(0,0,w,h);return {ctx,w,h};
+}
+function txt(ctx,s,x,y,col,sz=14,wt=600,al='left',bl='middle',font=FONT){ctx.fillStyle=col;ctx.font=`${wt} ${sz}px ${font}`;ctx.textAlign=al;ctx.textBaseline=bl;ctx.fillText(s,x,y);}
+function pill(ctx,s,x,y,col,sz=13,al='center',bg){ctx.font=`700 ${sz}px ${FONT}`;const tw=ctx.measureText(s).width;let x0=al==='center'?x-tw/2:al==='right'?x-tw:x;
+  ctx.fillStyle=bg||C.panel;ctx.globalAlpha=.88;ctx.beginPath();ctx.roundRect(x0-5,y-sz*.75,tw+10,sz*1.5,5);ctx.fill();ctx.globalAlpha=1;txt(ctx,s,x0,y,col,sz,700,'left');}
+function arrow(ctx,x1,y1,x2,y2,col,lw=4){
+  const dx=x2-x1,dy=y2-y1,L=Math.hypot(dx,dy);if(L<2)return;const ux=dx/L,uy=dy/L,hl=Math.min(14,L*.7),hw=hl*.55;
+  ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=lw;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2-ux*hl*.8,y2-uy*hl*.8);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(x2,y2);ctx.lineTo(x2-ux*hl-uy*hw,y2-uy*hl+ux*hw);ctx.lineTo(x2-ux*hl+uy*hw,y2-uy*hl-ux*hw);ctx.closePath();ctx.fill();
+}
+function niceStep(range,n=5){const r=range/n,p=10**Math.floor(Math.log10(r)),m=r/p;return (m<1.5?1:m<3?2:m<7?5:10)*p;}
+function graph(cv,series,o){
+  const {ctx,w,h}=size(cv,R(.62,.62),260,180);
+  const L=54,Rr=14,Tt=14,B=38,pw=w-L-Rr,ph=h-Tt-B;
+  const x0=o.x0||0,x1=o.x1,y0=o.y0||0,y1=o.y1;
+  const X=x=>L+(x-x0)/(x1-x0)*pw,Y=y=>Tt+ph-(y-y0)/(y1-y0)*ph;
+  ctx.strokeStyle=C.line;ctx.lineWidth=1;
+  const sx=niceStep(x1-x0,4),sy=niceStep(y1-y0,4),dx=sx<1?(sx<.1?2:1):0,dy=sy<1?(sy<.1?2:1):0;
+  for(let x=Math.ceil(x0/sx)*sx;x<=x1+1e-9;x+=sx){ctx.beginPath();ctx.moveTo(X(x),Tt);ctx.lineTo(X(x),Tt+ph);ctx.stroke();txt(ctx,nf(x,dx),X(x),Tt+ph+12,C.muted,12,500,'center');}
+  for(let y=Math.ceil(y0/sy)*sy;y<=y1+1e-9;y+=sy){ctx.beginPath();ctx.moveTo(L,Y(y));ctx.lineTo(L+pw,Y(y));ctx.stroke();txt(ctx,nf(y,dy),L-6,Y(y),C.muted,12,500,'right');}
+  txt(ctx,o.xl,L+pw,Tt+ph+29,C.muted,12,600,'right');
+  ctx.save();ctx.translate(12,Tt+ph/2);ctx.rotate(-Math.PI/2);txt(ctx,o.yl,0,0,C.muted,12,600,'center');ctx.restore();
+  ctx.save();ctx.beginPath();ctx.rect(L,Tt-2,pw,ph+4);ctx.clip();
+  series.forEach(s=>{if(!s.d.length)return;ctx.strokeStyle=s.c;ctx.fillStyle=s.c;ctx.lineWidth=s.lw||2.5;ctx.setLineDash(s.dash||[]);
+    if(!s.pts){ctx.beginPath();s.d.forEach((p,i)=>{const px=X(p[0]),py=Y(p[1]);i?ctx.lineTo(px,py):ctx.moveTo(px,py);});ctx.stroke();}
+    else s.d.forEach(p=>{ctx.beginPath();ctx.arc(X(p[0]),Y(p[1]),4.5,0,7);ctx.fill();});});
+  ctx.setLineDash([]);ctx.restore();
+  series.filter(s=>s.label).forEach((s,i)=>{const last=s.d[s.d.length-1];if(!last)return;const px=Math.min(X(last[0]),L+pw-4),py=clamp(Y(last[1]),Tt+8,Tt+ph-8);pill(ctx,s.label,px,py-10,s.c,11,'right');});
+}
+function fillSelect(sel,items,val){sel.innerHTML=items.map((it,i)=>`<option value="${i}">${T(it.k)}</option>`).join('');sel.value=val;}
+function speedSeg(id,S,opts){const el=$(id);el.innerHTML=opts.map(s=>`<button class="btn" data-s="${s}">×${String(s).replace('.',lang==='vi'?',':'.')}</button>`).join('');
+  el.querySelectorAll('button').forEach(b=>{b.setAttribute('aria-pressed',+b.dataset.s===S.speed);b.onclick=()=>{S.speed=+b.dataset.s;speedSeg(id,S,opts);};});}
+function drawPerson(ctx,x,y,s,col,rot=0){ // (x,y) = bàn chân, s = chiều cao (px); rot: góc xoay (rad), 0 = đứng thẳng lên
+  ctx.save();ctx.translate(x,y);ctx.rotate(rot);ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=Math.max(2,s*.09);ctx.lineCap='round';ctx.lineJoin='round';
+  ctx.beginPath();ctx.arc(0,-s*.86,s*.13,0,7);ctx.fill();
+  ctx.beginPath();ctx.moveTo(0,-s*.72);ctx.lineTo(0,-s*.36);ctx.moveTo(-s*.2,0);ctx.lineTo(0,-s*.36);ctx.lineTo(s*.2,0);
+  ctx.moveTo(-s*.24,-s*.5);ctx.lineTo(0,-s*.64);ctx.lineTo(s*.24,-s*.5);ctx.stroke();ctx.restore();}
+
+/* ================= Video thực tế ================= */
+const VIDEOS={
+1:{u:'https://www.youtube.com/watch?v=70-_GBymrck',t:'Watch gravity pull two metal balls together',c:'Steve Mould',
+   look:{vi:'Quả cầu nhỏ treo trên dây từ từ bị quả cầu lớn hút lại gần. Để ý: vì sao phải treo trên dây chứ không đặt trên bàn? Vì sao phải chờ lâu mới thấy?',en:'A small ball on a thread is slowly pulled towards a big one. Why hang it on a thread rather than put it on a table? Why does it take so long?'},
+   a:{u:'https://www.youtube.com/watch?v=4DlyZL436hE',t:'Demonstration of the Cavendish Experiment',c:'Rhett Allain',l:'vAlt'}},
+2:{u:'https://www.youtube.com/watch?v=Ri_trwYcJO4',t:'Why people don’t fall off in the south pole',c:'Tupo3D',
+   look:{vi:'Hình động 3D: người ở Bắc Cực, xích đạo và Nam Cực đều đứng vững. Lực hút của Trái Đất lên mỗi người hướng về đâu?',en:'3D animation: people at the North Pole, the equator and the South Pole all stand firmly. Where does the Earth’s pull on each person point?'},
+   a:{u:'https://www.youtube.com/watch?v=Pc4tz5UWEXE',t:'Why Don’t Australians Fall Off the Earth?',c:'Zapnik’s Lab',l:'vAlt'}},
+3:{u:'https://www.youtube.com/watch?v=16D0hmLt-S0',t:'Lunar Olympics: Astronauts jumping in 1/6 earth gravity',c:'Apollo 16, NASA',
+   look:{vi:'Phim thật quay trên Mặt Trăng năm 1972. Bộ đồ và ba lô nặng gần bằng chính phi hành gia, vậy mà họ nhảy lên dễ dàng. Khối lượng của họ có đổi không? Cái gì đã thay đổi?',en:'Real footage from the Moon, 1972. Suit and backpack weigh almost as much as the astronaut, yet they jump easily. Has their mass changed? What has?'},
+   a:{u:'https://www.youtube.com/watch?v=7TtU9HlFMqM',t:'Mass vs Weight (NASA, quay trên trạm ISS)',c:'NASA',l:'vAlt'}},
+4:{u:'https://www.youtube.com/watch?v=CgXs83s3cfE',t:'KHTN 6: Thực hành đo lực bằng lực kế (Bài 39: Biến dạng của lò xo)',c:'Nguyễn Hoàng Sơn · 6:09',
+   look:{vi:'Thí nghiệm lò xo giãn: treo thêm quả nặng và đọc số chỉ lực kế. Video thứ hai (Jared Owen) cho thấy lò xo bị nén bên trong cân sức khoẻ, cân đồng hồ.',en:'Stretched spring: hang more masses and read the spring balance. The second video (Jared Owen) shows the compressed spring inside bathroom and dial scales.'},
+   a:{u:'https://www.youtube.com/watch?v=LdZLLR8AfkM',t:'How does a Mechanical Scale work?',c:'Jared Owen',l:'vComp'}},
+5:{u:'https://www.youtube.com/watch?v=rz0LRqtf5ks',t:'Dropping a Bucket of Water',c:'Flipping Physics · 3:47',
+   look:{vi:'Xô nước thủng hai lỗ được thả rơi: nước ngừng chảy khi xô rơi tự do, giống chai nước trong “Cabin rơi tự do”. Video thứ hai giải thích vì sao phi hành gia lơ lửng (giống “Súng đại bác của Newton”).',en:'A bucket with two holes is dropped: the water stops flowing while it falls freely, like the bottle in the “Free-falling cabin”. The second video explains why astronauts float (like “Newton’s cannon”).'},
+   a:{u:'https://www.youtube.com/watch?v=aJepFU6URhw',t:'Why Do Astronauts Float in Space? (It’s NOT Zero Gravity!)',c:'Rhythm and Papa · 3:28',l:'vOrbit'}}};
+I18N.vi.vComp='Video lò xo nén';I18N.en.vComp='Compressed spring video';I18N.vi.vOrbit='Video phi hành gia lơ lửng';I18N.en.vOrbit='Floating astronauts video';
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function renderVideo(n){const V=VIDEOS[n],el=$('v'+n);
+  el.innerHTML=`<a class="play" href="${V.u}" target="_blank" rel="noopener" aria-label="${esc(T('vOpen'))}" style="padding:0;background:var(--force)"></a>
+  <div class="vt"><span class="lbl">${T('vLbl')} · ${esc(V.c)}</span><span class="ttl">${esc(V.t)}</span><span class="look">${esc(V.look[lang])}</span><span class="src">${T('vNote')}</span></div>
+  <div class="links"><a href="${V.u}" target="_blank" rel="noopener">${T('vOpen')} ↗</a><a class="alt" href="${V.a.u}" target="_blank" rel="noopener" title="${esc(V.a.t)} · ${esc(V.a.c)}">${T(V.a.l)} ↗</a></div>`;}
+
+/* ================= Dự đoán ================= */
+const PRED={
+  p1:{q:'p1q',o:['p1a','p1b','p1c'],c:1,e:'p1e'},p1b:{q:'p1bq',o:['p1ba','p1bb','p1bc'],c:2,e:'p1be'},
+  p2:{q:'p2q',o:['p2a','p2b','p2c'],c:1,e:'p2e'},p2b:{q:'p2bq',o:['p2ba','p2bb','p2bc'],c:1,e:'p2be'},
+  p3:{q:'p3q',o:['p3a','p3b','p3c'],c:0,e:'p3e'},p3b:{q:'p3bq',o:['p3ba','p3bb','p3bc'],c:1,e:'p3be'},
+  p4:{q:'p4q',o:['p4a','p4b','p4c'],c:2,e:'p4e'},p4b:{q:'p4bq',o:['p4ba','p4bb','p4bc'],c:1,e:'p4be'},
+  p5:{q:'p5q',o:['p5a','p5b','p5c'],c:2,e:'p5e'},p5b:{q:'p5bq',o:['p5ba','p5bb','p5bc'],c:1,e:'p5be'}};
+function renderPred(id){const P=PRED[id],el=$(id);
+  el.innerHTML=`<h2>${T('predTitle')}</h2><p>${T(P.q)}</p><div class="opts">${P.o.map((k,i)=>`<button class="btn ${P.pick===i?'picked':''} ${P.show&&i===P.c?'right':''}" data-i="${i}">${T(k)}</button>`).join('')}</div>`+
+  (P.pick==null?'':`<p class="muted">${T('predThen')}</p><div><button class="btn rv">${T(P.show?'hideAns':'showAns')}</button></div>`)+(P.show?`<div class="ans">${T(P.e)}</div>`:'');}
+Object.keys(PRED).forEach(id=>$(id).addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const P=PRED[id];
+  if(b.classList.contains('rv'))P.show=!P.show;else P.pick=+b.dataset.i;renderPred(id);}));
+
+/* ================= Tab chung ================= */
+let tab=1;
+function setTab(n){tab=n;document.querySelectorAll('nav.tabs button').forEach(b=>{const on=+b.dataset.tab===n;b.classList.toggle('on',on);b.setAttribute('aria-selected',on);});
+  [1,2,3,4,5].forEach(i=>$('t'+i).hidden=i!==n);store.set('hd-tab',n);}
+document.querySelectorAll('nav.tabs button').forEach(b=>b.onclick=()=>setTab(+b.dataset.tab));
+function gSeg(){const el=$('gSeg');el.innerHTML=[9.8,10].map(v=>`<button class="btn" data-g="${v}" aria-pressed="${gMode===v}">${T(v===10?'g10':'g98')}</button>`).join('');
+  el.querySelectorAll('button').forEach(b=>b.onclick=()=>{gMode=+b.dataset.g;gSeg();onG();});}
+function onG(){upd2();upd3();S4.eq=true;upd4();}
+$('gvBtn').onclick=()=>{const on=!document.body.classList.contains('hideNums');document.body.classList.toggle('hideNums',on);$('gvBtn').setAttribute('aria-pressed',on);};
+function canvasPt(cv,e){const r=cv.getBoundingClientRect();return {x:e.clientX-r.left,y:e.clientY-r.top};}
+
+/* ================= TAB 1: mọi vật đều hút nhau ================= */
+const PAIRS=[
+  {k:'pApple',A:{k:'bAppleL',m:.1,r:.035,ic:'apple'},B:{k:'bAppleR',m:.1,r:.035,ic:'apple'},d:.10,dmin:.07,dmax:2,st:'st1Small'},
+  {k:'pKids',A:{k:'bKidA',m:40,r:.22,ic:'kid'},B:{k:'bKidB',m:45,r:.22,ic:'kid'},d:1,dmin:.5,dmax:20,st:'st1Small'},
+  {k:'pCav',A:{k:'bLeadBig',m:158,r:.149,ic:'lead'},B:{k:'bLeadSmall',m:.73,r:.025,ic:'lead'},d:.225,dmin:.18,dmax:3,st:'st1Cav'},
+  {k:'pKidEarth',A:{k:'bEarth',m:ME,r:RE,ic:'earth'},B:{k:'bKid',m:40,r:.22,ic:'kid'},d:RE,dmin:RE,dmax:4*RE,st:'st1Earth',earthKid:true},
+  {k:'pEarthMoon',A:{k:'bEarth',m:ME,r:RE,ic:'earth'},B:{k:'bMoon',m:MM,r:RM,ic:'moon'},d:3.844e8,dmin:2e7,dmax:4e9,st:'st1Moon'}];
+const WREF=[['xBact',1e-15],['xPollen',8e-12],['xSand',1.4e-9],['xSalt',6e-8],['xMosq',2.5e-6],['xRice',2.5e-5],['xChalk',1e-2],['xApple',.1],['xKid',40],
+  ['xElephant',5000],['xTanker',5e8],['xHumans',4e11],['xAir',5.1e18],['xOcean',1.4e21]];
+const S1={pi:0,sA:0,sB:0,s:0,drag:false};
+const P1=()=>PAIRS[S1.pi];
+const mA1=()=>P1().A.m*10**S1.sA, mB1=()=>P1().B.m*10**S1.sB;
+const d1=()=>{const P=P1();return P.dmin*(P.dmax/P.dmin)**S1.s;};
+const F1=()=>G*mA1()*mB1()/d1()**2;
+let F1ref=1;
+function setPair(i){S1.pi=i;S1.sA=0;S1.sB=0;const P=P1();S1.s=Math.log(P.d/P.dmin)/Math.log(P.dmax/P.dmin);F1ref=G*P.A.m*P.B.m/P.d**2;
+  $('mA').value=0;$('mB').value=0;$('d1').value=S1.s;upd1();}
+function fmtDist(d){if(d<1)return nf(d*100,1)+' cm';if(d<1000)return nf(d,2)+' m';return nfs(d/1000,4)+' km';}
+function fmtMass(m){if(m<1)return nfs(m*1000,3)+' g';if(m<1e5)return nfs(m,3)+' kg';return sci(m,3)+' kg';}
+function compare(F){let best=null,bd=1e9;WREF.forEach(([k,m])=>{const W=m*9.8,dd=Math.abs(Math.log10(F/W));if(dd<bd){bd=dd;best=[k,W];}});
+  const r=F/best[1],x=T(best[0]);
+  if(r>.8&&r<1.25)return fill(T('cmpEq'),{x});
+  const rr=v=>v>=2?nfs(Math.round(v),3):nfs(v,2);return r>=1?fill(T('cmpBig'),{r:rr(r),x}):fill(T('cmpSmall'),{r:rr(1/r),x});}
+const ICON={apple:20,kid:16,lead:9,earth:24,moon:10};
+function iconR(b){return b.ic==='lead'?(b.m>10?26:9):ICON[b.ic]*R(1,.85);}
+function geom1(w,h){const P=P1(),mx=R(24,14),cy=h*.5;
+  if(P.earthKid){const xA=mx,sc=(w-xA-mx-50)/P.dmax;return {P,xA,sc,cy,xB:xA+d1()*sc,lin:true};}
+  const rA=iconR(P.A),rB=iconR(P.B),xA=mx+rA+6,xMax=w-mx-rB-6,gap=rA+rB+2,span=xMax-xA-gap;
+  const frac=Math.sqrt(Math.log(d1()/P.dmin)/Math.log(P.dmax/P.dmin));return {P,xA,cy,rA,rB,gap,span,xB:xA+gap+frac*span};}
+function drawBody(ctx,b,x,y,rad,sc){
+  if(b.ic==='apple'){ctx.fillStyle='#d23b3b';ctx.beginPath();ctx.arc(x,y,rad,0,7);ctx.fill();ctx.fillStyle='#3f8f3f';ctx.beginPath();ctx.ellipse(x+rad*.3,y-rad*1.05,rad*.35,rad*.16,-.5,0,7);ctx.fill();
+    ctx.strokeStyle='#6b4a2a';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x,y-rad*.8);ctx.lineTo(x+rad*.05,y-rad*1.2);ctx.stroke();}
+  else if(b.ic==='lead'){const g=ctx.createRadialGradient(x-rad*.35,y-rad*.35,rad*.1,x,y,rad);g.addColorStop(0,'#c9cfd6');g.addColorStop(1,'#5b636c');ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,rad,0,7);ctx.fill();}
+  else if(b.ic==='earth'){ctx.fillStyle=C.earth;ctx.beginPath();ctx.arc(x,y,rad,0,7);ctx.fill();ctx.save();ctx.beginPath();ctx.arc(x,y,rad,0,7);ctx.clip();ctx.fillStyle=C.land;
+    [[-.3,-.35,.35,.22],[.25,.1,.3,.4],[-.2,.45,.25,.15],[.45,-.45,.2,.12]].forEach(([a,b2,c,d])=>{ctx.beginPath();ctx.ellipse(x+a*rad,y+b2*rad,c*rad,d*rad,.4,0,7);ctx.fill();});ctx.restore();}
+  else if(b.ic==='moon'){ctx.fillStyle=C.moon;ctx.beginPath();ctx.arc(x,y,rad,0,7);ctx.fill();ctx.fillStyle='rgba(0,0,0,.18)';[[-.3,-.2,.22],[.3,.25,.16],[.1,-.4,.12]].forEach(([a,b2,c])=>{ctx.beginPath();ctx.arc(x+a*rad,y+b2*rad,c*rad,0,7);ctx.fill();});}
+}
+function renderT1(){
+  const cv=$('cv1'),{ctx,w,h}=size(cv,R(.46,.8),360,280);const gm=geom1(w,h),{P,xA,cy,xB}=gm;
+  const space=P.A.ic==='earth',fg=space?C.star:C.ink,mu=space?C.star:C.muted,bg=space?C.space:C.panel;
+  ctx.fillStyle=space?C.space:C.lane;ctx.fillRect(0,0,w,h);
+  if(space){ctx.fillStyle=C.star;for(let i=0;i<70;i++){const sx=(i*137.5)%w,sy=(i*71.3+i*i*3.1)%h;ctx.globalAlpha=.25+(i%5)*.12;ctx.fillRect(sx,sy,1.5,1.5);}ctx.globalAlpha=1;}
+  let rmax,labY;
+  if(gm.lin){ // bạn học sinh và Trái Đất: vẽ đúng tỉ lệ khoảng cách
+    const Rp=RE*gm.sc;drawBody(ctx,P.A,xA,cy,Rp);txt(ctx,T('bEarth'),xA+10,cy-Rp*.15,C.star,14,700);
+    const ks=R(40,32);drawPerson(ctx,xB,cy,ks,C.gold,Math.PI/2);rmax=Math.max(ks,26);labY=cy+ks*.7;
+    txt(ctx,T('bKid'),xB+ks*.5,labY,fg,13,700,'center','top');
+    const hgt=d1()-RE;if(hgt>1000)txt(ctx,fill(T('lbH'),{h:nfs(hgt/1000,3)+' km'}),xB+ks*.5,cy-ks*.75,fg,13,600,'center');
+  }else{
+    rmax=Math.max(gm.rA,gm.rB,P.A.ic==='kid'?35:0);
+    if(P.A.ic==='apple'){ctx.fillStyle=C.wood;ctx.globalAlpha=.35;ctx.fillRect(0,cy+20,w,8);ctx.globalAlpha=1;}
+    if(P.A.ic==='kid'){ctx.strokeStyle=C.line;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,cy+36);ctx.lineTo(w,cy+36);ctx.stroke();}
+    if(P.A.ic==='lead'){ctx.strokeStyle=C.muted;ctx.lineWidth=1.2;[[xA,gm.rA],[xB,gm.rB]].forEach(([x,r])=>{ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,cy-r);ctx.stroke();});}
+    [[P.A,xA,gm.rA,C.vel],[P.B,xB,gm.rB,C.laneB]].forEach(([b,x,r,col])=>{if(b.ic==='kid')drawPerson(ctx,x,cy+35,70*R(1,.85),col);else drawBody(ctx,b,x,cy,r);});
+    labY=cy+rmax+10;txt(ctx,T(P.A.k),xA,labY,fg,13,700,'center','top');txt(ctx,T(P.B.k),xB,labY,fg,13,700,'center','top');
+  }
+  // khoảng cách
+  const dy=labY+34;ctx.strokeStyle=mu;ctx.lineWidth=1.2;ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(xA,dy);ctx.lineTo(xB,dy);ctx.stroke();ctx.setLineDash([]);
+  [xA,xB].forEach(x=>{ctx.beginPath();ctx.moveTo(x,dy-6);ctx.lineTo(x,dy+6);ctx.stroke();});
+  pill(ctx,fmtDist(d1()),clamp((xA+xB)/2,60,w-60),dy,fg,13,'center',bg);
+  // hai mũi tên lực: điểm đặt ở tâm mỗi vật
+  const F=F1(),Lref=R(70,50),maxL=w*.45;let L=Lref*F/F1ref,cut=false;if(L>maxL){L=maxL;cut=true;}L=Math.max(L,2.5);
+  const yb=gm.lin?cy:cy-6,ya=gm.lin?cy:cy-6;
+  arrow(ctx,xA,cy-7,xA+L,cy-7,C.force,4);arrow(ctx,xB+(gm.lin?R(20,16):0),cy+7,xB+(gm.lin?R(20,16):0)-L,cy+7,C.force,4);
+  if(cut){txt(ctx,'⋯',xA+L+4,cy-7,C.force,18,800);txt(ctx,'⋯',xB-L-4,cy+7,C.force,18,800,'right');}
+  pill(ctx,'F = '+sci(F,3)+' N',clamp((xA+xB)/2,90,w-90),cy-rmax-30,C.force,14,'center',bg);
+  txt(ctx,T('notScale'),w-10,h-12,mu,12,500,'right');
+  S1.geo={xB:gm.lin?xB+16:xB,cy,hit:gm.lin?26:Math.max(gm.rB,22)};
+}
+function upd1(){const P=P1();
+  $('mALbl').textContent=fill(T('mOf'),{n:T(P.A.k)});$('mBLbl').textContent=fill(T('mOf'),{n:T(P.B.k)});
+  $('mAV').textContent=fmtMass(mA1());$('mBV').textContent=fmtMass(mB1());$('dV').textContent=fmtDist(d1());
+  const F=F1();$('o1F').textContent=sci(F,3)+' N';$('o1FA').textContent=sci(F,3)+' N';$('o1FB').textContent=sci(F,3)+' N';
+  $('o1rel').textContent='× '+nfs(F/F1ref,3);$('o1cmp').textContent=compare(F);$('st1').textContent=T(P.st);}
+fillSelect($('pair1'),PAIRS,0);
+$('pair1').onchange=e=>setPair(+e.target.value);
+$('mA').oninput=e=>{S1.sA=+e.target.value;upd1();};$('mB').oninput=e=>{S1.sB=+e.target.value;upd1();};
+$('d1').oninput=e=>{S1.s=+e.target.value;upd1();};$('rst1').onclick=()=>setPair(S1.pi);
+(()=>{const cv=$('cv1');
+  cv.addEventListener('pointerdown',e=>{const p=canvasPt(cv,e),g=S1.geo;if(!g)return;if(Math.abs(p.x-g.xB)<g.hit+18&&Math.abs(p.y-g.cy)<g.hit+40){S1.drag=true;cv.setPointerCapture(e.pointerId);}});
+  cv.addEventListener('pointermove',e=>{if(!S1.drag)return;const p=canvasPt(cv,e),gm=geom1(cv.clientWidth,cv._h),P=P1();
+    if(gm.lin){const d=clamp((p.x-gm.xA)/gm.sc,P.dmin,P.dmax);S1.s=Math.log(d/P.dmin)/Math.log(P.dmax/P.dmin);}else S1.s=clamp((p.x-gm.xA-gm.gap)/gm.span,0,1)**2;$('d1').value=S1.s;upd1();});
+  ['pointerup','pointercancel'].forEach(t=>cv.addEventListener(t,()=>S1.drag=false));})();
+
+/* ================= TAB 2: hướng về tâm Trái Đất ================= */
+const KIDS2=[{k:'wHN',th:69,col:'laneB'},{k:'wNP',th:0,col:'vel'},{k:'wEq',th:270,col:'c4'},{k:'wBA',th:235.4,col:'c5'},{k:'wSP',th:180,col:'c3'}];
+KIDS2.forEach(k=>k.th0=k.th);
+const S2={sel:0,m:40,rot:false,pair:false,view:0,balls:[],drag:null};
+const latOf=th=>{th=((th%360)+360)%360;return th<=180?90-th:th-270;};
+function gLat(lat){const p=lat*Math.PI/180,s=Math.sin(p),s2=Math.sin(2*p);return 9.780327*(1+.0053024*s*s-.0000058*s2*s2);}
+const g2=()=>gMode===10?10:gLat(latOf(KIDS2[S2.sel].th));
+function latTxt(lat){const a=Math.abs(lat);if(a<.05)return T('lat0');return fill(T(lat>0?'latN':'latS'),{d:nf(a,1)});}
+function kidName(k){return Math.abs(k.th-k.th0)<.5?T(k.k):latTxt(latOf(k.th));}
+function drop2(){S2.balls=KIDS2.map(k=>({th:k.th,r:null,v:0,done:false}));}
+function geom2(w,h){const cx=w/2,cy=h/2,Rp=Math.min(w,h)*.3;return {cx,cy,Rp,ks:Math.max(28,Rp*.24)};}
+function step2(dt){const tgt=S2.rot?-KIDS2[S2.sel].th:0;let d=((tgt-S2.view+540)%360)-180;S2.view+=d*Math.min(1,dt*4);
+  S2.balls.forEach(b=>{if(b.done)return;b.v+=420*dt;b.r-=b.v*dt;if(b.r<=0){b.r=0;b.done=true;}});}
+function renderT2(){
+  const cv=$('cv2'),{ctx,w,h}=size(cv,R(.72,1),560,320);const {cx,cy,Rp,ks}=geom2(w,h);
+  ctx.fillStyle=C.space;ctx.fillRect(0,0,w,h);ctx.fillStyle=C.star;for(let i=0;i<90;i++){const sx=(i*137.5)%w,sy=(i*71.3+i*i*3.7)%h;ctx.globalAlpha=.2+(i%5)*.12;ctx.fillRect(sx,sy,1.5,1.5);}ctx.globalAlpha=1;
+  ctx.save();ctx.translate(cx,cy);ctx.rotate(S2.view*Math.PI/180);
+  drawBody(ctx,{ic:'earth'},0,0,Rp);
+  ctx.fillStyle=C.star;ctx.beginPath();ctx.arc(0,0,4,0,7);ctx.fill();
+  const P0=S2.m*g2();
+  KIDS2.forEach((k,i)=>{const a=k.th*Math.PI/180,ux=Math.sin(a),uy=-Math.cos(a),col=C[k.col],sel=i===S2.sel;
+    ctx.strokeStyle=C.star;ctx.globalAlpha=sel?.55:.22;ctx.lineWidth=1.2;ctx.setLineDash([4,5]);ctx.beginPath();ctx.moveTo(ux*Rp,uy*Rp);ctx.lineTo(0,0);ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=1;
+    const fx=ux*Rp,fy=uy*Rp;drawPerson(ctx,fx,fy,ks,col,a);
+    // dây dọi cầm ở tay
+    const tx=Math.cos(a),ty=Math.sin(a),hx=fx+ux*ks*.52+tx*ks*.3,hy=fy+uy*ks*.52+ty*ks*.3,len=ks*.36;
+    ctx.strokeStyle=C.spring;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(hx,hy);ctx.lineTo(hx-ux*len,hy-uy*len);ctx.stroke();
+    ctx.fillStyle=C.gold;ctx.beginPath();ctx.moveTo(hx-ux*len+tx*3,hy-uy*len+ty*3);ctx.lineTo(hx-ux*(len+7),hy-uy*(len+7));ctx.lineTo(hx-ux*len-tx*3,hy-uy*len-ty*3);ctx.closePath();ctx.fill();
+    // mũi tên trọng lượng
+    const L=ks*1.15*(S2.m*g2()/(40*9.8)),bx=fx+ux*ks*.45,by=fy+uy*ks*.45;arrow(ctx,bx,by,bx-ux*L,by-uy*L,C.force,sel?4:3);
+    if(sel){ctx.strokeStyle=C.accent;ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(fx+ux*ks*.5,fy+uy*ks*.5,ks*.78,0,7);ctx.stroke();}
+  });
+  // bóng rơi
+  S2.balls.forEach((b,i)=>{const a=b.th*Math.PI/180,ux=Math.sin(a),uy=-Math.cos(a),tx=Math.cos(a),ty=Math.sin(a);
+    if(b.r===null)b.r=ks*.7;const x=ux*(Rp+5+b.r)-tx*ks*.42,y=uy*(Rp+5+b.r)-ty*ks*.42;ctx.fillStyle=C.gold;ctx.beginPath();ctx.arc(x,y,5,0,7);ctx.fill();});
+  if(S2.pair){const k=KIDS2[S2.sel],a=k.th*Math.PI/180,L=ks*1.15*(S2.m*g2()/(40*9.8));arrow(ctx,0,0,Math.sin(a)*L,-Math.cos(a)*L,C.force,3);}
+  ctx.restore();
+  txt(ctx,T('lbCenter'),cx+8,cy+14,C.star,12,600,'left');
+  if(S2.pair)pill(ctx,'= P',cx,cy-22,C.force,12,'center',C.space);
+  // nhãn tên
+  KIDS2.forEach((k,i)=>{const a=(k.th+S2.view)*Math.PI/180,ux=Math.sin(a),uy=-Math.cos(a),r=Rp+ks*1.45;
+    const x=cx+ux*r,y=cy+uy*r;pill(ctx,kidName(k),clamp(x,40,w-40),clamp(y,14,h-14),C[k.col],12,'center',C.space);});
+  S2.geo={cx,cy,Rp,ks};
+}
+function upd2(){const k=KIDS2[S2.sel],g=g2();
+  $('where2').innerHTML=KIDS2.map((kk,i)=>`<button class="btn" data-i="${i}" aria-pressed="${i===S2.sel}"><span style="color:${C[kk.col]}">●</span> ${esc(kidName(kk))}</button>`).join('');
+  $('where2').querySelectorAll('button').forEach(b=>b.onclick=()=>{S2.sel=+b.dataset.i;upd2();});
+  $('m2V').textContent=nf(S2.m,0)+' kg';$('o2who').textContent=kidName(k);$('o2lat').textContent=latTxt(latOf(k.th));
+  $('o2g').textContent=(gMode===10?'≈ 10':nf(g,3))+' N/kg';$('o2P').textContent=nf(S2.m*g,gMode===10?0:1)+' N';$('o2dir').textContent=T('o2dirV');
+  $('st2').textContent=T(S2.balls.length&&S2.balls.every(b=>b.done)?'st2Fall':'st2Ready');}
+$('m2').oninput=e=>{S2.m=+e.target.value;upd2();};
+$('drop2').onclick=()=>{drop2();upd2();};
+$('rot2').onchange=e=>{S2.rot=e.target.checked;};$('pair2').onchange=e=>{S2.pair=e.target.checked;};
+(()=>{const cv=$('cv2');
+  const ang=p=>{const g=S2.geo;return (Math.atan2(p.x-g.cx,-(p.y-g.cy))*180/Math.PI-S2.view+720)%360;};
+  cv.addEventListener('pointerdown',e=>{const p=canvasPt(cv,e),g=S2.geo;if(!g)return;let best=-1,bd=1e9;
+    KIDS2.forEach((k,i)=>{const a=(k.th+S2.view)*Math.PI/180,x=g.cx+Math.sin(a)*(g.Rp+g.ks*.5),y=g.cy-Math.cos(a)*(g.Rp+g.ks*.5),d=Math.hypot(p.x-x,p.y-y);if(d<bd){bd=d;best=i;}});
+    if(bd<g.ks*1.1){S2.drag=best;S2.sel=best;S2.balls=[];cv.setPointerCapture(e.pointerId);upd2();}});
+  cv.addEventListener('pointermove',e=>{if(S2.drag===null)return;KIDS2[S2.drag].th=ang(canvasPt(cv,e));if(S2.rot)S2.view=-KIDS2[S2.drag].th;upd2();});
+  ['pointerup','pointercancel'].forEach(t=>cv.addEventListener(t,()=>{S2.drag=null;}));})();
+
+/* ================= TAB 3: khối lượng và trọng lượng ở các nơi ================= */
+const PL3=[{k:'plEarth',g:9.8,sky:'#bfe0f5',gr:'#7fb069'},{k:'plMoon',g:1.62,sky:'#05070c',gr:'#9b9b9b'},{k:'plMercury',g:3.7,sky:'#0a0a10',gr:'#8c7f73'},
+  {k:'plVenus',g:8.87,sky:'#e7c27c',gr:'#b9853f'},{k:'plMars',g:3.71,sky:'#e6b892',gr:'#b5532c'},{k:'plJupiter',g:24.79,sky:'#d9b98c',gr:null},
+  {k:'plSaturn',g:10.44,sky:'#eadba8',gr:null},{k:'plSun',g:274,sky:'#ffb23f',gr:null}];
+const OBJ3=[{k:'oApple',m:.1,ic:'apple'},{k:'oSugar',m:1,ic:'bag'},{k:'oRice',m:5,ic:'sack'},{k:'oKid',m:40,ic:'kid'},{k:'oCustom',m:null,ic:'box'}];
+const S3={pl:0,oi:2,m:5,t:0,rows:[]};
+const g3=()=>S3.pl===0?gE():PL3[S3.pl].g;
+const P3=()=>S3.m*g3();
+const bath3=()=>P3()/gE();
+const RANGES=[1,2,5,10,20,50,100,200,500,1000,2000,5000,10000,20000,50000];
+function weightsFor(m){const set=[50,20,10,5,2,1,.5,.2,.1],out=[];let r=Math.round(m*10)/10;for(const s of set){while(r>=s-1e-9&&out.length<12){out.push(s);r=Math.round((r-s)*10)/10;}}return out;}
+function drawObj3(ctx,ic,x,yb,s){ // yb = đáy vật
+  if(ic==='apple'){drawBody(ctx,{ic:'apple'},x,yb-s*.32,s*.32);}
+  else if(ic==='bag'){ctx.fillStyle='#f4f4f4';ctx.strokeStyle='#888';ctx.lineWidth=1.5;ctx.beginPath();ctx.roundRect(x-s*.3,yb-s*.7,s*.6,s*.7,4);ctx.fill();ctx.stroke();txt(ctx,'1 kg',x,yb-s*.35,'#333',11,700,'center');}
+  else if(ic==='sack'){ctx.fillStyle='#e8dcc0';ctx.strokeStyle='#9c8a62';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(x-s*.38,yb);ctx.lineTo(x-s*.32,yb-s*.78);ctx.lineTo(x+s*.32,yb-s*.78);ctx.lineTo(x+s*.38,yb);ctx.closePath();ctx.fill();ctx.stroke();txt(ctx,'5 kg',x,yb-s*.38,'#5a4a2a',11,700,'center');}
+  else if(ic==='kid'){drawPerson(ctx,x,yb,s*1.25,'#1f4f8a');}
+  else{ctx.fillStyle='#c9a46b';ctx.strokeStyle='#7c5a2c';ctx.lineWidth=1.5;ctx.beginPath();ctx.rect(x-s*.3,yb-s*.55,s*.6,s*.55);ctx.fill();ctx.stroke();txt(ctx,nfs(S3.m,3)+' kg',x,yb-s*.27,'#3a2a10',10,700,'center');}
+}
+function brass(ctx,x,y,w,h,label){const g=ctx.createLinearGradient(x-w/2,0,x+w/2,0);g.addColorStop(0,'#a0782a');g.addColorStop(.5,'#e8c76a');g.addColorStop(1,'#9b7426');
+  ctx.fillStyle=g;ctx.beginPath();ctx.roundRect(x-w/2,y-h,w,h,2);ctx.fill();if(label&&h>9)txt(ctx,label,x,y-h/2,'#3a2a05',Math.min(10,h-1),700,'center');}
+function renderT3(dt){
+  const cv=$('cv3'),{ctx,w,h}=size(cv,R(.56,1.05),420,330);S3.t+=dt;const PL=PL3[S3.pl],ob=OBJ3[S3.oi];
+  ctx.fillStyle=PL.sky;ctx.fillRect(0,0,w,h);const gy=h-34;
+  if(PL.gr){ctx.fillStyle=PL.gr;ctx.fillRect(0,gy,w,h-gy);}else{ctx.fillStyle='rgba(255,255,255,.18)';for(let i=0;i<4;i++)ctx.fillRect(0,gy-60+i*30,w,10);ctx.fillStyle='#6b6f78';ctx.fillRect(0,gy,w,8);}
+  const dark=[1,2].includes(S3.pl),ink=dark?'#eef2f7':'#14202c';
+  pill(ctx,T(PL.k)+' · g = '+nfs(g3(),4)+' N/kg',w/2,16,'#14202c',13,'center','#ffffffd9');
+  const cols=[w/6,w/2,5*w/6],cw=Math.min(w/3-14,200),os=Math.min(46,cw*.32);
+  const bob=Math.exp(-S3.t*2.2)*Math.sin(S3.t*9);
+  // 1. cân đòn
+  {const x=cols[0],top=gy-150*Math.min(1,h/400)-10,bl=cw*.42,ang=bob*.05;
+   ctx.fillStyle='#5b636c';ctx.fillRect(x-5,top,10,gy-top);ctx.fillRect(x-30,gy-8,60,8);
+   ctx.save();ctx.translate(x,top);ctx.rotate(ang);ctx.fillStyle='#3d444c';ctx.fillRect(-bl,-3,bl*2,6);ctx.restore();
+   ctx.fillStyle='#3d444c';ctx.beginPath();ctx.moveTo(x,top-10);ctx.lineTo(x-7,top+2);ctx.lineTo(x+7,top+2);ctx.closePath();ctx.fill();
+   const pan=(sx)=>{const px=x+sx*bl*Math.cos(ang),py=top+sx*bl*Math.sin(ang),ph=Math.min(70,(gy-top)*.55);ctx.strokeStyle='#3d444c';ctx.lineWidth=1.3;
+     ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(px-18,py+ph);ctx.moveTo(px,py);ctx.lineTo(px+18,py+ph);ctx.stroke();ctx.fillStyle='#3d444c';ctx.fillRect(px-24,py+ph,48,4);return [px,py+ph];};
+   const [lx,ly]=pan(-1),[rx,ry]=pan(1);drawObj3(ctx,ob.ic,lx,ly,os*.85);
+   let yy=ry;weightsFor(S3.m).forEach(s=>{const hh=clamp(4+Math.log10(s*10+1)*6,5,15),ww=clamp(14+Math.log10(s*10+1)*9,16,40);brass(ctx,rx,yy,ww,hh,s>=1?nfs(s,2):'');yy-=hh+1;});
+   pill(ctx,T('inBal'),x,gy+16,'#14202c',12,'center','#ffffffd9');
+   pill(ctx,'m = '+fmtMass(S3.m),x,Math.max(30,top-30),'#14202c',14,'center','#ffffffe6');}
+  // 2. lực kế
+  {const x=cols[1],P=P3(),rng=RANGES.find(r=>r>=P*1.0001)||RANGES[RANGES.length-1],f=Math.min(1,P/rng),top=40,bh=Math.min(130,gy-top-os-30);
+   ctx.fillStyle='#5b636c';ctx.fillRect(x-cw*.4,top-10,cw*.8,6);ctx.fillRect(x-2,top-4,4,8);
+   ctx.fillStyle='#e9edf2';ctx.strokeStyle='#5b636c';ctx.lineWidth=1.5;ctx.beginPath();ctx.roundRect(x-16,top+4,32,bh,6);ctx.fill();ctx.stroke();
+   for(let i=0;i<=10;i++){const yy=top+14+i*(bh-24)/10;ctx.strokeStyle='#5b636c';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x+4,yy);ctx.lineTo(x+(i%5?10:14),yy);ctx.stroke();}
+   const ind=top+14+(f*(1+bob*.04))*(bh-24);
+   ctx.strokeStyle=C.spring;ctx.lineWidth=1.6;ctx.beginPath();const n=10;for(let i=0;i<=n*2;i++){const yy=top+12+(ind-top-12)*i/(n*2);ctx.lineTo(x-4+(i%2?-6:6)*.6,yy);}ctx.stroke();
+   ctx.fillStyle=C.force;ctx.fillRect(x-11,ind-2,22,4);
+   ctx.strokeStyle='#3d444c';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x,ind);ctx.lineTo(x,top+bh+14);ctx.stroke();ctx.beginPath();ctx.arc(x,top+bh+19,5,-Math.PI/2,Math.PI);ctx.stroke();
+   const oy=top+bh+24+(ob.ic==='kid'?os*1.25:os*.8);drawObj3(ctx,ob.ic,x,oy,os*.85);
+   txt(ctx,fill(T('range'),{r:nfs(rng,5)}),x+22,top+bh-4,'#14202c',10,600,'left');
+   pill(ctx,T('inSpring'),x,gy+16,'#14202c',12,'center','#ffffffd9');
+   const aL=clamp(18+Math.log10(P+1)*14,18,70),ay0=oy-os*.4;arrow(ctx,x+28,ay0,x+28,ay0+aL,C.force,3.5);
+   pill(ctx,'P = '+sci(P,3)+' N',x,Math.min(gy-14,ay0+aL+14),C.force,14,'center','#ffffffe6');}
+  // 3. cân sức khoẻ
+  {const x=cols[2],kg=bath3(),over=kg>150,sw=Math.min(cw*.8,110),sh=22,top=gy-sh;
+   drawObj3(ctx,ob.ic,x,top,os*.95);
+   ctx.fillStyle='#e9edf2';ctx.strokeStyle='#5b636c';ctx.lineWidth=1.5;ctx.beginPath();ctx.roundRect(x-sw/2,top,sw,sh,5);ctx.fill();ctx.stroke();
+   const dx=x,dy=top-os*1.9-36,dr=26;ctx.fillStyle='#fff';ctx.strokeStyle='#5b636c';ctx.beginPath();ctx.arc(dx,dy,dr,0,7);ctx.fill();ctx.stroke();
+   for(let i=0;i<=15;i++){const a=-Math.PI*1.25+i/15*Math.PI*1.5;ctx.beginPath();ctx.moveTo(dx+Math.cos(a)*dr*.78,dy+Math.sin(a)*dr*.78);ctx.lineTo(dx+Math.cos(a)*dr*.95,dy+Math.sin(a)*dr*.95);ctx.stroke();}
+   const fr=Math.min(1,kg/150)*(1+bob*.03),a=-Math.PI*1.25+fr*Math.PI*1.5;ctx.strokeStyle=C.force;ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(dx,dy);ctx.lineTo(dx+Math.cos(a)*dr*.8,dy+Math.sin(a)*dr*.8);ctx.stroke();
+   txt(ctx,'kg',dx,dy+dr*.45,'#14202c',9,700,'center');
+   ctx.strokeStyle='#5b636c';ctx.lineWidth=1;ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(dx,dy+dr);ctx.lineTo(dx,top-os*1.35);ctx.stroke();ctx.setLineDash([]);
+   pill(ctx,T('inBath'),x,gy+16,'#14202c',12,'center','#ffffffd9');
+   pill(ctx,over?T('over'):nfs(kg,3)+' kg',x,dy-dr-14,over?C.warn:(S3.pl===0?'#14202c':C.warn),14,'center','#ffffffe6');}
+}
+function upd3(){const PL=PL3[S3.pl],P=P3(),kg=bath3(),Pe=S3.m*gE();
+  $('where3').innerHTML=PL3.map((p,i)=>`<button class="btn" data-i="${i}" aria-pressed="${i===S3.pl}">${T(p.k)}<small>g = ${nfs(i===0?gE():p.g,4)}</small></button>`).join('');
+  $('where3').querySelectorAll('button').forEach(b=>b.onclick=()=>{S3.pl=+b.dataset.i;S3.t=0;upd3();});
+  $('m3V').textContent=fmtMass(S3.m);
+  $('o3m').textContent=fmtMass(S3.m);$('o3g').textContent=nfs(g3(),4)+' N/kg';$('o3P').textContent=sci(P,3)+' N';
+  $('o3bath').textContent=kg>150?T('over'):nfs(kg,3)+' kg';
+  const r=P/Pe;$('o3cmp').textContent=S3.pl===0?'—':fill(T(r>=1?'cmpTimes':'cmpPart'),{r:nfs(r,2)});
+  $('st3').textContent=S3.pl===0?T('st3E'):fill(T('st3'),{p:T(PL.k),m:fmtMass(S3.m),P:sci(P,3)+' N'})+' '+(kg>150?'':fill(T('st3Off'),{b:nfs(kg,3)+' kg',m:fmtMass(S3.m)}));
+  renderTable3();}
+function renderTable3(){const tb=$('tb3');
+  if(!S3.rows.length){tb.innerHTML=`<tr><td>${T('noRow')}</td></tr>`;}
+  else tb.innerHTML=`<tr><th>${T('th3place')}</th><th>${T('th3m')}</th><th>${T('th3P')}</th><th>${T('th3b')}</th></tr>`+
+    S3.rows.map(r=>`<tr><td class="t">${T(PL3[r.pl].k)}</td><td class="num">${nfs(r.m,3)}</td><td class="num">${sci(r.m*r.g,3)}</td><td class="num">${r.m*r.g/r.gc>150?T('over'):nfs(r.m*r.g/r.gc,3)+' kg'}</td></tr>`).join('');
+  const pls=[...new Set([S3.pl,...S3.rows.map(r=>r.pl)])],xs=Math.max(S3.m,...S3.rows.map(r=>r.m))*1.15;
+  const gOf=i=>i===0?gE():PL3[i].g,cols=[C.vel,C.laneA,C.laneB,C.c3,C.c4,C.c5,C.warn,C.force];
+  const ys=Math.max(...pls.map(i=>gOf(i)*xs))*1.05;
+  graph($('g3'),[...pls.map(i=>({d:[[0,0],[xs,gOf(i)*xs]],c:cols[i],lw:2,dash:i===S3.pl?[]:[6,4],label:T(PL3[i].k)})),
+    ...pls.map(i=>({d:S3.rows.filter(r=>r.pl===i).map(r=>[r.m,r.m*r.g]),c:cols[i],pts:true}))],{x0:0,x1:xs,y0:0,y1:ys,xl:T('gx3'),yl:T('gy3')});}
+function setObj3(i){S3.oi=i;if(OBJ3[i].m!=null){S3.m=OBJ3[i].m;$('m3').value=S3.m;}S3.t=0;upd3();}
+$('obj3').onchange=e=>setObj3(+e.target.value);
+$('m3').oninput=e=>{S3.m=Math.max(.1,+e.target.value);const j=OBJ3.findIndex(o=>o.m===S3.m);S3.oi=j>=0?j:4;$('obj3').value=S3.oi;S3.t=0;upd3();};
+$('log3').onclick=()=>{S3.rows.unshift({pl:S3.pl,m:S3.m,g:g3(),gc:gE()});S3.rows=S3.rows.slice(0,12);renderTable3();};
+$('clr3').onclick=()=>{S3.rows=[];renderTable3();};
+
+/* ================= TAB 4: lò xo giãn, lò xo nén ================= */
+const MW=.05,NMAX=10,L0A=.10,L0B=.14,SOLID=.03;
+const S4={soft:true,moon:false,A:{n:0,x:0,v:0,ps:0},B:{n:0,x:0,v:0},drag:null,rows:[],settle:{A:0,B:0},eq:false};
+const kA=()=>S4.soft?20:40, kB=()=>S4.soft?40:80, limA=()=>S4.soft?.20:.12, maxB=L0B-SOLID;
+const g4=()=>S4.moon?1.62:gE();
+function stepSpring(s,k,dt,isB){const m=s.n*MW,md=m+.02,c=2*.22*Math.sqrt(k*md);
+  const a=(m*g4()-k*s.x-c*s.v)/md;s.v+=a*dt;s.x+=s.v*dt;
+  if(isB){if(s.x>maxB){s.x=maxB;if(s.v>0)s.v=0;}if(s.x<0&&s.n===0&&Math.abs(s.x)<1e-5)s.x=0;}
+  else if(s.x>limA()){s.ps+=s.x-limA();s.x=limA();if(s.v>0)s.v=0;}}
+function step4(dt){stepSpring(S4.A,kA(),dt,false);stepSpring(S4.B,kB(),dt,true);
+  ['A','B'].forEach(L=>{const s=S4[L];if(Math.abs(s.v)<.002)S4.settle[L]+=dt;else S4.settle[L]=0;
+    if(S4.settle[L]>.35&&s.n>0){const dl=L==='A'?s.ps+s.x:s.x,key=[L,s.n,S4.soft,S4.moon].join('|');
+      const row={key,L,soft:S4.soft,moon:S4.moon,m:s.n*MW*1000,dl:dl*100},i=S4.rows.findIndex(r=>r.key===key);
+      if(i<0){S4.rows.push(row);renderTable4();}else if(Math.abs(S4.rows[i].dl-row.dl)>.005){S4.rows[i]=row;renderTable4();}}});}
+function coil(ctx,x,y1,y2,wd,n,col,lw=2){ctx.strokeStyle=col;ctx.lineWidth=lw;ctx.lineJoin='round';ctx.beginPath();ctx.moveTo(x,y1);
+  const L=y2-y1,lead=Math.min(6,Math.abs(L)*.1)*Math.sign(L);ctx.lineTo(x,y1+lead);
+  for(let i=0;i<=n*2;i++){const t=i/(n*2),yy=y1+lead+(L-2*lead)*t;ctx.lineTo(x+(i===0||i===n*2?0:(i%2?-1:1))*wd/2,yy);}ctx.lineTo(x,y2);ctx.stroke();}
+function geom4(w,h){const trayH=56,gy=h-88,top=26,pxm=Math.min((gy-top-20)/.62,(gy-40)/.32,1400);return {trayH,gy,top,pxm,xa:w*.27,xb:w*.73,mh:Math.max(7,Math.min(10,pxm*.012)),mw:32};}
+function ruler(ctx,x,y0,dir,len,pxm,col){ctx.fillStyle=C.panel;ctx.strokeStyle=C.line;ctx.lineWidth=1;ctx.beginPath();ctx.rect(x,Math.min(y0,y0+dir*len*pxm),22,len*pxm);ctx.fill();ctx.stroke();
+  for(let c=0;c<=len*100+1e-6;c++){const yy=y0+dir*c/100*pxm,big=c%5===0;ctx.strokeStyle=C.muted;ctx.beginPath();ctx.moveTo(x,yy);ctx.lineTo(x+(big?10:5),yy);ctx.stroke();
+    if(c%10===0&&pxm>500||c%5===0&&pxm>900)txt(ctx,String(c),x+12,yy,C.muted,9,600,'left');}
+  if(pxm>300)for(let mm=0;mm<=len*1000;mm++){if(mm%10===0)continue;const yy=y0+dir*mm/1000*pxm;if(pxm*0.001<2.2)break;ctx.beginPath();ctx.moveTo(x,yy);ctx.lineTo(x+3,yy);ctx.stroke();}}
+function lblL(ctx,s,x,y){ctx.font=`600 11px ${FONT}`;const tw=ctx.measureText(s).width;if(x-tw<4)txt(ctx,'l₀',x,y,C.muted,12,700,'right');else txt(ctx,s,x,y,C.muted,11,600,'right');}
+function pillR(ctx,s,x,y,col,w){ctx.font=`700 12px ${FONT}`;const tw=ctx.measureText(s).width;if(x+tw+8>w)pill(ctx,s,w-8,y-16,col,12,'right');else pill(ctx,s,x,y,col,12,'left');}
+function renderT4(){
+  const cv=$('cv4'),{ctx,w,h}=size(cv,R(.66,1.15),560,400);const g=geom4(w,h),{gy,top,pxm,xa,xb,mh,mw,trayH}=g;
+  ctx.fillStyle=C.lane;ctx.fillRect(0,0,w,h);
+  // giá treo bên trái
+  ctx.fillStyle=C.metal2;ctx.fillRect(xa-60,top-12,120,8);ctx.fillRect(xa-64,top-12,6,gy-top+12);ctx.fillRect(xa-90,gy,60,6);
+  // bàn bên phải
+  ctx.fillStyle=C.wood;ctx.fillRect(xb-90,gy,180,10);
+  // ---- lò xo A (treo)
+  const A=S4.A,lA=L0A+A.ps+A.x,yEnd=top-4+lA*pxm;
+  ruler(ctx,xa+30,top-4,1,.40,pxm);
+  coil(ctx,xa,top-4,yEnd,22,14,S4.soft?C.laneA:C.metal2,S4.soft?2:3);
+  ctx.strokeStyle=C.ink;ctx.lineWidth=2;ctx.beginPath();ctx.arc(xa,yEnd+5,5,-Math.PI/2,Math.PI*1.2);ctx.stroke();
+  const y0A=top-4+L0A*pxm;ctx.strokeStyle=C.laneA;ctx.setLineDash([4,3]);ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(xa-30,y0A);ctx.lineTo(xa+30,y0A);ctx.moveTo(xa-14,yEnd);ctx.lineTo(xa+30,yEnd);ctx.stroke();ctx.setLineDash([]);
+  lblL(ctx,fill(T('lbL0'),{v:nf(L0A*100,1)}),xa-36,y0A);
+  let yy=yEnd+10;for(let i=0;i<A.n;i++){brass(ctx,xa,yy+mh,mw,mh,'');ctx.strokeStyle='#6b5216';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(xa,yy);ctx.lineTo(xa,yy+mh);ctx.stroke();yy+=mh+1;}
+  if(A.n){const L=clamp(A.n*MW*g4()*7,8,90);arrow(ctx,xa-mw/2-10,yEnd+10+A.n*(mh+1)/2,xa-mw/2-10,yEnd+10+A.n*(mh+1)/2+L,C.force,3);
+    pillR(ctx,fill(T('lbDl'),{v:nf((A.ps+A.x)*100,1)}),xa+58,yEnd,C.laneA,w);}
+  if(A.ps>1e-4)txt(ctx,'⚠',xa-40,yEnd,C.warn,16,800,'right');
+  S4.hitA={x:xa,y:yEnd+10,yb:yy};
+  // ---- lò xo B (nén)
+  const B=S4.B,lB=L0B-B.x,yTop=gy-lB*pxm;
+  ruler(ctx,xb+46,gy,-1,.20,pxm);
+  coil(ctx,xb,gy,yTop,30,9,S4.soft?C.laneB:C.metal2,S4.soft?2.4:3.4);
+  ctx.fillStyle=C.metal2;ctx.fillRect(xb-26,yTop-4,52,5);
+  const y0B=gy-L0B*pxm;ctx.strokeStyle=C.laneB;ctx.setLineDash([4,3]);ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(xb-40,y0B);ctx.lineTo(xb+46,y0B);ctx.moveTo(xb-40,yTop-4);ctx.lineTo(xb+46,yTop-4);ctx.stroke();ctx.setLineDash([]);
+  lblL(ctx,fill(T('lbL0'),{v:nf(L0B*100,1)}),xb-44,y0B);
+  let yb=yTop-4;for(let i=0;i<B.n;i++){brass(ctx,xb,yb,mw,mh,'');yb-=mh+1;}
+  if(B.n){const L=clamp(B.n*MW*g4()*7,8,90);arrow(ctx,xb-mw/2-10,yb+ (yTop-4-yb)/2-L/2,xb-mw/2-10,yb+(yTop-4-yb)/2+L/2,C.force,3);
+    pillR(ctx,fill(T('lbDl'),{v:nf(B.x*100,1)}),xb+74,yTop-4,C.laneB,w);}
+  S4.hitB={x:xb,y:yb,yt:yTop-4};
+  // nhãn
+  txt(ctx,T('sprA'),xa,gy+20,C.ink,13,700,'center');txt(ctx,T('sprB'),xb,gy+24,C.ink,13,700,'center');
+  // khay
+  const ty=h-22;ctx.fillStyle=C.panel;ctx.strokeStyle=C.line;ctx.beginPath();ctx.roundRect(w/2-110,ty-18,220,36,8);ctx.fill();ctx.stroke();
+  for(let i=0;i<5;i++)brass(ctx,w/2-80+i*40,ty+6,mw,12,'50 g');
+  txt(ctx,T('tray'),w/2,ty-26,C.muted,11,600,'center');S4.tray={x:w/2,y:ty,wd:220};
+  if(S4.moon)pill(ctx,T('plMoon')+' · g = 1,62 N/kg'.replace(',',lang==='vi'?',':'.'),w/2,12,C.ink,12);
+  if(S4.drag)brass(ctx,S4.drag.x,S4.drag.y+mh/2,mw,12,'50 g');
+}
+function upd4(){const A=S4.A,B=S4.B;
+  $('o4mA').textContent=nf(A.n*MW*1000,0)+' g';$('o4dA').textContent=nf((A.ps+A.x)*100,1)+' cm';
+  $('o4mB').textContent=nf(B.n*MW*1000,0)+' g';$('o4dB').textContent=nf(B.x*100,1)+' cm';
+  const w=[];if(A.ps>1e-4)w.push(T('warnYield')+` <button class="btn" id="newA">${T('newSpring')}</button>`);if(B.n*MW*g4()>kB()*maxB)w.push(T('warnSolid'));
+  const el=$('o4warn');el.hidden=!w.length;el.innerHTML=w.join('<br>');const nb=$('newA');if(nb)nb.onclick=()=>{A.ps=0;A.x=0;A.v=0;upd4();};
+  $('st4').textContent=A.n||B.n?fill(T('st4'),{mA:nf(A.n*50,0),dA:nf((A.ps+A.x)*100,1),mB:nf(B.n*50,0),dB:nf(B.x*100,1)}):T('st4Idle');
+  $('kSeg').innerHTML=[true,false].map(v=>`<button class="btn" data-v="${v}" aria-pressed="${S4.soft===v}">${T(v?'kSoft':'kHard')}</button>`).join('');
+  $('kSeg').querySelectorAll('button').forEach(b=>b.onclick=()=>{S4.soft=b.dataset.v==='true';S4.A.ps=0;upd4();});
+  $('pl4').innerHTML=[false,true].map(v=>`<button class="btn" data-v="${v}" aria-pressed="${S4.moon===v}">${T(v?'plMoon':'plEarth')}</button>`).join('');
+  $('pl4').querySelectorAll('button').forEach(b=>b.onclick=()=>{S4.moon=b.dataset.v==='true';upd4();});
+  renderTable4();}
+function label4(r){return T(r.L==='A'?'sprA':'sprB')+' '+T(r.soft?'kSoft':'kHard').toLowerCase()+(r.moon?' · '+T('plMoon'):'');}
+function renderTable4(){const tb=$('tb4'),rows=[...S4.rows].sort((a,b)=>a.key.split('|').slice(0,1).join()<b.key.split('|').slice(0,1).join()?-1:(a.L===b.L?(a.soft===b.soft?(a.moon===b.moon?a.m-b.m:a.moon-b.moon):b.soft-a.soft):1));
+  tb.innerHTML=rows.length?`<tr><th>${T('th4s')}</th><th>${T('th4m')}</th><th>${T('th4d')}</th><th>${T('th4r')}</th></tr>`+
+    rows.map(r=>`<tr><td class="t">${esc(label4(r))}</td><td>${nf(r.m,0)}</td><td class="num">${nf(r.dl,2)}</td><td class="num">${nf(r.dl/r.m*100,2)}</td></tr>`).join(''):`<tr><td>${T('noRow')}</td></tr>`;
+  const groups={};S4.rows.forEach(r=>{const k=[r.L,r.soft,r.moon].join('|');(groups[k]=groups[k]||[]).push(r);});
+  const xs=550,ys=Math.max(5,...S4.rows.map(r=>r.dl))*1.15,ser=[];
+  Object.values(groups).forEach(gr=>{const r0=gr[0],c=r0.L==='A'?C.laneA:C.laneB,dash=r0.moon?[6,4]:[];const ok=gr.filter(r=>r.L==='B'||true);
+    const sl=ok.reduce((s,r)=>s+r.dl,0)/ok.reduce((s,r)=>s+r.m,0);ser.push({d:[[0,0],[xs,sl*xs]],c,lw:1.5,dash});ser.push({d:gr.map(r=>[r.m,r.dl]),c,pts:true});});
+  graph($('g4'),ser,{x0:0,x1:xs,y0:0,y1:ys,xl:T('gx4'),yl:T('gy4')});}
+function addW(L,d){const s=S4[L];s.n=clamp(s.n+d,0,NMAX);S4.settle[L]=0;upd4();}
+$('addA').onclick=()=>addW('A',1);$('subA').onclick=()=>addW('A',-1);$('addB').onclick=()=>addW('B',1);$('subB').onclick=()=>addW('B',-1);
+$('clr4').onclick=()=>{S4.rows=[];renderTable4();};
+(()=>{const cv=$('cv4');
+  cv.addEventListener('pointerdown',e=>{const p=canvasPt(cv,e),t=S4.tray,a=S4.hitA,b=S4.hitB;if(!t)return;let from=null;
+    if(Math.abs(p.x-t.x)<t.wd/2&&Math.abs(p.y-t.y)<24)from='tray';
+    else if(S4.A.n&&Math.abs(p.x-a.x)<30&&p.y>a.y-6&&p.y<a.yb+10){from='A';addW('A',-1);}
+    else if(S4.B.n&&Math.abs(p.x-b.x)<30&&p.y>b.y-6&&p.y<b.yt+6){from='B';addW('B',-1);}
+    if(from){S4.drag={from,x:p.x,y:p.y};cv.setPointerCapture(e.pointerId);}});
+  cv.addEventListener('pointermove',e=>{if(!S4.drag)return;const p=canvasPt(cv,e);S4.drag.x=p.x;S4.drag.y=p.y;});
+  const end=()=>{const d=S4.drag;if(!d)return;S4.drag=null;const a=S4.hitA,b=S4.hitB,wd=cv.clientWidth;
+    if(d.x<wd/2&&Math.abs(d.x-a.x)<80&&d.y>a.y-80&&d.y<a.yb+80)addW('A',1);
+    else if(d.x>=wd/2&&Math.abs(d.x-b.x)<80&&d.y<b.yt+30&&d.y>b.y-120)addW('B',1);};
+  cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',()=>{S4.drag=null;});})();
+
+/* ================= TAB 5: “mất trọng lượng” ================= */
+const H0=4e5;
+const S5={mode:'A',v0:4,shots:[],speed:600,B:{t:0,ph:'ready',v:0,y:0,a:0,hist:[],speed:.5,running:false}};
+const SHOTCOL=['laneB','c5','c3','c4','laneA','gold'];
+function fire5(){const r0=RE+H0;S5.shots.push({x:0,y:r0,vx:S5.v0*1000,vy:0,trail:[[0,r0]],ang:0,pa:0,t:0,done:false,orbit:false,col:SHOTCOL[S5.shots.length%6],v0:S5.v0,lt:0});
+  if(S5.shots.length>6)S5.shots.shift();}
+function acc5(x,y){const r=Math.hypot(x,y),k=-GM/(r*r*r);return [k*x,k*y];}
+function step5A(T5){S5.shots.forEach(s=>{if(s.done)return;let rem=T5;while(rem>0){const h=Math.min(4,rem);rem-=h;
+  const [ax,ay]=acc5(s.x,s.y);s.vx+=ax*h/2;s.vy+=ay*h/2;s.x+=s.vx*h;s.y+=s.vy*h;const [bx,by]=acc5(s.x,s.y);s.vx+=bx*h/2;s.vy+=by*h/2;s.t+=h;
+  const a=Math.atan2(s.x,s.y);let d=a-s.pa;if(d<-Math.PI)d+=2*Math.PI;if(d>Math.PI)d-=2*Math.PI;s.ang+=d;s.pa=a;if(s.ang>=2*Math.PI)s.orbit=true;
+  if(s.t-s.lt>=20){s.trail.push([s.x,s.y]);s.lt=s.t;if(s.trail.length>420)s.trail.shift();}
+  if(Math.hypot(s.x,s.y)<=RE){s.done=true;s.trail.push([s.x,s.y]);s.hit=RE*s.ang;break;}}});}
+function step5B(dt){const B=S5.B;if(!B.running)return;const g=gE();B.t+=dt;
+  if(B.ph==='fall'){B.a=-g;if(B.t>=2.5)B.ph='brake';}
+  if(B.ph==='brake'){B.a=g;if(B.v>=0){B.v=0;B.a=0;B.ph='stop';B.running=false;}}
+  B.v+=B.a*dt;B.y+=-B.v*dt;if(B.ph==='stop')B.v=0;
+  if(!B.hist.length||B.t-B.hist[B.hist.length-1][0]>=.02)B.hist.push([B.t,40*(g+B.a)]);}
+function orbitPeriod(s){const r=Math.hypot(s.x,s.y),v2=s.vx*s.vx+s.vy*s.vy,a=1/(2/r-v2/GM);return a>0?2*Math.PI*Math.sqrt(a**3/GM):Infinity;}
+function renderT5(){
+  const cv=$('cv5');if(S5.mode==='A'){const {ctx,w,h}=size(cv,R(.72,1),560,340);
+    ctx.fillStyle=C.space;ctx.fillRect(0,0,w,h);ctx.fillStyle=C.star;for(let i=0;i<110;i++){const sx=(i*137.5)%w,sy=(i*71.3+i*i*3.7)%h;ctx.globalAlpha=.2+(i%5)*.12;ctx.fillRect(sx,sy,1.5,1.5);}ctx.globalAlpha=1;
+    const cx=w/2,cy=h/2,Rp=Math.min(w*.3,(h/2-12)/1.72),sc=Rp/RE,X=x=>cx+x*sc,Y=y=>cy-y*sc;
+    ctx.strokeStyle=C.star;ctx.globalAlpha=.4;ctx.setLineDash([5,5]);ctx.lineWidth=1.2;ctx.beginPath();ctx.arc(cx,cy,(RE+H0)*sc,0,7);ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=1;
+    ctx.fillStyle='rgba(120,180,255,.18)';ctx.beginPath();ctx.arc(cx,cy,Rp*1.02,0,7);ctx.fill();
+    drawBody(ctx,{ic:'earth'},cx,cy,Rp);
+    const mt=(RE+H0)*sc;ctx.fillStyle='#8a7a66';ctx.beginPath();ctx.moveTo(cx-Rp*.16,cy-Rp*.987);ctx.lineTo(cx,cy-mt);ctx.lineTo(cx+Rp*.16,cy-Rp*.987);ctx.closePath();ctx.fill();
+    ctx.fillStyle='#2b2b2b';ctx.fillRect(cx-6,cy-mt-6,14,6);
+    {ctx.font=`600 12px ${FONT}`;const tw=ctx.measureText(T('lbMount')).width;txt(ctx,T('lbMount'),Math.min(cx+14,w-tw-6),cy-mt-14,C.star,12,600,'left');}txt(ctx,T('lbISS'),cx+(RE+H0)*sc*.72,cy+(RE+H0)*sc*.72+14,C.star,11,600,'left');
+    S5.shots.forEach(s=>{ctx.strokeStyle=C[s.col];ctx.lineWidth=2.2;ctx.beginPath();s.trail.forEach((p,i)=>i?ctx.lineTo(X(p[0]),Y(p[1])):ctx.moveTo(X(p[0]),Y(p[1])));ctx.lineTo(X(s.x),Y(s.y));ctx.stroke();
+      ctx.fillStyle=C[s.col];ctx.beginPath();ctx.arc(X(s.x),Y(s.y),s.done?3:5,0,7);ctx.fill();});
+    const s=S5.shots[S5.shots.length-1];
+    if(s&&!s.done){const r=Math.hypot(s.x,s.y),g=GM/(r*r),L=32*g/9.8,px=X(s.x),py=Y(s.y);arrow(ctx,px,py,px-s.x/r*L,py+s.y/r*L,C.force,3.5);
+      const v=Math.hypot(s.vx,s.vy),Lv=40*v/8500;arrow(ctx,px,py,px+s.vx/v*Lv,py-s.vy/v*Lv,C.vel,3);}
+  }else{const {ctx,w,h}=size(cv,R(.72,1.1),560,380);const B=S5.B,g=gE(),tot=g*6.25,ch=Math.min(150,h*.36),cwd=Math.min(230,w*.5);
+    ctx.fillStyle=C.lane;ctx.fillRect(0,0,w,h);
+    const tx=w*.5,ttop=18,tbot=h-14,pxm=(tbot-ttop-ch)/tot;
+    ctx.fillStyle=C.metal;ctx.fillRect(tx-cwd/2-14,ttop-6,10,tbot-ttop+6);ctx.fillRect(tx+cwd/2+4,ttop-6,10,tbot-ttop+6);
+    ctx.fillStyle=C.line;for(let yy=ttop;yy<tbot;yy+=24){ctx.fillRect(tx-cwd/2-14,yy,cwd+28,2);}
+    ctx.fillStyle=C.metal2;ctx.fillRect(0,tbot,w,h-tbot);
+    const yc=ttop+B.y*pxm,x0=tx-cwd/2;
+    ctx.fillStyle=C.panel;ctx.strokeStyle=C.ink;ctx.lineWidth=2;ctx.beginPath();ctx.roundRect(x0,yc,cwd,ch,8);ctx.fill();ctx.stroke();
+    const geff=g+B.a,fl=yc+ch-8;
+    // người trên cân
+    const px=x0+cwd*.3,sh=12;ctx.fillStyle=C.metal;ctx.fillRect(px-24,fl-sh,48,sh);const kgd=40*geff/g;
+    ctx.fillStyle='#111';ctx.fillRect(px-17,fl-sh+2,34,sh-4);txt(ctx,nf(Math.max(0,kgd),1),px,fl-sh/2,'#7CFF8A',9,700,'center','middle',MONO);
+    const ps=Math.min(ch*.62,80);drawPerson(ctx,px,fl-sh,ps,C.vel);
+    arrow(ctx,px-30,fl-sh-ps*.5,px-30,fl-sh-ps*.5+38,C.force,3.5);txt(ctx,'P',px-38,fl-sh-ps*.5+30,C.force,12,800,'right');
+    if(geff>.05){const L=38*geff/g;arrow(ctx,px+30,fl-sh,px+30,fl-sh-L,C.ok,3);txt(ctx,'N',px+36,fl-sh-L+6,C.ok,12,800,'left');}
+    // lực kế treo 1 kg
+    const sx=x0+cwd*.62,sy=yc+6,ext=8+22*geff/g;coil(ctx,sx,sy,sy+ext+8,10,6,C.spring,1.5);brass(ctx,sx,sy+ext+26,20,16,'1 kg');
+    txt(ctx,nf(geff,1)+' N',sx+14,sy+10,C.ink,11,700,'left','middle',MONO);
+    // chai nước thủng lỗ
+    const bx=x0+cwd*.86,by=fl-6,bh=44;ctx.fillStyle='rgba(80,150,230,.35)';ctx.strokeStyle=C.ink;ctx.lineWidth=1.3;ctx.beginPath();ctx.roundRect(bx-9,by-bh,18,bh,4);ctx.fill();ctx.stroke();
+    if(geff>.05){ctx.strokeStyle='rgba(60,140,230,.9)';ctx.lineWidth=1+1.5*Math.sqrt(geff/g);ctx.beginPath();const hx=bx-9,hy=by-12;ctx.moveTo(hx,hy);for(let i=1;i<=12;i++){const xx=i*2.2;ctx.lineTo(hx-xx,hy+xx*xx/(4*20));}ctx.stroke();}
+    if(B.ph==='fall'||B.ph==='brake'){ctx.strokeStyle=C.muted;ctx.lineWidth=1;for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(x0+20+i*90,yc-8);ctx.lineTo(x0+20+i*90,yc-22);ctx.stroke();}}
+    pill(ctx,T('ph'+B.ph[0].toUpperCase()+B.ph.slice(1)),tx,Math.max(14,yc-14),C.ink,12);
+  }
+}
+function upd5(){const A=S5.mode==='A';$('ctlA5').hidden=!A;$('ctlB5').hidden=A;$('cardA5').hidden=!A;$('g5').hidden=A;
+  $('hint5').textContent=T(A?'hintA5':'hintB5');$('assume5').textContent=T(A?'assumeA5':'assumeB5');
+  $('mode5').innerHTML=['A','B'].map(m=>`<button class="btn" data-m="${m}" aria-pressed="${S5.mode===m}">${T('mode'+m+'5')}</button>`).join('');
+  $('mode5').querySelectorAll('button').forEach(b=>b.onclick=()=>{S5.mode=b.dataset.m;upd5();});
+  $('v5V').textContent=nf(S5.v0,1)+' km/s';info5();}
+function info5(){const o=$('o5');
+  if(S5.mode==='A'){const s=S5.shots[S5.shots.length-1];
+    if(!s){o.innerHTML=`<dt>${T('o5v0')}</dt><dd>${nf(S5.v0,1)} km/s</dd>`;$('st5').textContent=T('st5A0');return;}
+    const r=Math.hypot(s.x,s.y),hh=Math.max(0,r-RE),g=GM/(r*r),v=Math.hypot(s.vx,s.vy),g0=GM/(RE*RE);
+    const fate=s.done?fill(T('fateHit'),{d:nfs(s.hit/1000,3)}):s.orbit?fill(T('fateOrbit'),{t:nf(orbitPeriod(s)/60,0)}):T('fateFly');
+    o.innerHTML=`<dt>${T('o5v0')}</dt><dd>${nf(s.v0,1)} km/s</dd><dt>${T('o5v')}</dt><dd class="num">${nf(v/1000,2)} km/s</dd><dt>${T('o5h')}</dt><dd class="num">${nfs(hh/1000,3)} km</dd>
+      <dt>${T('o5g')}</dt><dd class="num">${nf(g,2)} N/kg</dd><dt>${T('o5F')}</dt><dd class="num">${nf(60*g,0)} N</dd><dt>${T('o5pct')}</dt><dd class="num">${nf(g/g0*100,0)} %</dd><dt>${T('o5fate')}</dt><dd class="t">${fate}</dd>`;
+    $('st5').textContent=s.done?T('st5Hit'):s.orbit||s.ang>Math.PI?T('st5Orbit'):T('st5Fly');}
+  else{const B=S5.B,g=gE(),N=40*(g+B.a);
+    o.innerHTML=`<dt>${T('o5ph')}</dt><dd class="t">${T('ph'+B.ph[0].toUpperCase()+B.ph.slice(1))}</dd><dt>${T('o5a')}</dt><dd class="num">${nf(B.a,1)} m/s²</dd>
+      <dt>${T('o5P')}</dt><dd class="num">${nf(40*g,0)} N</dd><dt>${T('o5N')}</dt><dd class="num">${nf(Math.max(0,N),0)} N</dd><dt>${T('o5Nkg')}</dt><dd class="num">${nf(Math.max(0,N)/g,1)} kg</dd><dt>${T('o5sp')}</dt><dd class="num">${nf(g+B.a,1)} N</dd>`;
+    $('st5').textContent=T({ready:'st5B0',fall:'st5BFall',brake:'st5BBrake',stop:'st5BStop'}[B.ph]);
+    const P=40*g,tm=Math.max(6,B.t*1.05);graph($('g5'),[{d:[[0,P],[tm,P]],c:C.force,lw:2,dash:[6,4],label:T('lbWeight')},{d:B.hist,c:C.ok,lw:3,label:B.hist.length?T('lbScale'):''}],{x0:0,x1:tm,y0:0,y1:P*2.3,xl:T('gx5'),yl:T('gy5')});}}
+function resetB5(){Object.assign(S5.B,{t:0,ph:'ready',v:0,y:0,a:0,hist:[[0,40*gE()]],running:false});info5();}
+$('v5in').oninput=e=>{S5.v0=+e.target.value;$('v5V').textContent=nf(S5.v0,1)+' km/s';info5();};
+$('vISS').onclick=()=>{S5.v0=7.7;$('v5in').value=7.7;upd5();};
+$('fire5').onclick=()=>{fire5();info5();};$('clr5').onclick=()=>{S5.shots=[];info5();};
+$('dropB5').onclick=()=>{if(S5.B.ph!=='ready')resetB5();S5.B.ph='fall';S5.B.running=true;};$('rstB5').onclick=resetB5;
+
+/* ================= Ngôn ngữ ================= */
+function applyLang(){document.documentElement.lang=lang;document.title=T('title');
+  document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=T(el.dataset.i18n));
+  document.querySelectorAll('[data-i18n-html]').forEach(el=>el.innerHTML=T(el.dataset.i18nHtml));
+  $('langBtn').textContent=lang==='vi'?'EN':'VI';
+  Object.keys(PRED).forEach(renderPred);[1,2,3,4,5].forEach(renderVideo);
+  fillSelect($('pair1'),PAIRS,S1.pi);fillSelect($('obj3'),OBJ3,S3.oi);gSeg();
+  speedSeg('spd5',S5,[300,600,1200]);speedSeg('spdB5',S5.B,[.25,.5,1]);
+  upd1();upd2();upd3();upd4();upd5();}
+$('langBtn').onclick=()=>{lang=lang==='vi'?'en':'vi';applyLang();};
+
+/* ================= Vòng lặp ================= */
+setPair(0);resetB5();drop2();S2.balls.forEach(b=>{b.r=0;b.done=true;});applyLang();
+{const t=+store.get('hd-tab');setTab(t>=1&&t<=5?t:1);}
+let last=performance.now(),acc=0,uiT=0;
+function loop(now){const dt=Math.min((now-last)/1000,.1);last=now;
+  try{
+    if(tab===1)renderT1();
+    else if(tab===2){step2(dt);renderT2();uiT+=dt;if(uiT>.25){uiT=0;if(S2.balls.length)$('st2').textContent=T(S2.balls.every(b=>b.done)?'st2Fall':'st2Ready');}}
+    else if(tab===3)renderT3(dt);
+    else if(tab===4){acc+=dt;let n=0;while(acc>=DT&&n<200){step4(DT);acc-=DT;n++;}renderT4();uiT+=dt;if(uiT>.15){uiT=0;upd4v();}}
+    else if(tab===5){if(S5.mode==='A')step5A(dt*S5.speed);else{let r=dt*S5.B.speed;while(r>0){const h=Math.min(r,1/240);step5B(h);r-=h;}}renderT5();uiT+=dt;if(uiT>.12){uiT=0;info5();}}
+  }catch(err){console.error(err);}
+  requestAnimationFrame(loop);}
+function upd4v(){const A=S4.A,B=S4.B;$('o4dA').textContent=nf((A.ps+A.x)*100,1)+' cm';$('o4dB').textContent=nf(B.x*100,1)+' cm';
+  const wantWarn=A.ps>1e-4||B.n*MW*g4()>kB()*maxB;if(wantWarn===$('o4warn').hidden)upd4();
+  $('st4').textContent=A.n||B.n?fill(T('st4'),{mA:nf(A.n*50,0),dA:nf((A.ps+A.x)*100,1),mB:nf(B.n*50,0),dB:nf(B.x*100,1)}):T('st4Idle');}
+addEventListener('resize',()=>{renderTable3();renderTable4();if(S5.mode==='B')info5();});
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

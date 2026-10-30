@@ -1,0 +1,1007 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Đồ thị quãng đường – thời gian</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Phòng thí nghiệm đồ thị quãng đường – thời gian (KHTN 7): dải video thực tế, sân khấu canvas bên trái, sổ ghi chép bên phải. Điện thoại xếp một cột.
+   Cùng hệ màu, phông với bộ mô phỏng KHTN 6–9 (Lực hấp dẫn, Lực ma sát). */
+:root{
+  --bg:#edf0f3; --panel:#ffffff; --lane:#f4f6f9; --ink:#141c26; --muted:#556170; --line:#c9d1db;
+  --accent:#1d5fa8; --accent-ink:#ffffff; --ok:#1d8a4b; --warn:#c2410c;
+  --force:#d1323b; --vel:#1f6fd1; --mass:#7a3fc2; --spring:#5d6b7a; --spring2:#e07b00;
+  --earth:#2f78c4; --land:#4f9a5b; --moon:#a9adb3; --space:#0d1626; --star:#e9eef7;
+  --gold:#c99a2e; --metal:#8b96a3; --metal2:#5b6673; --wood:#b07a45;
+  --laneA:#0f7c8a; --laneB:#d0661c; --c3:#7a3fc2; --c4:#1d8a4b; --c5:#b8326a;
+  --font-ui:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-num:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Consolas,monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0e131a; --panel:#161e28; --lane:#111821; --ink:#e3e9f0; --muted:#97a3b2; --line:#2a3644;
+  --accent:#5ea6ec; --accent-ink:#04182c; --ok:#47c47d; --warn:#f08a4b;
+  --force:#ff5f67; --vel:#5aa2ff; --mass:#b28cff; --spring:#9aa8b8; --spring2:#ffa630;
+  --earth:#3b86d4; --land:#4c8a55; --moon:#8d9197; --space:#060a12; --star:#cfd8e6;
+  --gold:#e0b24a; --metal:#7c8794; --metal2:#a9b4c1; --wood:#9a6a3c;
+  --laneA:#3cc3d2; --laneB:#ff9a4d; --c3:#b28cff; --c4:#47c47d; --c5:#f06aa2;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e131a; --panel:#161e28; --lane:#111821; --ink:#e3e9f0; --muted:#97a3b2; --line:#2a3644;
+  --accent:#5ea6ec; --accent-ink:#04182c; --ok:#47c47d; --warn:#f08a4b;
+  --force:#ff5f67; --vel:#5aa2ff; --mass:#b28cff; --spring:#9aa8b8; --spring2:#ffa630;
+  --earth:#3b86d4; --land:#4c8a55; --moon:#8d9197; --space:#060a12; --star:#cfd8e6;
+  --gold:#e0b24a; --metal:#7c8794; --metal2:#a9b4c1; --wood:#9a6a3c;
+  --laneA:#3cc3d2; --laneB:#ff9a4d; --c3:#b28cff; --c4:#47c47d; --c5:#f06aa2;
+  color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-ui);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px 40px}
+.wrap{max-width:1320px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.hbtns{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.eyebrow{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{margin:0;font-size:clamp(25px,3.4vw,36px);line-height:1.15;font-weight:800;text-wrap:balance;letter-spacing:-.01em}
+h2{margin:0;font-size:17px;font-weight:700;text-wrap:balance}
+h3{margin:0;font-size:15px;font-weight:700}
+.btn{font:inherit;font-weight:600;font-size:15px;min-height:44px;padding:8px 14px;border-radius:8px;border:1px solid var(--line);
+  background:var(--panel);color:var(--ink);cursor:pointer;touch-action:manipulation}
+.btn:hover{border-color:var(--accent)}
+.btn:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
+.seg .btn{border:0;border-radius:0;min-width:52px}
+.places{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:6px}
+.places .btn{font-size:14px;padding:6px 8px;line-height:1.25}
+.places .btn small{display:block;font-family:var(--font-num);font-size:12px;font-weight:500;opacity:.8}
+nav.tabs{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line)}
+nav.tabs button{font:inherit;font-size:15px;font-weight:600;white-space:nowrap;min-height:46px;padding:8px 14px;border:0;border-bottom:3px solid transparent;
+  background:none;color:var(--muted);cursor:pointer;margin-bottom:-1px}
+nav.tabs button.on{color:var(--ink);border-bottom-color:var(--accent)}
+.req{margin:0;font-size:14px;color:var(--muted);max-width:110ch}
+.req b{color:var(--ink);font-weight:600}
+.lab{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:14px;align-items:start}
+@media (max-width:1020px){.lab{grid-template-columns:minmax(0,1fr)}}
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.col{display:flex;flex-direction:column;gap:12px;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card p{margin:0}
+canvas{display:block;width:100%;border-radius:8px;background:var(--lane);touch-action:pan-y;user-select:none;-webkit-user-select:none}
+canvas.drag{touch-action:none}
+.hint{margin:0;font-size:14px;color:var(--muted)}
+.status{margin:0;font-weight:600;min-height:1.5em}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chk{display:inline-flex;align-items:center;gap:8px;min-height:44px;font-size:15px;cursor:pointer}
+.chk input{width:22px;height:22px;accent-color:var(--accent)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:14px;color:var(--muted)}
+.legend i{display:inline-block;width:18px;height:5px;border-radius:3px;margin-right:6px;vertical-align:middle}
+.sl{display:flex;flex-direction:column;gap:4px}
+.sl .top{display:flex;justify-content:space-between;gap:8px;font-size:15px}
+.sl .val{font-family:var(--font-num);font-weight:600;text-align:right}
+.sl .ends{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+input[type=range]{width:100%;height:44px;accent-color:var(--accent);margin:0}
+select{font:inherit;font-size:15px;min-height:44px;padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);width:100%}
+.kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;font-size:15px;margin:0}
+.kv dt{color:var(--muted)} .kv dd{margin:0;font-family:var(--font-num);font-variant-numeric:tabular-nums;text-align:right;overflow-wrap:anywhere}
+.bigfig{font-family:var(--font-num);font-size:clamp(22px,2.6vw,30px);font-weight:600;line-height:1.2;overflow-wrap:anywhere}
+.cmp{font-size:15px;background:var(--lane);border-radius:8px;padding:8px 12px}
+.opts{display:flex;flex-direction:column;gap:6px}
+.opts .btn{text-align:left;font-size:14px}
+.opts .btn.picked{border:2px solid var(--accent)}
+.opts .btn.right{background:color-mix(in srgb,var(--ok) 18%,var(--panel));border-color:var(--ok)}
+.ans{background:var(--lane);border-left:4px solid var(--ok);padding:8px 12px;border-radius:6px;font-size:15px}
+.muted{color:var(--muted);font-size:14px}
+details{border:1px solid var(--line);border-radius:var(--r);background:var(--panel);padding:0 14px}
+details[open]{padding-bottom:12px}
+summary{cursor:pointer;font-weight:700;min-height:44px;display:flex;align-items:center;font-size:15px}
+details p,details ul{margin:6px 0;font-size:15px;max-width:95ch}
+details ul{padding-left:20px}
+.fine{font-size:13px;color:var(--muted);margin:0}
+.two4{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media (max-width:560px){.two4{grid-template-columns:1fr}}
+.tblwrap{overflow-x:auto}
+table.log{border-collapse:collapse;width:100%;font-size:14px}
+table.log th,table.log td{padding:4px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+table.log th:first-child,table.log td:first-child{text-align:left}
+table.log td{font-family:var(--font-num);font-variant-numeric:tabular-nums}
+table.log th{color:var(--muted);font-weight:600}
+.kv dd.t,table.log td.t{font-family:var(--font-ui)}
+/* Dải video thực tế */
+.video{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center;background:var(--space);color:var(--star);
+  border-radius:var(--r);padding:12px 14px}
+.video .play{width:52px;height:52px;border-radius:50%;background:var(--force);display:grid;place-items:center;flex:none}
+.video .play::before{content:"";border-style:solid;border-width:10px 0 10px 17px;border-color:transparent transparent transparent #fff;margin-left:4px}
+.video .vt{display:flex;flex-direction:column;gap:2px;min-width:0}
+.video .lbl{font-size:12px;letter-spacing:.08em;text-transform:uppercase;opacity:.75;font-weight:600}
+.video .ttl{font-weight:700;font-size:16px;line-height:1.3}
+.video .look{font-size:14px;opacity:.9}
+.video .links{display:flex;flex-direction:column;gap:6px;align-items:stretch}
+.video a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:6px 14px;border-radius:8px;font-weight:700;font-size:15px;text-decoration:none;
+  background:var(--star);color:var(--space);white-space:nowrap}
+.video a.alt{background:transparent;color:var(--star);border:1px solid color-mix(in srgb,var(--star) 45%,transparent);font-weight:600;font-size:14px}
+.video .src{font-size:13px;opacity:.75}
+@media (max-width:720px){.video{grid-template-columns:auto minmax(0,1fr)}.video .links{grid-column:1/-1;flex-direction:row;flex-wrap:wrap}.video a{flex:1 1 160px}}
+/* Chế độ giáo viên: che số liệu để lớp dự đoán */
+body.hideNums .num{filter:blur(7px);user-select:none}
+body.hideNums .num:hover{filter:none}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+/* Bảng số liệu ngang, câu hỏi đọc đồ thị, thử thách */
+table.log.hz th,table.log.hz td{text-align:center;min-width:44px}
+table.log.hz th:first-child,table.log.hz td:first-child{text-align:left;position:sticky;left:0;background:var(--panel)}
+.quiz{display:flex;flex-direction:column;gap:12px}
+.qz{display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--line);padding-top:10px}
+.qz:first-child{border-top:0;padding-top:0}
+.qz .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.qz input{font:inherit;font-family:var(--font-num);font-size:16px;width:110px;min-height:44px;padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+.qz .unit{font-family:var(--font-num);color:var(--muted)}
+.qz .res{font-weight:700}
+.qz .res.ok{color:var(--ok)} .qz .res.no{color:var(--warn)}
+.stars{font-size:28px;letter-spacing:4px;color:var(--gold)}
+.big{font-family:var(--font-num);font-size:clamp(30px,5vw,48px);font-weight:600;line-height:1}
+.count{font-size:15px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow" data-i18n="eyebrow"></div>
+      <h1 data-i18n="title"></h1>
+    </div>
+    <div class="hbtns">
+      <button class="btn" id="gvBtn" aria-pressed="false" data-i18n="gvBtn"></button>
+      <button class="btn" id="langBtn">EN</button>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="1" data-i18n="tab1"></button>
+    <button role="tab" data-tab="2" data-i18n="tab2"></button>
+    <button role="tab" data-tab="3" data-i18n="tab3"></button>
+    <button role="tab" data-tab="4" data-i18n="tab4"></button>
+  </nav>
+
+  <!-- ===================== TAB 1: ĐO VÀ VẼ ĐỒ THỊ ===================== -->
+  <section id="t1" class="col">
+    <p class="req" data-i18n-html="req1"></p>
+    <div class="video" id="v1"></div>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" data-i18n="hint1a"></p>
+        <canvas id="cv1a" aria-label="toy car on a straight track"></canvas>
+        <div class="controls">
+          <button class="btn primary" id="run1"></button>
+          <button class="btn" id="step1" data-i18n="step1"></button>
+          <button class="btn" id="rst1" data-i18n="reset"></button>
+          <div class="seg" id="spd1"></div>
+        </div>
+        <div class="tblwrap"><table class="log hz" id="tb1"></table></div>
+        <p class="hint" data-i18n="hint1b"></p>
+        <canvas id="cv1b" class="drag" aria-label="distance-time grid for plotting"></canvas>
+        <p class="status" id="st1"></p>
+        <div class="controls">
+          <button class="btn primary" id="chk1" data-i18n="chk1"></button>
+          <label class="chk"><input type="checkbox" id="join1" checked> <span data-i18n="join1"></span></label>
+          <label class="chk"><input type="checkbox" id="true1"> <span data-i18n="true1"></span></label>
+          <button class="btn" id="auto1" data-i18n="auto1"></button>
+          <button class="btn" id="clr1" data-i18n="clr1"></button>
+        </div>
+        <div class="legend">
+          <span><i style="background:var(--accent)"></i><span data-i18n="lgMine"></span></span>
+          <span><i style="background:var(--laneB)"></i><span data-i18n="lgTrue"></span></span>
+        </div>
+        <p class="fine" data-i18n="assume1"></p>
+      </div>
+      <div class="col">
+        <div class="card">
+          <h2 data-i18n="setT1"></h2>
+          <div class="controls" id="pre1"></div>
+          <div class="sl"><div class="top"><span data-i18n="seg1"></span><span class="val" id="v1aV"></span></div>
+            <input type="range" id="v1a" min="0" max="0.5" step="0.05" value="0.3"></div>
+          <div class="sl"><div class="top"><span data-i18n="seg2"></span><span class="val" id="v1bV"></span></div>
+            <input type="range" id="v1b" min="0" max="0.5" step="0.05" value="0"></div>
+          <div class="sl"><div class="top"><span data-i18n="seg3"></span><span class="val" id="v1cV"></span></div>
+            <input type="range" id="v1c" min="0" max="0.5" step="0.05" value="0.5"></div>
+        </div>
+        <div class="card">
+          <h2 data-i18n="obs"></h2>
+          <dl class="kv" id="o1"></dl>
+          <div id="o1seg"></div>
+        </div>
+        <div class="card" id="p1"></div>
+        <div class="card" id="p1b"></div>
+      </div>
+    </div>
+    <details open><summary data-i18n="mechT"></summary><div data-i18n-html="mech1"></div></details>
+    <details><summary data-i18n="simpleT"></summary><div data-i18n-html="simple1"></div></details>
+    <details><summary data-i18n="wordT1"></summary><div data-i18n-html="word1"></div></details>
+  </section>
+
+  <!-- ===================== TAB 2: ĐỌC ĐỒ THỊ ===================== -->
+  <section id="t2" class="col" hidden>
+    <p class="req" data-i18n-html="req2"></p>
+    <div class="video" id="v2"></div>
+    <div class="lab">
+      <div class="stage">
+        <div class="seg" id="sc2"></div>
+        <p class="hint" id="desc2"></p>
+        <canvas id="cv2a" aria-label="moving object on a road"></canvas>
+        <p class="hint" data-i18n="hint2"></p>
+        <canvas id="cv2b" class="drag" aria-label="distance-time graph with a reading cursor"></canvas>
+        <p class="status" id="st2"></p>
+        <div class="controls">
+          <button class="btn primary" id="play2"></button>
+          <label class="chk"><input type="checkbox" id="tri2" checked> <span data-i18n="tri2"></span></label>
+        </div>
+        <div class="legend">
+          <span><i style="background:var(--laneA)"></i><span data-i18n="lgGraph"></span></span>
+          <span><i style="background:var(--vel)"></i><span data-i18n="lgTri"></span></span>
+        </div>
+        <p class="fine" id="assume2"></p>
+      </div>
+      <div class="col">
+        <div class="card">
+          <h2 data-i18n="obs"></h2>
+          <dl class="kv" id="o2"></dl>
+        </div>
+        <div class="card">
+          <h2 data-i18n="quizT"></h2>
+          <div class="quiz" id="quiz2"></div>
+        </div>
+        <div class="card" id="p2"></div>
+      </div>
+    </div>
+    <details open><summary data-i18n="mechT"></summary><div data-i18n-html="mech2"></div></details>
+    <details><summary data-i18n="simpleT"></summary><div data-i18n-html="simple2"></div></details>
+    <details><summary data-i18n="wordT2"></summary><div data-i18n-html="word2"></div></details>
+  </section>
+
+  <!-- ===================== TAB 3: ĐỒ THỊ KHÔNG PHẢI CON ĐƯỜNG ===================== -->
+  <section id="t3" class="col" hidden>
+    <p class="req" data-i18n-html="req3"></p>
+    <div class="video" id="v3"></div>
+    <div class="lab">
+      <div class="stage">
+        <div class="seg" id="path3"></div>
+        <p class="hint" id="hint3"></p>
+        <canvas id="cv3a" class="drag" aria-label="map of the path walked"></canvas>
+        <canvas id="cv3b" aria-label="distance-time graph of the walk"></canvas>
+        <p class="status" id="st3"></p>
+        <div class="controls">
+          <div class="seg" id="mode3"></div>
+          <button class="btn primary" id="run3"></button>
+          <button class="btn" id="rst3" data-i18n="reset"></button>
+          <div class="seg" id="spd3"></div>
+        </div>
+        <div class="controls" id="prof3wrap">
+          <label class="chk"><input type="checkbox" id="prof3"> <span data-i18n="prof3"></span></label>
+        </div>
+        <div class="legend">
+          <span><i style="background:var(--laneB)"></i><span data-i18n="lgPath"></span></span>
+          <span><i style="background:var(--laneA)"></i><span data-i18n="lgGraph"></span></span>
+        </div>
+        <p class="fine" data-i18n="assume3"></p>
+      </div>
+      <div class="col">
+        <div class="card">
+          <h2 data-i18n="set3"></h2>
+          <div class="sl"><div class="top"><span data-i18n="spd3"></span><span class="val" id="vw3V"></span></div>
+            <input type="range" id="vw3" min="0.5" max="3" step="0.1" value="1.4"></div>
+        </div>
+        <div class="card">
+          <h2 data-i18n="obs"></h2>
+          <dl class="kv" id="o3"></dl>
+          <p class="cmp" id="o3cmp"></p>
+        </div>
+        <div class="card" id="p3"></div>
+        <div class="card" id="p3b"></div>
+      </div>
+    </div>
+    <details open><summary data-i18n="mechT"></summary><div data-i18n-html="mech3"></div></details>
+    <details><summary data-i18n="simpleT"></summary><div data-i18n-html="simple3"></div></details>
+    <details><summary data-i18n="wordT3"></summary><div data-i18n-html="word3"></div></details>
+  </section>
+
+  <!-- ===================== TAB 4: THỬ THÁCH ĐI THEO ĐỒ THỊ ===================== -->
+  <section id="t4" class="col" hidden>
+    <p class="req" data-i18n-html="req4"></p>
+    <div class="video" id="v4"></div>
+    <div class="lab">
+      <div class="stage">
+        <div class="seg" id="lvl4"></div>
+        <p class="hint" id="hint4"></p>
+        <canvas id="cv4a" class="drag" aria-label="corridor where you move the walker"></canvas>
+        <canvas id="cv4b" aria-label="target and your distance-time graph"></canvas>
+        <p class="status" id="st4"></p>
+        <div class="controls">
+          <button class="btn primary" id="go4" data-i18n="go4"></button>
+          <div class="seg" id="mode4"></div>
+        </div>
+        <div class="sl" id="vs4wrap" hidden><div class="top"><span data-i18n="spd4"></span><span class="val" id="vs4V"></span></div>
+          <input type="range" id="vs4" min="0" max="3" step="0.1" value="0"><div class="ends"><span data-i18n="stand"></span><span>3 m/s</span></div></div>
+        <div class="legend">
+          <span><i style="background:var(--muted)"></i><span data-i18n="lgTarget"></span></span>
+          <span><i style="background:var(--accent)"></i><span data-i18n="lgYou"></span></span>
+        </div>
+        <p class="fine" data-i18n="assume4"></p>
+      </div>
+      <div class="col">
+        <div class="card">
+          <h2 data-i18n="obs"></h2>
+          <div class="big num" id="o4t"></div>
+          <dl class="kv" id="o4"></dl>
+          <div id="o4res"></div>
+        </div>
+        <div class="card" id="p4"></div>
+        <div class="card" id="p4b"></div>
+      </div>
+    </div>
+    <details open><summary data-i18n="mechT"></summary><div data-i18n-html="mech4"></div></details>
+    <details><summary data-i18n="simpleT"></summary><div data-i18n-html="simple4"></div></details>
+  </section>
+
+  <p class="fine" data-i18n-html="footer"></p>
+</div>
+<script>
+/* ================= Chuỗi song ngữ ================= */
+const I18N={vi:{
+eyebrow:'KHTN 7 · Tốc độ · Đồ thị quãng đường – thời gian',title:'Đồ thị quãng đường – thời gian',
+gvBtn:'Che số liệu',tab1:'1. Đo và vẽ đồ thị',tab2:'2. Đọc đồ thị',tab3:'3. Đồ thị không phải con đường',tab4:'4. Thử thách: đi theo đồ thị',
+reset:'Đặt lại',obs:'Số liệu',mechT:'Cơ chế khoa học',simpleT:'Giải thích cho học sinh',
+predTitle:'Dự đoán trước',predThen:'Chạy thí nghiệm để kiểm tra, rồi xem đáp án.',showAns:'Xem đáp án',hideAns:'Ẩn đáp án',
+run:'▶ Chạy',pause:'⏸ Tạm dừng',again:'▶ Chạy lại',
+vLbl:'Video thực tế',vOpen:'Mở video',vAlt:'Video khác',vNote:'Video mở ở thẻ mới (YouTube).',
+lgGraph:'Đồ thị s–t',check:'Kiểm tra',answer:'Đáp án',right:'✓ Đúng',wrong:'✗ Chưa đúng',
+footer:'Mô phỏng thuộc bộ <b>Mô phỏng Vật lí 6789</b> (KHTN THCS, chương trình GDPT 2018). Kí hiệu: s là quãng đường (m, km), t là thời gian (s, phút, h), v là tốc độ (m/s, km/h); 1 m/s = 3,6 km/h.',
+
+/* Tab 1 */
+req1:'<b>Yêu cầu cần đạt (KHTN 7):</b> Vẽ được đồ thị quãng đường – thời gian cho chuyển động thẳng. Xác định được tốc độ qua quãng đường vật đi được trong khoảng thời gian tương ứng.',
+hint1a:'Chọn tốc độ của xe đồ chơi trong ba đoạn thời gian rồi bấm Chạy. Cứ mỗi giây, máy ảnh “chụp” vị trí xe và ghi vào bảng.',
+hint1b:'Đến lượt em: chạm vào lưới để chấm điểm (t; s) theo bảng số liệu. Chạm lại cùng cột thời gian để sửa, kéo điểm để chỉnh.',
+step1:'Bước +1 s',chk1:'Kiểm tra điểm',join1:'Nối các điểm',true1:'Hiện đồ thị đúng',auto1:'Chấm hộ',clr1:'Xoá các điểm',
+lgMine:'Điểm em chấm',lgTrue:'Đồ thị đúng',
+assume1:'Giả thiết mô phỏng: xe chạy trên đường thẳng; trong mỗi đoạn tốc độ không đổi và đổi tốc độ ngay lập tức (thật ra xe cần một khoảng thời gian ngắn để tăng tốc, giảm tốc).',
+setT1:'Tốc độ của xe trong từng đoạn',seg1:'Đoạn 1: từ 0 s đến 4 s',seg2:'Đoạn 2: từ 4 s đến 6 s',seg3:'Đoạn 3: từ 6 s đến 10 s',
+preU:'Chạy đều',preS:'Chạy – dừng – chạy',preF:'Chậm rồi nhanh',
+o1t:'Thời gian t',o1s:'Quãng đường s',o1v:'Tốc độ lúc này',o1segT:'Tốc độ từng đoạn, tính từ bảng: v = Δs / Δt',
+tbT:'t (s)',tbS:'s (m)',
+st1Ready:'Bấm Chạy để xe chuyển động và ghi số liệu.',st1Run:'Xe đang chạy, bảng số liệu đang được ghi…',st1Done:'Đã ghi đủ 11 cặp số liệu. Hãy chấm các điểm lên lưới.',
+st1Chk:'{n}/11 điểm đúng.',st1All:'Tuyệt vời: cả 11 điểm đều đúng!',st1None:'Em chưa chấm điểm nào.',st1Need:'Hãy chạy xe hết 10 s để có đủ số liệu trước khi kiểm tra.',
+st1Miss:' Còn thiếu {m} điểm.',segL:'Đoạn {i} ({a}–{b} s)',stopped:'đứng yên',
+p1q:'Trong đoạn 1, xe chạy đều 0,3 m/s. Các điểm (t; s) trên đồ thị sẽ…',
+p1a:'Nằm trên một đường nằm ngang',p1b:'Nằm trên một đường thẳng dốc lên, đi qua gốc toạ độ',p1c:'Nằm trên một đường cong, càng lúc càng dốc',
+p1e:'Mỗi giây xe đi thêm 0,3 m bằng nhau, nên s tăng đều theo t (s = v·t): các điểm thẳng hàng và đường thẳng đi qua gốc O (lúc t = 0 thì s = 0).',
+p1bq:'Từ 4 s đến 6 s xe dừng lại. Đoạn đồ thị lúc này sẽ…',
+p1ba:'Đi xuống trở về trục thời gian',p1bb:'Nằm ngang (song song với trục thời gian)',p1bc:'Dựng đứng lên',
+p1be:'Xe đứng yên thì quãng đường đã đi không tăng nữa nhưng thời gian vẫn trôi: đồ thị nằm ngang. Đồ thị không đi xuống, vì quãng đường đã đi không thể “mất đi”.',
+mech1:'<p>Đồ thị quãng đường – thời gian có trục nằm ngang là thời gian t, trục thẳng đứng là quãng đường s mà vật đã đi được kể từ lúc bắt đầu tính giờ. Mỗi lần đo cho một cặp số (t; s), tức là một điểm trên mặt phẳng toạ độ. Nối các điểm đo theo thứ tự thời gian ta được đồ thị.</p><ul><li><b>Chuyển động có tốc độ không đổi:</b> s = v·t, s tỉ lệ thuận với t, nên đồ thị là một đoạn thẳng xiên. Nếu bắt đầu tính giờ lúc vật xuất phát thì đoạn thẳng đi qua gốc toạ độ.</li><li><b>Độ dốc của đoạn thẳng</b> chính là tốc độ: v = Δs / Δt (quãng đường đi thêm chia cho thời gian tương ứng). Đoạn càng dốc thì tốc độ càng lớn.</li><li><b>Vật đứng yên:</b> Δs = 0, đồ thị nằm ngang.</li><li>Quãng đường đã đi không bao giờ giảm, nên đồ thị s–t không bao giờ đi xuống.</li></ul><p>Chỗ mô phỏng đơn giản hoá: xe đổi tốc độ tức thời, nên đồ thị gãy khúc sắc nét. Xe thật cần một khoảng thời gian ngắn để tăng tốc, giảm tốc, nên chỗ gãy hơi cong.</p>',
+simple1:'<p>Hãy coi đồ thị như <b>cuốn nhật kí của chiếc xe</b>: cứ mỗi giây, xe ghi lại “từ lúc xuất phát mình đã đi được bao xa”.</p><ul><li>Xe chạy đều: mỗi giây ghi thêm một đoạn bằng nhau, các điểm xếp thành bậc thang đều, nối lại thành <b>đường thẳng</b>.</li><li>Xe chạy nhanh: mỗi giây thêm đoạn dài, đường <b>dốc</b>. Xe chạy chậm: đường <b>thoải</b>.</li><li>Xe dừng: nhật kí ghi mãi một con số, đường <b>nằm ngang</b>.</li></ul>',
+wordT1:'Nguồn gốc từ: “đồ thị”, “tốc độ”',
+word1:'<ul><li><b>Đồ thị</b> là từ Hán Việt 圖示: <i>đồ</i> 圖 là bức vẽ, bản vẽ (như trong bản đồ, đồ hoạ); <i>thị</i> 示 là bày ra cho thấy (như trong chỉ thị, biểu thị). Nghĩa gốc: hình vẽ để bày ra cho người xem thấy. Tiếng Nhật dùng 図示 (zushi) với nghĩa “minh hoạ bằng hình”; tiếng Trung hiện đại gọi đồ thị là 图像 (túxiàng) hoặc 图表 (túbiǎo).</li><li>Tiếng Anh <i>graph</i>, tiếng Pháp <i>graphique</i>, tiếng Nga <i>график</i> đều từ tiếng Hy Lạp <i>graphein</i> là viết, vẽ (cùng gốc với <i>photograph</i>, <i>autograph</i>). Nhà toán học J. J. Sylvester dùng chữ <i>graph</i> năm 1878, rút gọn từ “graphic notation” (kí hiệu bằng hình vẽ).</li><li><b>Tốc độ</b> 速度: <i>tốc</i> 速 là nhanh (như cấp tốc, tốc hành), <i>độ</i> 度 là mức, thước đo (như nhiệt độ, độ dài). Vậy tốc độ là “mức độ nhanh”. Tiếng Anh <i>speed</i> từ tiếng Anh cổ <i>spēd</i>, lúc đầu nghĩa là thành công, may mắn (còn trong câu chúc “Godspeed”), về sau mới thành sự nhanh nhẹn. Chữ <i>velocity</i> từ tiếng Latinh <i>velox</i> là nhanh.</li><li><b>Quãng đường</b> là từ thuần Việt: <i>quãng</i> là một khoảng, một đoạn.</li></ul>',
+
+/* Tab 2 */
+req2:'<b>Yêu cầu cần đạt (KHTN 7):</b> Từ đồ thị quãng đường – thời gian cho trước, tìm được quãng đường vật đi (hoặc tốc độ, hay thời gian chuyển động của vật). Liệt kê được một số đơn vị đo tốc độ thường dùng.',
+hint2:'Kéo vạch dọc trên đồ thị để đọc t và s (vật trên đường đi theo). Kéo hai chấm A, B để đo tốc độ trong đoạn giữa hai chấm.',
+tri2:'Tam giác tốc độ A–B',lgTri:'Δs, Δt giữa A và B',play2:'▶ Phát lại chuyển động',stop2:'⏸ Dừng',
+scBus:'Xe buýt',scBolt:'Usain Bolt 100 m',scCat:'Con mèo',
+descBus:'Xe buýt rời trạm A, chạy đến trạm B thì dừng đón khách, rồi chạy tiếp đến bến cuối.',
+descBolt:'Số liệu thật: kỉ lục thế giới 100 m của Usain Bolt (Berlin, 16/8/2009, 9,58 s). Thời gian được đo ở mỗi mốc 10 m.',
+descCat:'Con mèo rình mồi: bước chậm, đứng im rình, vồ thật nhanh rồi đứng lại ăn.',
+asBus:'Giả thiết: xe đổi tốc độ tức thời; số liệu là ví dụ minh hoạ.',
+asBolt:'Nguồn số liệu: thời gian qua từng mốc 10 m do Liên đoàn Điền kinh thế giới (IAAF) đo trong báo cáo cơ sinh học Berlin 2009, gồm cả 0,146 s phản xạ sau tiếng súng. Giữa các mốc, đồ thị được nối mượt.',
+asCat:'Giả thiết: mèo đổi tốc độ tức thời; số liệu là ví dụ minh hoạ.',
+o2t:'Vạch đọc: t',o2s:'Vạch đọc: s',o2A:'Chấm A',o2B:'Chấm B',o2dt:'Δt = tB − tA',o2ds:'Δs = sB − sA',o2v:'Tốc độ AB = Δs / Δt',o2vc:'Đổi đơn vị',
+st2:'Lúc t = {t}, vật đã đi được s = {s}.',
+quizT:'Đọc đồ thị và trả lời',
+qBus1:'Sau 15 phút, xe buýt đi được bao nhiêu km?',qBus1e:'Kẻ vạch dọc ở t = 15 phút, gặp đồ thị ở s = 9 km. (Đoạn đầu: 12 km trong 20 phút.)',
+qBus2:'Xe buýt dừng ở trạm B bao nhiêu phút?',qBus2e:'Đoạn nằm ngang từ phút 20 đến phút 30: dừng 10 phút.',
+qBus3:'Tốc độ của xe từ phút 30 đến phút 50 là bao nhiêu km/h?',qBus3e:'Δs = 27 − 12 = 15 km, Δt = 20 phút = 1/3 h, v = 15 : (1/3) = 45 km/h (= 12,5 m/s).',
+qBus4:'Xe đi được 21 km sau bao nhiêu phút?',qBus4e:'Kẻ vạch ngang ở s = 21 km, gặp đồ thị ở t = 42 phút (sau trạm B, xe đi 9 km với tốc độ 0,75 km/phút mất 12 phút: 30 + 12 = 42).',
+qBolt1:'Bolt chạy 50 m đầu tiên hết bao nhiêu giây?',qBolt1e:'Kẻ vạch ngang ở s = 50 m, gặp đồ thị ở t = 5,47 s.',
+qBolt2:'Tốc độ trung bình của Bolt trên cả 100 m là bao nhiêu m/s?',qBolt2e:'v = 100 m : 9,58 s ≈ 10,4 m/s (≈ 37,6 km/h).',
+qBolt3:'Tốc độ của Bolt trong đoạn từ 60 m đến 70 m là bao nhiêu m/s?',qBolt3e:'Δs = 10 m, Δt = 7,10 − 6,29 = 0,81 s, v = 10 : 0,81 ≈ 12,3 m/s (≈ 44 km/h). Đây là đoạn Bolt chạy nhanh nhất.',
+qBolt4:'Vì sao đoạn đầu đồ thị cong lên, còn đoạn sau gần như thẳng?',qBolt4e:'Lúc mới xuất phát Bolt còn chậm và tăng tốc dần, nên đồ thị dốc dần lên (cong). Từ khoảng 50–60 m, tốc độ gần như không đổi, nên đồ thị gần như thẳng.',
+qCat1:'Mèo đứng im rình mồi trong bao nhiêu giây?',qCat1e:'Đoạn nằm ngang đầu tiên từ 2 s đến 4 s: 2 giây.',
+qCat2:'Tốc độ của mèo khi vồ mồi (từ 4 s đến 5 s) là bao nhiêu m/s?',qCat2e:'Δs = 5 − 1 = 4 m trong Δt = 1 s, v = 4 m/s (= 14,4 km/h).',
+qCat3:'Lúc mèo bước chậm (0–2 s), tốc độ là bao nhiêu m/s?',qCat3e:'Δs = 1 m, Δt = 2 s, v = 0,5 m/s.',
+qCat4:'Đoạn nào dốc nhất? Điều đó cho biết gì?',qCat4e:'Đoạn 4 s – 5 s dốc nhất: mèo chạy nhanh nhất lúc vồ mồi. Đoạn nằm ngang là lúc mèo đứng yên.',
+p2q:'Trên đồ thị xe buýt, đoạn từ phút 20 đến phút 30 nằm ngang. Lúc đó xe buýt…',
+p2a:'Đang chạy trên đoạn đường bằng phẳng',p2b:'Đang chạy với tốc độ không đổi',p2c:'Đang đứng yên ở trạm',
+p2e:'Nằm ngang nghĩa là s không đổi trong khi t vẫn tăng: xe không đi thêm mét nào, tức là đứng yên. Đồ thị không cho biết đường bằng hay dốc.',
+mech2:'<p>Đọc đồ thị s–t là dùng mối liên hệ giữa hai trục:</p><ul><li><b>Biết t, tìm s:</b> từ t trên trục ngang kẻ đường thẳng đứng lên gặp đồ thị, rồi kẻ ngang sang trục s.</li><li><b>Biết s, tìm t:</b> làm ngược lại, từ s trên trục đứng kẻ ngang gặp đồ thị rồi kẻ xuống trục t.</li><li><b>Tìm tốc độ:</b> chọn hai điểm A, B trên một đoạn thẳng của đồ thị, v = Δs / Δt = (sB − sA) / (tB − tA). Với đoạn cong (như lúc Bolt tăng tốc), cách này cho tốc độ trung bình trong khoảng AB.</li></ul><p><b>Đơn vị tốc độ</b> là đơn vị quãng đường chia cho đơn vị thời gian: m/s (đơn vị SI), km/h, km/phút, cm/s… Đổi: 1 m/s nghĩa là mỗi giờ (3600 s) đi được 3600 m = 3,6 km, vậy 1 m/s = 3,6 km/h.</p>',
+simple2:'<p>Muốn biết “lúc này đi được bao xa”: đi <b>lên</b> từ trục thời gian đến đồ thị, rồi đi <b>sang</b> trục quãng đường. Muốn biết tốc độ: xem trong một khoảng thời gian, vật đi thêm được bao nhiêu mét, rồi chia ra.</p><p>Mẹo nhớ: đồ thị càng <b>dốc</b> càng <b>nhanh</b>; nằm <b>ngang</b> là <b>đứng yên</b>.</p>',
+wordT2:'Các đơn vị đo tốc độ và nguồn gốc',
+word2:'<ul><li><b>m/s</b> (mét trên giây) là đơn vị SI. <i>Mét</i> từ tiếng Pháp <i>mètre</i>, gốc Hy Lạp <i>metron</i> là thước đo.</li><li><b>km/h</b> (ki-lô-mét trên giờ) dùng trên đồng hồ tốc độ xe ở Việt Nam. <i>Kilo</i> từ Hy Lạp <i>khilioi</i> là một nghìn.</li><li><b>dặm/giờ (mph)</b> dùng ở Anh, Mỹ; 1 dặm ≈ 1,609 km. <i>Mile</i> từ Latinh <i>mille passus</i> là “một nghìn bước kép” của lính La Mã.</li><li><b>Hải lí/giờ (knot, “nút”)</b> dùng cho tàu thuyền, máy bay; 1 hải lí/giờ = 1,852 km/h. Thuỷ thủ xưa thả xuống biển một sợi dây có thắt nút cách đều, rồi đếm số nút trôi qua tay trong lúc đồng hồ cát chảy hết. Vì vậy tiếng Anh gọi đơn vị này là <i>knot</i> (cái nút).</li><li><b>Số Mach</b> dùng cho máy bay nhanh: Mach 1 là bằng tốc độ âm thanh trong không khí, đặt theo tên nhà vật lí Áo Ernst Mach.</li></ul>',
+
+/* Tab 3 */
+req3:'<b>Hiểu sai thường gặp:</b> nhiều học sinh nghĩ đồ thị s–t là “hình con đường” vật đi. Tab này cho em vẽ con đường (quỹ đạo) và đồ thị s–t cạnh nhau để so sánh. Liên quan yêu cầu: vẽ được và đọc được đồ thị quãng đường – thời gian cho chuyển động.',
+paStr:'Đường thẳng',paS:'Đường chữ S',paHill:'Lên dốc, xuống dốc',paLoop:'Vòng quanh sân',
+h3auto:'Bản đồ ở trên là con đường thật (quỹ đạo). Bấm Chạy: bạn nhỏ đi hết con đường, đồ thị s–t ở dưới được vẽ cùng lúc.',
+h3drag:'Tự kéo bạn nhỏ đi dọc con đường (đi tới, đứng lại, quay lại đều được). Đồng hồ chạy từ lúc em chạm vào.',
+h3hill:' Đây là hình nhìn ngang con dốc.',
+mAuto:'Tự động',mDrag:'Tự kéo',prof3:'Đi theo địa hình (lên dốc chậm, xuống dốc nhanh)',
+lgPath:'Con đường đã đi (quỹ đạo)',
+assume3:'Giả thiết mô phỏng: coi bạn nhỏ là một chấm; quãng đường là độ dài đoạn đường đã đi dọc con đường, cộng cả khi đi tới lẫn khi quay lại.',
+set3:'Tốc độ đi bộ',spd3:'Tốc độ (khi tự động)',
+o3t:'Thời gian t',o3s:'Quãng đường đã đi s',o3v:'Tốc độ lúc này',o3L:'Độ dài con đường',o3h:'Độ cao so với chân dốc',
+cmpStr:'Con đường thẳng và đồ thị cũng thẳng: hai hình giống nhau chỉ là tình cờ. Hãy thử “Đường chữ S”.',
+cmpS:'Con đường uốn lượn chữ S, nhưng đồ thị s–t vẫn là đường thẳng: tốc độ không đổi thì mỗi giây đi thêm một quãng như nhau, dù đường rẽ trái hay phải.',
+cmpHill:'Con dốc có hình ∧ (lên rồi xuống), nhưng đồ thị s–t luôn đi lên. Khi xuống dốc, quãng đường vẫn tăng.',
+cmpHillP:'Lên dốc đi chậm nên đồ thị thoải; xuống dốc đi nhanh nên đồ thị dốc hơn. Đồ thị dốc nhất lại ứng với lúc đi xuống dốc!',
+cmpLoop:'Đi một vòng về đúng chỗ xuất phát, nhưng quãng đường đã đi không về 0: đồ thị vẫn đi lên, không quay về.',
+cmpDrag:'Dù em kéo đi tới hay quay lại, đồ thị s–t chỉ đi lên hoặc nằm ngang (lúc em giữ yên), không bao giờ đi xuống.',
+st3Ready:'Sẵn sàng.',st3Run:'Đang đi…',st3Done:'Đã đi hết con đường.',st3DragWait:'Chạm vào bạn nhỏ và kéo dọc con đường.',st3DragRun:'Đồng hồ đang chạy. Giữ yên một lúc để xem đồ thị nằm ngang.',st3DragEnd:'Hết 60 s. Bấm Đặt lại để thử lại.',
+p3q:'Lan đi với tốc độ không đổi trên con đường uốn lượn hình chữ S. Đồ thị s–t của Lan có dạng…',
+p3a:'Uốn lượn hình chữ S giống con đường',p3b:'Một đường thẳng dốc lên',p3c:'Một đường gợn sóng đi lên',
+p3e:'Đồ thị s–t chỉ ghi “đã đi bao xa” theo thời gian, không ghi hướng rẽ. Tốc độ không đổi thì s tăng đều, đồ thị là đường thẳng.',
+p3bq:'Chọn “Lên dốc, xuống dốc” và bật “Đi theo địa hình”. Khi Lan đi xuống dốc, đường đồ thị s–t…',
+p3ba:'Đi xuống, giống con dốc',p3bb:'Vẫn đi lên, và dốc hơn lúc lên dốc',p3bc:'Nằm ngang',
+p3be:'Xuống dốc thì quãng đường vẫn tăng, nên đồ thị vẫn đi lên. Lan đi xuống nhanh hơn lúc leo lên, nên đoạn đồ thị này còn dốc hơn. Độ dốc của đồ thị là tốc độ, không phải độ dốc của con đường.',
+mech3:'<p><b>Quỹ đạo</b> và <b>đồ thị s–t</b> là hai hình vẽ khác hẳn nhau:</p><ul><li>Quỹ đạo là tập hợp các vị trí vật đi qua, vẽ trên bản đồ (hoặc hình nhìn ngang). Cả hai chiều của hình đều là chiều dài (mét).</li><li>Đồ thị s–t có trục ngang là <b>thời gian</b>, trục đứng là quãng đường đã đi. Mỗi điểm trên đồ thị trả lời câu hỏi: “đến giây thứ t, vật đã đi được bao nhiêu mét?”.</li><li>Vì quãng đường đã đi chỉ cộng thêm, không trừ đi, nên đồ thị s–t không bao giờ đi xuống, kể cả khi vật rẽ, xuống dốc hay quay đầu.</li><li>Độ dốc của đồ thị s–t là tốc độ (v = Δs / Δt), không liên quan độ dốc của mặt đường.</li></ul><p>(Lên lớp 10 các em sẽ gặp đồ thị độ dịch chuyển – thời gian; đồ thị đó có thể đi xuống khi vật quay lại. Ở lớp 7 ta chỉ dùng quãng đường.)</p>',
+simple3:'<p>Con đường giống <b>sợi dây</b> em trải trên sân: nó cong, vòng, lên dốc tuỳ ý. Đồ thị s–t giống <b>cái thước dây trong túi</b> em kéo ra theo mỗi bước chân: dù em đi đường nào, thước chỉ dài thêm ra, không bao giờ ngắn lại.</p><p>Vậy khi nhìn đồ thị s–t, đừng hỏi “đường đi ra sao?”, hãy hỏi “<b>đi nhanh hay chậm, có lúc nào dừng không?</b>”.</p>',
+wordT3:'Nguồn gốc từ: “quỹ đạo”',
+word3:'<ul><li><b>Quỹ đạo</b> 軌道: <i>quỹ</i> 軌 là vết bánh xe, đường ray (như trong quỹ tích); <i>đạo</i> 道 là đường. Nghĩa gốc: con đường mà bánh xe để lại vết. Trong vật lí, quỹ đạo là đường mà vật vạch ra khi chuyển động.</li><li>Tiếng Trung hiện đại phân biệt 轨迹 (guǐjì, “vết đường đi”, tức quỹ đạo của một vật bất kì) với 轨道 (guǐdào, đường ray, quỹ đạo vệ tinh). Tiếng Nhật 軌道 (kidō).</li><li>Tiếng Anh <i>trajectory</i> từ Latinh <i>traicere</i> là “ném qua” (<i>trans</i> là qua, <i>iacere</i> là ném): lúc đầu chỉ đường bay của viên đạn, hòn đá ném. Tiếng Pháp <i>trajectoire</i>, tiếng Nga <i>траектория</i>.</li><li>Tiếng Anh thường gọi đồ thị s–t là <i>distance–time graph</i>; còn con đường là <i>path</i>. Hai chữ khác nhau, cũng như hai hình vẽ khác nhau.</li></ul>',
+
+/* Tab 4 */
+req4:'<b>Thử thách:</b> nhìn đồ thị mẫu rồi tự di chuyển bạn nhỏ sao cho đồ thị của em trùng với đồ thị mẫu. Luyện đọc đồ thị: nằm ngang là đứng yên, càng dốc càng nhanh. Liên quan yêu cầu: từ đồ thị tìm được quãng đường, tốc độ, thời gian.',
+L1:'Màn 1',L2:'Màn 2',L3:'Màn 3',L4:'Màn 4',
+hint4:'Trước khi bấm Bắt đầu, hãy nói thành lời: đồ thị mẫu bảo em đi thế nào? Sau đếm ngược, kéo bạn nhỏ trong hành lang (chỉ đi tới hoặc đứng lại).',
+hint4s:'Trước khi bấm Bắt đầu, hãy nói thành lời: đồ thị mẫu bảo em đi thế nào? Sau đếm ngược, dùng thanh trượt chỉnh tốc độ.',
+go4:'Bắt đầu',md4Drag:'Kéo bằng tay',md4Sl:'Thanh trượt tốc độ',spd4:'Tốc độ',stand:'Đứng yên',
+lgTarget:'Đồ thị mẫu',lgYou:'Đồ thị của em',
+assume4:'Thời gian thử thách chạy theo thời gian thật. Hành lang dài 16 m, mỗi mét trên màn hình ứng với 1 m thật.',
+o4s:'Quãng đường s',o4v:'Tốc độ lúc này',o4tg:'Mẫu lúc này',o4err:'Lệch trung bình',
+st4Ready:'Bấm Bắt đầu. Có 3 giây đếm ngược.',st4Count:'Chuẩn bị… {n}',st4Go:'Đi!',st4Done:'Xong! Lệch trung bình {e} so với mẫu.',
+res3:'Xuất sắc! Đồ thị gần như trùng khít.',res2:'Khá tốt! Thử lại để khớp hơn ở các chỗ gãy.',res1:'Gần được rồi. Xem lại đoạn nào lệch nhiều nhất.',res0:'Chưa khớp. Đọc lại đồ thị: nằm ngang là đứng yên, dốc là đi nhanh.',
+p4q:'Màn 2 có đoạn nằm ngang từ 4 s đến 7 s. Để khớp đồ thị, lúc đó em phải…',
+p4a:'Đi trên đoạn đường bằng phẳng',p4b:'Đứng yên',p4c:'Đi ngang sang một bên',
+p4e:'Nằm ngang nghĩa là quãng đường không tăng: em phải đứng yên tại chỗ cho đến giây thứ 7.',
+p4bq:'Màn 3: đoạn sau dốc hơn đoạn đầu. Em phải…',
+p4ba:'Đi nhanh hơn ở đoạn sau',p4bb:'Đi chậm lại ở đoạn sau',p4bc:'Đi lên chỗ cao hơn',
+p4be:'Dốc hơn nghĩa là mỗi giây đi thêm nhiều mét hơn: phải đi nhanh hơn. Ở màn 3, đoạn đầu 0,5 m/s, đoạn sau 2 m/s.',
+mech4:'<p>Trò “đi theo đồ thị” (graph matching) mô phỏng một thí nghiệm nổi tiếng: học sinh đi trước cảm biến siêu âm và nhìn đồ thị của chính mình hiện lên ngay trên máy tính. Nghiên cứu của R. Thornton và D. Sokoloff (1990) cho thấy học sinh được tự đi và thấy đồ thị ngay lập tức hiểu đồ thị chuyển động tốt hơn hẳn so với chỉ nghe giảng.</p><p>Muốn khớp đồ thị, em phải dịch mỗi đoạn của đồ thị thành hành động: đoạn nằm ngang → đứng yên; đoạn thẳng xiên → đi đều; tốc độ cần đi = Δs / Δt của đoạn đó. Ví dụ màn 2, đoạn cuối: (10 − 4) m / (12 − 7) s = 1,2 m/s.</p>',
+simple4:'<p>Đồ thị mẫu là một “bản hướng dẫn đi đường” viết bằng hình. Đọc từ trái sang phải giống như đọc theo đồng hồ: đến giây này thì phải đứng ở mét này. Đường lên dốc đứng: chạy! Đường nằm ngang: đứng im!</p>'
+},
+en:{
+eyebrow:'Science 7 · Speed · Distance–time graphs',title:'Distance–time graphs',
+gvBtn:'Hide numbers',tab1:'1. Measure and plot',tab2:'2. Read a graph',tab3:'3. A graph is not the path',tab4:'4. Challenge: walk the graph',
+reset:'Reset',obs:'Data',mechT:'Scientific mechanism',simpleT:'Explanation for students',
+predTitle:'Predict first',predThen:'Run the experiment to check, then reveal the answer.',showAns:'Show answer',hideAns:'Hide answer',
+run:'▶ Run',pause:'⏸ Pause',again:'▶ Run again',
+vLbl:'Real-world video',vOpen:'Open video',vAlt:'Another video',vNote:'Videos open in a new tab (YouTube).',
+lgGraph:'s–t graph',check:'Check',answer:'Answer',right:'✓ Correct',wrong:'✗ Not yet',
+footer:'Part of the <b>Physics simulations 6789</b> collection (lower-secondary science, Vietnam 2018 curriculum). Symbols: s is distance travelled (m, km), t is time (s, min, h), v is speed (m/s, km/h); 1 m/s = 3.6 km/h.',
+req1:'<b>Learning outcome (Science 7):</b> Plot a distance–time graph for straight-line motion. Find speed from the distance travelled in a given time.',
+hint1a:'Choose the toy car’s speed in three time intervals, then press Run. Every second a camera “snaps” the car’s position and writes it into the table.',
+hint1b:'Your turn: tap the grid to plot each point (t; s) from the table. Tap the same time column again to correct it, or drag a point.',
+step1:'Step +1 s',chk1:'Check points',join1:'Join the points',true1:'Show correct graph',auto1:'Plot for me',clr1:'Clear points',
+lgMine:'Your points',lgTrue:'Correct graph',
+assume1:'Model assumptions: the car moves in a straight line; within each interval its speed is constant and it changes speed instantly (a real car needs a short time to speed up or slow down).',
+setT1:'Car speed in each interval',seg1:'Interval 1: 0 s to 4 s',seg2:'Interval 2: 4 s to 6 s',seg3:'Interval 3: 6 s to 10 s',
+preU:'Steady',preS:'Go – stop – go',preF:'Slow then fast',
+o1t:'Time t',o1s:'Distance s',o1v:'Speed now',o1segT:'Speed in each interval from the table: v = Δs / Δt',
+tbT:'t (s)',tbS:'s (m)',
+st1Ready:'Press Run to move the car and record data.',st1Run:'The car is moving; the table is being filled…',st1Done:'All 11 data pairs recorded. Now plot them on the grid.',
+st1Chk:'{n}/11 points correct.',st1All:'Excellent: all 11 points are correct!',st1None:'You have not plotted any points yet.',st1Need:'Run the car for the full 10 s to get all the data before checking.',
+st1Miss:' {m} points missing.',segL:'Interval {i} ({a}–{b} s)',stopped:'at rest',
+p1q:'In interval 1 the car moves steadily at 0.3 m/s. The points (t; s) on the graph will…',
+p1a:'Lie on a horizontal line',p1b:'Lie on a straight sloping line through the origin',p1c:'Lie on a curve that gets steeper',
+p1e:'Each second the car covers the same 0.3 m, so s grows evenly with t (s = v·t): the points line up and the line passes through the origin (s = 0 when t = 0).',
+p1bq:'From 4 s to 6 s the car stops. That part of the graph will…',
+p1ba:'Go down to the time axis',p1bb:'Be horizontal (parallel to the time axis)',p1bc:'Go straight up',
+p1be:'When the car is at rest the distance travelled stops increasing while time goes on: the graph is horizontal. It does not go down, because distance already travelled cannot be “lost”.',
+mech1:'<p>A distance–time graph has time t on the horizontal axis and the distance s travelled since the clock started on the vertical axis. Each measurement gives a pair (t; s), one point on the grid. Joining the points in time order gives the graph.</p><ul><li><b>Constant speed:</b> s = v·t, s is proportional to t, so the graph is a sloping straight line. If timing starts when the object sets off, the line passes through the origin.</li><li><b>The slope of the line</b> is the speed: v = Δs / Δt. The steeper the line, the faster the object.</li><li><b>At rest:</b> Δs = 0, the graph is horizontal.</li><li>Distance travelled never decreases, so a distance–time graph never goes down.</li></ul><p>Simplification: the car changes speed instantly, so the graph has sharp corners. A real car takes a moment to speed up or slow down, so the corners are slightly rounded.</p>',
+simple1:'<p>Think of the graph as <b>the car’s diary</b>: every second it writes down “how far have I gone since the start?”.</p><ul><li>Steady speed: the same extra distance each second, an even staircase of points, a <b>straight line</b>.</li><li>Fast: a long step each second, a <b>steep</b> line. Slow: a <b>gentle</b> line.</li><li>Stopped: the diary keeps the same number, a <b>flat</b> line.</li></ul>',
+wordT1:'Word origins: “graph”, “speed”',
+word1:'<ul><li>Vietnamese <b>đồ thị</b> is Sino-Vietnamese 圖示: <i>đồ</i> 圖 “drawing, chart” (as in bản đồ, map) and <i>thị</i> 示 “to show”. Literally “a drawing that shows”. Japanese 図示 (zushi) means “to illustrate with a figure”; modern Chinese calls a graph 图像 (túxiàng) or 图表 (túbiǎo).</li><li>English <i>graph</i>, French <i>graphique</i>, Russian <i>график</i> come from Greek <i>graphein</i>, “to write, to draw” (as in <i>photograph</i>, <i>autograph</i>). The mathematician J. J. Sylvester used <i>graph</i> in 1878, short for “graphic notation”.</li><li><b>Tốc độ</b> 速度: <i>tốc</i> 速 “fast”, <i>độ</i> 度 “degree, measure”: “the measure of fastness”. English <i>speed</i> comes from Old English <i>spēd</i>, first meaning success or luck (still heard in “Godspeed”), later swiftness. <i>Velocity</i> comes from Latin <i>velox</i>, “fast”.</li><li><b>Quãng đường</b> (distance) is a native Vietnamese word: <i>quãng</i> means a stretch, a section.</li></ul>',
+req2:'<b>Learning outcome (Science 7):</b> From a given distance–time graph, find the distance travelled (or the speed, or the time taken). List some common units of speed.',
+hint2:'Drag the vertical line on the graph to read t and s (the object on the road follows). Drag points A and B to measure the speed between them.',
+tri2:'Speed triangle A–B',lgTri:'Δs, Δt between A and B',play2:'▶ Replay the motion',stop2:'⏸ Stop',
+scBus:'Bus',scBolt:'Usain Bolt 100 m',scCat:'Cat',
+descBus:'A bus leaves stop A, drives to stop B where it waits for passengers, then continues to the terminus.',
+descBolt:'Real data: Usain Bolt’s 100 m world record (Berlin, 16 Aug 2009, 9.58 s). Times were measured at every 10 m mark.',
+descCat:'A cat stalking prey: creeps slowly, freezes, pounces very fast, then stops to eat.',
+asBus:'Assumption: the bus changes speed instantly; the data are an illustrative example.',
+asBolt:'Data source: 10 m split times measured by the IAAF in the Berlin 2009 biomechanics report, including the 0.146 s reaction time after the gun. Between marks the graph is joined smoothly.',
+asCat:'Assumption: the cat changes speed instantly; the data are an illustrative example.',
+o2t:'Cursor: t',o2s:'Cursor: s',o2A:'Point A',o2B:'Point B',o2dt:'Δt = tB − tA',o2ds:'Δs = sB − sA',o2v:'Speed AB = Δs / Δt',o2vc:'In other units',
+st2:'At t = {t}, the object has travelled s = {s}.',
+quizT:'Read the graph and answer',
+qBus1:'How many km has the bus travelled after 15 minutes?',qBus1e:'Draw a vertical line at t = 15 min; it meets the graph at s = 9 km. (First part: 12 km in 20 min.)',
+qBus2:'For how many minutes does the bus wait at stop B?',qBus2e:'The flat part from minute 20 to minute 30: it waits 10 minutes.',
+qBus3:'What is the bus’s speed from minute 30 to minute 50, in km/h?',qBus3e:'Δs = 27 − 12 = 15 km, Δt = 20 min = 1/3 h, v = 15 ÷ (1/3) = 45 km/h (= 12.5 m/s).',
+qBus4:'After how many minutes has the bus travelled 21 km?',qBus4e:'Draw a horizontal line at s = 21 km; it meets the graph at t = 42 min (after stop B the bus covers 9 km at 0.75 km/min in 12 min: 30 + 12 = 42).',
+qBolt1:'How many seconds did Bolt take for the first 50 m?',qBolt1e:'Draw a horizontal line at s = 50 m; it meets the graph at t = 5.47 s.',
+qBolt2:'What was Bolt’s average speed over 100 m, in m/s?',qBolt2e:'v = 100 m ÷ 9.58 s ≈ 10.4 m/s (≈ 37.6 km/h).',
+qBolt3:'What was Bolt’s speed between 60 m and 70 m, in m/s?',qBolt3e:'Δs = 10 m, Δt = 7.10 − 6.29 = 0.81 s, v = 10 ÷ 0.81 ≈ 12.3 m/s (≈ 44 km/h). This was his fastest section.',
+qBolt4:'Why does the graph curve at the start and look almost straight later?',qBolt4e:'Just after the start Bolt is still slow and speeds up, so the graph gets steeper (curves). From about 50–60 m his speed is nearly constant, so the graph is nearly straight.',
+qCat1:'For how many seconds does the cat freeze?',qCat1e:'The first flat part, from 2 s to 4 s: 2 seconds.',
+qCat2:'What is the cat’s speed when it pounces (4 s to 5 s), in m/s?',qCat2e:'Δs = 5 − 1 = 4 m in Δt = 1 s, v = 4 m/s (= 14.4 km/h).',
+qCat3:'What is the cat’s speed while creeping (0–2 s), in m/s?',qCat3e:'Δs = 1 m, Δt = 2 s, v = 0.5 m/s.',
+qCat4:'Which part is steepest? What does that tell you?',qCat4e:'The 4 s – 5 s part is steepest: the cat is fastest when it pounces. The flat parts are when it is at rest.',
+p2q:'On the bus graph, the part from minute 20 to minute 30 is horizontal. At that time the bus is…',
+p2a:'Driving on a flat road',p2b:'Driving at constant speed',p2c:'Standing still at the stop',
+p2e:'Horizontal means s does not change while t increases: the bus covers no extra distance, so it is at rest. The graph says nothing about whether the road is flat or hilly.',
+mech2:'<p>Reading a distance–time graph uses the link between the two axes:</p><ul><li><b>Given t, find s:</b> go up from t on the time axis to the graph, then across to the s axis.</li><li><b>Given s, find t:</b> the reverse: across from s to the graph, then down to the t axis.</li><li><b>Find the speed:</b> pick two points A and B on a straight part, v = Δs / Δt = (sB − sA) / (tB − tA). On a curved part (Bolt speeding up) this gives the average speed between A and B.</li></ul><p><b>Units of speed</b> are a unit of distance divided by a unit of time: m/s (SI unit), km/h, km/min, cm/s… Conversion: 1 m/s means 3600 m in one hour (3600 s) = 3.6 km, so 1 m/s = 3.6 km/h.</p>',
+simple2:'<p>To find “how far by now”: go <b>up</b> from the time axis to the graph, then <b>across</b> to the distance axis. To find the speed: see how many extra metres are covered in some time, then divide.</p><p>Remember: <b>steeper</b> means <b>faster</b>; <b>flat</b> means <b>at rest</b>.</p>',
+wordT2:'Units of speed and their origins',
+word2:'<ul><li><b>m/s</b> (metres per second) is the SI unit. <i>Metre</i> comes from French <i>mètre</i>, from Greek <i>metron</i>, “measure”.</li><li><b>km/h</b> is used on speedometers in Vietnam. <i>Kilo</i> comes from Greek <i>khilioi</i>, “thousand”.</li><li><b>mph</b> (miles per hour) is used in the UK and USA; 1 mile ≈ 1.609 km. <i>Mile</i> comes from Latin <i>mille passus</i>, “a thousand double paces” of a Roman soldier.</li><li><b>Knot</b> (nautical mile per hour) is used for ships and aircraft; 1 knot = 1.852 km/h. Old sailors let out a rope with knots tied at equal spacing and counted how many knots ran out while a sandglass emptied.</li><li><b>Mach number</b> is used for fast aircraft: Mach 1 equals the speed of sound in air, named after the Austrian physicist Ernst Mach.</li></ul>',
+req3:'<b>Common misconception:</b> many students think a distance–time graph is “a picture of the road”. This tab shows the path (trajectory) and the s–t graph side by side so you can compare. Related outcome: plot and read distance–time graphs.',
+paStr:'Straight road',paS:'S-shaped road',paHill:'Up and down a hill',paLoop:'Around the yard',
+h3auto:'The map at the top is the real path (trajectory). Press Run: the child walks the whole path while the s–t graph below is drawn.',
+h3drag:'Drag the child along the path yourself (forwards, stop, even back). The clock starts when you touch.',
+h3hill:' This is a side view of the hill.',
+mAuto:'Automatic',mDrag:'Drag myself',prof3:'Follow the terrain (slow uphill, fast downhill)',
+lgPath:'Path walked (trajectory)',
+assume3:'Model assumptions: the child is a point; distance travelled is the length walked along the path, counting both forward and backward walking.',
+set3:'Walking speed',spd3:'Speed (automatic mode)',
+o3t:'Time t',o3s:'Distance travelled s',o3v:'Speed now',o3L:'Length of the path',o3h:'Height above the foot of the hill',
+cmpStr:'The road is straight and so is the graph: the match is only a coincidence. Try the “S-shaped road”.',
+cmpS:'The road winds like an S, but the s–t graph is still a straight line: at constant speed the same distance is added every second, whether the road turns left or right.',
+cmpHill:'The hill is shaped like ∧ (up then down), but the s–t graph always goes up. Going downhill, distance still increases.',
+cmpHillP:'Uphill is slow so the graph is gentle; downhill is fast so the graph is steeper. The steepest part of the graph is when walking down the hill!',
+cmpLoop:'After one lap the child is back at the start, but the distance travelled is not back to 0: the graph keeps going up.',
+cmpDrag:'Whether you drag forwards or back, the s–t graph only goes up or stays flat (while you hold still); it never goes down.',
+st3Ready:'Ready.',st3Run:'Walking…',st3Done:'Reached the end of the path.',st3DragWait:'Touch the child and drag along the path.',st3DragRun:'The clock is running. Hold still for a while to see a flat graph.',st3DragEnd:'60 s is up. Press Reset to try again.',
+p3q:'Lan walks at constant speed along an S-shaped road. Her s–t graph looks like…',
+p3a:'An S shape like the road',p3b:'A straight line going up',p3c:'A wavy line going up',
+p3e:'The s–t graph only records “how far so far” against time, not which way the road turns. At constant speed s grows evenly, so the graph is a straight line.',
+p3bq:'Choose “Up and down a hill” and tick “Follow the terrain”. As Lan walks down the hill, the s–t graph…',
+p3ba:'Goes down, like the hill',p3bb:'Still goes up, and is steeper than when climbing',p3bc:'Is horizontal',
+p3be:'Going downhill the distance still increases, so the graph still rises. Lan walks down faster than she climbed, so this part is even steeper. The slope of the graph is the speed, not the slope of the road.',
+mech3:'<p>The <b>trajectory</b> and the <b>s–t graph</b> are completely different drawings:</p><ul><li>The trajectory is the set of positions the object passes through, drawn on a map (or side view). Both directions of the drawing are lengths (metres).</li><li>The s–t graph has <b>time</b> on the horizontal axis and distance travelled on the vertical axis. Each point answers: “by second t, how many metres has it covered?”.</li><li>Distance travelled is only ever added to, so the s–t graph never goes down, even when the object turns, goes downhill or turns back.</li><li>The slope of the s–t graph is speed (v = Δs / Δt), unrelated to the slope of the road.</li></ul><p>(In grade 10 you will meet displacement–time graphs, which can go down when the object comes back. In grade 7 we only use distance.)</p>',
+simple3:'<p>The path is like a <b>rope</b> laid on the ground: it can bend, loop and climb. The s–t graph is like <b>a tape measure in your pocket</b> that pulls out with every step: whichever way you walk, the tape only gets longer.</p><p>So when you look at an s–t graph, don’t ask “what does the road look like?”; ask “<b>fast or slow, and did it ever stop?</b>”.</p>',
+wordT3:'Word origin: “trajectory”',
+word3:'<ul><li>Vietnamese <b>quỹ đạo</b> 軌道: <i>quỹ</i> 軌 “wheel track, rail”; <i>đạo</i> 道 “road”. Literally the road marked by wheel tracks. In physics it is the line an object traces as it moves.</li><li>Modern Chinese distinguishes 轨迹 (guǐjì, “track left behind”, the trajectory of any object) from 轨道 (guǐdào, rail, satellite orbit). Japanese 軌道 (kidō).</li><li>English <i>trajectory</i> comes from Latin <i>traicere</i>, “to throw across” (<i>trans</i> “across” + <i>iacere</i> “to throw”): first the flight of a bullet or a thrown stone. French <i>trajectoire</i>, Russian <i>траектория</i>.</li><li>English calls the graph a <i>distance–time graph</i> and the route a <i>path</i>: two different words for two different drawings.</li></ul>',
+req4:'<b>Challenge:</b> read the target graph, then move the child so that your graph matches it. Practise reading graphs: flat means at rest, steeper means faster. Related outcome: find distance, speed and time from a graph.',
+L1:'Level 1',L2:'Level 2',L3:'Level 3',L4:'Level 4',
+hint4:'Before pressing Start, say aloud: how does the target graph tell you to move? After the countdown, drag the child along the corridor (forwards or stop only).',
+hint4s:'Before pressing Start, say aloud: how does the target graph tell you to move? After the countdown, use the slider to set your speed.',
+go4:'Start',md4Drag:'Drag by hand',md4Sl:'Speed slider',spd4:'Speed',stand:'At rest',
+lgTarget:'Target graph',lgYou:'Your graph',
+assume4:'The challenge runs in real time. The corridor is 16 m long; one metre on screen stands for 1 m.',
+o4s:'Distance s',o4v:'Speed now',o4tg:'Target now',o4err:'Average gap',
+st4Ready:'Press Start. There is a 3-second countdown.',st4Count:'Get ready… {n}',st4Go:'Go!',st4Done:'Done! Average gap from the target: {e}.',
+res3:'Excellent! Almost a perfect match.',res2:'Good! Try again to match the corners better.',res1:'Nearly there. Look at where the gap is largest.',res0:'Not matched yet. Re-read the graph: flat means stand still, steep means go fast.',
+p4q:'Level 2 has a flat part from 4 s to 7 s. To match it you must…',
+p4a:'Walk on a flat floor',p4b:'Stand still',p4c:'Walk sideways',
+p4e:'Flat means the distance does not increase: you must stand still until second 7.',
+p4bq:'Level 3: the second part is steeper than the first. You must…',
+p4ba:'Go faster in the second part',p4bb:'Slow down in the second part',p4bc:'Walk up to a higher place',
+p4be:'Steeper means more metres every second: go faster. In level 3 the first part is 0.5 m/s and the second 2 m/s.',
+mech4:'<p>“Graph matching” recreates a famous experiment: students walk in front of an ultrasonic motion sensor and watch their own graph appear on screen at once. Research by R. Thornton and D. Sokoloff (1990) found that students who walk and see the graph in real time understand motion graphs far better than those who only hear a lecture.</p><p>To match a graph, translate each part into an action: flat → stand still; sloping straight line → walk steadily; required speed = Δs / Δt of that part. Example, level 2, last part: (10 − 4) m / (12 − 7) s = 1.2 m/s.</p>',
+simple4:'<p>The target graph is a set of “walking directions” drawn as a picture. Read it left to right like following a clock: at this second you must be at this metre. Steep line: run! Flat line: freeze!</p>'
+}};
+Object.assign(I18N.vi,{uMin:'phút',start:'Xuất phát',finish:'Đích',vComp:'Video cổng quang điện',vLesson:'Bài giảng KHTN 7',vVern:'Video thử thách',st1Wait:'(chưa đo)'});
+Object.assign(I18N.en,{uMin:'min',start:'Start',finish:'Finish',vComp:'Photogate video',vLesson:'Science 7 lesson',vVern:'Challenge video',st1Wait:'(not yet)'});
+
+/* ================= Tiện ích chung ================= */
+const $=id=>document.getElementById(id);
+let lang='vi';
+const store={get(k){try{return localStorage.getItem(k);}catch(e){return null;}},set(k,v){try{localStorage.setItem(k,v);}catch(e){}}};
+const T=k=>(I18N[lang][k]!==undefined?I18N[lang][k]:(I18N.vi[k]!==undefined?I18N.vi[k]:k));
+const Tf=(k,o)=>T(k).replace(/\{(\w+)\}/g,(m,n)=>o[n]);
+const nf=(x,d=2,mn=0)=>new Intl.NumberFormat(lang==='vi'?'vi-VN':'en-US',{maximumFractionDigits:d,minimumFractionDigits:mn}).format(Math.abs(x)<1e-9?0:x);
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const FONT='"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif',MONO='"IBM Plex Mono",ui-monospace,Consolas,monospace';
+const C={};
+function readColors(){const cs=getComputedStyle(document.documentElement);
+  ['bg','panel','lane','ink','muted','line','accent','ok','warn','force','vel','laneA','laneB','gold','land','wood','metal','metal2','c3','c5','earth','space','star']
+  .forEach(k=>C[k]=cs.getPropertyValue('--'+k).trim());}
+readColors();
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',readColors);
+new MutationObserver(readColors).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+
+function size(cv,ratio,maxH,minH=160){
+  const w=cv.clientWidth||300; let h=Math.round(w*ratio); if(maxH)h=Math.min(h,maxH); h=Math.max(h,minH);
+  if(cv._h!==h){cv.style.height=h+'px';cv._h=h;}
+  const d=window.devicePixelRatio||1,W=Math.round(w*d),H=Math.round(h*d);
+  if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H;}
+  const ctx=cv.getContext('2d');ctx.setTransform(d,0,0,d,0,0);ctx.clearRect(0,0,w,h);return {ctx,w,h};
+}
+function txt(ctx,s,x,y,col,sz=14,wt=600,al='left',bl='middle',font=FONT){ctx.fillStyle=col;ctx.font=`${wt} ${sz}px ${font}`;ctx.textAlign=al;ctx.textBaseline=bl;ctx.fillText(s,x,y);}
+function pill(ctx,s,x,y,col,sz=13,al='center',bg){ctx.font=`700 ${sz}px ${FONT}`;const tw=ctx.measureText(s).width;let x0=al==='center'?x-tw/2:al==='right'?x-tw:x;
+  ctx.fillStyle=bg||C.panel;ctx.globalAlpha=.9;ctx.beginPath();ctx.roundRect(x0-5,y-sz*.75,tw+10,sz*1.5,5);ctx.fill();ctx.globalAlpha=1;txt(ctx,s,x0,y,col,sz,700,'left');}
+function line(ctx,pts,col,lw=3,dash){if(pts.length<2)return;ctx.strokeStyle=col;ctx.lineWidth=lw;ctx.lineJoin='round';ctx.lineCap='round';ctx.setLineDash(dash||[]);
+  ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.stroke();ctx.setLineDash([]);}
+function dot(ctx,x,y,r,fill,stroke,lw=2){ctx.beginPath();ctx.arc(x,y,r,0,7);if(fill){ctx.fillStyle=fill;ctx.fill();}if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=lw;ctx.stroke();}}
+function pos(cv,e){const r=cv.getBoundingClientRect();return {x:e.clientX-r.left,y:e.clientY-r.top};}
+function onDrag(cv,down,move,up){
+  cv.addEventListener('pointerdown',e=>{const p=pos(cv,e);if(down(p,e)){cv.setPointerCapture(e.pointerId);cv._d=true;e.preventDefault();}});
+  cv.addEventListener('pointermove',e=>{if(cv._d)move(pos(cv,e),e);});
+  const end=e=>{if(cv._d){cv._d=false;up&&up(pos(cv,e),e);}};
+  cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);}
+function niceStep(r,n=5){const raw=r/n,p=Math.pow(10,Math.floor(Math.log10(raw))),f=raw/p;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p;}
+const niceCeil=v=>{const st=niceStep(v,5);return Math.ceil(v/st-1e-9)*st;};
+
+/* Lưới đồ thị s–t: trả về hàm đổi toạ độ */
+function gBox(w,h){return {l:56,t:30,w:w-56-18,h:h-30-42};}
+function axes(ctx,B,o){
+  const X=t=>B.l+t/o.x1*B.w,Y=s=>B.t+B.h-s/o.y1*B.h;
+  ctx.fillStyle=C.panel;ctx.fillRect(B.l,B.t,B.w,B.h);
+  ctx.lineWidth=1;
+  if(o.xm){ctx.strokeStyle=C.line;ctx.globalAlpha=.35;ctx.beginPath();
+    for(let i=0;i*o.xm<=o.x1+1e-9;i++){const x=X(i*o.xm);ctx.moveTo(x,B.t);ctx.lineTo(x,B.t+B.h);}
+    for(let i=0;i*o.ym<=o.y1+1e-9;i++){const y=Y(i*o.ym);ctx.moveTo(B.l,y);ctx.lineTo(B.l+B.w,y);}ctx.stroke();ctx.globalAlpha=1;}
+  ctx.strokeStyle=C.line;ctx.beginPath();
+  for(let i=0;i*o.xs<=o.x1+1e-9;i++){const x=X(i*o.xs);ctx.moveTo(x,B.t);ctx.lineTo(x,B.t+B.h);}
+  for(let i=0;i*o.ys<=o.y1+1e-9;i++){const y=Y(i*o.ys);ctx.moveTo(B.l,y);ctx.lineTo(B.l+B.w,y);}ctx.stroke();
+  const fs=B.w<360?12:13;
+  for(let i=0;i*o.xs<=o.x1+1e-9;i++){if(B.w<360&&i%2&&o.x1/o.xs>6)continue;txt(ctx,nf(i*o.xs,2),X(i*o.xs),B.t+B.h+14,C.muted,fs,500,'center','middle',MONO);}
+  for(let i=0;i*o.ys<=o.y1+1e-9;i++)txt(ctx,nf(i*o.ys,2),B.l-7,Y(i*o.ys),C.muted,fs,500,'right','middle',MONO);
+  ctx.strokeStyle=C.ink;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(B.l,B.t-10);ctx.lineTo(B.l,B.t+B.h);ctx.lineTo(B.l+B.w+10,B.t+B.h);ctx.stroke();
+  ctx.fillStyle=C.ink;ctx.beginPath();ctx.moveTo(B.l,B.t-16);ctx.lineTo(B.l-5,B.t-7);ctx.lineTo(B.l+5,B.t-7);ctx.fill();
+  ctx.beginPath();ctx.moveTo(B.l+B.w+16,B.t+B.h);ctx.lineTo(B.l+B.w+7,B.t+B.h-5);ctx.lineTo(B.l+B.w+7,B.t+B.h+5);ctx.fill();
+  txt(ctx,o.yl,B.l+10,B.t-16,C.ink,14,700,'left','middle');
+  txt(ctx,o.xl,B.l+B.w+14,B.t+B.h+31,C.ink,14,700,'right','middle');
+  return {X,Y,tOf:x=>(x-B.l)/B.w*o.x1,sOf:y=>(B.t+B.h-y)/B.h*o.y1};
+}
+function seg(id,items,cur,pick){const el=$(id);el.innerHTML='';items.forEach(it=>{const b=document.createElement('button');b.className='btn';b.textContent=it.label;
+  b.setAttribute('aria-pressed',String(it.k===cur));b.onclick=()=>pick(it.k);el.appendChild(b);});}
+const speedItems=a=>a.map(k=>({k,label:'×'+nf(k,2)}));
+function person(ctx,x,y,s,col){ctx.save();ctx.translate(x,y);ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=Math.max(2,s*.1);ctx.lineCap='round';
+  ctx.beginPath();ctx.arc(0,-s*.86,s*.14,0,7);ctx.fill();ctx.beginPath();ctx.moveTo(0,-s*.72);ctx.lineTo(0,-s*.36);ctx.moveTo(-s*.2,0);ctx.lineTo(0,-s*.36);ctx.lineTo(s*.22,0);
+  ctx.moveTo(-s*.22,-s*.48);ctx.lineTo(0,-s*.64);ctx.lineTo(s*.24,-s*.52);ctx.stroke();ctx.restore();}
+
+/* ================= Tabs ================= */
+let tab=1;
+function setTab(n){tab=n;document.querySelectorAll('nav.tabs button').forEach(b=>{const on=+b.dataset.tab===n;b.classList.toggle('on',on);b.setAttribute('aria-selected',on);});
+  [1,2,3,4].forEach(i=>$('t'+i).hidden=i!==n);store.set('dt-tab',n);}
+document.querySelectorAll('nav.tabs button').forEach(b=>b.onclick=()=>setTab(+b.dataset.tab));
+$('gvBtn').onclick=()=>{const on=!document.body.classList.contains('hideNums');document.body.classList.toggle('hideNums',on);$('gvBtn').setAttribute('aria-pressed',on);};
+
+/* ================= Video thực tế ================= */
+const VIDEOS={
+1:{u:'https://www.youtube.com/watch?v=yCiI9qaDUSk',t:'Ticker Timers to Distance Time Graphs',c:'ATAR Chemistry for the QCE · 2:43',
+   look:{vi:'Máy gõ nhịp (ticker timer) chấm lên băng giấy những chấm cách nhau một khoảng thời gian bằng nhau. Chấm cách đều là chuyển động đều. Cắt băng giấy theo từng khoảng thời gian rồi xếp cạnh nhau là ra đồ thị quãng đường – thời gian, giống bảng số liệu và các vạch “chụp” mỗi giây trong mô phỏng. Video thứ hai: cổng quang điện và đồng hồ đo thời gian hiện số trong bộ thí nghiệm KHTN 7.',
+         en:'A ticker timer prints dots on paper tape at equal time intervals. Evenly spaced dots mean steady motion. Cutting the tape into equal time strips and placing them side by side builds a distance–time graph, like the data table and the once-per-second “snapshots” in the simulation. Second video: a photogate and digital timer from a Science 7 lab kit.'},
+   a:{u:'https://www.youtube.com/watch?v=BpPVG-QrRYM',t:'Couple Cổng quang điện + Đồng hồ đo thời gian',c:'BÀI HỌC THÚ VỊ',l:'vComp'}},
+2:{u:'https://www.youtube.com/watch?v=jiQ-4TFeeO8',t:'Usain Bolt’s 9.58: the night he obliterated the 100m world record',c:'NBC Sports',
+   look:{vi:'Cuộc đua có số liệu trong tab này. Để ý: ngay sau tiếng súng Bolt còn chậm, đến giữa đường thì nhanh nhất, những mét cuối gần như giữ tốc độ. Đối chiếu với độ dốc của đồ thị. Video thứ hai là bài giảng KHTN 7 về cách đọc đồ thị.',
+         en:'This is the race whose data are in this tab. Notice: just after the gun Bolt is still slow, he is fastest mid-race and holds his speed over the last metres. Compare with the slope of the graph. The second video is a Science 7 lesson (in Vietnamese) on reading the graph.'},
+   a:{u:'https://www.youtube.com/watch?v=h3zdHhPTPIk',t:'KHTN lớp 7 – Bài 10: Đồ thị quãng đường – thời gian (Kết nối tri thức)',c:'Thầy Nguyễn Chí Sơn · 14:44',l:'vLesson'}},
+3:{u:'https://www.youtube.com/watch?v=LiO4C8fZKfw',t:'Teaching distance time graphs with an ultrasonic motion sensor',c:'Physics with Simon Poliakoff',
+   look:{vi:'Người đi thẳng một đường trước cảm biến siêu âm, vậy mà đồ thị trên màn hình có đoạn dốc, đoạn thoải, đoạn nằm ngang: hình dạng đồ thị kể về nhanh hay chậm, không vẽ lại con đường. Lưu ý: cảm biến đo khoảng cách từ người đến máy, nên khi người đi lùi về thì đường đi xuống. Còn quãng đường đã đi mà lớp 7 dùng thì không bao giờ giảm.',
+         en:'The person walks in a straight line in front of an ultrasonic sensor, yet the graph has steep, gentle and flat parts: the shape tells you fast or slow, not the shape of the route. Note: the sensor measures the distance from the person to the device, so the line goes down when the person walks back. The distance travelled used in grade 7 never decreases.'},
+   a:{u:'https://www.youtube.com/watch?v=4EXx1CrwG3E',t:'Graph Matching with Vernier Motion Detector',c:'WHS Physics w/ Mr. Edgar · 11:37',l:'vAlt'}},
+4:{u:'https://www.youtube.com/watch?v=-EOeJRrdumM',t:'Pasco Motion Match Graphing Lab',c:'Physics Walker · 6:42',
+   look:{vi:'Học sinh đi trước cảm biến chuyển động để khớp với bốn đồ thị vẽ sẵn, đúng như thử thách trong tab này. Để ý cách họ đứng yên ở đoạn nằm ngang và đi nhanh ở đoạn dốc. (Trong video có cả đoạn đi lùi; ở tab này em chỉ đi tới hoặc đứng lại.)',
+         en:'Students walk in front of a motion sensor to match four pre-drawn graphs, just like the challenge in this tab. Watch how they stand still on flat parts and walk fast on steep parts. (The video also includes walking backwards; in this tab you only walk forwards or stop.)'},
+   a:{u:'https://www.youtube.com/watch?v=4EXx1CrwG3E',t:'Kinematics: Graph Matching with Vernier Motion Detector',c:'WHS Physics w/ Mr. Edgar · 11:37',l:'vVern'}}};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function renderVideo(n){const V=VIDEOS[n],el=$('v'+n);
+  el.innerHTML=`<a class="play" href="${V.u}" target="_blank" rel="noopener" aria-label="${esc(T('vOpen'))}" style="padding:0;background:var(--force)"></a>
+  <div class="vt"><span class="lbl">${T('vLbl')} · ${esc(V.c)}</span><span class="ttl">${esc(V.t)}</span><span class="look">${esc(V.look[lang])}</span><span class="src">${T('vNote')}</span></div>
+  <div class="links"><a href="${V.u}" target="_blank" rel="noopener">${T('vOpen')} ↗</a><a class="alt" href="${V.a.u}" target="_blank" rel="noopener" title="${esc(V.a.t)} · ${esc(V.a.c)}">${T(V.a.l)} ↗</a></div>`;}
+
+/* ================= Dự đoán ================= */
+const PRED={p1:{q:'p1q',o:['p1a','p1b','p1c'],c:1,e:'p1e'},p1b:{q:'p1bq',o:['p1ba','p1bb','p1bc'],c:1,e:'p1be'},
+  p2:{q:'p2q',o:['p2a','p2b','p2c'],c:2,e:'p2e'},
+  p3:{q:'p3q',o:['p3a','p3b','p3c'],c:1,e:'p3e'},p3b:{q:'p3bq',o:['p3ba','p3bb','p3bc'],c:1,e:'p3be'},
+  p4:{q:'p4q',o:['p4a','p4b','p4c'],c:1,e:'p4e'},p4b:{q:'p4bq',o:['p4ba','p4bb','p4bc'],c:0,e:'p4be'}};
+function renderPred(id){const P=PRED[id],el=$(id);
+  el.innerHTML=`<h2>${T('predTitle')}</h2><p>${T(P.q)}</p><div class="opts">${P.o.map((k,i)=>`<button class="btn ${P.pick===i?'picked':''} ${P.show&&i===P.c?'right':''}" data-i="${i}">${T(k)}</button>`).join('')}</div>`+
+  (P.pick==null?'':`<p class="muted">${T('predThen')}</p><div><button class="btn rv">${T(P.show?'hideAns':'showAns')}</button></div>`)+(P.show?`<div class="ans">${T(P.e)}</div>`:'');}
+Object.keys(PRED).forEach(id=>$(id).addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const P=PRED[id];
+  if(b.classList.contains('rv'))P.show=!P.show;else P.pick=+b.dataset.i;renderPred(id);}));
+
+/* ================= TAB 1: Đo và vẽ đồ thị ================= */
+const S1={v:[.3,0,.5],dur:[4,2,4],t:0,run:false,speed:1,pts:{},chk:false,msg:'',drag:null,rec:-1};
+const T1=10,S1Y=5;
+function s1At(t){let s=0,t0=0;for(let i=0;i<3;i++){s+=S1.v[i]*clamp(t-t0,0,S1.dur[i]);t0+=S1.dur[i];}return s;}
+function v1At(t){let t0=0;for(let i=0;i<3;i++){if(t<t0+S1.dur[i]-1e-9||i===2)return S1.v[i];t0+=S1.dur[i];}return 0;}
+const r2=x=>Math.round(x*100)/100;
+const recN=()=>Math.floor(S1.t+1e-9);
+function reset1(clear){S1.t=0;S1.run=false;S1.chk=false;S1.msg='';if(clear)S1.pts={};}
+function setV1(){['a','b','c'].forEach((k,i)=>{$('v1'+k).value=S1.v[i];$('v1'+k+'V').textContent=nf(S1.v[i],2,2)+' m/s';});}
+['a','b','c'].forEach((k,i)=>$('v1'+k).oninput=e=>{S1.v[i]=+e.target.value;setV1();reset1(true);ui1();});
+const PRE1={preU:[.4,.4,.4],preS:[.3,0,.5],preF:[.1,.2,.5]};
+function pre1(){seg('pre1',Object.keys(PRE1).map(k=>({k,label:T(k)})),null,k=>{S1.v=PRE1[k].slice();setV1();reset1(true);ui1();});}
+$('run1').onclick=()=>{if(S1.t>=T1-1e-9){reset1(false);S1.run=true;}else S1.run=!S1.run;ui1();};
+$('step1').onclick=()=>{S1.run=false;S1.t=Math.min(T1,recN()+1);ui1();};
+$('rst1').onclick=()=>{reset1(true);ui1();};
+$('chk1').onclick=()=>{const n=Object.keys(S1.pts).length;
+  if(S1.t<T1-1e-9){S1.msg=T('st1Need');S1.chk=false;}
+  else if(!n){S1.msg=T('st1None');S1.chk=false;}
+  else{let ok=0;for(let k=0;k<=10;k++)if(S1.pts[k]!=null&&Math.abs(S1.pts[k]-r2(s1At(k)))<=.051)ok++;
+    S1.chk=true;S1.msg=ok===11?T('st1All'):Tf('st1Chk',{n:ok})+(n<11?Tf('st1Miss',{m:11-n}):'');}
+  ui1();};
+$('auto1').onclick=()=>{for(let k=0;k<=recN();k++)S1.pts[k]=r2(s1At(k));S1.chk=false;S1.msg='';ui1();};
+$('clr1').onclick=()=>{S1.pts={};S1.chk=false;S1.msg='';ui1();};
+['join1','true1'].forEach(id=>$(id).onchange=()=>{});
+function ui1(){
+  $('run1').textContent=S1.run?T('pause'):S1.t>=T1-1e-9?T('again'):T('run');
+  $('st1').textContent=S1.msg||(S1.run?T('st1Run'):S1.t>=T1-1e-9?T('st1Done'):T('st1Ready'));
+  const n=recN();
+  if(S1.rec!==n||S1._lang!==lang){S1.rec=n;S1._lang=lang;
+    let h=`<tr><th>${T('tbT')}</th>`;for(let k=0;k<=10;k++)h+=`<th>${k}</th>`;h+=`</tr><tr><th>${T('tbS')}</th>`;
+    for(let k=0;k<=10;k++)h+=`<td class="num">${k<=n?nf(r2(s1At(k)),2,2):'…'}</td>`;$('tb1').innerHTML=h+'</tr>';
+    let sg=`<p class="muted">${T('o1segT')}</p><dl class="kv">`,t0=0;
+    for(let i=0;i<3;i++){const a=t0,b=t0+S1.dur[i];t0=b;const ds=r2(s1At(b))-r2(s1At(a));
+      sg+=`<dt>${Tf('segL',{i:i+1,a,b})}</dt><dd class="num">${n>=b?(ds<1e-9?`Δs = 0 m → ${T('stopped')}`:`${nf(ds,2)} m / ${b-a} s = ${nf(ds/(b-a),2)} m/s`):T('st1Wait')}</dd>`;}
+    $('o1seg').innerHTML=sg+'</dl>';}
+  const v=S1.t>=T1-1e-9?0:v1At(S1.t);
+  $('o1').innerHTML=`<dt>${T('o1t')}</dt><dd class="num">${nf(S1.t,1,1)} s</dd><dt>${T('o1s')}</dt><dd class="num">${nf(s1At(S1.t),2,2)} m</dd>
+    <dt>${T('o1v')}</dt><dd class="num">${nf(v,2)} m/s = ${nf(v*3.6,2)} km/h</dd>`;
+}
+function render1a(){const cv=$('cv1a'),{ctx,w,h}=size(cv,.2,170,130);
+  const x0=34,x1=w-30,px=(x1-x0)/S1Y,X=s=>x0+s*px,ry=h*.58;
+  ctx.fillStyle=C.metal;ctx.globalAlpha=.25;ctx.fillRect(x0-10,ry,x1-x0+20,18);ctx.globalAlpha=1;
+  ctx.strokeStyle=C.metal2;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x0-10,ry);ctx.lineTo(x1+10,ry);ctx.moveTo(x0-10,ry+18);ctx.lineTo(x1+10,ry+18);ctx.stroke();
+  for(let i=0;i<=S1Y*2;i++){const x=X(i/2);ctx.strokeStyle=C.ink;ctx.lineWidth=i%2?1:2;ctx.beginPath();ctx.moveTo(x,ry+18);ctx.lineTo(x,ry+(i%2?26:32));ctx.stroke();
+    if(i%2===0)txt(ctx,nf(i/2,0)+' m',x,ry+42,C.muted,12,600,'center','middle',MONO);}
+  // vạch “chụp” mỗi giây
+  const n=recN();let lastX=-99;
+  for(let k=0;k<=n;k++){const x=X(s1At(k));ctx.strokeStyle=C.laneB;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x,ry-4);ctx.lineTo(x,ry+18);ctx.stroke();
+    if(x-lastX>22){txt(ctx,k+' s',x,ry-12,C.laneB,11,700,'center','middle',MONO);lastX=x;}}
+  // xe: mũi xe ở vị trí s
+  const xc=X(s1At(S1.t)),cw=46,ch=20,y=ry-ch-26;
+  ctx.fillStyle=C.accent;ctx.beginPath();ctx.roundRect(xc-cw,y,cw,ch,6);ctx.fill();
+  ctx.fillStyle=C.panel;ctx.globalAlpha=.85;ctx.fillRect(xc-cw+8,y+4,14,8);ctx.globalAlpha=1;
+  dot(ctx,xc-cw+10,y+ch,6,C.ink);dot(ctx,xc-10,y+ch,6,C.ink);
+  ctx.strokeStyle=C.accent;ctx.setLineDash([3,3]);ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(xc,y+ch+6);ctx.lineTo(xc,ry+18);ctx.stroke();ctx.setLineDash([]);
+  pill(ctx,'t = '+nf(S1.t,1,1)+' s',w-8,16,C.ink,14,'right');
+}
+let G1=null;
+function render1b(){const cv=$('cv1b'),{ctx,w,h}=size(cv,.6,430,250),B=gBox(w,h);
+  const fine=B.h/50>6;
+  const A=axes(ctx,B,{x1:T1,y1:S1Y,xs:1,ys:1,xm:1,ym:fine?.1:.5,xl:'t (s)',yl:'s (m)'});G1={B,A};
+  if($('true1').checked){const p=[0,4,6,10].map(t=>[A.X(t),A.Y(s1At(t))]);line(ctx,p,C.laneB,4);}
+  const ks=Object.keys(S1.pts).map(Number).sort((a,b)=>a-b);
+  if($('join1').checked&&ks.length>1)line(ctx,ks.map(k=>[A.X(k),A.Y(S1.pts[k])]),C.accent,2.5);
+  ks.forEach(k=>{const x=A.X(k),y=A.Y(S1.pts[k]);let ring=null;
+    if(S1.chk)ring=Math.abs(S1.pts[k]-r2(s1At(k)))<=.051?C.ok:C.warn;
+    dot(ctx,x,y,6.5,C.accent,ring||C.panel,ring?4:2);});
+  if(S1.drag!=null){const k=S1.drag;pill(ctx,`(${k}; ${nf(S1.pts[k],2,2)})`,A.X(k),A.Y(S1.pts[k])-20,C.accent,13);}
+}
+onDrag($('cv1b'),p=>{if(!G1)return false;const {B,A}=G1;
+  const ks=Object.keys(S1.pts).map(Number);let best=null,bd=18;
+  ks.forEach(k=>{const d=Math.hypot(A.X(k)-p.x,A.Y(S1.pts[k])-p.y);if(d<bd){bd=d;best=k;}});
+  if(best==null){const t=Math.round(A.tOf(p.x));if(t<0||t>10||p.y<B.t-8||p.y>B.t+B.h+8)return false;best=t;}
+  S1.drag=best;S1.pts[best]=clamp(Math.round(A.sOf(p.y)*20)/20,0,S1Y);S1.chk=false;S1.msg='';ui1();return true;},
+  p=>{if(S1.drag==null)return;S1.pts[S1.drag]=clamp(Math.round(G1.A.sOf(p.y)*20)/20,0,S1Y);},
+  ()=>{S1.drag=null;});
+
+/* ================= TAB 2: Đọc đồ thị ================= */
+function mono(pts){const n=pts.length,x=pts.map(p=>p[0]),y=pts.map(p=>p[1]),d=[],m=new Array(n);
+  for(let i=0;i<n-1;i++)d[i]=(y[i+1]-y[i])/(x[i+1]-x[i]);
+  m[0]=d[0];m[n-1]=d[n-2];for(let i=1;i<n-1;i++)m[i]=d[i-1]*d[i]<=0?0:(d[i-1]+d[i])/2;
+  for(let i=0;i<n-1;i++){if(d[i]===0){m[i]=0;m[i+1]=0;continue;}const a=m[i]/d[i],b=m[i+1]/d[i],hh=a*a+b*b;if(hh>9){const k=3/Math.sqrt(hh);m[i]=k*a*d[i];m[i+1]=k*b*d[i];}}
+  return t=>{if(t<=x[0])return y[0];if(t>=x[n-1])return y[n-1];let i=0;while(t>x[i+1])i++;const h=x[i+1]-x[i],u=(t-x[i])/h,u2=u*u,u3=u2*u;
+    return (2*u3-3*u2+1)*y[i]+(u3-2*u2+u)*h*m[i]+(-2*u3+3*u2)*y[i+1]+(u3-u2)*h*m[i+1];};}
+function linf(pts){return t=>{if(t<=pts[0][0])return pts[0][1];for(let i=0;i<pts.length-1;i++){const [a,sa]=pts[i],[b,sb]=pts[i+1];if(t<=b)return sa+(sb-sa)*(t-a)/(b-a);}return pts[pts.length-1][1];};}
+const BOLT=[[0,0],[.146,0],[1.89,10],[2.88,20],[3.78,30],[4.64,40],[5.47,50],[6.29,60],[7.10,70],[7.92,80],[8.75,90],[9.58,100]];
+const SC={
+  bus:{tu:'uMin',su:'km',x1:50,y1:30,xs:10,ys:5,xm:2,ym:1,pts:[[0,0],[20,12],[30,12],[50,27]],f:null,lin:true,A:30,B:50,cur:15,si:{t:60,s:1000},rate:5,obj:'bus',desc:'descBus',as:'asBus',
+    q:[{k:'qBus1',a:9,tol:.3,u:'km'},{k:'qBus2',a:10,tol:.5,u:'uMin'},{k:'qBus3',a:45,tol:1.5,u:'km/h'},{k:'qBus4',a:42,tol:1,u:'uMin'}]},
+  bolt:{tu:'s',su:'m',x1:10,y1:100,xs:1,ys:10,xm:.5,ym:5,pts:BOLT,lin:false,A:6.29,B:7.10,cur:5.47,si:{t:1,s:1},rate:1,obj:'run',desc:'descBolt',as:'asBolt',
+    q:[{k:'qBolt1',a:5.47,tol:.08,u:'s'},{k:'qBolt2',a:10.44,tol:.15,u:'m/s'},{k:'qBolt3',a:12.35,tol:.4,u:'m/s'},{k:'qBolt4'}]},
+  cat:{tu:'s',su:'m',x1:8,y1:6,xs:1,ys:1,xm:.5,ym:.5,pts:[[0,0],[2,1],[4,1],[5,5],[8,5]],lin:true,A:4,B:5,cur:3,si:{t:1,s:1},rate:1,obj:'cat',desc:'descCat',as:'asCat',
+    q:[{k:'qCat1',a:2,tol:.1,u:'s'},{k:'qCat2',a:4,tol:.2,u:'m/s'},{k:'qCat3',a:.5,tol:.05,u:'m/s'},{k:'qCat4'}]}};
+Object.values(SC).forEach(c=>{c.f=c.lin?linf(c.pts):mono(c.pts);c.tEnd=c.pts[c.pts.length-1][0];c.ans={};});
+const S2={k:'bus',drag:null,play:false};
+const sc2=()=>SC[S2.k];
+const U=k=>(k==='uMin'?T('uMin'):k);
+function pick2(k){S2.k=k;S2.play=false;seg('sc2',['bus','bolt','cat'].map(k=>({k,label:T({bus:'scBus',bolt:'scBolt',cat:'scCat'}[k])})),k,pick2);
+  $('desc2').textContent=T(sc2().desc);$('assume2').textContent=T(sc2().as);quiz2();ui2();}
+function quiz2(){const c=sc2();$('quiz2').innerHTML=c.q.map((q,i)=>{const A=c.ans[i]||{};
+  const res=A.r==null?'':`<span class="res ${A.r?'ok':'no'}">${T(A.r?'right':'wrong')}</span>`;
+  return `<div class="qz" data-i="${i}"><p>${T(q.k)}</p>`+(q.a!=null?`<div class="row"><input inputmode="decimal" value="${esc(A.v||'')}" aria-label="${esc(T(q.k))}"><span class="unit">${U(q.u)}</span><button class="btn ck">${T('check')}</button>${res}</div>`:'')+
+    `<div><button class="btn rv">${T(A.show?'hideAns':'showAns')}</button></div>${A.show?`<div class="ans">${T(q.k+'e')}</div>`:''}</div>`;}).join('');}
+$('quiz2').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const box=b.closest('.qz'),i=+box.dataset.i,c=sc2(),q=c.q[i],A=c.ans[i]=c.ans[i]||{};
+  if(b.classList.contains('rv'))A.show=!A.show;
+  else if(b.classList.contains('ck')){A.v=box.querySelector('input').value;const x=parseFloat(String(A.v).replace(',','.'));A.r=isFinite(x)&&Math.abs(x-q.a)<=q.tol;}
+  quiz2();});
+$('quiz2').addEventListener('input',e=>{const box=e.target.closest('.qz');if(!box)return;const c=sc2(),i=+box.dataset.i;(c.ans[i]=c.ans[i]||{}).v=e.target.value;});
+$('play2').onclick=()=>{const c=sc2();if(!S2.play&&c.cur>=c.tEnd-1e-6)c.cur=0;S2.play=!S2.play;ui2();};
+$('tri2').onchange=()=>ui2();
+function fmtS(c,s){return nf(s,c.su==='km'?1:2)+' '+c.su;}
+function fmtT(c,t){return nf(t,c.tu==='uMin'?1:2)+' '+U(c.tu);}
+function ui2(){const c=sc2(),sA=c.f(c.A),sB=c.f(c.B),dt=c.B-c.A,ds=sB-sA;
+  $('play2').textContent=S2.play?T('stop2'):T('play2');
+  $('st2').textContent=Tf('st2',{t:fmtT(c,c.cur),s:fmtS(c,c.f(c.cur))});
+  let h=`<dt>${T('o2t')}</dt><dd class="num">${fmtT(c,c.cur)}</dd><dt>${T('o2s')}</dt><dd class="num">${fmtS(c,c.f(c.cur))}</dd>`;
+  if($('tri2').checked){const vn=Math.abs(dt)>1e-6?ds/dt:NaN,vsi=vn*c.si.s/c.si.t;
+    h+=`<dt>${T('o2A')}</dt><dd class="num">(${fmtT(c,c.A)}; ${fmtS(c,sA)})</dd><dt>${T('o2B')}</dt><dd class="num">(${fmtT(c,c.B)}; ${fmtS(c,sB)})</dd>
+    <dt>${T('o2dt')}</dt><dd class="num">${fmtT(c,dt)}</dd><dt>${T('o2ds')}</dt><dd class="num">${fmtS(c,ds)}</dd>
+    <dt>${T('o2v')}</dt><dd class="num">${isFinite(vn)?nf(vn,2)+' '+c.su+'/'+U(c.tu):'—'}</dd>
+    <dt>${T('o2vc')}</dt><dd class="num">${isFinite(vsi)?nf(vsi,2)+' m/s = '+nf(vsi*3.6,1)+' km/h':'—'}</dd>`;}
+  $('o2').innerHTML=h;}
+function drawObj(ctx,kind,x,y,col){
+  if(kind==='bus'){ctx.fillStyle=col;ctx.beginPath();ctx.roundRect(x-54,y-30,54,26,5);ctx.fill();ctx.fillStyle=C.panel;ctx.globalAlpha=.85;
+    for(let i=0;i<4;i++)ctx.fillRect(x-49+i*11,y-25,8,8);ctx.globalAlpha=1;dot(ctx,x-44,y-4,5,C.ink);dot(ctx,x-12,y-4,5,C.ink);}
+  else if(kind==='run')person(ctx,x-6,y-2,34,col);
+  else{ctx.fillStyle=col;ctx.beginPath();ctx.ellipse(x-18,y-12,16,8,0,0,7);ctx.fill();dot(ctx,x-2,y-20,7,col);
+    ctx.beginPath();ctx.moveTo(x-6,y-25);ctx.lineTo(x-4,y-33);ctx.lineTo(x,y-26);ctx.moveTo(x+1,y-26);ctx.lineTo(x+4,y-33);ctx.lineTo(x+5,y-24);ctx.fill();
+    ctx.strokeStyle=col;ctx.lineWidth=3;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(x-33,y-14);ctx.quadraticCurveTo(x-44,y-28,x-38,y-32);ctx.stroke();
+    ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x-28,y-6);ctx.lineTo(x-28,y);ctx.moveTo(x-10,y-6);ctx.lineTo(x-10,y);ctx.stroke();}}
+function render2a(){const c=sc2(),cv=$('cv2a'),{ctx,w,h}=size(cv,.17,140,118);
+  const x0=64,x1=w-24,X=s=>x0+s/c.y1*(x1-x0),ry=h*.62;
+  ctx.fillStyle=C.metal;ctx.globalAlpha=.22;ctx.fillRect(x0-50,ry,x1-x0+64,10);ctx.globalAlpha=1;
+  ctx.strokeStyle=C.ink;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x0-50,ry+10);ctx.lineTo(x1+14,ry+10);ctx.stroke();
+  for(let i=0;i*c.ys<=c.y1+1e-9;i++){const x=X(i*c.ys);ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(x,ry+10);ctx.lineTo(x,ry+18);ctx.stroke();
+    if(w>520||i%2===0)txt(ctx,nf(i*c.ys,0),x,ry+28,C.muted,12,600,'center','middle',MONO);}
+  txt(ctx,'('+c.su+')',x0-50,ry+28,C.muted,12,700,'left','middle',MONO);
+  if(S2.k==='bus'){pill(ctx,'A',X(0),ry-46,C.ink,12);pill(ctx,'B',X(12),ry-46,C.ink,12);}
+  const s=c.f(c.cur);drawObj(ctx,c.obj,X(s),ry,S2.k==='bolt'?C.laneB:C.accent);
+  pill(ctx,'t = '+fmtT(c,c.cur)+'   s = '+fmtS(c,s),w-8,14,C.ink,13,'right');}
+let G2=null;
+function render2b(){const c=sc2(),cv=$('cv2b'),{ctx,w,h}=size(cv,.62,440,260),B=gBox(w,h);
+  const A=axes(ctx,B,{x1:c.x1,y1:c.y1,xs:c.xs,ys:c.ys,xm:c.xm,ym:c.ym,xl:'t ('+U(c.tu)+')',yl:'s ('+c.su+')'});G2={B,A};
+  const p=[];for(let i=0;i<=400;i++){const t=c.tEnd*i/400;p.push([A.X(t),A.Y(c.f(t))]);}line(ctx,p,C.laneA,3.5);
+  if(S2.k==='bolt')BOLT.slice(2).forEach(q=>dot(ctx,A.X(q[0]),A.Y(q[1]),3.5,C.laneA));
+  const tc=c.cur,sc=c.f(tc),xc=A.X(tc),yc=A.Y(sc);
+  line(ctx,[[xc,B.t+B.h],[xc,yc],[B.l,yc]],C.ink,1.8,[6,5]);dot(ctx,xc,yc,6,C.ink,C.panel,2);
+  pill(ctx,nf(tc,2),xc,B.t+B.h+14,C.ink,13,'center',C.lane);pill(ctx,nf(sc,c.su==='km'?1:2),B.l-6,yc,C.ink,13,'right',C.lane);
+  ctx.fillStyle=C.ink;ctx.globalAlpha=.08;ctx.fillRect(xc-14,B.t,28,B.h);ctx.globalAlpha=1;
+  if($('tri2').checked){const xa=A.X(c.A),ya=A.Y(c.f(c.A)),xb=A.X(c.B),yb=A.Y(c.f(c.B));
+    line(ctx,[[xa,ya],[xb,ya],[xb,yb]],C.vel,2.5);
+    pill(ctx,'Δt',(xa+xb)/2,ya+14,C.vel,13);pill(ctx,'Δs',xb+8,(ya+yb)/2,C.vel,13,'left');
+    dot(ctx,xa,ya,9,C.vel,C.panel,2.5);dot(ctx,xb,yb,9,C.vel,C.panel,2.5);
+    txt(ctx,'A',xa-12,ya-12,C.vel,14,800,'center');txt(ctx,'B',xb-12,yb-12,C.vel,14,800,'center');}}
+onDrag($('cv2b'),p=>{if(!G2)return false;const c=sc2(),{A}=G2;S2.play=false;
+  if($('tri2').checked){for(const k of ['B','A']){if(Math.hypot(A.X(c[k])-p.x,A.Y(c.f(c[k]))-p.y)<24){S2.drag=k;return true;}}}
+  S2.drag='cur';c.cur=clamp(A.tOf(p.x),0,c.tEnd);ui2();return true;},
+  p=>{const c=sc2();c[S2.drag]=clamp(G2.A.tOf(p.x),0,c.tEnd);ui2();},()=>{S2.drag=null;});
+
+/* ================= TAB 3: Đồ thị không phải con đường ================= */
+function mkPath(kind,fn,n){const pts=[];for(let i=0;i<=n;i++)pts.push(fn(i/n));const cum=[0];
+  for(let i=1;i<pts.length;i++)cum.push(cum[i-1]+Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]));return {kind,pts,cum,L:cum[cum.length-1]};}
+function hillY(x){return x<6?0:x<18?(x-6)*.5:x<30?6-(x-18)*.5:0;}
+const PATHS={
+  paStr:mkPath('top',u=>[u*40,0],400),
+  paS:mkPath('top',u=>[u*32,5*Math.sin(u*2*Math.PI*2)],800),
+  paHill:mkPath('side',u=>[u*36,hillY(u*36)],720),
+  paLoop:mkPath('top',u=>[7*Math.sin(u*2*Math.PI),-7*Math.cos(u*2*Math.PI)],720)};
+const S3={pk:'paS',mode:'auto',a:0,s:0,t:0,run:false,done:false,hist:[[0,0]],trail:[],speed:1,vw:1.4,prof:false,drag:false,started:false,ix:0};
+const P3=()=>PATHS[S3.pk];
+function at3(a){const P=P3(),c=P.cum;let lo=0,hi=c.length-1;while(hi-lo>1){const m=(lo+hi)>>1;if(c[m]<=a)lo=m;else hi=m;}
+  const u=c[hi]>c[lo]?(a-c[lo])/(c[hi]-c[lo]):0,p=P.pts[lo],q=P.pts[hi];return {x:p[0]+(q[0]-p[0])*u,y:p[1]+(q[1]-p[1])*u,i:lo,dx:(q[0]-p[0]),dy:(q[1]-p[1])};}
+function v3At(a){if(S3.pk==='paHill'&&S3.prof){const r=at3(a),L=Math.hypot(r.dx,r.dy)||1,sl=r.dy/L;return sl>.05?.7:sl<-.05?2:1.4;}return S3.vw;}
+function tEnd3(){if(!(S3.pk==='paHill'&&S3.prof))return P3().L/S3.vw;let t=0;const P=P3();for(let i=1;i<P.cum.length;i++){const d=P.cum[i]-P.cum[i-1];t+=d/v3At((P.cum[i]+P.cum[i-1])/2);}return t;}
+function reset3(){Object.assign(S3,{a:0,s:0,t:0,run:false,done:false,hist:[[0,0]],trail:[[P3().pts[0][0],P3().pts[0][1]]],drag:false,started:false});}
+function step3(dt){
+  if(S3.mode==='auto'){if(!S3.run)return;const P=P3();let rem=dt*S3.speed;
+    while(rem>0){const h=Math.min(rem,1/120);const v=v3At(S3.a);let da=v*h;if(S3.a+da>=P.L){da=P.L-S3.a;S3.a=P.L;S3.s+=da;S3.t+=da/v;S3.run=false;S3.done=true;rem=0;}
+      else{S3.a+=da;S3.s+=da;S3.t+=h;rem-=h;}}
+    const r=at3(S3.a);S3.trail.push([r.x,r.y]);S3.hist.push([S3.t,S3.s]);}
+  else if(S3.started&&S3.t<60){S3.t=Math.min(60,S3.t+dt);S3.hist.push([S3.t,S3.s]);}
+}
+function vNow3(){const H=S3.hist;if(H.length<2)return 0;if(S3.mode==='auto')return S3.run?v3At(S3.a):0;
+  const t1=H[H.length-1][0];let j=H.length-1;while(j>0&&t1-H[j][0]<.5)j--;const dt=t1-H[j][0];return dt>.05?(H[H.length-1][1]-H[j][1])/dt:0;}
+let G3=null;
+function render3a(){const P=P3(),cv=$('cv3a'),side=P.kind==='side',{ctx,w,h}=size(cv,side?.36:P3()===PATHS.paLoop?.5:.4,330,170);
+  let xs=P.pts.map(p=>p[0]),ys=P.pts.map(p=>p[1]);const mnx=Math.min(...xs),mxx=Math.max(...xs),mny=Math.min(...ys),mxy=Math.max(...ys);
+  const pad=34,sc=Math.min((w-2*pad)/(mxx-mnx||1),(h-2*pad-(side?10:0))/((mxy-mny)||1)),cx=(w-(mxx-mnx)*sc)/2,cy=(h+(mxy-mny)*sc)/2+(side?-6:0);
+  const W=(x,y)=>[cx+(x-mnx)*sc,cy-(y-mny)*sc];G3={W,sc};
+  if(side){ctx.fillStyle=C.land;ctx.globalAlpha=.35;ctx.beginPath();const p0=W(mnx,mny);ctx.moveTo(p0[0],h);P.pts.forEach(p=>{const q=W(p[0],p[1]);ctx.lineTo(q[0],q[1]);});ctx.lineTo(W(mxx,mny)[0],h);ctx.fill();ctx.globalAlpha=1;
+    line(ctx,P.pts.map(p=>W(p[0],p[1])),C.metal2,4);}
+  else{if(S3.pk==='paLoop'){const c0=W(0,0);ctx.fillStyle=C.land;ctx.globalAlpha=.25;ctx.beginPath();ctx.arc(c0[0],c0[1],7*sc-12,0,7);ctx.fill();ctx.globalAlpha=1;}
+    const pp=P.pts.map(p=>W(p[0],p[1]));line(ctx,pp,C.metal,20);ctx.globalAlpha=.6;line(ctx,pp,C.panel,1.5,[8,8]);ctx.globalAlpha=1;}
+  // mốc mỗi 10 m dọc đường
+  for(let m=10;m<P.L;m+=10){const r=at3(m),q=W(r.x,r.y),L=Math.hypot(r.dx,r.dy)||1,nx=-r.dy/L,ny=r.dx/L;
+    ctx.strokeStyle=C.ink;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(q[0]-nx*12,q[1]+ny*12);ctx.lineTo(q[0]+nx*12,q[1]-ny*12);ctx.stroke();
+    txt(ctx,m+' m',q[0]+nx*24,q[1]-ny*24,C.muted,11,700,'center','middle',MONO);}
+  line(ctx,S3.trail.map(p=>W(p[0],p[1])),C.laneB,5);
+  const st=W(P.pts[0][0],P.pts[0][1]),en=W(P.pts[P.pts.length-1][0],P.pts[P.pts.length-1][1]);
+  if(S3.pk!=='paLoop')pill(ctx,T('finish'),en[0],en[1]+(side?-24:22),C.ink,12);
+  pill(ctx,T('start'),st[0]+(S3.pk==='paLoop'?0:0),st[1]+(side?-24:22),C.ink,12);
+  const r=at3(S3.a),q=W(r.x,r.y);
+  if(side)person(ctx,q[0],q[1]-2,30,C.accent);else{dot(ctx,q[0],q[1],11,C.accent,C.panel,3);}
+  if(S3.mode==='drag'&&!S3.started){ctx.strokeStyle=C.accent;ctx.lineWidth=2;ctx.setLineDash([4,4]);dot(ctx,q[0],q[1]-(side?14:0),22,null,C.accent,2);ctx.setLineDash([]);}
+  pill(ctx,'s = '+nf(S3.s,1,1)+' m',w-8,14,C.laneB,13,'right');}
+function render3b(){const P=P3(),cv=$('cv3b'),{ctx,w,h}=size(cv,.5,360,230),B=gBox(w,h);
+  const x1=S3.mode==='auto'?niceCeil(tEnd3()*1.04):60,y1=niceCeil(Math.max(P.L,S3.s)*1.06),xs=niceStep(x1,w<500?5:10),ys=niceStep(y1,5);
+  const A=axes(ctx,B,{x1,y1,xs,ys,xl:'t (s)',yl:'s (m)'});
+  line(ctx,S3.hist.map(p=>[A.X(Math.min(p[0],x1)),A.Y(p[1])]),C.laneA,3.5);
+  const l=S3.hist[S3.hist.length-1];dot(ctx,A.X(Math.min(l[0],x1)),A.Y(l[1]),5.5,C.laneA,C.panel,2);}
+onDrag($('cv3a'),p=>{if(S3.mode!=='drag'||!G3||S3.t>=60)return false;const r=at3(S3.a),q=G3.W(r.x,r.y);
+  if(Math.hypot(q[0]-p.x,q[1]-p.y)>44)return false;S3.drag=true;S3.started=true;return true;},
+  p=>{const P=P3();let best=S3.a,bd=1e9;const lo=S3.a-4,hi=S3.a+4;
+    for(let i=0;i<P.pts.length;i++){if(P.cum[i]<lo||P.cum[i]>hi)continue;const q=G3.W(P.pts[i][0],P.pts[i][1]),d=Math.hypot(q[0]-p.x,q[1]-p.y);if(d<bd){bd=d;best=P.cum[i];}}
+    if(S3.t>=60)return;S3.s+=Math.abs(best-S3.a);S3.a=best;const r=at3(best);S3.trail.push([r.x,r.y]);},
+  ()=>{S3.drag=false;});
+function pick3(k){S3.pk=k;reset3();ui3(true);}
+function ui3(full){
+  if(full){seg('path3',Object.keys(PATHS).map(k=>({k,label:T(k)})),S3.pk,pick3);
+    seg('mode3',[{k:'auto',label:T('mAuto')},{k:'drag',label:T('mDrag')}],S3.mode,k=>{S3.mode=k;reset3();ui3(true);});
+    seg('spd3',speedItems([.5,1,2,4]),S3.speed,k=>{S3.speed=k;ui3(true);});
+    $('prof3wrap').hidden=S3.pk!=='paHill';$('prof3').checked=S3.prof;
+    $('run3').hidden=$('spd3').hidden=S3.mode!=='auto';
+    $('hint3').textContent=T(S3.mode==='auto'?'h3auto':'h3drag')+(S3.pk==='paHill'?T('h3hill'):'');
+    $('vw3V').textContent=nf(S3.vw,1,1)+' m/s';}
+  $('run3').textContent=S3.run?T('pause'):S3.done?T('again'):T('run');
+  $('st3').textContent=S3.mode==='auto'?T(S3.run?'st3Run':S3.done?'st3Done':'st3Ready'):T(S3.t>=60?'st3DragEnd':S3.started?'st3DragRun':'st3DragWait');
+  const v=vNow3(),r=at3(S3.a);
+  $('o3').innerHTML=`<dt>${T('o3t')}</dt><dd class="num">${nf(S3.t,1,1)} s</dd><dt>${T('o3s')}</dt><dd class="num">${nf(S3.s,1,1)} m</dd>
+    <dt>${T('o3v')}</dt><dd class="num">${nf(v,1,1)} m/s</dd><dt>${T('o3L')}</dt><dd class="num">${nf(P3().L,1,1)} m</dd>`+
+    (S3.pk==='paHill'?`<dt>${T('o3h')}</dt><dd class="num">${nf(r.y,1,1)} m</dd>`:'');
+  $('o3cmp').textContent=S3.mode==='drag'?T('cmpDrag'):T({paStr:'cmpStr',paS:'cmpS',paHill:S3.prof?'cmpHillP':'cmpHill',paLoop:'cmpLoop'}[S3.pk]);}
+$('run3').onclick=()=>{if(S3.done)reset3();S3.run=!S3.run;ui3();};
+$('rst3').onclick=()=>{reset3();ui3();};
+$('prof3').onchange=e=>{S3.prof=e.target.checked;reset3();ui3();};
+$('vw3').oninput=e=>{S3.vw=+e.target.value;$('vw3V').textContent=nf(S3.vw,1,1)+' m/s';if(S3.mode==='auto'&&!S3.run)reset3();ui3();};
+
+/* ================= TAB 4: Thử thách đi theo đồ thị ================= */
+const LV=[[[0,0],[10,10]],[[0,0],[4,4],[7,4],[12,10]],[[0,0],[6,3],[12,15]],[[0,0],[3,0],[5,6],[8,6],[12,8]]];
+const CORR=16;
+const S4={li:0,mode:'drag',ph:'ready',t:0,cd:0,s:0,vs:0,hist:[],err:0,drag:false};
+const tgt4=t=>linf(LV[S4.li])(t),tEnd4=()=>LV[S4.li][LV[S4.li].length-1][0];
+function reset4(){Object.assign(S4,{ph:'ready',t:0,cd:0,s:0,hist:[],err:0,drag:false});S4.vs=0;$('vs4').value=0;$('vs4V').textContent=nf(0,1,1)+' m/s';}
+$('go4').onclick=()=>{reset4();S4.ph='count';S4.cd=3;ui4();};
+$('vs4').oninput=e=>{S4.vs=+e.target.value;$('vs4V').textContent=nf(S4.vs,1,1)+' m/s';};
+function step4(dt){
+  if(S4.ph==='count'){S4.cd-=dt;if(S4.cd<=0){S4.ph='go';S4.t=0;S4.hist=[[0,S4.s]];}return;}
+  if(S4.ph!=='go')return;
+  const h=Math.min(dt,tEnd4()-S4.t);S4.t+=h;
+  if(S4.mode==='slider')S4.s=Math.min(CORR,S4.s+S4.vs*h);
+  S4.err+=Math.abs(S4.s-tgt4(S4.t))*h;S4.hist.push([S4.t,S4.s]);
+  if(S4.t>=tEnd4()-1e-9){S4.ph='done';S4.drag=false;}}
+function vNow4(){const H=S4.hist;if(H.length<2||S4.ph!=='go')return S4.mode==='slider'&&S4.ph==='go'?S4.vs:0;
+  const t1=H[H.length-1][0];let j=H.length-1;while(j>0&&t1-H[j][0]<.4)j--;const dt=t1-H[j][0];return dt>.05?(H[H.length-1][1]-H[j][1])/dt:0;}
+let G4=null;
+function render4a(){const cv=$('cv4a'),{ctx,w,h}=size(cv,.16,130,112);
+  const x0=26,x1=w-22,X=m=>x0+m/CORR*(x1-x0),fy=h*.7;G4={X,x0,x1};
+  ctx.fillStyle=C.wood;ctx.globalAlpha=.22;ctx.fillRect(x0-12,fy-58,x1-x0+24,58);ctx.globalAlpha=1;
+  ctx.strokeStyle=C.ink;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x0-12,fy);ctx.lineTo(x1+12,fy);ctx.stroke();
+  for(let m=0;m<=CORR;m++){const x=X(m);ctx.lineWidth=m%2?1:1.8;ctx.beginPath();ctx.moveTo(x,fy);ctx.lineTo(x,fy+(m%2?6:10));ctx.stroke();
+    if(m%2===0&&(w>420||m%4===0))txt(ctx,m+' m',x,fy+22,C.muted,12,600,'center','middle',MONO);}
+  if(S4.ph==='go'||S4.ph==='done'){const xt=X(tgt4(S4.t));ctx.globalAlpha=.45;person(ctx,xt,fy-2,40,C.muted);ctx.globalAlpha=1;}
+  person(ctx,X(S4.s),fy-2,44,C.accent);
+  if(S4.ph==='count')pill(ctx,String(Math.ceil(S4.cd)),w/2,22,C.warn,20);
+  else if(S4.ph==='go'&&S4.t<.8)pill(ctx,T('st4Go'),w/2,22,C.ok,18);}
+function render4b(){const cv=$('cv4b'),{ctx,w,h}=size(cv,.55,400,240),B=gBox(w,h),te=tEnd4();
+  const A=axes(ctx,B,{x1:te,y1:CORR,xs:1,ys:2,xm:.5,ym:1,xl:'t (s)',yl:'s (m)'});
+  ctx.globalAlpha=.4;line(ctx,LV[S4.li].map(p=>[A.X(p[0]),A.Y(p[1])]),C.muted,10);ctx.globalAlpha=1;
+  line(ctx,LV[S4.li].map(p=>[A.X(p[0]),A.Y(p[1])]),C.muted,2,[6,5]);
+  if(S4.hist.length)line(ctx,S4.hist.map(p=>[A.X(p[0]),A.Y(p[1])]),C.accent,3.5);
+  if(S4.ph==='go'){const x=A.X(S4.t);ctx.strokeStyle=C.ink;ctx.lineWidth=1;ctx.globalAlpha=.5;ctx.beginPath();ctx.moveTo(x,B.t);ctx.lineTo(x,B.t+B.h);ctx.stroke();ctx.globalAlpha=1;}}
+onDrag($('cv4a'),p=>{if(S4.mode!=='drag'||!G4||!(S4.ph==='go'||S4.ph==='count'))return false;if(Math.abs(G4.X(S4.s)-p.x)>50)return false;S4.drag=true;return true;},
+  p=>{if(S4.ph!=='go')return;const m=clamp((p.x-G4.x0)/(G4.x1-G4.x0)*CORR,0,CORR);S4.s=Math.max(S4.s,m);},()=>{S4.drag=false;});
+function ui4(full){
+  if(full){seg('lvl4',LV.map((_,i)=>({k:i,label:T('L'+(i+1))})),S4.li,k=>{S4.li=k;reset4();ui4(true);});
+    seg('mode4',[{k:'drag',label:T('md4Drag')},{k:'slider',label:T('md4Sl')}],S4.mode,k=>{S4.mode=k;reset4();ui4(true);});
+    $('vs4wrap').hidden=S4.mode!=='slider';$('hint4').textContent=T(S4.mode==='slider'?'hint4s':'hint4');}
+  $('go4').textContent=T(S4.ph==='ready'?'go4':'again').replace('▶ ','');
+  $('st4').textContent=S4.ph==='ready'?T('st4Ready'):S4.ph==='count'?Tf('st4Count',{n:Math.ceil(S4.cd)}):S4.ph==='go'?T('st4Go'):Tf('st4Done',{e:nf(S4.err/tEnd4(),2)+' m'});
+  $('o4t').textContent=S4.ph==='count'?String(Math.ceil(S4.cd)):'t = '+nf(S4.t,1,1)+' s';
+  const e=S4.t>0?S4.err/S4.t:0;
+  $('o4').innerHTML=`<dt>${T('o4s')}</dt><dd class="num">${nf(S4.s,1,1)} m</dd><dt>${T('o4v')}</dt><dd class="num">${nf(vNow4(),1,1)} m/s</dd>
+    <dt>${T('o4tg')}</dt><dd class="num">${nf(tgt4(S4.t),1,1)} m</dd><dt>${T('o4err')}</dt><dd class="num">${nf(e,2,2)} m</dd>`;
+  if(S4.ph==='done'){const er=S4.err/tEnd4(),n=er<.4?3:er<.8?2:er<1.5?1:0;
+    $('o4res').innerHTML=`<div class="stars" aria-label="${n}/3">${'★'.repeat(n)}${'☆'.repeat(3-n)}</div><p>${T('res'+n)}</p>`;}
+  else $('o4res').innerHTML='';}
+
+/* ================= Ngôn ngữ ================= */
+function applyLang(){document.documentElement.lang=lang;document.title=T('title');
+  document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=T(el.dataset.i18n));
+  document.querySelectorAll('[data-i18n-html]').forEach(el=>el.innerHTML=T(el.dataset.i18nHtml));
+  $('langBtn').textContent=lang==='vi'?'EN':'VI';
+  Object.keys(PRED).forEach(renderPred);[1,2,3,4].forEach(renderVideo);
+  seg('spd1',speedItems([.25,.5,1]),S1.speed,k=>{S1.speed=k;applySpd1();});
+  pre1();setV1();S1._lang=null;ui1();pick2(S2.k);ui3(true);ui4(true);}
+function applySpd1(){seg('spd1',speedItems([.25,.5,1]),S1.speed,k=>{S1.speed=k;applySpd1();});}
+$('langBtn').onclick=()=>{lang=lang==='vi'?'en':'vi';applyLang();};
+
+/* ================= Vòng lặp ================= */
+reset3();applyLang();
+{const t=+store.get('dt-tab');setTab(t>=1&&t<=4?t:1);}
+let last=performance.now(),uiT=0;
+function loop(now){const dt=Math.min((now-last)/1000,.1);last=now;uiT+=dt;
+  try{
+    if(tab===1){if(S1.run){S1.t=Math.min(T1,S1.t+dt*S1.speed);if(S1.t>=T1)S1.run=false;}render1a();render1b();if(uiT>.1){uiT=0;ui1();}}
+    else if(tab===2){const c=sc2();if(S2.play){c.cur=Math.min(c.tEnd,c.cur+dt*c.rate);if(c.cur>=c.tEnd)S2.play=false;}render2a();render2b();if(uiT>.1&&S2.play){uiT=0;ui2();}else if(uiT>.1&&!S2.play&&S2._was){ui2();}S2._was=S2.play;}
+    else if(tab===3){step3(dt);render3a();render3b();if(uiT>.12){uiT=0;ui3();}}
+    else if(tab===4){step4(dt);render4a();render4b();if(uiT>.1){uiT=0;ui4();}}
+  }catch(err){console.error(err);}
+  requestAnimationFrame(loop);}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

@@ -1,0 +1,1562 @@
+<title>Sóng âm KHTN 7</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Bàn thí nghiệm: sân khấu (các làn môi trường) bên trái, bảng ghi chép bên phải; điện thoại xếp một cột */
+:root{
+  --bg:#eaf0f2; --panel:#ffffff; --lane:#f6f9fa; --ink:#14222b; --muted:#566872; --line:#cbd6dc;
+  --accent:#0d6b86; --accent-ink:#ffffff; --ok:#1f9d55; --warn:#c2410c;
+  --solid:#4f6272; --liquid:#1d74c4; --gas:#b9741f; --na:#8a4fd1; --cl:#2f9e58; --mark:#d7263d;
+  --compress:13,107,134; --rare:214,160,40;
+  --font-ui:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-num:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Consolas,monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f161b; --panel:#172129; --lane:#121b21; --ink:#e4ecf0; --muted:#94a6b1; --line:#2a3842;
+  --accent:#4cb6d3; --accent-ink:#06222b; --ok:#45c47c; --warn:#f08a4b;
+  --solid:#a3b4c3; --liquid:#5aaef0; --gas:#e6a453; --na:#b98ef2; --cl:#5fcb88; --mark:#ff5b6f;
+  --compress:76,182,211; --rare:230,180,80; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f161b; --panel:#172129; --lane:#121b21; --ink:#e4ecf0; --muted:#94a6b1; --line:#2a3842;
+  --accent:#4cb6d3; --accent-ink:#06222b; --ok:#45c47c; --warn:#f08a4b;
+  --solid:#a3b4c3; --liquid:#5aaef0; --gas:#e6a453; --na:#b98ef2; --cl:#5fcb88; --mark:#ff5b6f;
+  --compress:76,182,211; --rare:230,180,80; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-ui);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px 32px}
+.wrap{max-width:1320px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.eyebrow{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{margin:0;font-size:clamp(24px,3.4vw,34px);line-height:1.15;font-weight:700;text-wrap:balance}
+h2{margin:0;font-size:17px;font-weight:700}
+.btn{font:inherit;font-weight:600;font-size:15px;min-height:44px;padding:8px 14px;border-radius:8px;border:1px solid var(--line);
+  background:var(--panel);color:var(--ink);cursor:pointer;touch-action:manipulation}
+.btn:hover{border-color:var(--accent)}
+.btn:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+nav.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
+nav.tabs button{font:inherit;font-size:15px;font-weight:600;white-space:nowrap;min-height:44px;padding:8px 14px;border:0;border-bottom:3px solid transparent;
+  background:none;color:var(--muted);cursor:pointer}
+nav.tabs button.on{color:var(--ink);border-bottom-color:var(--accent)}
+nav.tabs button:disabled{cursor:not-allowed;opacity:.6}
+nav.tabs small{font-weight:500;font-size:12px;margin-left:4px}
+.lab{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:14px;align-items:start}
+@media (max-width:980px){.lab{grid-template-columns:minmax(0,1fr)}}
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.lanesel{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+@media (max-width:620px){.lanesel{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.lanesel label{display:flex;flex-direction:column;gap:2px;font-size:13px;color:var(--muted);font-weight:600;min-width:0}
+select{font:inherit;font-size:15px;min-height:44px;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:var(--lane);color:var(--ink);width:100%}
+.clock{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:baseline;font-size:14px;color:var(--muted)}
+.clock b{font-family:var(--font-num);font-size:20px;color:var(--ink);font-variant-numeric:tabular-nums}
+canvas{display:block;width:100%;touch-action:none;border-radius:8px;background:var(--lane)}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg .btn{border:0;border-radius:0;min-width:56px}
+.hint{font-size:14px;color:var(--muted);margin:0}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.freq{display:flex;align-items:center;gap:8px;flex:1 1 260px;font-size:14px}
+input[type=range]{flex:1;min-width:120px;height:32px;accent-color:var(--accent)}
+.num{font-family:var(--font-num);font-variant-numeric:tabular-nums}
+aside{display:flex;flex-direction:column;gap:12px;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card p{margin:0}
+.card.predict{border-color:var(--accent);border-width:2px}
+.choices{display:flex;flex-wrap:wrap;gap:6px}
+.choices .btn{flex:1 1 140px;font-size:14px;text-align:left}
+.choices .btn.right{border-color:var(--ok);box-shadow:inset 0 0 0 2px var(--ok)}
+.choices .btn.wrong{border-color:var(--warn);box-shadow:inset 0 0 0 2px var(--warn)}
+.fb{font-size:15px;padding:8px 10px;border-radius:8px;background:var(--lane)}
+.fb.good{color:var(--ok)} .fb.bad{color:var(--warn)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:6px 4px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.03em}
+td.n{font-family:var(--font-num);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+th.n{text-align:right}
+.tablewrap{overflow-x:auto}
+.bars{display:flex;flex-direction:column;gap:6px}
+.bar{display:grid;grid-template-columns:96px minmax(0,1fr) 78px;gap:8px;align-items:center;font-size:13px}
+.bar span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar i{display:block;height:14px;border-radius:3px;background:var(--accent)}
+.bar .n{text-align:right;font-family:var(--font-num)}
+.slider{display:flex;flex-direction:column;gap:2px;font-size:14px}
+.slider .top{display:flex;justify-content:space-between;gap:8px}
+.toggles{display:flex;flex-direction:column;gap:2px}
+.toggles label{display:flex;gap:10px;align-items:center;min-height:40px;font-size:15px;cursor:pointer}
+.toggles input{width:22px;height:22px;accent-color:var(--accent)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.dot{width:12px;height:12px;border-radius:50%;display:inline-block}
+details{font-size:14px;color:var(--muted)}
+details summary{cursor:pointer;font-weight:600;color:var(--ink);min-height:36px;display:flex;align-items:center}
+details ul{margin:6px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+.concl{font-size:15px}
+.concl ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+.hidenum .sec{visibility:hidden}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+.seg.wide{display:flex}
+.seg.wide .btn{flex:1 1 0;min-width:0;white-space:normal;line-height:1.2}
+.sliders{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px 18px}
+.scopehead{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between}
+.stack{display:flex;flex-direction:column;gap:10px}
+ul.plain{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;font-size:15px}
+.card table td:first-child{color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips .btn{font-size:14px;padding:6px 12px}
+.ebars{display:flex;flex-direction:column;gap:6px}
+.ebhead{font-size:13px;color:var(--muted);min-height:18px}
+.ebar{display:grid;grid-template-columns:150px minmax(0,1fr) 64px;gap:10px;align-items:center;font-size:15px}
+.ebar .track{height:16px;border-radius:4px;background:var(--lane);border:1px solid var(--line);overflow:hidden}
+.ebar .track i{display:block;height:100%}
+.ebar b{text-align:right}
+@media (max-width:480px){.ebar{grid-template-columns:110px minmax(0,1fr) 54px;font-size:14px}}
+details.custom summary{color:var(--accent)}
+ul.vids{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px;font-size:15px}
+ul.vids a{color:var(--accent);font-weight:600}
+ul.vids span{display:block;font-size:12px;color:var(--muted)}
+.apps{display:flex;flex-direction:column;gap:14px}
+.appgrid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:900px){.appgrid{grid-template-columns:minmax(0,1fr)}}
+.appcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:14px}
+.app h3{margin:4px 0 0;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.app p{font-size:15px}
+.numin{font:inherit;min-height:44px;width:7em;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:var(--lane);color:var(--ink)}
+</style>
+
+<div class="wrap" id="app">
+  <header>
+    <div>
+      <div class="eyebrow" data-i18n="eyebrow"></div>
+      <h1 data-i18n="title"></h1>
+    </div>
+    <div class="row">
+      <button class="btn" id="teacher" aria-pressed="false" data-i18n="teacher"></button>
+      <button class="btn" id="lang">EN</button>
+    </div>
+  </header>
+
+  <nav class="tabs" aria-label="tabs" role="tablist">
+    <button class="on" role="tab" data-i18n="tab1"></button>
+    <button role="tab" data-i18n="tab2"></button>
+    <button role="tab" data-i18n="tab3"></button>
+    <button role="tab" data-i18n="tab4"></button>
+  </nav>
+
+  <section class="lab" id="p1">
+    <div class="stage">
+      <div class="lanesel" id="lanesel"></div>
+      <div class="clock">
+        <span><span data-i18n="clock"></span> <b id="clock">0,000 ms</b></span>
+        <span id="slowtxt"></span>
+      </div>
+      <canvas id="scene" aria-label="Mô phỏng truyền âm"></canvas>
+      <div class="legend" id="legend"></div>
+      <div class="controls">
+        <button class="btn primary" id="strike" data-i18n="strike"></button>
+        <button class="btn" id="cont" aria-pressed="false" data-i18n="cont"></button>
+        <button class="btn" id="run" data-i18n="pause"></button>
+        <button class="btn" id="stepb" data-i18n="step"></button>
+        <button class="btn" id="reset" data-i18n="reset"></button>
+        <div class="seg" id="speed">
+          <button class="btn" data-s="0.25">×0,25</button><button class="btn" data-s="0.5">×0,5</button><button class="btn" data-s="1" aria-pressed="true">×1</button>
+        </div>
+      </div>
+      <div class="row">
+        <label class="freq" id="freqbox" hidden><span data-i18n="freq"></span>
+          <input type="range" id="freq" min="100" max="1000" step="10" value="500">
+          <b class="num" id="freqv"></b></label>
+        <label class="freq"><span data-i18n="slow"></span>
+          <select id="slow" style="width:auto">
+            <option value="1000">1 000</option><option value="3000" selected>3 000</option><option value="10000">10 000</option><option value="30000">30 000</option>
+          </select></label>
+      </div>
+      <p class="hint" data-i18n="hint"></p>
+    </div>
+
+    <aside id="aside">
+      <div class="card predict">
+        <h2 data-i18n="predTitle"></h2>
+        <p data-i18n="predQ"></p>
+        <div class="choices" id="predChoices"></div>
+        <div class="fb" id="predFb" data-i18n="predWait"></div>
+      </div>
+
+      <div class="card">
+        <h2 data-i18n="resTitle"></h2>
+        <div class="tablewrap"><table>
+          <thead><tr><th data-i18n="thLane"></th><th data-i18n="thMed"></th><th class="n" data-i18n="thV"></th><th class="n" data-i18n="thT"></th><th class="n" data-i18n="thVm"></th></tr></thead>
+          <tbody id="resBody"></tbody>
+        </table></div>
+        <div class="bars sec" id="bars"></div>
+        <p class="hint" data-i18n="resNote"></p>
+      </div>
+
+      <div class="card">
+        <h2 data-i18n="q2Title"></h2>
+        <p data-i18n="q2"></p>
+        <div class="choices" id="q2Choices">
+          <button class="btn" data-a="travel" data-i18n="q2a"></button>
+          <button class="btn" data-a="osc" data-i18n="q2b"></button>
+        </div>
+        <div class="fb" id="q2Fb" hidden></div>
+      </div>
+
+      <div class="card">
+        <h2 data-i18n="envTitle"></h2>
+        <div class="slider"><div class="top"><span data-i18n="temp"></span><b class="num" id="tempv"></b></div>
+          <input type="range" id="temp" min="0" max="35" step="1" value="20"></div>
+        <div class="slider"><div class="top"><span data-i18n="sal"></span><b class="num" id="salv"></b></div>
+          <input type="range" id="sal" min="0" max="40" step="1" value="35"></div>
+        <p class="hint" data-i18n="envNote"></p>
+        <div class="toggles">
+          <label><input type="checkbox" id="tShade" checked><span data-i18n="tShade"></span></label>
+          <label><input type="checkbox" id="tBonds" checked><span data-i18n="tBonds"></span></label>
+          <label><input type="checkbox" id="tTherm" checked><span data-i18n="tTherm"></span></label>
+        </div>
+      </div>
+
+      <div class="card"><h2 data-i18n="vidTitle"></h2><ul class="vids" id="p1vid"></ul></div>
+
+      <div class="card concl">
+        <details id="conclBox">
+          <summary data-i18n="conclTitle"></summary>
+          <ul id="conclList"></ul>
+        </details>
+      </div>
+
+      <div class="card">
+        <details>
+          <summary data-i18n="assumeTitle"></summary>
+          <ul id="assumeList"></ul>
+        </details>
+        <details>
+          <summary data-i18n="yccdTitle"></summary>
+          <ul id="yccdList"></ul>
+        </details>
+      </div>
+    </aside>
+  </section>
+
+  <!-- ============ TAB 2: NGUỒN ÂM (TẦN SỐ, BIÊN ĐỘ) ============ -->
+  <section class="lab" id="p2" hidden>
+    <div class="stage">
+      <canvas id="p2cv" aria-label="máy phát âm và loa"></canvas>
+      <div class="sliders">
+        <div class="slider"><div class="top"><span data-i18n="p2f"></span><b class="num" id="p2fv"></b></div><input type="range" id="p2f" min="0" max="1000" step="1" value="473"></div>
+        <div class="slider"><div class="top"><span data-i18n="p2a"></span><b class="num" id="p2av"></b></div><input type="range" id="p2a" min="0" max="100" step="1" value="50"></div>
+      </div>
+      <div class="controls">
+        <button class="btn primary" id="p2sound" aria-pressed="false" data-i18n="soundOn"></button>
+        <button class="btn" id="p2slow" aria-pressed="false" data-i18n="p2slow"></button>
+        <button class="btn" id="p2hold" data-i18n="hold"></button>
+        <button class="btn" id="p2clear" data-i18n="clearHold"></button>
+      </div>
+      <div class="scopehead">
+        <h2 data-i18n="scopeTitle"></h2>
+        <label class="freq"><span data-i18n="tdiv"></span>
+          <select id="p2tdiv" style="width:auto"></select></label>
+      </div>
+      <canvas id="p2scope" aria-label="dao động kí"></canvas>
+      <p class="hint" data-i18n="p2hint"></p>
+    </div>
+    <aside>
+      <div class="card predict" id="p2pred"></div>
+      <div class="card">
+        <h2 data-i18n="readTitle"></h2>
+        <table><tbody id="p2read"></tbody></table>
+        <div class="fb" id="p2zone"></div>
+      </div>
+      <div class="card"><h2 data-i18n="vidTitle"></h2><ul class="vids" id="p2vid"></ul></div>
+      <div class="card concl"><details><summary data-i18n="conclTitle"></summary><ul id="p2concl"></ul></details></div>
+      <div class="card">
+        <details><summary data-i18n="assumeTitle"></summary><ul id="p2assume"></ul></details>
+        <details><summary data-i18n="yccdTitle"></summary><ul id="p2yccd"></ul></details>
+      </div>
+    </aside>
+  </section>
+
+  <!-- ============ TAB 3: PHẢN XẠ ÂM ============ -->
+  <section class="lab" id="p3" hidden>
+    <div class="stage">
+      <div class="seg wide" id="p3mode">
+        <button class="btn" data-v="mat" data-i18n="p3modeMat"></button><button class="btn" data-v="echo" data-i18n="p3modeEcho"></button>
+      </div>
+      <div id="p3matBox" class="stack">
+        <div class="chips" id="p3presets"></div>
+        <canvas id="p3cv" aria-label="sóng âm gặp vật liệu"></canvas>
+        <div class="legend" id="p3legend"></div>
+        <div class="controls">
+          <button class="btn primary" id="p3send" data-i18n="p3send"></button>
+          <div class="seg" id="p3speed"><button class="btn" data-s="0.5">×0,5</button><button class="btn" data-s="1" aria-pressed="true">×1</button></div>
+        </div>
+        <div class="ebars" id="p3bars"></div>
+        <details class="custom">
+          <summary data-i18n="p3custom"></summary>
+          <div class="sliders">
+            <div class="slider"><div class="top"><span data-i18n="p3Z"></span><b class="num" id="p3Zv"></b></div><input type="range" id="p3Z" min="0" max="1000" step="1" value="1000"></div>
+            <div class="slider"><div class="top"><span data-i18n="p3G"></span><b class="num" id="p3Gv"></b></div><input type="range" id="p3G" min="0" max="40" step="1" value="0"></div>
+            <div class="slider"><div class="top"><span data-i18n="p3Th"></span><b class="num" id="p3Thv"></b></div><input type="range" id="p3Th" min="1" max="16" step="1" value="8"></div>
+          </div>
+        </details>
+      </div>
+      <div id="p3echoBox" class="stack" hidden>
+        <canvas id="p4cv" aria-label="tiếng vang"></canvas>
+        <div class="sliders">
+          <div class="slider"><div class="top"><span data-i18n="p4d"></span><b class="num" id="p4dv"></b></div><input type="range" id="p4d" min="2" max="150" step="0.5" value="5"></div>
+          <label class="slider"><span data-i18n="p4mat"></span><select id="p4mat"></select></label>
+        </div>
+        <div class="controls">
+          <button class="btn primary" id="p4clap" data-i18n="p4clap"></button>
+          <div class="seg" id="p4slow"><button class="btn" data-s="10">×10</button><button class="btn" data-s="30" aria-pressed="true">×30</button><button class="btn" data-s="100">×100</button></div>
+          <span class="hint" data-i18n="p4slowLbl"></span>
+        </div>
+        <h2 data-i18n="p4tlTitle"></h2>
+        <canvas id="p4tl" aria-label="âm nghe được theo thời gian"></canvas>
+        <p class="hint" data-i18n="p4hint"></p>
+      </div>
+    </div>
+    <aside>
+      <div class="card predict" id="p3pred"></div>
+      <div class="card" id="p3why">
+        <h2 data-i18n="p3whyTitle"></h2>
+        <p id="p3whyMat"></p>
+        <details><summary data-i18n="p3mechTitle"></summary><ul id="p3mech"></ul></details>
+        <details><summary data-i18n="p3simpleTitle"></summary><ul id="p3simple"></ul></details>
+      </div>
+      <div class="card" id="p4echoRead" hidden>
+        <h2 data-i18n="readTitle"></h2>
+        <table><tbody id="p4read"></tbody></table>
+        <div class="fb" id="p4verdict"></div>
+      </div>
+      <div class="card">
+        <h2 data-i18n="p4refTitle"></h2>
+        <ul class="plain" id="p4ref"></ul>
+      </div>
+      <div class="card"><h2 data-i18n="vidTitle"></h2><ul class="vids" id="p3vid"></ul></div>
+      <div class="card concl"><details><summary data-i18n="conclTitle"></summary><ul id="p3concl"></ul></details></div>
+      <div class="card">
+        <details><summary data-i18n="assumeTitle"></summary><ul id="p3assume"></ul></details>
+        <details><summary data-i18n="yccdTitle"></summary><ul id="p3yccd"></ul></details>
+      </div>
+    </aside>
+  </section>
+
+  <!-- ============ TAB 4: ỨNG DỤNG ============ -->
+  <section id="p4" hidden>
+    <div class="apps">
+      <article class="card app wide-app">
+        <h2 data-i18n="a1t"></h2>
+        <div class="appgrid">
+          <div class="stack">
+            <canvas id="p4sea" aria-label="đo độ sâu biển"></canvas>
+            <div class="controls">
+              <button class="btn primary" id="p4ping" data-i18n="p4ping"></button>
+              <button class="btn" id="p4show" aria-pressed="false" data-i18n="p4show"></button>
+              <button class="btn" id="p4clearMap" data-i18n="p4clearMap"></button>
+            </div>
+            <p class="hint" data-i18n="p4seaHint"></p>
+          </div>
+          <div class="stack">
+            <p id="p4given"></p>
+            <table><tbody id="p4sread"></tbody></table>
+            <div class="row">
+              <label class="freq"><span data-i18n="p4ans"></span><input type="number" id="p4ans" inputmode="decimal" step="any" class="numin"> m</label>
+              <button class="btn" id="p4check" data-i18n="p4check"></button>
+            </div>
+            <div class="fb" id="p4sfb" hidden></div>
+            <div class="appbody" data-app="a1"></div>
+          </div>
+        </div>
+      </article>
+      <div class="appcards" id="appcards"></div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+/* ================= I18N ================= */
+const I18N = {
+  vi: {
+    eyebrow:'KHTN 7 · Âm thanh', title:'Sóng âm',
+    teacher:'Ẩn số liệu', tab1:'1. Truyền âm', tab2:'2. Tần số và biên độ', tab3:'3. Phản xạ âm', tab4:'4. Ứng dụng', soon:'(sắp có)',
+    clock:'Đồng hồ (thời gian thực):', slowtxt:'Hình đang chạy chậm hơn thực tế {S} lần',
+    strike:'Gõ một cái', cont:'Phát âm liên tục', pause:'Tạm dừng', play:'Chạy', step:'Bước', reset:'Đặt lại',
+    freq:'Tần số nguồn', slow:'Làm chậm thời gian ×',
+    hint:'Bấm "Gõ một cái" để cả bốn làn nhận cùng một cú gõ. Có thể kéo pít-tông xám bên trái để tự đẩy lớp hạt đầu tiên. Chạm vào một hạt để đánh dấu nó màu đỏ. Micrô đặt cách nguồn 1 m.',
+    lane:'Làn', predTitle:'Dự đoán trước khi gõ', predQ:'Âm sẽ đến micrô ở làn nào ĐẦU TIÊN?',
+    predWait:'Chọn một làn, rồi bấm "Gõ một cái" để kiểm tra.', predChosen:'Bạn đoán: {m}. Bấm "Gõ một cái" để kiểm tra.',
+    predRight:'Đúng! Âm đến micrô ở {m} đầu tiên.', predWrong:'Chưa đúng. Âm đến micrô ở {m} đầu tiên, bạn đã đoán {g}.',
+    order:'Thứ tự đến micrô: {o}.', noSound:'{m}: âm không đến được micrô.',
+    resTitle:'Số liệu đo', thLane:'Làn', thMed:'Môi trường', thV:'v tra bảng (m/s)', thT:'t đi 1 m', thVm:'v = s/t (m/s)',
+    resNote:'t là thời gian thực để đỉnh xung đi từ nguồn đến micrô (s = 1 m), đo ngay trên mô phỏng. "—" là chưa đo được.',
+    q2Title:'Quan sát hạt màu đỏ', q2:'Khi xung âm đi qua, hạt màu đỏ có đi theo xung âm đến micrô không?',
+    q2a:'Có, hạt bị đẩy đi theo âm', q2b:'Không, hạt chỉ dao động qua lại quanh chỗ cũ',
+    q2good:'Đúng. Mỗi hạt chỉ dao động quanh vị trí cân bằng (vòng tròn nét đứt), đẩy hạt bên cạnh rồi trở về. Thứ truyền đi là dao động (năng lượng), không phải bản thân các hạt.',
+    q2bad:'Hãy nhìn lại vòng tròn nét đứt: đó là chỗ cũ của hạt đỏ. Sau khi xung đi qua, hạt quay về đúng chỗ đó. Hạt không đi theo âm, chỉ dao động rồi truyền dao động cho hạt bên cạnh.',
+    envTitle:'Điều kiện môi trường', temp:'Nhiệt độ (chất khí, nước, nước muối)', sal:'Độ mặn của nước muối',
+    envNote:'Nước biển có độ mặn khoảng 35 g muối trong 1 kg nước. Tốc độ trong chất rắn và cồn lấy ở nhiệt độ phòng.',
+    tShade:'Tô vùng nén và vùng dãn', tBonds:'Vẽ liên kết giữa các hạt chất rắn', tTherm:'Chuyển động nhiệt (minh hoạ)',
+    lgSolid:'hạt chất rắn', lgLiquid:'phân tử chất lỏng', lgGas:'phân tử chất khí', lgNa:'ion Na⁺', lgCl:'ion Cl⁻', lgMark:'hạt đánh dấu', lgComp:'vùng nén', lgRare:'vùng dãn',
+    conclTitle:'Kết luận (mở sau khi thảo luận)',
+    concl:[
+      'Âm truyền được trong chất rắn, chất lỏng và chất khí. Âm không truyền được trong chân không vì không có hạt nào để truyền dao động.',
+      'Nói chung tốc độ truyền âm trong chất rắn lớn hơn trong chất lỏng, trong chất lỏng lớn hơn trong chất khí.',
+      'Khi âm truyền qua, các hạt chỉ dao động quanh vị trí cân bằng và truyền dao động cho hạt bên cạnh. Sóng âm là sự lan truyền dao động, tạo ra các vùng nén và vùng dãn nối tiếp nhau.',
+      'Tốc độ âm phụ thuộc vào chất đó khó nén đến đâu và nặng đến đâu. Chất càng khó nén thì âm càng nhanh; chất càng nặng thì âm càng chậm. Nước muối nặng hơn nước nhưng khó nén hơn nhiều, nên âm trong nước muối nhanh hơn một chút.',
+      'Trong chất khí, nhiệt độ càng cao thì âm càng nhanh (không khí: khoảng 331 m/s ở 0 °C, 343 m/s ở 20 °C).'
+    ],
+    assumeTitle:'Giả thiết mô phỏng',
+    assume:[
+      'Mỗi chấm đại diện cho một lớp rất nhiều phân tử. Khoảng cách giữa các chấm được phóng to hàng trăm triệu lần.',
+      'Lực tương tác giữa các lớp hạt được mô hình bằng lò xo. Độ cứng lò xo được chọn để tốc độ xung trên hình tỉ lệ đúng với tốc độ âm thật.',
+      'Thời gian được làm chậm theo hệ số đã chọn. Đồng hồ hiển thị thời gian thực tương ứng.',
+      'Để dễ so sánh, xung "gõ một cái" có cùng bề rộng trên hình ở mọi làn. Thực tế, cùng một cú gõ thì xung trong môi trường truyền nhanh dài hơn. Chế độ phát liên tục dùng cùng một tần số cho mọi làn, nên bước sóng λ = v/f khác nhau thật.',
+      'Chuyển động nhiệt chỉ minh hoạ. Thực tế phân tử khí chuyển động hỗn loạn rất nhanh (cỡ vài trăm m/s) và truyền dao động qua va chạm.',
+      'Chỉ xét sóng dọc, bỏ qua sự suy giảm của âm theo quãng đường.',
+      'Số liệu: chất khí theo công thức khí lí tưởng v = √(γRT/M); nước và nước muối theo công thức thực nghiệm Medwin (1975); chất rắn là sóng dọc trong khối vật liệu lớn ở khoảng 20 °C (gỗ dọc thớ, giá trị gần đúng).'
+    ],
+    yccdTitle:'Yêu cầu cần đạt (Chương trình KHTN 2018, lớp 7)',
+    yccd:[
+      'Thực hiện thí nghiệm tạo sóng âm để chứng tỏ được sóng âm có thể truyền được trong chất rắn, lỏng, khí.',
+      'Giải thích được sự truyền sóng âm trong không khí.',
+      'Giải thích được một số hiện tượng đơn giản thường gặp trong thực tế về sóng âm.'
+    ],
+    vacuumMsg:'Chân không: không có hạt nào nên dao động không truyền đi được', lambda:'λ = {l} m',
+    groups:{solid:'Chất rắn', liquid:'Chất lỏng', gas:'Chất khí', none:'Khác'},
+    media:{vacuum:'Chân không', air:'Không khí', he:'Khí heli', co2:'Khí cacbon đioxit', water:'Nước tinh khiết', brine:'Nước muối', ethanol:'Cồn (etanol)',
+      ice:'Nước đá', wood:'Gỗ (dọc thớ)', copper:'Đồng', glass:'Thuỷ tinh', steel:'Thép', al:'Nhôm'},
+    source:'nguồn', mic:'micrô'
+  },
+  en: {
+    eyebrow:'Natural Science 7 · Sound', title:'Sound waves',
+    teacher:'Hide numbers', tab1:'1. How sound travels', tab2:'2. Frequency and amplitude', tab3:'3. Reflection', tab4:'4. Applications', soon:'(coming)',
+    clock:'Clock (real time):', slowtxt:'Animation runs {S} times slower than reality',
+    strike:'Strike once', cont:'Continuous tone', pause:'Pause', play:'Play', step:'Step', reset:'Reset',
+    freq:'Source frequency', slow:'Slow motion ×',
+    hint:'Press "Strike once" to give all four lanes the same strike. You can drag the grey piston on the left to push the first layer yourself. Tap a particle to mark it red. The microphone is 1 m from the source.',
+    lane:'Lane', predTitle:'Predict before striking', predQ:'In which lane will the sound reach the microphone FIRST?',
+    predWait:'Choose a lane, then press "Strike once" to check.', predChosen:'Your guess: {m}. Press "Strike once" to check.',
+    predRight:'Correct! Sound reached the microphone first in {m}.', predWrong:'Not quite. Sound arrived first in {m}; you guessed {g}.',
+    order:'Arrival order: {o}.', noSound:'{m}: no sound reaches the microphone.',
+    resTitle:'Measurements', thLane:'Lane', thMed:'Medium', thV:'v from table (m/s)', thT:'t over 1 m', thVm:'v = s/t (m/s)',
+    resNote:'t is the real time for the pulse peak to travel from the source to the microphone (s = 1 m), measured in the simulation. "—" means not measured yet.',
+    q2Title:'Watch the red particle', q2:'As the pulse passes, does the red particle travel with it to the microphone?',
+    q2a:'Yes, it is carried along with the sound', q2b:'No, it only vibrates back and forth around its place',
+    q2good:'Right. Each particle only vibrates about its rest position (dashed circle), pushes its neighbour and returns. What travels is the vibration (energy), not the particles themselves.',
+    q2bad:'Look at the dashed circle: that is the red particle\'s rest position. After the pulse passes it returns exactly there. Particles are not carried along; they vibrate and pass the vibration on.',
+    envTitle:'Conditions', temp:'Temperature (gases, water, salt water)', sal:'Salinity of the salt water',
+    envNote:'Seawater has about 35 g of salt per kg of water. Speeds in solids and ethanol are taken at room temperature.',
+    tShade:'Shade compressions and rarefactions', tBonds:'Draw bonds between solid particles', tTherm:'Thermal motion (illustrative)',
+    lgSolid:'solid particle', lgLiquid:'liquid molecule', lgGas:'gas molecule', lgNa:'Na⁺ ion', lgCl:'Cl⁻ ion', lgMark:'marked particle', lgComp:'compression', lgRare:'rarefaction',
+    conclTitle:'Conclusions (open after discussion)',
+    concl:[
+      'Sound travels through solids, liquids and gases. It cannot travel through a vacuum because there are no particles to pass the vibration on.',
+      'In general sound is faster in solids than in liquids, and faster in liquids than in gases.',
+      'As sound passes, particles only vibrate about their rest positions and pass the vibration to their neighbours. A sound wave is a travelling vibration that forms alternating compressions and rarefactions.',
+      'The speed depends on how hard the material is to compress and how heavy it is. Harder to compress means faster; heavier means slower. Salt water is heavier than pure water but much harder to compress, so sound is slightly faster in it.',
+      'In a gas, sound is faster at higher temperature (air: about 331 m/s at 0 °C, 343 m/s at 20 °C).'
+    ],
+    assumeTitle:'Model assumptions',
+    assume:[
+      'Each dot stands for a layer of very many molecules. Spacing is magnified hundreds of millions of times.',
+      'Forces between layers are modelled as springs, with stiffness chosen so the pulse speed on screen is proportional to the real speed of sound.',
+      'Time is slowed by the chosen factor. The clock shows the corresponding real time.',
+      'For a fair comparison, the "strike" pulse has the same width on screen in every lane. In reality the same strike makes a longer pulse in a faster medium. The continuous tone uses the same frequency in all lanes, so the wavelengths λ = v/f really differ.',
+      'Thermal motion is only illustrative. Real gas molecules move randomly at hundreds of m/s and pass vibrations on by collisions.',
+      'Only longitudinal waves are shown; attenuation is ignored.',
+      'Data: gases from the ideal-gas formula v = √(γRT/M); water and salt water from Medwin\'s empirical formula (1975); solids are bulk longitudinal waves at about 20 °C (wood along the grain, approximate).'
+    ],
+    yccdTitle:'Curriculum objectives (Vietnam 2018, grade 7)',
+    yccd:[
+      'Carry out experiments producing sound waves to show that sound can travel through solids, liquids and gases.',
+      'Explain how sound waves travel through air.',
+      'Explain simple everyday phenomena involving sound waves.'
+    ],
+    vacuumMsg:'Vacuum: no particles, so the vibration cannot travel', lambda:'λ = {l} m',
+    groups:{solid:'Solids', liquid:'Liquids', gas:'Gases', none:'Other'},
+    media:{vacuum:'Vacuum', air:'Air', he:'Helium', co2:'Carbon dioxide', water:'Pure water', brine:'Salt water', ethanol:'Ethanol',
+      ice:'Ice', wood:'Wood (along grain)', copper:'Copper', glass:'Glass', steel:'Steel', al:'Aluminium'},
+    source:'source', mic:'mic'
+  }
+};
+let lang = 'vi';
+const T = k => I18N[lang][k];
+const fmt = (x, d = 0) => new Intl.NumberFormat(lang === 'vi' ? 'vi-VN' : 'en-US', { maximumFractionDigits: d, minimumFractionDigits: d }).format(x);
+const fmtSig = (x, s = 3) => { if (!isFinite(x) || x === 0) return fmt(0); const d = Math.max(0, s - 1 - Math.floor(Math.log10(Math.abs(x)))); return fmt(x, d); };
+const tpl = (s, o) => s.replace(/\{(\w+)\}/g, (_, k) => o[k]);
+
+/* ================= Vật lí ================= */
+const R_GAS = 8.314462;
+// Môi trường: nhóm, cách tính tốc độ (m/s)
+const MEDIA = {
+  vacuum:{g:'none'},
+  air:{g:'gas', gamma:1.4, M:0.028965}, he:{g:'gas', gamma:5/3, M:0.0040026}, co2:{g:'gas', gamma:1.289, M:0.04401},
+  water:{g:'liquid'}, brine:{g:'liquid', brine:true}, ethanol:{g:'liquid', c:1160},
+  ice:{g:'solid', c:3840}, wood:{g:'solid', c:4000}, copper:{g:'solid', c:4760}, glass:{g:'solid', c:5640}, steel:{g:'solid', c:5900}, al:{g:'solid', c:6420}
+};
+const ORDER = { solid:['steel','al','copper','glass','wood','ice'], liquid:['water','brine','ethanol'], gas:['air','he','co2'], none:['vacuum'] };
+// Medwin (1975): T (°C), S (g/kg), độ sâu 0
+const medwin = (t, s) => 1449.2 + 4.6*t - 0.055*t*t + 0.00029*t*t*t + (1.34 - 0.010*t)*(s - 35);
+function speedOf(key){
+  const m = MEDIA[key];
+  if (m.g === 'none') return 0;
+  if (m.g === 'gas') return Math.sqrt(m.gamma * R_GAS * (S.tempC + 273.15) / m.M);
+  if (key === 'water') return medwin(S.tempC, 0);
+  if (m.brine) return medwin(S.tempC, S.sal);
+  return m.c;
+}
+
+const N = 56;          // số lớp hạt mỗi làn (lớp 0 là mặt pít-tông)
+const DET = 50;        // micrô ở lớp 50
+const DIST = 1.0;      // khoảng cách nguồn – micrô (m)
+const A_M = DIST / DET;// khoảng cách giữa hai lớp hạt, quy đổi (m)
+const AMP = 0.45;      // biên độ dịch chuyển trên hình (đơn vị: khoảng cách lớp)
+const W_PULSE = 16;    // bề rộng xung trên hình (lớp)
+const DT = 1/4000;     // bước tích phân (giây hình)
+const ROWS = 5;
+
+const S = { tempC:20, sal:35, slow:3000, play:1, running:true, cont:false, f:500, tCont0:0,
+  t:0, tStrike:null, drag:null, dragU:0, ret:null, tj:0, shade:true, bonds:true, therm:true, hide:false,
+  pred:null, predDone:false, q2:null };
+
+function rng(seed){ let x = seed >>> 0 || 1; return () => (x = (x * 1664525 + 1013904223) >>> 0) / 4294967296; }
+function makeLane(key, idx){
+  const r = rng(1234 + idx*977);
+  const P = [];
+  for (let i = 1; i <= N; i++) for (let k = 0; k < ROWS; k++)
+    P.push({ i, k, ox:r()-0.5, oy:r()-0.5, p1:r()*6.283, p2:r()*6.283, w1:1.3+r()*1.4, w2:1.1+r()*1.6, vis:r(), ion:r() });
+  return { key, u:new Float64Array(N+1), v:new Float64Array(N+1), acc:new Float64Array(N+1), P,
+    mark:{ i:20, k:2 }, det:{ st:'wait', mx:0, tm:0, tArr:null }, lit:0 };
+}
+let lanes = ['air','water','brine','steel'].map(makeLane);
+
+function sitesPerSec(l){ return speedOf(l.key) / (A_M * S.slow); } // tốc độ trên hình (lớp/giây hình)
+function srcU(l, t){
+  let u = S.dragU;
+  if (S.tStrike !== null){ const cs = sitesPerSec(l); if (cs > 0){ const tau = W_PULSE / cs, d = t - S.tStrike; if (d > 0 && d < tau) u += AMP * Math.sin(Math.PI*d/tau) ** 2; } }
+  if (S.cont){ const fa = S.f / S.slow, d = t - S.tCont0; u += AMP * Math.min(1, d*fa) * Math.sin(2*Math.PI*fa*d); }
+  return u;
+}
+function step(dt){
+  S.t += dt;
+  if (S.ret){ // pít-tông tự trở về sau khi thả tay
+    const p = Math.min(1, (S.t - S.ret.t0) / S.ret.dur); S.dragU = S.ret.u0 * (1 - (3*p*p - 2*p*p*p)); if (p >= 1) S.ret = null;
+  }
+  for (const l of lanes){
+    const u = l.u, v = l.v, a = l.acc;
+    u[0] = srcU(l, S.t);
+    if (l.key === 'vacuum') continue;
+    const cs = sitesPerSec(l), k = cs*cs;
+    for (let i = 1; i < N; i++) a[i] = k * (u[i-1] - 2*u[i] + u[i+1]);
+    a[N] = k * (u[N-1] - u[N]) - cs * v[N]; // đầu cuối hấp thụ, không phản xạ
+    for (let i = 1; i <= N; i++){ v[i] += a[i]*dt; u[i] += v[i]*dt; }
+    const x = u[DET], d = l.det;
+    if (Math.abs(x) > 0.15*AMP) l.lit = 1;
+    if (S.tStrike !== null && !S.cont && S.drag === null){
+      if (d.st === 'wait' && x > 0.3*AMP) d.st = 'rise';
+      if (d.st === 'rise'){
+        if (x > d.mx){ d.mx = x; d.tm = S.t; }
+        if (x < 0.6*d.mx){ d.st = 'done'; d.tArr = (d.tm - (S.tStrike + W_PULSE/cs/2)) / S.slow; onArrival(); }
+      }
+    }
+  }
+}
+function clearLane(l){ l.u.fill(0); l.v.fill(0); l.lit = 0; l.det = { st:'wait', mx:0, tm:0, tArr:null }; }
+function strike(){
+  if (S.cont) setCont(false);
+  lanes.forEach(clearLane); S.dragU = 0; S.ret = null;
+  S.tStrike = S.t; S.predDone = false; S.running = true; updRun(); renderResults(); renderPred();
+}
+function resetAll(){ S.t = 0; S.tStrike = null; S.dragU = 0; S.ret = null; setCont(false); lanes.forEach(clearLane); S.running = true; updRun(); renderResults(); renderPred(); }
+
+/* ================= Vẽ ================= */
+const cv = document.getElementById('scene'), ctx = cv.getContext('2d');
+let G = {}, colors = {};
+function readColors(){
+  const cs = getComputedStyle(document.documentElement), g = n => cs.getPropertyValue(n).trim();
+  colors = { ink:g('--ink'), muted:g('--muted'), line:g('--line'), lane:g('--lane'), panel:g('--panel'), accent:g('--accent'), ok:g('--ok'),
+    solid:g('--solid'), liquid:g('--liquid'), gas:g('--gas'), na:g('--na'), cl:g('--cl'), mark:g('--mark'), comp:g('--compress'), rare:g('--rare') };
+}
+function layout(){
+  const w = cv.clientWidth, small = w < 560;
+  const laneH = small ? 92 : 118, gap = 6, top = 4, ruler = 34;
+  const h = top + 4*laneH + 3*gap + ruler;
+  const dpr = window.devicePixelRatio || 1;
+  cv.style.height = h + 'px'; cv.width = Math.round(w*dpr); cv.height = Math.round(h*dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  const x0 = small ? 30 : 48;
+  G = { w, h, small, laneH, gap, top, x0, aPx:(w - x0 - 8)/N, pw: small ? 16 : 24, head: small ? 22 : 26 };
+}
+function laneTop(li){ return G.top + li*(G.laneH + G.gap); }
+function particleXY(l, p, li){
+  const m = MEDIA[l.key].g, top = laneTop(li), y0 = top + G.head, rh = (G.laneH - G.head - 6) / ROWS;
+  let ox = 0, oy = 0, jx = 0, jy = 0;
+  if (m === 'liquid'){ ox = p.ox*0.45; oy = p.oy*0.55; }
+  if (m === 'gas'){ ox = p.ox*0.9; oy = p.oy*0.9; }
+  if (S.therm){
+    const J = m === 'gas' ? 0.22 : m === 'liquid' ? 0.09 : 0.035;
+    jx = J * Math.sin(p.p1 + p.w1*S.tj*3); jy = J * Math.sin(p.p2 + p.w2*S.tj*3);
+  }
+  const eqx = G.x0 + (p.i + ox) * G.aPx, eqy = y0 + (p.k + 0.5 + oy) * rh;
+  return { x: eqx + (l.u[p.i] + jx) * G.aPx, y: eqy + jy * rh, eqx, eqy, rh };
+}
+function render(){
+  const c = ctx; c.clearRect(0,0,G.w,G.h);
+  const rad = Math.max(1.8, Math.min(5.5, G.aPx*0.3));
+  c.font = `600 ${G.small?12:14}px ${getComputedStyle(document.body).fontFamily}`;
+  lanes.forEach((l, li) => {
+    const top = laneTop(li), m = MEDIA[l.key].g, y0 = top + G.head, yb = top + G.laneH - 4;
+    c.fillStyle = colors.panel; c.fillRect(0, top, G.w, G.laneH);
+    c.strokeStyle = colors.line; c.lineWidth = 1; c.strokeRect(0.5, top+0.5, G.w-1, G.laneH-1);
+    // vùng nén, dãn
+    if (S.shade && m !== 'none'){
+      for (let i = 0; i < N; i++){
+        const e = l.u[i+1] - l.u[i]; const a = Math.min(1, Math.abs(e)/AMP*1.4) * 0.38; if (a < 0.02) continue;
+        const xa = G.x0 + (i + l.u[i]) * G.aPx, xb = G.x0 + (i + 1 + l.u[i+1]) * G.aPx;
+        c.fillStyle = `rgba(${e < 0 ? colors.comp : colors.rare},${a})`; c.fillRect(xa, y0-2, xb-xa, yb-y0+2);
+      }
+    }
+    // micrô
+    const xd = G.x0 + DET * G.aPx;
+    c.setLineDash([3,4]); c.strokeStyle = colors.muted; c.beginPath(); c.moveTo(xd, y0-2); c.lineTo(xd, yb); c.stroke(); c.setLineDash([]);
+    c.fillStyle = l.lit ? colors.ok : colors.line; c.beginPath(); c.arc(xd, top + G.head/2, G.small?6:7, 0, 6.283); c.fill();
+    // nhãn làn
+    c.fillStyle = colors.ink; c.textBaseline = 'middle'; c.textAlign = 'left';
+    let lab = `${T('lane')} ${li+1} · ${T('media')[l.key]}`;
+    if (!S.hide && m !== 'none') lab += ` · ${fmt(speedOf(l.key))} m/s`;
+    c.fillText(lab, 8, top + G.head/2 + 1);
+    if (l.det.tArr !== null && !S.hide){ c.textAlign = 'right'; c.fillStyle = colors.ok; c.fillText(`${fmtSig(l.det.tArr*1000,3)} ms`, xd - 12, top + G.head/2 + 1); }
+    if (S.cont && m !== 'none' && !S.hide){ c.textAlign = 'right'; c.fillStyle = colors.muted; c.fillText(tpl(T('lambda'), { l: fmtSig(speedOf(l.key)/S.f, 3) }), G.w - 8, top + G.head/2 + 1); }
+    // hạt
+    if (m === 'none'){
+      c.fillStyle = colors.muted; c.textAlign = 'center'; c.font = `500 ${G.small?12:15}px ${getComputedStyle(document.body).fontFamily}`;
+      c.fillText(T('vacuumMsg'), (G.x0 + G.w)/2, (y0 + yb)/2);
+      c.font = `600 ${G.small?12:14}px ${getComputedStyle(document.body).fontFamily}`;
+    } else {
+      const col = m === 'solid' ? colors.solid : m === 'liquid' ? colors.liquid : colors.gas;
+      const ionP = MEDIA[l.key].brine ? S.sal/40*0.16 : 0;
+      if (m === 'solid' && S.bonds){
+        c.strokeStyle = col; c.globalAlpha = 0.35; c.lineWidth = 1; c.beginPath();
+        for (const p of l.P){
+          const a = particleXY(l, p, li);
+          if (p.i < N){ const q = l.P[(p.i)*ROWS + p.k]; const b = particleXY(l, q, li); c.moveTo(a.x, a.y); c.lineTo(b.x, b.y); }
+          if (p.k < ROWS-1){ const q = l.P[(p.i-1)*ROWS + p.k + 1]; const b = particleXY(l, q, li); c.moveTo(a.x, a.y); c.lineTo(b.x, b.y); }
+        }
+        c.stroke(); c.globalAlpha = 1;
+        // nối hàng đầu với pít-tông
+        c.beginPath(); c.globalAlpha = 0.35;
+        for (let k = 0; k < ROWS; k++){ const a = particleXY(l, l.P[k], li); c.moveTo(G.x0 + l.u[0]*G.aPx, a.y); c.lineTo(a.x, a.y); }
+        c.stroke(); c.globalAlpha = 1;
+      }
+      for (const p of l.P){
+        const isMark = p.i === l.mark.i && p.k === l.mark.k;
+        if (m === 'gas' && p.vis > 0.38 && !isMark) continue;
+        const a = particleXY(l, p, li);
+        let fill = col, r = rad;
+        if (ionP && p.ion < ionP){ fill = (p.i + p.k) % 2 ? colors.na : colors.cl; r = rad*1.15; }
+        if (isMark){
+          c.setLineDash([2,2]); c.strokeStyle = colors.mark; c.lineWidth = 1.4; c.beginPath(); c.arc(a.eqx, a.eqy, rad+2.5, 0, 6.283); c.stroke(); c.setLineDash([]);
+          continue;
+        }
+        c.fillStyle = fill; c.beginPath(); c.arc(a.x, a.y, r, 0, 6.283); c.fill();
+      }
+      const mp = l.P[(l.mark.i-1)*ROWS + l.mark.k], a = particleXY(l, mp, li);
+      c.fillStyle = colors.mark; c.beginPath(); c.arc(a.x, a.y, rad*1.35, 0, 6.283); c.fill();
+    }
+    // pít-tông
+    const xp = G.x0 + l.u[0]*G.aPx;
+    c.fillStyle = colors.solid; c.fillRect(xp - G.pw, y0 - 2, G.pw, yb - y0 + 2);
+    c.strokeStyle = colors.panel; c.lineWidth = 1.5; c.beginPath();
+    for (let g = 0; g < 3; g++){ const gx = xp - G.pw*0.25 - g*G.pw*0.22; c.moveTo(gx, (y0+yb)/2 - 10); c.lineTo(gx, (y0+yb)/2 + 10); }
+    c.stroke();
+  });
+  // thước đo
+  const ry = laneTop(4) - G.gap + 10, xd = G.x0 + DET*G.aPx;
+  c.strokeStyle = colors.muted; c.fillStyle = colors.muted; c.lineWidth = 1; c.textAlign = 'center'; c.textBaseline = 'top';
+  c.beginPath(); c.moveTo(G.x0, ry); c.lineTo(xd, ry);
+  for (let j = 0; j <= 10; j++){ const x = G.x0 + j*(xd - G.x0)/10; c.moveTo(x, ry); c.lineTo(x, ry + (j%5 ? 4 : 8)); }
+  c.stroke();
+  c.font = `500 ${G.small?11:13}px ${getComputedStyle(document.body).fontFamily}`;
+  c.fillText('0', G.x0, ry + 10); c.fillText(`${fmt(0.5,1)} m`, (G.x0+xd)/2, ry + 10); c.fillText('1 m', xd, ry + 10);
+}
+
+/* ================= Giao diện ================= */
+const $ = id => document.getElementById(id);
+function buildLaneSel(){
+  const box = $('lanesel'); box.innerHTML = '';
+  lanes.forEach((l, li) => {
+    const lab = document.createElement('label');
+    lab.innerHTML = `<span>${T('lane')} ${li+1}</span>`;
+    const sel = document.createElement('select'); sel.id = 'lane' + li;
+    for (const g of ['solid','liquid','gas','none']){
+      const og = document.createElement('optgroup'); og.label = T('groups')[g];
+      for (const k of ORDER[g]){ const o = document.createElement('option'); o.value = k; o.textContent = T('media')[k]; og.appendChild(o); }
+      sel.appendChild(og);
+    }
+    sel.value = l.key;
+    sel.onchange = () => { const mark = l.mark; lanes[li] = makeLane(sel.value, li); lanes[li].mark = mark; S.pred = null; renderPred(); renderResults(); renderLegend(); };
+    lab.appendChild(sel); box.appendChild(lab);
+  });
+}
+function renderLegend(){
+  const used = new Set(lanes.map(l => MEDIA[l.key].g)), brine = lanes.some(l => MEDIA[l.key].brine);
+  const it = [];
+  if (used.has('solid')) it.push(['--solid','lgSolid']);
+  if (used.has('liquid')) it.push(['--liquid','lgLiquid']);
+  if (used.has('gas')) it.push(['--gas','lgGas']);
+  if (brine){ it.push(['--na','lgNa']); it.push(['--cl','lgCl']); }
+  it.push(['--mark','lgMark']);
+  let h = it.map(([c,k]) => `<span><i class="dot" style="background:var(${c})"></i>${T(k)}</span>`).join('');
+  if (S.shade) h += `<span><i class="dot" style="border-radius:2px;background:rgba(var(--compress),.45)"></i>${T('lgComp')}</span><span><i class="dot" style="border-radius:2px;background:rgba(var(--rare),.45)"></i>${T('lgRare')}</span>`;
+  $('legend').innerHTML = h;
+}
+function renderResults(){
+  const rows = lanes.map((l, li) => {
+    const v = speedOf(l.key), t = l.det.tArr, none = MEDIA[l.key].g === 'none';
+    return `<tr><td>${li+1}</td><td>${T('media')[l.key]}</td><td class="n sec">${none ? '0' : fmt(v)}</td><td class="n sec">${t !== null ? fmtSig(t*1000,3)+' ms' : '—'}</td><td class="n sec">${t !== null ? fmt(DIST/t) : '—'}</td></tr>`;
+  }).join('');
+  $('resBody').innerHTML = rows;
+  const vmax = 6500;
+  $('bars').innerHTML = lanes.map((l, li) => { const v = speedOf(l.key); return `<div class="bar"><span>${li+1}. ${T('media')[l.key]}</span><span><i style="width:${Math.max(0.5, v/vmax*100)}%"></i></span><span class="n">${fmt(v)} m/s</span></div>`; }).join('');
+}
+function arrivalOrder(){
+  return lanes.map((l, li) => ({ li, t:l.det.tArr, none:MEDIA[l.key].g === 'none' })).filter(o => !o.none && o.t !== null).sort((a,b) => a.t - b.t);
+}
+function laneName(li){ return `${T('lane')} ${li+1} (${T('media')[lanes[li].key]})`; }
+function onArrival(){
+  renderResults();
+  const pending = lanes.some(l => MEDIA[l.key].g !== 'none' && l.det.st !== 'done');
+  if (!pending){ S.predDone = true; renderPred(); }
+}
+function renderPred(){
+  const box = $('predChoices'); box.innerHTML = '';
+  const ord = S.predDone ? arrivalOrder() : [];
+  const first = ord.length ? ord[0].li : null;
+  lanes.forEach((l, li) => {
+    const b = document.createElement('button'); b.className = 'btn'; b.textContent = laneName(li);
+    b.setAttribute('aria-pressed', S.pred === li ? 'true' : 'false');
+    if (S.predDone && S.pred !== null){ if (ord.length && Math.abs(lanes[li].det.tArr - ord[0].t) < 1e-9) b.classList.add('right'); else if (li === S.pred) b.classList.add('wrong'); }
+    b.onclick = () => { S.pred = li; S.predDone = false; renderPred(); };
+    box.appendChild(b);
+  });
+  const fb = $('predFb'); fb.className = 'fb';
+  if (S.predDone && ord.length){
+    let s = '';
+    if (S.pred !== null){
+      const ok = Math.abs((lanes[S.pred].det.tArr ?? Infinity) - ord[0].t) < 1e-9;
+      s = tpl(T(ok ? 'predRight' : 'predWrong'), { m: laneName(first), g: laneName(S.pred) }) + ' ';
+      fb.classList.add(ok ? 'good' : 'bad');
+    }
+    s += tpl(T('order'), { o: ord.map(o => T('media')[lanes[o.li].key]).join(' → ') });
+    lanes.forEach(l => { if (MEDIA[l.key].g === 'none') s += ' ' + tpl(T('noSound'), { m: T('media')[l.key] }); });
+    fb.textContent = s;
+  } else fb.textContent = S.pred === null ? T('predWait') : tpl(T('predChosen'), { m: laneName(S.pred) });
+}
+function renderQ2(){
+  const fb = $('q2Fb');
+  document.querySelectorAll('#q2Choices .btn').forEach(b => { b.classList.remove('right','wrong'); if (S.q2 && b.dataset.a === S.q2) b.classList.add(S.q2 === 'osc' ? 'right' : 'wrong'); });
+  if (!S.q2){ fb.hidden = true; return; }
+  fb.hidden = false; fb.className = 'fb ' + (S.q2 === 'osc' ? 'good' : 'bad'); fb.textContent = T(S.q2 === 'osc' ? 'q2good' : 'q2bad');
+}
+function list(id, arr){ $(id).innerHTML = arr.map(s => `<li>${s}</li>`).join(''); }
+function applyLang(){
+  document.documentElement.lang = lang;
+  document.querySelectorAll('[data-i18n]').forEach(el => el.textContent = T(el.dataset.i18n));
+  $('lang').textContent = lang === 'vi' ? 'EN' : 'VI';
+  document.querySelectorAll('#speed .btn').forEach(b => b.textContent = '×' + fmt(+b.dataset.s, b.dataset.s === '1' ? 0 : (b.dataset.s === '0.5' ? 1 : 2)));
+  document.querySelectorAll('#slow option').forEach(o => o.textContent = fmt(+o.value));
+  list('conclList', T('concl')); list('assumeList', T('assume')); list('yccdList', T('yccd'));
+  buildLaneSel(); renderLegend(); renderResults(); renderPred(); renderQ2(); updRun(); updLabels();
+  $('p1vid').innerHTML = vidHTML('p1'); lang2(); lang3(); lang4();
+}
+function updRun(){ $('run').textContent = T(S.running ? 'pause' : 'play'); }
+function updLabels(){
+  $('tempv').textContent = `${fmt(S.tempC)} °C`; $('salv').textContent = `${fmt(S.sal)} g/kg`; $('freqv').textContent = `${fmt(S.f)} Hz`;
+  $('slowtxt').textContent = tpl(T('slowtxt'), { S: fmt(S.slow) });
+}
+function setCont(on){
+  S.cont = on; $('cont').setAttribute('aria-pressed', on ? 'true' : 'false'); $('freqbox').hidden = !on;
+  if (on){ S.tStrike = null; lanes.forEach(clearLane); S.tCont0 = S.t; S.running = true; updRun(); renderResults(); }
+}
+
+$('lang').onclick = () => { lang = lang === 'vi' ? 'en' : 'vi'; applyLang(); };
+$('teacher').onclick = () => { S.hide = !S.hide; $('teacher').setAttribute('aria-pressed', S.hide); $('app').classList.toggle('hidenum', S.hide); upd2(); upd3(); upd4(); };
+$('strike').onclick = strike;
+$('cont').onclick = () => setCont(!S.cont);
+$('run').onclick = () => { S.running = !S.running; updRun(); };
+$('stepb').onclick = () => { S.running = false; updRun(); for (let n = 0; n < Math.round(1/60/DT); n++) step(DT); S.tj += 1/60; };
+$('reset').onclick = resetAll;
+document.querySelectorAll('#speed .btn').forEach(b => b.onclick = () => { S.play = +b.dataset.s; document.querySelectorAll('#speed .btn').forEach(x => x.setAttribute('aria-pressed', x === b)); });
+$('slow').onchange = e => { S.slow = +e.target.value; resetAll(); updLabels(); };
+$('freq').oninput = e => { S.f = +e.target.value; updLabels(); };
+$('temp').oninput = e => { S.tempC = +e.target.value; updLabels(); renderResults(); };
+$('sal').oninput = e => { S.sal = +e.target.value; updLabels(); renderResults(); };
+$('tShade').onchange = e => { S.shade = e.target.checked; renderLegend(); };
+$('tBonds').onchange = e => { S.bonds = e.target.checked; };
+$('tTherm').onchange = e => { S.therm = e.target.checked; };
+document.querySelectorAll('#q2Choices .btn').forEach(b => b.onclick = () => { S.q2 = b.dataset.a; renderQ2(); });
+
+// Kéo pít-tông, chạm để đánh dấu hạt
+function ptr(e){ const r = cv.getBoundingClientRect(); return { x:e.clientX - r.left, y:e.clientY - r.top }; }
+cv.addEventListener('pointerdown', e => {
+  const p = ptr(e), li = Math.floor((p.y - G.top) / (G.laneH + G.gap));
+  if (li < 0 || li > 3) return;
+  const xp = G.x0 + S.dragU * G.aPx;
+  if (p.x < xp + G.aPx*1.2){
+    if (S.cont) setCont(false);
+    S.tStrike = null; lanes.forEach(l => { l.det = { st:'wait', mx:0, tm:0, tArr:null }; });
+    S.drag = { x0:p.x, u0:S.dragU }; S.ret = null; S.running = true; updRun(); cv.setPointerCapture(e.pointerId); e.preventDefault(); return;
+  }
+  const l = lanes[li]; if (MEDIA[l.key].g === 'none') return;
+  let best = null, bd = 1e9;
+  for (const q of l.P){ if (MEDIA[l.key].g === 'gas' && q.vis > 0.38) continue; const a = particleXY(l, q, li); const d = (a.x-p.x)**2 + (a.y-p.y)**2; if (d < bd){ bd = d; best = q; } }
+  if (best && bd < (G.aPx*3)**2) l.mark = { i:best.i, k:best.k };
+});
+cv.addEventListener('pointermove', e => {
+  if (!S.drag) return;
+  const p = ptr(e); S.dragU = Math.max(-1.2, Math.min(1.2, S.drag.u0 + (p.x - S.drag.x0) / G.aPx));
+});
+const endDrag = () => { if (!S.drag) return; S.drag = null; S.ret = { t0:S.t, u0:S.dragU, dur: 0.6 }; };
+cv.addEventListener('pointerup', endDrag); cv.addEventListener('pointercancel', endDrag);
+
+// Vòng lặp: bước cố định
+let last = performance.now(), acc = 0;
+function loop(now){
+  const fdt = Math.min((now - last)/1000, 0.1); last = now;
+  if (S.running && curTab === 1){
+    acc += fdt * S.play; S.tj += fdt * S.play;
+    let n = 0; while (acc >= DT && n < 2000){ step(DT); acc -= DT; n++; }
+    if (n >= 2000) acc = 0;
+  }
+  lanes.forEach(l => { if (l.lit && Math.abs(l.u[DET]) < 0.05*AMP) l.lit = Math.max(0, l.lit - fdt*1.5); });
+  // đồng hồ thời gian thực
+  let tr = 0;
+  if (S.tStrike !== null){
+    tr = (S.t - S.tStrike) / S.slow;
+    const pend = lanes.some(l => MEDIA[l.key].g !== 'none' && l.det.st !== 'done');
+    if (!pend){ const ts = lanes.map(l => l.det.tArr).filter(t => t !== null); if (ts.length) tr = Math.max(...ts); }
+  } else if (S.cont) tr = (S.t - S.tCont0) / S.slow;
+  $('clock').textContent = S.hide ? '—' : `${fmt(tr*1000, 3)} ms`;
+  if (curTab === 1) render(); else FRAMES[curTab](fdt);
+  requestAnimationFrame(loop);
+}
+
+
+/* ================= Các tab 2–4: chuỗi chữ ================= */
+Object.assign(I18N.vi, {
+  soundOn:'Bật tiếng', soundOff:'Tắt tiếng', readTitle:'Số liệu', scopeTitle:'Dao động kí', tdiv:'Thời gian mỗi ô',
+  hold:'Giữ vết để so sánh', clearHold:'Xoá vết', perDiv:'/ô', arb:'đơn vị tuỳ ý', vidTitle:'Video ngắn (tiếng Anh, khoảng 1 phút)',
+  p2f:'Tần số', p2a:'Biên độ', p2slow:'Quay chậm',
+  p2hint:'Bấm "Giữ vết" rồi đổi tần số hoặc biên độ để so sánh đường cũ (nét đứt) với đường mới.',
+  blur:'Màng loa dao động quá nhanh, mắt chỉ thấy vệt mờ. Bấm "Quay chậm".', slowBy:'Đang quay chậm {n} lần', gen:'máy phát âm',
+  rowF:'Tần số f', rowT:'Chu kì T = 1/f', rowN:'Số dao động trong 1 s', rowA:'Biên độ (so với mức lớn nhất)', rowLam:'Bước sóng trong không khí λ = v/f',
+  zInfra:'Dưới 20 Hz là hạ âm: tai người không nghe được.', zUltra:'Trên 20 000 Hz là siêu âm: tai người không nghe được.',
+  pLow:'Âm trầm', pMid:'Âm cao vừa', pHigh:'Âm bổng (cao)', lSoft:'nhỏ', lMid:'vừa', lLoud:'to', zAud:'{p}, {l}.', noSoundOut:'Loa không phát vì tai người không nghe được tần số này.',
+  p2pq:'Giữ nguyên tần số, tăng biên độ. Âm nghe được sẽ thay đổi thế nào?',
+  p2o:['To hơn','Cao (bổng) hơn','Vừa to hơn vừa cao hơn'],
+  p2good:'Đúng. Biên độ chỉ quyết định độ to. Trên dao động kí, đường cao hơn nhưng số dao động trong mỗi ô không đổi.',
+  p2bad:'Hãy thử: bấm "Giữ vết", tăng biên độ rồi nghe. Đường mới cao hơn nhưng số dao động không đổi, âm to hơn chứ không cao hơn. Muốn âm cao hơn phải tăng tần số.',
+  p2concl:[
+    'Số dao động trong 1 giây là tần số, đơn vị héc (Hz). Tần số càng lớn thì âm càng cao (bổng); tần số càng nhỏ thì âm càng thấp (trầm).',
+    'Độ lệch lớn nhất so với vị trí cân bằng là biên độ. Biên độ càng lớn thì âm càng to.',
+    'Trên dao động kí: đường càng "dày" thì tần số càng lớn; đường càng "cao" thì biên độ càng lớn.',
+    'Tai người nghe được âm từ khoảng 20 Hz đến 20 000 Hz. Dưới 20 Hz là hạ âm, trên 20 000 Hz là siêu âm.'
+  ],
+  p2assume:[
+    'Máy phát tạo âm hình sin (âm thuần), không có hoạ âm như nhạc cụ thật.',
+    'Biên độ ghi theo phần trăm của mức lớn nhất, không phải số đo thật. Độ to nghe được còn phụ thuộc âm lượng của máy.',
+    'Loa điện thoại nhỏ phát rất yếu các âm dưới khoảng 200 Hz; nhiều người lớn không nghe được âm trên khoảng 15 000 Hz.'
+  ],
+  p2yccd:[
+    'Từ hình ảnh hoặc đồ thị xác định được biên độ và tần số sóng âm.',
+    'Nêu được đơn vị của tần số là hertz (kí hiệu là Hz).',
+    'Nêu được sự liên quan của độ to của âm với biên độ âm.',
+    'Sử dụng nhạc cụ (hoặc học liệu điện tử, dao động kí) chứng tỏ được độ cao của âm có liên hệ với tần số âm.'
+  ],
+  notes:['Đô','Đô#','Rê','Rê#','Mi','Fa','Fa#','Son','Son#','La','La#','Si'], rowNote:'Nốt nhạc gần nhất',
+  /* tab 3 */
+  p3modeMat:'Vì sao vật liệu khác nhau?', p3modeEcho:'Tiếng vang',
+  p3send:'Gửi xung âm', p3custom:'Tự chỉnh vật liệu', p3Z:'Độ "cứng và nặng" so với không khí (trở kháng âm)', p3G:'Độ xốp (ma sát trong các lỗ khí)', p3Th:'Độ dày',
+  presets:{concrete:'Tường bê tông', water:'Mặt nước', wood:'Tấm gỗ mỏng', curtain:'Rèm vải mỏng', foam:'Mút xốp tiêu âm', foamwall:'Mút xốp dán lên tường', custom:'Tự chỉnh'},
+  air:'không khí', airBehind:'không khí phía sau', frame:'khung xốp (đứng yên)',
+  eR:'Phản xạ', eA:'Hấp thụ (thành nhiệt)', eT:'Truyền qua', measuring:'đang đo…', done:'kết quả',
+  lgAir:'phân tử không khí', lgMat:'hạt vật liệu', lgHeat:'nóng lên do ma sát', lgFrame:'khung xốp',
+  p3whyTitle:'Vì sao?', p3mechTitle:'Cơ chế khoa học (cho giáo viên)', p3simpleTitle:'Cách nói với học sinh',
+  why:{
+    concrete:'Hạt bê tông nặng và liên kết rất chặt. Lớp không khí đẩy vào giống quả bóng bàn đập vào bức tường: tường gần như không nhúc nhích, nên gần như toàn bộ âm bị dội ngược lại. Âm truyền vào trong tường cực ít.',
+    water:'Nước nặng và khó nén hơn không khí khoảng 3 600 lần (theo trở kháng âm). Âm từ không khí gặp mặt nước bị dội lại gần hết (khoảng 99,9%). Vì vậy đứng trên bờ nói, người lặn dưới nước gần như không nghe thấy.',
+    wood:'Tấm gỗ mỏng nhưng vẫn nặng hơn lớp không khí rất nhiều, không khí đẩy không làm nó rung đáng kể, nên âm phần lớn bị dội lại.',
+    curtain:'Rèm vải mỏng và nhẹ: không khí đẩy làm tấm rèm rung theo, tấm rèm lại đẩy không khí phía sau, nên phần lớn âm truyền qua. Một phần âm mất đi do ma sát giữa các sợi vải.',
+    foam:'Mút xốp có rất nhiều lỗ khí nhỏ thông nhau, nhẹ gần như không khí nên âm đi vào dễ dàng, ít bị dội lại. Trong các lỗ nhỏ, không khí dao động cọ xát vào thành lỗ, năng lượng âm biến thành nhiệt. Đi hết lớp mút thì âm đã yếu đi rất nhiều.',
+    foamwall:'Mút xốp dán lên tường: âm đi vào mút bị hấp thụ, phần còn lại dội vào tường rồi lại đi qua mút lần nữa và bị hấp thụ tiếp. Đây là cách làm phòng hát, phòng thu âm.',
+    custom:'Thử kéo độ "cứng và nặng" và độ xốp để xem phần âm phản xạ, hấp thụ, truyền qua thay đổi thế nào.'
+  },
+  p3mech:[
+    'Mỗi chất có trở kháng âm Z = ρ·v (khối lượng riêng × tốc độ âm). Không khí: Z ≈ 413 kg/(m²·s); nước: Z ≈ 1,5 triệu; gỗ: khoảng 2 triệu; bê tông: khoảng 8–9 triệu.',
+    'Tại mặt phân cách, phần năng lượng bị phản xạ là R = ((Z₂ − Z₁)/(Z₂ + Z₁))². Z càng chênh lệch thì phản xạ càng mạnh. Không khí – bê tông: R ≈ 99,98%; không khí – nước: R ≈ 99,9%.',
+    'Hấp thụ: trong vật liệu xốp, không khí dao động trong các lỗ nhỏ chịu ma sát nhớt với thành lỗ và trao đổi nhiệt, cơ năng của sóng biến thành nhiệt năng.',
+    'Truyền qua tấm mỏng: tấm bị không khí đẩy rung theo như một khối lượng. Tấm càng nặng (khối lượng trên mỗi m² càng lớn) và tần số càng cao thì truyền qua càng ít (định luật khối lượng). Vì vậy tường gạch dày cách âm tốt hơn rèm vải.',
+    'Phản xạ + hấp thụ + truyền qua = 100% năng lượng âm tới (bảo toàn năng lượng).'
+  ],
+  p3simple:[
+    'Âm là dao động truyền qua các hạt. Khi gặp vật khác, dao động có thể bị dội lại (phản xạ), bị "mất" thành nhiệt (hấp thụ) hoặc đi tiếp sang bên kia (truyền qua).',
+    'Vật cứng, nặng, nhẵn (tường, đá, kính, mặt nước): không khí đẩy không nổi, âm dội lại, như bóng bàn đập vào tường.',
+    'Vật mềm, xốp (mút, thảm, rèm dày, bông): âm chui vào các lỗ nhỏ, cọ xát rồi tắt dần, giống chạy trong đám đông mất dần sức.',
+    'Vật mỏng, nhẹ (rèm mỏng, giấy): bị âm làm rung theo và lại phát âm sang bên kia, nên âm truyền qua.'
+  ],
+  p3pq:'Âm trong không khí gặp một bức tường bê tông. Phần lớn năng lượng âm sẽ thế nào?',
+  p3o:['Bị phản xạ ngược lại','Truyền qua bức tường','Bị tường hấp thụ thành nhiệt'],
+  p3good:'Đúng. Bê tông nặng và cứng hơn không khí rất nhiều, gần như toàn bộ âm bị dội lại. Thử chọn "Mút xốp tiêu âm" và "Rèm vải mỏng" để so sánh.',
+  p3bad:'Chọn "Tường bê tông" rồi bấm "Gửi xung âm" để kiểm tra: gần như toàn bộ âm bị dội lại. Thử thêm "Mút xốp tiêu âm" và "Rèm vải mỏng" để thấy hấp thụ và truyền qua.',
+  p3concl:[
+    'Âm gặp vật cản thì một phần bị phản xạ, một phần bị hấp thụ, một phần truyền qua.',
+    'Vật cứng, nặng, bề mặt nhẵn phản xạ âm tốt. Vật mềm, xốp, bề mặt gồ ghề phản xạ âm kém (hấp thụ âm tốt).',
+    'Vật mỏng, nhẹ để âm truyền qua nhiều; tường dày, nặng ngăn âm truyền qua tốt.',
+    'Âm phản xạ đến tai sau âm phát ra ít nhất 1/15 giây thì nghe được tiếng vang. Trong phòng nhỏ, âm phản xạ hoà vào âm gốc làm âm to và kéo dài (âm vang).',
+    'Chống ồn: dùng vật hấp thụ âm (mút, thảm, rèm dày) để giảm âm vang; dùng tường dày, cửa kính kín để ngăn âm truyền qua; trồng cây xanh.'
+  ],
+  p3assume:[
+    'Mỗi chấm đại diện cho một lớp rất nhiều phân tử. Lực giữa các lớp mô hình bằng lò xo (như tab 1).',
+    'Để dễ quan sát, sóng trong mọi vật liệu được vẽ cùng tốc độ trên hình; chỉ "độ cứng và nặng" (trở kháng âm) thay đổi. Phần trăm phản xạ ở mặt phân cách vì vậy vẫn đúng.',
+    'Vật liệu xốp mô hình là không khí trong khung xốp đứng yên, chịu lực ma sát tỉ lệ với vận tốc.',
+    'Số % đo cho một xung âm ngắn đi vuông góc tới vật liệu; thực tế còn phụ thuộc tần số và góc tới. Độ chính xác khoảng ±2%.',
+    'Tiếng vang: thời gian lưu âm của tai lấy 1/15 s theo sách giáo khoa; hệ số hấp thụ của vật liệu ở khoảng 1 000 Hz (gần đúng). Hình làm chậm, còn tiếng vỗ tay phát ra máy chạy theo thời gian thực.'
+  ],
+  p3yccd:[
+    'Lấy được ví dụ về vật phản xạ âm tốt, vật phản xạ âm kém.',
+    'Giải thích được một số hiện tượng đơn giản thường gặp trong thực tế về sóng âm; đề xuất được phương án đơn giản để hạn chế tiếng ồn ảnh hưởng đến sức khoẻ.'
+  ],
+  p4d:'Khoảng cách từ người đến vật cản', p4mat:'Vật cản', p4clap:'Vỗ tay', p4slowLbl:'Làm chậm hình',
+  p4tlTitle:'Âm đến tai người theo thời gian', p4hint:'Kéo bức tường để đổi khoảng cách. Âm phản xạ đến tai sau âm gốc ít nhất 1/15 giây thì ta nghe thấy tiếng vang tách riêng.',
+  mats:{concrete:'Tường bê tông', rock:'Vách đá', glass:'Cửa kính', wood:'Tấm gỗ', carpet:'Thảm dày', curtain:'Rèm vải dày', foam:'Mút xốp tiêu âm'},
+  rowTe:'Thời gian âm đi và về t = 2d/v', rowV:'Tốc độ âm trong không khí', rowRefl:'Phần năng lượng âm bị phản xạ', rowLe:'Độ to của âm phản xạ tại tai',
+  vEcho:'Nghe được tiếng vang: âm phản xạ đến sau âm gốc {t}, lâu hơn 1/15 s.',
+  vMix:'Không nghe được tiếng vang riêng: âm phản xạ đến sau chỉ {t}, ngắn hơn 1/15 s, nên hoà vào âm gốc làm âm nghe to và kéo dài hơn.',
+  vWeak:' Âm phản xạ rất yếu vì vật cản hấp thụ gần hết âm.', direct:'âm gốc', echoL:'âm phản xạ', thr:'1/15 s',
+  p4refTitle:'Vật phản xạ âm tốt và kém',
+  p4ref:['<b>Phản xạ âm tốt:</b> vật cứng, bề mặt nhẵn như tường bê tông, vách đá, mặt kính, tấm kim loại, mặt nước yên lặng.','<b>Phản xạ âm kém (hấp thụ âm tốt):</b> vật mềm, xốp, bề mặt gồ ghề như rèm vải, thảm, mút xốp, quần áo, bông, cỏ cây.'],
+  /* tab 4 */
+  mechL:'Cơ chế', simpleL:'Nói với học sinh', watch:'Xem video',
+  p4ping:'Phát siêu âm', p4show:'Hiện độ sâu thật', p4clearMap:'Xoá bản đồ',
+  p4seaHint:'Kéo con tàu sang trái hoặc phải, phát siêu âm ở nhiều vị trí để vẽ bản đồ đáy biển.',
+  p4given:'Tàu phát siêu âm 50 kHz xuống đáy biển và đo thời gian t đến lúc nhận âm phản xạ. Tốc độ âm trong nước biển v ≈ {v} m/s. Tính độ sâu h = v·t/2.',
+  rowTs:'Thời gian đo được t', rowH:'Độ sâu thật', p4ans:'Độ sâu em tính được:', p4check:'Kiểm tra',
+  p4right:'Chính xác! h = v·t/2 = {h} m.', p4wrong:'Chưa đúng. Nhớ chia đôi: âm đi xuống rồi đi lên nên quãng đường là 2h.', p4need:'Hãy phát siêu âm trước để có thời gian t.',
+  surface:'mặt biển',
+  apps:{
+    a1:{t:'1. Đo độ sâu biển, dò đàn cá (sonar)', m:'Máy dò phát xung siêu âm (khoảng 20–200 kHz) xuống nước và đo thời gian t đến khi nhận được âm phản xạ từ đáy biển hoặc đàn cá. Độ sâu h = v·t/2 với v ≈ 1 500 m/s trong nước biển. Siêu âm có bước sóng ngắn nên đi thành chùm hẹp, phân biệt được vật nhỏ.', s:'Tàu "hét" xuống nước bằng tiếng rất cao mà tai người không nghe được, rồi đếm thời gian đến khi nghe tiếng vang. Tiếng vang về càng lâu thì biển càng sâu.'},
+    a2:{t:'2. Dơi và cá heo định vị bằng tiếng vang', m:'Dơi phát chuỗi tiếng kêu siêu âm (khoảng 20–100 kHz). Thời gian trễ của tiếng vang cho biết khoảng cách, độ to và hướng của tiếng vang về hai tai cho biết kích thước và vị trí con mồi. Khi đến gần mồi, dơi kêu dày hơn để cập nhật vị trí liên tục.', s:'Dơi "nhìn bằng tai": nó kêu thật cao rồi nghe tiếng vang dội về từ con muỗi để biết muỗi ở đâu, kể cả trong bóng tối.'},
+    a3:{t:'3. Siêu âm trong y tế', m:'Đầu dò phát siêu âm 2–15 MHz vào cơ thể. Ở mỗi mặt ranh giới giữa các mô (da, mỡ, cơ, xương, nước ối) có trở kháng âm khác nhau, một phần sóng phản xạ về. Máy đo thời gian trễ và độ mạnh của các tiếng vang để dựng ảnh. Phải bôi gel để không còn lớp không khí giữa đầu dò và da, vì không khí làm siêu âm phản xạ gần hết.', s:'Máy siêu âm giống con dơi: phát tiếng rất cao vào bụng mẹ, nghe tiếng vang dội lại từ em bé rồi vẽ thành hình. Siêu âm an toàn nên dùng được cho bà bầu.'},
+    a4:{t:'4. Cảm biến lùi xe', m:'Cảm biến ở cản sau phát xung siêu âm khoảng 40 kHz và đo thời gian tiếng vang dội về từ vật cản: d = v·t/2 với v ≈ 343 m/s. Khoảng cách càng nhỏ thì còi kêu càng dồn dập.', s:'Xe tự "hét" ra phía sau và nghe tiếng vang. Tiếng vang về càng nhanh thì vật cản càng gần, còi kêu càng nhanh.'},
+    a5:{t:'5. Máy rửa siêu âm', m:'Siêu âm khoảng 40 kHz làm nước nén – dãn rất nhanh. Ở pha dãn, áp suất giảm mạnh tạo ra vô số bọt khí li ti; ở pha nén, bọt khí xẹp đột ngột (hiện tượng xâm thực), tạo tia nước cực nhỏ đánh bật bụi bẩn ở các khe kẽ.', s:'Siêu âm làm nước sủi ra hàng triệu bong bóng nhỏ xíu rồi nổ liên tục, như hàng triệu bàn chải tí hon chà vào kẽ nhẫn, kính.'},
+    a6:{t:'6. Tai nghe chống ồn chủ động', m:'Micrô trên tai nghe thu tiếng ồn bên ngoài, mạch điện tạo ra sóng âm ngược pha (chỗ ồn có vùng nén thì loa tạo vùng dãn). Hai sóng chồng lên nhau triệt tiêu, tiếng ồn giảm mạnh, nhất là tiếng ồn trầm đều đặn như tiếng động cơ.', s:'Tai nghe "nghe" tiếng ồn rồi phát ra một tiếng ồn "ngược lại", hai tiếng đè lên nhau và mất đi, giống hai người đẩy cái xích đu ngược chiều nhau.'},
+    a7:{t:'7. Phòng tiêu âm, phòng hát, phòng thu', m:'Tường được phủ vật liệu xốp dạng nêm (chóp nhọn) hấp thụ gần hết âm, nên gần như không có âm phản xạ. Phòng hát, rạp phim dùng mút, thảm, rèm dày để giảm âm vang; tường dày và cửa kín để ngăn âm truyền ra ngoài.', s:'Trong phòng tiêu âm, mọi tiếng động bị "nuốt" vào tường xốp, không dội lại, nên yên tĩnh đến mức nghe được cả tiếng tim mình đập.'}
+  }
+});
+Object.assign(I18N.en, {
+  soundOn:'Sound on', soundOff:'Sound off', readTitle:'Readings', scopeTitle:'Oscilloscope', tdiv:'Time per division',
+  hold:'Hold trace to compare', clearHold:'Clear trace', perDiv:'/div', arb:'arbitrary units', vidTitle:'Short videos (about 1 minute)',
+  p2f:'Frequency', p2a:'Amplitude', p2slow:'Slow motion',
+  p2hint:'Press "Hold trace", then change the frequency or amplitude to compare the old trace (dashed) with the new one.',
+  blur:'The speaker cone moves too fast for the eye: you only see a blur. Press "Slow motion".', slowBy:'Slowed down {n} times', gen:'signal generator',
+  rowF:'Frequency f', rowT:'Period T = 1/f', rowN:'Oscillations per second', rowA:'Amplitude (of maximum)', rowLam:'Wavelength in air λ = v/f',
+  zInfra:'Below 20 Hz is infrasound: humans cannot hear it.', zUltra:'Above 20 000 Hz is ultrasound: humans cannot hear it.',
+  pLow:'Low pitch', pMid:'Medium pitch', pHigh:'High pitch', lSoft:'quiet', lMid:'medium loudness', lLoud:'loud', zAud:'{p}, {l}.', noSoundOut:'The speaker is silent because humans cannot hear this frequency.',
+  p2pq:'Keep the frequency, increase the amplitude. How does the sound change?',
+  p2o:['Louder','Higher pitch','Both louder and higher'],
+  p2good:'Right. Amplitude only sets loudness. On the oscilloscope the trace is taller but the number of oscillations per division is unchanged.',
+  p2bad:'Try it: press "Hold trace", increase the amplitude and listen. The trace is taller with the same number of oscillations: louder, not higher. For a higher pitch, raise the frequency.',
+  p2concl:[
+    'The number of oscillations per second is the frequency, unit hertz (Hz). Higher frequency means higher pitch; lower frequency means lower pitch.',
+    'The largest displacement from the rest position is the amplitude. Larger amplitude means a louder sound.',
+    'On an oscilloscope: a more crowded trace means a higher frequency; a taller trace means a larger amplitude.',
+    'Humans hear from about 20 Hz to 20 000 Hz. Below 20 Hz is infrasound, above 20 000 Hz is ultrasound.'
+  ],
+  p2assume:[
+    'The generator makes a pure sine tone with no overtones, unlike real instruments.',
+    'Amplitude is a percentage of the maximum, not a real measurement. What you hear also depends on your device volume.',
+    'Small phone speakers barely reproduce sounds below about 200 Hz; many adults cannot hear above about 15 000 Hz.'
+  ],
+  p2yccd:[
+    'Determine the amplitude and frequency of a sound wave from a picture or graph.',
+    'State that the unit of frequency is the hertz (Hz).',
+    'Relate loudness to amplitude.',
+    'Use instruments (or digital resources, an oscilloscope) to show that pitch is related to frequency.'
+  ],
+  notes:['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'], rowNote:'Nearest musical note',
+  p3modeMat:'Why do materials differ?', p3modeEcho:'Echoes',
+  p3send:'Send a sound pulse', p3custom:'Make your own material', p3Z:'"Stiff and heavy" compared with air (acoustic impedance)', p3G:'Porosity (friction in air pores)', p3Th:'Thickness',
+  presets:{concrete:'Concrete wall', water:'Water surface', wood:'Thin wooden board', curtain:'Thin curtain', foam:'Acoustic foam', foamwall:'Foam on a wall', custom:'Custom'},
+  air:'air', airBehind:'air behind', frame:'foam frame (fixed)',
+  eR:'Reflected', eA:'Absorbed (to heat)', eT:'Transmitted', measuring:'measuring…', done:'result',
+  lgAir:'air molecules', lgMat:'material particles', lgHeat:'warming by friction', lgFrame:'foam frame',
+  p3whyTitle:'Why?', p3mechTitle:'The science (for teachers)', p3simpleTitle:'How to explain it to students',
+  why:{
+    concrete:'Concrete particles are heavy and tightly bound. Air pushing on it is like a ping-pong ball hitting a wall: the wall barely moves, so almost all the sound bounces back. Very little enters the wall.',
+    water:'In acoustic impedance water is about 3 600 times "stiffer and heavier" than air. Sound in air hitting water is almost entirely reflected (about 99.9%), so a diver hears almost nothing of people talking on the shore.',
+    wood:'A thin board is still far heavier than the air layer pushing on it, so it hardly vibrates and most of the sound is reflected.',
+    curtain:'A thin, light curtain is pushed into vibration by the air and in turn pushes the air behind it, so most of the sound passes through. Some is lost to friction between fibres.',
+    foam:'Foam is full of tiny connected air pores and nearly as light as air, so sound enters easily and little is reflected. In the pores, vibrating air rubs against the walls and sound energy turns into heat. After crossing the foam the sound is much weaker.',
+    foamwall:'Foam on a wall: sound entering the foam is absorbed; what is left reflects off the wall and crosses the foam again, losing even more. This is how studios and karaoke rooms are treated.',
+    custom:'Drag "stiff and heavy" and porosity to see how reflection, absorption and transmission change.'
+  },
+  p3mech:[
+    'Each material has an acoustic impedance Z = ρ·v (density × speed of sound). Air: Z ≈ 413 kg/(m²·s); water ≈ 1.5 million; wood about 2 million; concrete about 8–9 million.',
+    'At a boundary the reflected energy fraction is R = ((Z₂ − Z₁)/(Z₂ + Z₁))². The bigger the mismatch, the stronger the reflection. Air–concrete: R ≈ 99.98%; air–water: R ≈ 99.9%.',
+    'Absorption: in porous materials air oscillating in small pores suffers viscous friction and heat exchange with the pore walls, turning wave energy into heat.',
+    'Transmission through a thin panel: the panel is driven like a mass. The heavier the panel (mass per m²) and the higher the frequency, the less is transmitted (mass law). That is why thick brick walls insulate better than curtains.',
+    'Reflected + absorbed + transmitted = 100% of the incident energy (conservation of energy).'
+  ],
+  p3simple:[
+    'Sound is a vibration passed between particles. At another material it can bounce back (reflection), fade into heat (absorption) or carry on through (transmission).',
+    'Hard, heavy, smooth things (walls, rock, glass, water): air cannot move them, so sound bounces back like a ping-pong ball off a wall.',
+    'Soft, porous things (foam, carpet, thick curtains, cotton): sound gets into tiny holes, rubs and dies away, like running through a crowd and losing energy.',
+    'Thin, light things (thin curtains, paper): sound makes them vibrate, and they pass the sound on to the other side.'
+  ],
+  p3pq:'Sound in air reaches a concrete wall. What happens to most of the sound energy?',
+  p3o:['It is reflected back','It passes through the wall','It is absorbed as heat'],
+  p3good:'Right. Concrete is far stiffer and heavier than air, so almost all the sound bounces back. Try "Acoustic foam" and "Thin curtain" to compare.',
+  p3bad:'Choose "Concrete wall" and press "Send a sound pulse": almost all the sound bounces back. Then try "Acoustic foam" and "Thin curtain" to see absorption and transmission.',
+  p3concl:[
+    'When sound meets an obstacle, part is reflected, part absorbed and part transmitted.',
+    'Hard, heavy, smooth objects reflect sound well. Soft, porous, rough objects reflect poorly (absorb well).',
+    'Thin, light objects let much sound through; thick, heavy walls block it well.',
+    'If the reflection reaches the ear at least 1/15 s after the original, we hear an echo. In small rooms reflections merge with the original and make it louder and longer (reverberation).',
+    'Fighting noise: absorbers (foam, carpets, heavy curtains) reduce reverberation; thick walls and sealed windows block transmission; trees help too.'
+  ],
+  p3assume:[
+    'Each dot stands for a layer of many molecules, with spring-like forces between layers (as in tab 1).',
+    'For easy viewing, waves travel at the same on-screen speed in every material; only "stiff and heavy" (impedance) changes. Reflection percentages at boundaries are therefore still correct.',
+    'A porous material is modelled as air inside a fixed frame, with a friction force proportional to velocity.',
+    'Percentages are for a short pulse at normal incidence; in reality they also depend on frequency and angle. Accuracy about ±2%.',
+    'Echoes: the ear\'s persistence is 1/15 s as in Vietnamese textbooks; absorption coefficients are approximate at about 1 000 Hz. The animation is slowed, but the clap you hear plays in real time.'
+  ],
+  p3yccd:[
+    'Give examples of good and poor reflectors of sound.',
+    'Explain simple everyday sound phenomena; propose simple ways to limit noise that harms health.'
+  ],
+  p4d:'Distance from person to obstacle', p4mat:'Obstacle', p4clap:'Clap', p4slowLbl:'Animation slowed',
+  p4tlTitle:'Sound reaching the ear over time', p4hint:'Drag the wall to change the distance. If the reflected sound arrives at least 1/15 s after the original, we hear a separate echo.',
+  mats:{concrete:'Concrete wall', rock:'Cliff face', glass:'Glass window', wood:'Wooden board', carpet:'Thick carpet', curtain:'Heavy curtain', foam:'Acoustic foam'},
+  rowTe:'Round-trip time t = 2d/v', rowV:'Speed of sound in air', rowRefl:'Fraction of sound energy reflected', rowLe:'Echo level at the ear',
+  vEcho:'Echo heard: the reflected sound arrives {t} after the original, longer than 1/15 s.',
+  vMix:'No separate echo: the reflection arrives only {t} later, less than 1/15 s, so it merges with the original and makes it sound louder and longer.',
+  vWeak:' The reflection is very weak because the obstacle absorbs most of the sound.', direct:'original', echoL:'echo', thr:'1/15 s',
+  p4refTitle:'Good and poor reflectors',
+  p4ref:['<b>Good reflectors:</b> hard, smooth surfaces such as concrete walls, cliffs, glass, metal sheets, calm water.','<b>Poor reflectors (good absorbers):</b> soft, porous, rough materials such as curtains, carpets, foam, clothes, cotton, grass and plants.'],
+  mechL:'How it works', simpleL:'For students', watch:'Watch video',
+  p4ping:'Send ultrasound', p4show:'Show true depth', p4clearMap:'Clear map',
+  p4seaHint:'Drag the ship left or right and send pulses at several places to map the sea floor.',
+  p4given:'The ship sends 50 kHz ultrasound to the sea floor and measures the time t until the echo returns. Speed of sound in seawater v ≈ {v} m/s. Find the depth h = v·t/2.',
+  rowTs:'Measured time t', rowH:'True depth', p4ans:'Your depth:', p4check:'Check',
+  p4right:'Correct! h = v·t/2 = {h} m.', p4wrong:'Not yet. Remember to halve: the sound goes down and back, a distance of 2h.', p4need:'Send a pulse first to get the time t.',
+  surface:'sea surface',
+  apps:{
+    a1:{t:'1. Measuring sea depth, finding fish (sonar)', m:'The sounder sends ultrasound pulses (about 20–200 kHz) into the water and times the echo from the sea floor or a fish shoal. Depth h = v·t/2 with v ≈ 1 500 m/s in seawater. The short wavelength gives a narrow beam that can pick out small objects.', s:'The ship "shouts" into the water with a sound too high for us to hear and times how long the echo takes. The longer the wait, the deeper the sea.'},
+    a2:{t:'2. Bats and dolphins echolocate', m:'Bats emit trains of ultrasonic calls (about 20–100 kHz). The echo delay gives distance; loudness and direction at the two ears give the size and position of prey. Near prey they call faster to update its position.', s:'Bats "see with their ears": they call very high and listen for the echo from a mosquito to find it, even in darkness.'},
+    a3:{t:'3. Medical ultrasound', m:'A probe sends 2–15 MHz ultrasound into the body. At each boundary between tissues of different acoustic impedance (skin, fat, muscle, bone, fluid) part of the wave is reflected. The machine times the echoes and their strength to build an image. Gel removes the air layer between probe and skin, because air would reflect almost all the ultrasound.', s:'An ultrasound scanner works like a bat: it sends very high sound into the mother\'s belly, listens for echoes from the baby and draws a picture. It is safe for pregnant women.'},
+    a4:{t:'4. Parking sensors', m:'Sensors in the rear bumper send about 40 kHz ultrasound pulses and time the echo from obstacles: d = v·t/2 with v ≈ 343 m/s. The closer the obstacle, the faster the beeping.', s:'The car "shouts" backwards and listens for the echo. The quicker the echo, the closer the obstacle and the faster the beeps.'},
+    a5:{t:'5. Ultrasonic cleaners', m:'About 40 kHz ultrasound compresses and stretches the water very quickly. In each stretch, pressure drops and countless tiny bubbles form; in each squeeze they collapse suddenly (cavitation), making micro-jets that blast dirt out of crevices.', s:'Ultrasound makes the water fizz with millions of tiny bubbles that keep popping, like millions of tiny brushes scrubbing rings and glasses.'},
+    a6:{t:'6. Noise-cancelling headphones', m:'A microphone picks up outside noise and the electronics make an opposite wave (where the noise compresses the air, the speaker rarefies it). The two waves add up and cancel, cutting steady low noise such as engines.', s:'The headphones "listen" to the noise and play an "opposite" noise; the two cancel out, like two people pushing a swing in opposite directions.'},
+    a7:{t:'7. Anechoic rooms, karaoke rooms, studios', m:'Walls covered with porous wedges absorb almost all sound, so there are almost no reflections. Karaoke rooms and cinemas use foam, carpets and heavy curtains to cut reverberation, and thick walls and sealed doors to keep sound in.', s:'In an anechoic room every sound is "swallowed" by the foam walls with no echo, so it is quiet enough to hear your own heartbeat.'}
+  }
+});
+// Video ngắn: id YouTube, kiểu đường dẫn, kênh, thời lượng (nếu kiểm tra được)
+const VIDEOS = {
+  p1:[{ id:'e6Fpq4b8oqs', sh:false, ch:'Dyson-Fereday Education', d:'1:00', vi:'Bơm hết không khí trong bình, tiếng nhạc nhỏ dần rồi tắt', en:'Pumping the air out of a bell jar silences the music' },
+      { id:'25gzbcJFNXM', sh:true, ch:'Ribs Norman', vi:'Nhốt tiếng nói trong bình chân không', en:'Trapping a voice in a vacuum' }],
+  p2:[{ id:'gC00GgwyMk0', sh:true, ch:'IYPT Sweden', vi:'Thước kẻ "biết hát": đổi độ dài, độ cao của âm thay đổi', en:'The singing ruler: change the length, the pitch changes' }],
+  p3:[{ id:'fkKC3eA6FpE', sh:true, ch:'Scientific American', vi:'Nổ bóng bay trong phòng tiêu âm: không có tiếng vang', en:'Popping a balloon in an anechoic room: no echo' },
+      { id:'J8qEGGkVFkE', sh:true, ch:'Invention', vi:'So sánh tiếng vỗ tay khi có và không có mút xốp', en:'Clap test with and without foam' },
+      { id:'Zr211OhIpyU', sh:true, ch:'Why Things Exist', vi:'Phải đứng xa bao nhiêu mới nghe được tiếng vang', en:'How far away you must be to hear an echo' }],
+  a1:[{ id:'Mw_-1V8VrgM', sh:true, ch:'', vi:'Sonar hoạt động thế nào', en:'How sonar works' }],
+  a2:[{ id:'FWkUiNnJKdM', sh:true, ch:'Seneca Park Zoo', vi:'Hình ảnh hoá cách dơi định vị bằng tiếng vang', en:'A visualisation of bat echolocation' }],
+  a3:[{ id:'7A4cq68vvm8', sh:true, ch:'Aarogya Hastha Hospitals', d:'1:24', vi:'Máy siêu âm hoạt động thế nào', en:'How ultrasound scanners work' }],
+  a4:[{ id:'DP3AgqlVt_M', sh:true, ch:'History of Simple Things', vi:'Cảm biến lùi xe hoạt động thế nào', en:'How parking sensors work' }],
+  a5:[{ id:'n4swfHrLUh4', sh:true, ch:'Royal Quanta', d:'1:20', vi:'Máy rửa siêu âm và hiện tượng xâm thực (hoạt hình 3D)', en:'Ultrasonic cleaners and cavitation (3D animation)' }],
+  a6:[{ id:'Eb2qXkQRzVY', sh:true, ch:'Learn with Sheraz', d:'1:06', vi:'Tai nghe chống ồn hoạt động thế nào', en:'How noise cancellation works' }],
+  a7:[{ id:'fkKC3eA6FpE', sh:true, ch:'Scientific American', vi:'Nổ bóng bay trong một trong những phòng yên tĩnh nhất thế giới', en:'Popping a balloon in one of the world\'s quietest rooms' }]
+};
+function vidHTML(key){
+  return (VIDEOS[key] || []).map(v => {
+    const url = v.sh ? `https://www.youtube.com/shorts/${v.id}` : `https://www.youtube.com/watch?v=${v.id}`;
+    const meta = [v.ch, v.d].filter(Boolean).join(' · ');
+    return `<li><a href="${url}" target="_blank" rel="noopener">${v[lang]}</a>${meta ? `<span>${meta}</span>` : ''}</li>`;
+  }).join('');
+}
+
+/* ================= Dùng chung ================= */
+const FONT = '"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif', MONO = '"IBM Plex Mono",ui-monospace,Consolas,monospace';
+function fit(cvs, h){
+  const w = cvs.clientWidth, dpr = window.devicePixelRatio || 1;
+  if (cvs._w !== w || cvs._h !== h || cvs._d !== dpr){ cvs.style.height = h + 'px'; cvs.width = Math.round(w*dpr); cvs.height = Math.round(h*dpr); cvs._w = w; cvs._h = h; cvs._d = dpr; }
+  const c = cvs.getContext('2d'); c.setTransform(dpr,0,0,dpr,0,0); c.clearRect(0,0,w,h); return { c, w, h };
+}
+const rgba = (rgb, a) => `rgba(${rgb},${a})`;
+const fmtT = s => s < 1e-3 ? `${fmtSig(s*1e6,3)} µs` : s < 1 ? `${fmtSig(s*1e3,3)} ms` : `${fmtSig(s,3)} s`;
+const fmtF = f => f >= 1000 ? `${fmtSig(f,4)} Hz` : `${fmtSig(f,3)} Hz`;
+const fmtLen = m => m < 0.01 ? `${fmtSig(m*1000,3)} mm` : m < 1 ? `${fmtSig(m*100,3)} cm` : `${fmtSig(m,3)} m`;
+function rows(tbodyId, arr){ $(tbodyId).innerHTML = arr.map(([k,v]) => `<tr><td>${k}</td><td class="n sec">${v}</td></tr>`).join(''); }
+function setSeg(id, v, key = 'v'){ document.querySelectorAll(`#${id} .btn`).forEach(b => b.setAttribute('aria-pressed', b.dataset[key] === String(v))); }
+let AC = null;
+function ac(){ if (!AC){ try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){ AC = null; } } if (AC && AC.state === 'suspended') AC.resume(); return AC; }
+function makeTone(){
+  let osc = null, gn = null;
+  return {
+    get on(){ return !!osc; },
+    start(f, g){ const a = ac(); if (!a) return; this.stop(); osc = a.createOscillator(); gn = a.createGain(); osc.type = 'sine'; osc.frequency.value = f; gn.gain.value = 0;
+      osc.connect(gn).connect(a.destination); osc.start(); gn.gain.setTargetAtTime(g, a.currentTime, 0.03); },
+    set(f, g){ if (!osc) return; osc.frequency.setTargetAtTime(f, AC.currentTime, 0.02); gn.gain.setTargetAtTime(g, AC.currentTime, 0.04); },
+    stop(){ if (!osc) return; const o = osc, gg = gn; gg.gain.setTargetAtTime(0, AC.currentTime, 0.02); setTimeout(() => { try { o.stop(); } catch(e){} }, 250); osc = null; gn = null; }
+  };
+}
+function burst(delay, gain, dur = 0.025){
+  const a = ac(); if (!a) return;
+  const n = Math.round(a.sampleRate * dur * 5), buf = a.createBuffer(1, n, a.sampleRate), d = buf.getChannelData(0);
+  for (let i = 0; i < n; i++) d[i] = (Math.random()*2 - 1) * Math.exp(-i / (a.sampleRate*dur));
+  const s = a.createBufferSource(), g = a.createGain(); s.buffer = buf; g.gain.value = gain; s.connect(g).connect(a.destination); s.start(a.currentTime + delay);
+}
+function drawScope(c, x, y, w, h, o){
+  c.fillStyle = colors.lane; c.fillRect(x, y, w, h);
+  c.strokeStyle = colors.line; c.lineWidth = 1; c.beginPath();
+  for (let i = 0; i <= 10; i++){ const xx = Math.round(x + i*w/10) + 0.5; c.moveTo(xx, y); c.lineTo(xx, y+h); }
+  for (let j = 0; j <= 8; j++){ const yy = Math.round(y + j*h/8) + 0.5; c.moveTo(x, yy); c.lineTo(x+w, yy); }
+  c.stroke();
+  c.strokeStyle = colors.muted; c.globalAlpha = 0.5; c.beginPath(); c.moveTo(x, y+h/2); c.lineTo(x+w, y+h/2); c.stroke(); c.globalAlpha = 1;
+  const plot = (amp, f, color, dash) => {
+    const span = 10*o.tDiv, cycles = span*f;
+    c.strokeStyle = color; c.lineWidth = dash ? 1.5 : 2.2; c.setLineDash(dash ? [5,4] : []);
+    const ay = Math.max(-h/2, Math.min(h/2, amp / o.yDiv * h/8));
+    if (cycles > w/3){ c.fillStyle = color; c.globalAlpha = 0.35; c.fillRect(x, y + h/2 - Math.abs(ay), w, 2*Math.abs(ay)); c.globalAlpha = 1; c.setLineDash([]); return true; }
+    c.beginPath();
+    const n = Math.max(200, Math.ceil(cycles*24));
+    for (let k = 0; k <= n; k++){
+      const xx = x + k/n*w, v = amp * Math.sin(2*Math.PI*f*(k/n)*span);
+      const yy = y + h/2 - Math.max(-h/2, Math.min(h/2, v / o.yDiv * h/8));
+      k ? c.lineTo(xx, yy) : c.moveTo(xx, yy);
+    }
+    c.stroke(); c.setLineDash([]); return false;
+  };
+  if (o.hold) plot(o.hold.amp, o.hold.f, colors.muted, true);
+  const crowded = plot(o.amp, o.f, colors.accent, false);
+  c.font = `600 13px ${MONO}`; c.textBaseline = 'top'; c.textAlign = 'left';
+  const lbl = (s, xx, yy) => { const m = c.measureText(s).width; c.fillStyle = colors.panel; c.globalAlpha = 0.85; c.fillRect(xx-3, yy-2, m+6, 18); c.globalAlpha = 1; c.fillStyle = colors.ink; c.fillText(s, xx, yy); };
+  lbl(`${fmtT(o.tDiv)}${T('perDiv')}`, x + 6, y + h - 20);
+  if (o.yLabel) lbl(o.yLabel, x + 6, y + 4);
+  if (crowded){ c.font = `600 14px ${FONT}`; lbl(lang === 'vi' ? 'Quá nhiều dao động: giảm thời gian mỗi ô' : 'Too many oscillations: reduce time per division', x + 10, y + h/2 - 9); }
+}
+const TDIVS = [10e-6, 20e-6, 50e-6, 100e-6, 200e-6, 500e-6, 1e-3, 2e-3, 5e-3, 10e-3, 20e-3, 50e-3];
+function fillTdiv(sel, cur){ sel.innerHTML = TDIVS.map(t => `<option value="${t}">${fmtT(t)}</option>`).join(''); sel.value = String(cur); }
+function predCard(id, st, qKey, optKey, correct, goodKey, badKey){
+  const box = $(id);
+  box.innerHTML = `<h2>${lang === 'vi' ? 'Dự đoán' : 'Predict'}</h2><p>${T(qKey)}</p><div class="choices"></div><div class="fb" hidden></div>`;
+  const ch = box.querySelector('.choices'), fb = box.querySelector('.fb');
+  T(optKey).forEach((s, i) => {
+    const b = document.createElement('button'); b.className = 'btn'; b.textContent = s;
+    if (st.pred === i) b.classList.add(i === correct ? 'right' : 'wrong');
+    b.onclick = () => { st.pred = i; predCard(id, st, qKey, optKey, correct, goodKey, badKey); };
+    ch.appendChild(b);
+  });
+  if (st.pred !== null && st.pred !== undefined){ fb.hidden = false; fb.className = 'fb ' + (st.pred === correct ? 'good' : 'bad'); fb.textContent = T(st.pred === correct ? goodKey : badKey); }
+}
+
+/* ================= TAB 2: nguồn âm ================= */
+const P2 = { f:440, a:50, slow:false, tDiv:1e-3, hold:null, t:0, pred:null };
+const tone2 = makeTone();
+const genF = v => 10 * Math.pow(3000, v/1000); // 10 Hz … 30 kHz
+function noteName(f){
+  if (f < 16 || f > 8000) return '—';
+  const midi = 69 + 12*Math.log2(f/440), m = Math.round(midi), cents = Math.round((midi - m)*100);
+  return `${T('notes')[((m % 12) + 12) % 12]}${Math.floor(m/12) - 1} (${cents >= 0 ? '+' : '−'}${Math.abs(cents)} cent)`;
+}
+const gain2 = () => (P2.f >= 20 && P2.f <= 20000) ? 0.3 * P2.a/100 : 0;
+function upd2(){
+  const f = P2.f;
+  $('p2fv').textContent = fmtF(f); $('p2av').textContent = `${fmt(P2.a)} %`;
+  rows('p2read', [[T('rowF'), fmtF(f)], [T('rowT'), fmtT(1/f)], [T('rowN'), fmt(f, f < 100 ? 1 : 0)], [T('rowA'), `${fmt(P2.a)} %`], [T('rowLam'), fmtLen(speedOf('air')/f)], [T('rowNote'), noteName(f)]]);
+  const z = $('p2zone');
+  if (f < 20) z.textContent = T('zInfra');
+  else if (f > 20000) z.textContent = T('zUltra');
+  else z.textContent = tpl(T('zAud'), { p: T(f < 250 ? 'pLow' : f < 1000 ? 'pMid' : 'pHigh'), l: T(P2.a < 25 ? 'lSoft' : P2.a < 65 ? 'lMid' : 'lLoud') });
+  if (tone2.on){ tone2.set(Math.min(f, 20000), gain2()); if (!gain2() && P2.a > 0 && (f < 20 || f > 20000)) z.textContent += ' ' + T('noSoundOut'); }
+  $('p2sound').textContent = T(tone2.on ? 'soundOff' : 'soundOn'); $('p2sound').setAttribute('aria-pressed', tone2.on);
+  $('p2slow').setAttribute('aria-pressed', P2.slow);
+}
+function drawSource2(dt){
+  const cv = $('p2cv'), small = cv.clientWidth < 560, { c, w, h } = fit(cv, small ? 170 : 210);
+  c.fillStyle = colors.lane; c.fillRect(0, 0, w, h);
+  const f = P2.f, FVIS = 1.2, blur = !P2.slow && f > 8;
+  P2.t += dt;
+  const ph = P2.slow ? Math.sin(2*Math.PI*FVIS*P2.t) : Math.sin(2*Math.PI*Math.min(f, 8)*P2.t);
+  c.font = `600 ${small ? 12 : 14}px ${FONT}`; c.textBaseline = 'top'; c.textAlign = 'left'; c.fillStyle = colors.muted;
+  c.fillText(blur ? T('blur') : P2.slow ? tpl(T('slowBy'), { n: fmtSig(f/FVIS, 3) }) : '', 10, 8);
+  const bx = 14, by = h*0.32, bw = Math.min(170, w*0.34), bh = h*0.42;
+  c.fillStyle = colors.panel; c.strokeStyle = colors.muted; c.lineWidth = 1.5; c.fillRect(bx, by, bw, bh); c.strokeRect(bx, by, bw, bh);
+  c.fillStyle = colors.ink; c.font = `600 ${small ? 16 : 22}px ${MONO}`; c.textAlign = 'center'; c.textBaseline = 'middle';
+  c.fillText(S.hide ? '???? Hz' : fmtF(f), bx + bw/2, by + bh/2);
+  c.font = `500 12px ${FONT}`; c.fillStyle = colors.muted; c.fillText(T('gen'), bx + bw/2, by + bh + 12);
+  const sx = bx + bw + Math.min(110, w*0.18), sy = h*0.55, A = 16 * P2.a/100, d = (blur ? 0 : ph) * A;
+  c.strokeStyle = colors.muted; c.lineWidth = 2; c.beginPath(); c.moveTo(bx + bw, by + bh/2); c.bezierCurveTo(bx + bw + 40, by + bh, sx - 70, sy, sx - 34, sy); c.stroke();
+  c.fillStyle = colors.solid; c.fillRect(sx - 34, sy - 20, 20, 40);
+  const cone = (dx, alpha) => { c.globalAlpha = alpha; c.beginPath(); c.moveTo(sx - 14 + dx*0.3, sy - 20); c.lineTo(sx + 36 + dx, sy - 56); c.lineTo(sx + 36 + dx, sy + 56); c.lineTo(sx - 14 + dx*0.3, sy + 20); c.closePath(); c.fill(); c.globalAlpha = 1; };
+  c.fillStyle = colors.solid;
+  if (blur && A > 0.5){ cone(A, 0.3); cone(-A, 0.3); c.fillStyle = rgba(colors.comp, 0.3); c.fillRect(sx + 36 - A, sy - 56, 2*A, 112); }
+  else cone(d, 0.85);
+  // phân tử không khí trước loa: nén – dãn (minh hoạ, bước sóng trên hình không theo tỉ lệ)
+  const x0 = sx + 50, sp = small ? 9 : 11, lamPx = Math.max(26, Math.min(160, 120 * Math.pow(440/f, 0.35)));
+  const tw = P2.slow ? FVIS*P2.t : 0.6*P2.t;
+  for (let row = -3; row <= 3; row++){
+    for (let x = x0; x < w - 6; x += sp){
+      const disp = 0.45 * sp * (P2.a/100) * Math.sin(2*Math.PI*(tw - (x - x0)/lamPx));
+      c.fillStyle = colors.gas; c.globalAlpha = 0.9;
+      c.beginPath(); c.arc(x + disp + ((row*5) % 4), sy + row*(small ? 12 : 15), small ? 2.2 : 2.6, 0, 6.283); c.fill();
+    }
+  }
+  c.globalAlpha = 1;
+}
+function drawScope2(){
+  const cv = $('p2scope'), { c, w, h } = fit(cv, cv.clientWidth < 560 ? 220 : 260);
+  drawScope(c, 0, 0, w, h, { tDiv:P2.tDiv, yDiv:1, amp:3.6*P2.a/100, f:P2.f, hold:P2.hold, yLabel:T('arb') });
+}
+function frame2(dt){ drawSource2(dt); drawScope2(); }
+function bind2(){
+  $('p2f').oninput = e => { P2.f = genF(+e.target.value); upd2(); };
+  $('p2a').oninput = e => { P2.a = +e.target.value; upd2(); };
+  $('p2sound').onclick = () => { if (tone2.on) tone2.stop(); else tone2.start(Math.min(P2.f, 20000), gain2()); upd2(); };
+  $('p2slow').onclick = () => { P2.slow = !P2.slow; upd2(); };
+  $('p2hold').onclick = () => { P2.hold = { amp:3.6*P2.a/100, f:P2.f }; };
+  $('p2clear').onclick = () => { P2.hold = null; };
+  $('p2tdiv').onchange = e => { P2.tDiv = +e.target.value; };
+}
+function lang2(){
+  fillTdiv($('p2tdiv'), P2.tDiv);
+  predCard('p2pred', P2, 'p2pq', 'p2o', 0, 'p2good', 'p2bad');
+  $('p2vid').innerHTML = vidHTML('p2');
+  list('p2concl', T('p2concl')); list('p2assume', T('p2assume')); list('p2yccd', T('p2yccd')); upd2();
+}
+
+/* ================= TAB 3a: âm gặp vật liệu ================= */
+// Chuỗi hạt: không khí | vật liệu | không khí. Cùng tốc độ trên hình, khác trở kháng Z (m và k cùng nhân Z),
+// vật liệu xốp có ma sát −γv. Đo năng lượng phản xạ (về nguồn), truyền qua (ra đầu kia), hấp thụ (công ma sát).
+const PRESETS = {
+  concrete:{ Z:20000, g:0, th:8, look:'solid' }, water:{ Z:3600, g:0, th:12, look:'liquid' }, wood:{ Z:5000, g:0, th:2, look:'solid' },
+  curtain:{ Z:2, g:0.6, th:2, look:'cloth' }, foam:{ Z:1.3, g:2.5, th:14, look:'foam' }, foamwall:{ Z:1.3, g:2.5, th:10, wall:4, look:'foam' },
+  custom:{ Z:20000, g:0, th:8, look:'auto' }
+};
+const M3 = { D:34, R:30, cs:12, W:12, AMP:0.5, ROWS:5 };
+const P3 = { preset:'concrete', mode:'mat', speed:1, pred:null, sim:null };
+function lookOf(p){ if (p.look !== 'auto') return p.look; if (p.g > 0.3) return p.Z > 50 ? 'solid' : 'foam'; return p.Z > 50 ? 'solid' : p.Z > 1.05 ? 'cloth' : 'air'; }
+function buildSim(){
+  const p = PRESETS[P3.preset], th = p.th, wall = p.wall || 0, N = M3.D + th + wall + M3.R, cs = M3.cs;
+  const m = new Float64Array(N+1).fill(1), k = new Float64Array(N+1).fill(cs*cs), gam = new Float64Array(N+1), kind = new Uint8Array(N+1);
+  for (let i = M3.D; i < M3.D + th; i++){ m[i] = p.Z; k[i] = p.Z*cs*cs; gam[i] = p.g*p.Z; kind[i] = 1; }
+  for (let i = M3.D + th; i < M3.D + th + wall; i++){ m[i] = 20000; k[i] = 20000*cs*cs; kind[i] = 2; }
+  const ks = new Float64Array(N); for (let i = 0; i < N; i++) ks[i] = 2*k[i]*k[i+1]/(k[i] + k[i+1]);
+  const r = rng(77), P = [];
+  for (let i = 0; i <= N; i++) for (let q = 0; q < M3.ROWS; q++) P.push({ i, q, ox:r()-0.5, oy:r()-0.5, vis:r(), p1:r()*6.28, w1:1+r() });
+  P3.sim = { N, th, wall, m, ks, gam, kind, P, u:new Float64Array(N+1), v:new Float64Array(N+1), a:new Float64Array(N+1), heat:new Float64Array(N+1),
+    t:0, t0:null, El:0, Er:0, Ea:0, Ein:0, done:false, look:lookOf(p), hmax:1e-9 };
+}
+function send3(){ const s = P3.sim; s.u.fill(0); s.v.fill(0); s.heat.fill(0); s.El = s.Er = s.Ea = 0; s.t0 = s.t; s.done = false; s.hmax = 1e-9; }
+function step3(dt){
+  const s = P3.sim, N = s.N, cs = M3.cs, tau = M3.W/cs, u = s.u, v = s.v, a = s.a;
+  s.t += dt;
+  const driven = s.t0 !== null && s.t - s.t0 < tau;
+  for (let i = 0; i <= N; i++){
+    let f = 0; if (i > 0) f += s.ks[i-1]*(u[i-1] - u[i]); if (i < N) f += s.ks[i]*(u[i+1] - u[i]);
+    f -= s.gam[i]*v[i]; if (i === N) f -= cs*v[i]; if (i === 0 && !driven) f -= cs*v[i];
+    a[i] = f / s.m[i];
+  }
+  for (let i = 1; i <= N; i++) v[i] += a[i]*dt;
+  if (driven){ const nu = M3.AMP * Math.sin(Math.PI*(s.t - s.t0)/tau)**2; v[0] = (nu - u[0])/dt; u[0] = nu; }
+  else { v[0] += a[0]*dt; u[0] += v[0]*dt; s.El += cs*v[0]*v[0]*dt; }
+  for (let i = 1; i <= N; i++) u[i] += v[i]*dt;
+  s.Er += cs*v[N]*v[N]*dt;
+  const decay = Math.exp(-dt/0.8);
+  for (let i = 0; i <= N; i++){ const q = s.gam[i]*v[i]*v[i]*dt; s.Ea += q; s.heat[i] = s.heat[i]*decay + q; }
+}
+function energyLeft3(){
+  const s = P3.sim; let e = 0;
+  for (let i = 1; i <= s.N; i++) e += 0.5*s.m[i]*s.v[i]*s.v[i];
+  for (let i = 0; i < s.N; i++) e += 0.5*s.ks[i]*(s.u[i+1] - s.u[i])**2;
+  return e;
+}
+function renderBars3(){
+  const s = P3.sim; if (!s) return;
+  const rem = s.t0 === null ? 0 : energyLeft3();
+  // xong khi xung phản xạ đã về hết nguồn và xung truyền qua đã ra hết; phần rất nhỏ còn dao động trong vật không tính
+  if (s.t0 !== null && !s.done && s.t - s.t0 > (Math.max(2*M3.D, s.N) + M3.W)/M3.cs + 0.8) s.done = true;
+  const tot = s.El + s.Er + s.Ea + (s.done ? 0 : rem);
+  const pc = x => tot > 0 ? x/tot*100 : 0;
+  const items = [['eR', s.El, colors.liquid], ['eA', s.Ea, colors.mark], ['eT', s.Er, colors.cl]];
+  const status = s.t0 === null ? '' : s.done ? T('done') : T('measuring');
+  $('p3bars').innerHTML = `<div class="ebhead"><span>${status}</span></div>` + items.map(([k, e, col]) =>
+    `<div class="ebar"><span>${T(k)}</span><span class="track"><i style="width:${s.t0 === null ? 0 : pc(e).toFixed(1)}%;background:${col}"></i></span><b class="num sec">${s.t0 === null ? '—' : fmt(pc(e)) + ' %'}</b></div>`).join('');
+}
+function drawMat(dt){
+  const cv = $('p3cv'), small = cv.clientWidth < 560, { c, w, h } = fit(cv, small ? 190 : 230);
+  const s = P3.sim, N = s.N;
+  let sub = Math.round(dt * P3.speed * 4000); sub = Math.min(sub, 400);
+  for (let n = 0; n < sub; n++) step3(1/4000);
+  c.fillStyle = colors.lane; c.fillRect(0, 0, w, h);
+  const x0 = 18, aPx = (w - x0 - 6) / N, top = 30, rh = (h - top - 26) / M3.ROWS;
+  const xs = i => x0 + i*aPx, xm0 = xs(M3.D) - aPx/2, xm1 = xs(M3.D + s.th + s.wall) - aPx/2;
+  // nền vật liệu
+  c.fillStyle = s.look === 'liquid' ? rgba(colors.comp, 0.18) : s.look === 'foam' ? rgba(colors.rare, 0.2) : s.look === 'cloth' ? rgba(colors.rare, 0.12) : 'rgba(0,0,0,0)';
+  c.fillRect(xm0, top - 6, xs(M3.D + s.th) - aPx/2 - xm0, h - top - 14);
+  if (s.wall){ c.fillStyle = colors.solid; c.globalAlpha = 0.25; c.fillRect(xs(M3.D + s.th) - aPx/2, top - 6, s.wall*aPx, h - top - 14); c.globalAlpha = 1; }
+  // vùng nén / dãn trong không khí
+  for (let i = 0; i < N; i++){
+    if (s.kind[i] || s.kind[i+1]) continue;
+    const e = s.u[i+1] - s.u[i], al = Math.min(1, Math.abs(e)/M3.AMP*1.5) * 0.35; if (al < 0.02) continue;
+    c.fillStyle = rgba(e < 0 ? colors.comp : colors.rare, al); c.fillRect(xs(i) + s.u[i]*aPx, top - 6, aPx*(1 + e), h - top - 14);
+  }
+  // nhiệt do ma sát
+  for (let i = 0; i <= N; i++){ if (s.heat[i] > s.hmax) s.hmax = s.heat[i]; }
+  for (let i = 0; i <= N; i++){ if (!s.kind[i] || s.heat[i] <= 0) continue; const al = Math.min(0.6, s.heat[i]/s.hmax*0.6); if (al < 0.03) continue; c.fillStyle = rgba('215,38,61', al); c.fillRect(xs(i) - aPx/2, top - 6, aPx, h - top - 14); }
+  // khung xốp đứng yên
+  if (s.look === 'foam'){
+    c.strokeStyle = colors.muted; c.lineWidth = 1.2;
+    for (let i = M3.D; i < M3.D + s.th; i += 2) for (let q = 0; q < M3.ROWS; q++){ c.beginPath(); c.arc(xs(i) + aPx/2, top + (q + 0.5)*rh, Math.min(aPx*0.95, rh*0.45), 0, 6.283); c.stroke(); }
+  }
+  // hạt
+  const rad = Math.max(1.6, Math.min(4.5, aPx*0.32));
+  for (const p of s.P){
+    const kd = s.kind[p.i];
+    let x = xs(p.i) + s.u[p.i]*aPx, y = top + (p.q + 0.5)*rh, col = colors.gas, r = rad;
+    if (kd === 0 || (kd === 1 && s.look === 'foam')){ if (p.vis > 0.45) continue; x += p.ox*aPx*0.8 + 0.08*aPx*Math.sin(p.p1 + p.w1*s.t*3); y += p.oy*rh*0.8; }
+    else if (kd === 2 || s.look === 'solid'){ col = colors.solid; r = rad*1.1; }
+    else if (s.look === 'liquid'){ col = colors.liquid; x += p.ox*aPx*0.4; y += p.oy*rh*0.5; }
+    else if (s.look === 'cloth'){ col = colors.na; }
+    c.fillStyle = col; c.beginPath();
+    if (kd === 1 && s.look === 'cloth'){ c.fillRect(x - 1.5, y - rh*0.45, 3, rh*0.9); continue; }
+    c.arc(x, y, r, 0, 6.283); c.fill();
+  }
+  // pít-tông nguồn
+  const xp = x0 + s.u[0]*aPx; c.fillStyle = colors.solid; c.fillRect(xp - 10, top - 6, 8, h - top - 14);
+  // nhãn
+  c.font = `600 ${small ? 11 : 13}px ${FONT}`; c.textBaseline = 'top'; c.fillStyle = colors.ink;
+  c.textAlign = 'center'; c.fillText(T('air'), (x0 + xm0)/2, 6); c.fillText(T('airBehind'), (xm1 + w)/2, 6);
+  { const lb = T('presets')[P3.preset], half = c.measureText(lb).width/2 + 4, cx = Math.max(half, Math.min(w - half, (xm0 + xm1)/2));
+    c.textBaseline = 'bottom'; c.fillStyle = colors.accent; c.fillText(lb, cx, h - 2); }
+  renderBars3();
+}
+function legend3(){
+  const s = P3.sim; if (!s) return;
+  let h = `<span><i class="dot" style="background:var(--gas)"></i>${T('lgAir')}</span>`;
+  if (s.look === 'solid' || s.wall) h += `<span><i class="dot" style="background:var(--solid)"></i>${T('lgMat')}</span>`;
+  if (s.look === 'liquid') h += `<span><i class="dot" style="background:var(--liquid)"></i>${T('lgMat')}</span>`;
+  if (s.look === 'cloth') h += `<span><i class="dot" style="border-radius:2px;background:var(--na)"></i>${T('lgMat')}</span>`;
+  if (s.look === 'foam') h += `<span><i class="dot" style="background:none;border:1.5px solid var(--muted)"></i>${T('lgFrame')}</span>`;
+  if (s.gam.some(g => g > 0)) h += `<span><i class="dot" style="border-radius:2px;background:rgba(215,38,61,.5)"></i>${T('lgHeat')}</span>`;
+  h += `<span><i class="dot" style="border-radius:2px;background:rgba(var(--compress),.45)"></i>${T('lgComp')}</span><span><i class="dot" style="border-radius:2px;background:rgba(var(--rare),.45)"></i>${T('lgRare')}</span>`;
+  $('p3legend').innerHTML = h;
+}
+function setPreset(k, go){
+  P3.preset = k; const p = PRESETS[k];
+  if (k !== 'custom'){ PRESETS.custom.Z = p.Z; PRESETS.custom.g = p.g; PRESETS.custom.th = p.th; syncCustom(); }
+  buildSim(); if (go) send3();
+  document.querySelectorAll('#p3presets .btn').forEach(b => b.setAttribute('aria-pressed', b.dataset.k === k));
+  $('p3whyMat').textContent = T('why')[k]; legend3(); renderBars3();
+}
+function syncCustom(){
+  const p = PRESETS.custom;
+  $('p3Z').value = Math.round(Math.log(p.Z)/Math.log(30000)*1000); $('p3G').value = Math.round(p.g*10); $('p3Th').value = p.th;
+  $('p3Zv').textContent = `Z ≈ ${fmtSig(p.Z, 2)} × Z_kk`; $('p3Gv').textContent = fmt(p.g, 1); $('p3Thv').textContent = fmt(p.th);
+}
+function bind3(){
+  document.querySelectorAll('#p3mode .btn').forEach(b => b.onclick = () => { P3.mode = b.dataset.v; upd3(); });
+  $('p3send').onclick = send3;
+  document.querySelectorAll('#p3speed .btn').forEach(b => b.onclick = () => { P3.speed = +b.dataset.s; setSeg('p3speed', b.dataset.s, 's'); });
+  const cust = () => { const p = PRESETS.custom; p.Z = Math.pow(30000, $('p3Z').value/1000); p.g = $('p3G').value/10; p.th = +$('p3Th').value; syncCustom(); setPreset('custom', true); };
+  ['p3Z','p3G','p3Th'].forEach(id => $(id).oninput = cust);
+  bind4echo();
+}
+function upd3(){
+  setSeg('p3mode', P3.mode);
+  $('p3matBox').hidden = P3.mode !== 'mat'; $('p3echoBox').hidden = P3.mode !== 'echo';
+  $('p3why').hidden = P3.mode !== 'mat'; $('p4echoRead').hidden = P3.mode !== 'echo';
+  upd4echo();
+}
+function lang3(){
+  $('p3presets').innerHTML = Object.keys(PRESETS).filter(k => k !== 'custom').map(k => `<button class="btn" data-k="${k}">${T('presets')[k]}</button>`).join('');
+  document.querySelectorAll('#p3presets .btn').forEach(b => b.onclick = () => setPreset(b.dataset.k, true));
+  setPreset(P3.preset, false);
+  if (!P3.sim || P3.sim.t0 === null) {} // giữ trạng thái
+  syncCustom();
+  predCard('p3pred', P3, 'p3pq', 'p3o', 0, 'p3good', 'p3bad');
+  list('p3mech', T('p3mech')); list('p3simple', T('p3simple'));
+  $('p3vid').innerHTML = vidHTML('p3');
+  $('p4mat').innerHTML = Object.keys(MATS).map(k => `<option value="${k}">${T('mats')[k]}</option>`).join(''); $('p4mat').value = P4.mat;
+  $('p4ref').innerHTML = T('p4ref').map(s => `<li>${s}</li>`).join('');
+  list('p3concl', T('p3concl')); list('p3assume', T('p3assume')); list('p3yccd', T('p3yccd')); upd3();
+}
+
+/* ================= TAB 3b: tiếng vang ================= */
+const MATS = { concrete:0.02, rock:0.03, glass:0.05, wood:0.1, carpet:0.45, curtain:0.6, foam:0.9 }; // hệ số hấp thụ ~1 kHz
+const P4 = { d:5, mat:'concrete', slow:30, t:0, tClap:null, drag:false, shipX:0.3, pings:[], ping:null, show:false, lastT:null };
+function echoInfo(){
+  const v = speedOf('air'), te = 2*P4.d/v, refl = 1 - MATS[P4.mat];
+  const L0 = 80, Le = L0 - 20*Math.log10(2*P4.d) + 10*Math.log10(refl); // âm gốc 80 dB ở 1 m
+  return { v, te, refl, L0, Le };
+}
+function upd4echo(){
+  $('p4dv').textContent = `${fmt(P4.d, 1)} m`; setSeg('p4slow', P4.slow, 's');
+  const e = echoInfo();
+  rows('p4read', [[T('rowV'), `${fmt(e.v)} m/s`], [T('rowTe'), fmtT(e.te)], [T('rowRefl'), `${fmt(e.refl*100)} %`], [T('rowLe'), `${fmt(e.Le)} dB`]]);
+  const vd = $('p4verdict'), ok = e.te >= 1/15;
+  vd.className = 'fb ' + (ok ? 'good' : ''); vd.textContent = tpl(T(ok ? 'vEcho' : 'vMix'), { t: fmtT(e.te) }) + (e.refl < 0.5 ? T('vWeak') : '');
+}
+function drawEcho(dt){
+  const cv = $('p4cv'), small = cv.clientWidth < 560, { c, w, h } = fit(cv, small ? 190 : 230);
+  c.fillStyle = colors.lane; c.fillRect(0, 0, w, h);
+  const e = echoInfo(), px = 52, ground = h - 34, scale = (w - px - 50) / Math.max(P4.d, 12), xw = px + P4.d*scale, my = ground - 62;
+  P4.geo = { px, scale, xw };
+  c.fillStyle = rgba(colors.rare, 0.3); c.fillRect(0, ground, w, h - ground);
+  c.strokeStyle = colors.ink; c.fillStyle = colors.ink; c.lineWidth = 4; c.lineCap = 'round';
+  c.beginPath(); c.arc(px, my, 12, 0, 6.283); c.fill();
+  c.beginPath(); c.moveTo(px, my + 12); c.lineTo(px, ground - 26); c.lineTo(px - 9, ground); c.moveTo(px, ground - 26); c.lineTo(px + 9, ground); c.moveTo(px, my + 26); c.lineTo(px + 14, my + 16); c.moveTo(px, my + 26); c.lineTo(px + 16, my + 22); c.stroke();
+  const soft = MATS[P4.mat] > 0.3;
+  c.fillStyle = soft ? colors.gas : colors.solid; c.fillRect(xw, 14, 18, ground - 14);
+  if (soft){ c.strokeStyle = colors.panel; c.lineWidth = 1.5; c.beginPath(); for (let yy = 22; yy < ground; yy += 12){ c.moveTo(xw + 3, yy); c.quadraticCurveTo(xw + 9, yy + 6, xw + 15, yy); } c.stroke(); }
+  c.fillStyle = colors.ink; c.font = `600 13px ${FONT}`; c.textAlign = 'right'; c.textBaseline = 'top'; c.fillText(T('mats')[P4.mat], xw - 6, 6);
+  c.strokeStyle = colors.muted; c.fillStyle = colors.muted; c.lineWidth = 1; c.beginPath(); c.moveTo(px, ground + 12); c.lineTo(xw, ground + 12); c.moveTo(px, ground + 6); c.lineTo(px, ground + 18); c.moveTo(xw, ground + 6); c.lineTo(xw, ground + 18); c.stroke();
+  c.textAlign = 'center'; c.font = `600 13px ${MONO}`; c.fillText(`d = ${fmt(P4.d, 1)} m`, (px + xw)/2, ground + 16);
+  if (P4.tClap !== null){
+    P4.t += dt;
+    const tr = (P4.t - P4.tClap) / P4.slow, R = e.v * tr;
+    c.save(); c.beginPath(); c.rect(0, 0, xw, ground); c.clip(); c.lineWidth = 3;
+    if (R < P4.d){ c.strokeStyle = colors.accent; c.beginPath(); c.arc(px + 14, my, R*scale, -1.2, 1.2); c.stroke(); }
+    if (R > P4.d && R < 2*P4.d + 3){ c.strokeStyle = colors.mark; c.globalAlpha = Math.max(0.12, Math.sqrt(e.refl)); c.beginPath(); c.arc(px + 14 + 2*P4.d*scale, my, R*scale, Math.PI - 1.2, Math.PI + 1.2); c.stroke(); }
+    c.restore(); c.globalAlpha = 1;
+    if (tr > e.te + 0.3) P4.tClap = null;
+    P4.tr = tr;
+  }
+}
+function drawTimeline(){
+  const cv = $('p4tl'), small = cv.clientWidth < 560, { c, w, h } = fit(cv, small ? 150 : 160);
+  const e = echoInfo(), tMax = Math.max(0.2, e.te*1.35 + 0.05), x0 = 46, x1 = w - 12, y0 = 10, yb = h - 28;
+  const X = t => x0 + t/tMax*(x1 - x0), Y = L => yb - Math.max(0, (L - 20)/70) * (yb - y0);
+  c.fillStyle = colors.lane; c.fillRect(x0, y0, x1 - x0, yb - y0);
+  c.fillStyle = rgba(colors.rare, 0.25); c.fillRect(x0, y0, X(1/15) - x0, yb - y0);
+  c.setLineDash([4,4]); c.strokeStyle = colors.muted; c.beginPath(); c.moveTo(X(1/15), y0); c.lineTo(X(1/15), yb); c.stroke(); c.setLineDash([]);
+  c.fillStyle = colors.muted; c.font = `600 12px ${FONT}`; c.textAlign = 'left'; c.textBaseline = 'top'; c.fillText(T('thr'), X(1/15) + 4, y0 + 2);
+  const blip = (t0, L, col, label) => {
+    c.strokeStyle = col; c.lineWidth = 1.6; c.beginPath();
+    const H = yb - Y(L);
+    for (let k = 0; k <= 80; k++){ const tt = k/80*0.03, xx = X(t0 + tt), a = H*Math.exp(-tt/0.008)*Math.abs(Math.sin(2*Math.PI*tt/0.0025)); k ? c.lineTo(xx, yb - a) : c.moveTo(xx, yb); }
+    c.stroke(); c.fillStyle = col; c.fillRect(X(t0) - 1, Y(L), 3, yb - Y(L));
+    c.font = `600 12px ${FONT}`; c.textAlign = 'left'; c.textBaseline = 'bottom'; c.fillText(label, X(t0) + 6, Math.max(y0 + 14, Y(L) + 2));
+  };
+  blip(0, e.L0, colors.accent, T('direct'));
+  blip(e.te, e.Le, colors.mark, `${T('echoL')} (${fmtT(e.te)})`);
+  c.strokeStyle = colors.muted; c.lineWidth = 1; c.beginPath(); c.moveTo(x0, yb); c.lineTo(x1, yb); c.moveTo(x0, y0); c.lineTo(x0, yb); c.stroke();
+  c.fillStyle = colors.muted; c.font = `500 11px ${MONO}`; c.textAlign = 'center'; c.textBaseline = 'top';
+  const step = tMax > 0.6 ? 0.2 : tMax > 0.25 ? 0.1 : 0.05;
+  for (let t = 0; t <= tMax + 1e-9; t += step) c.fillText(`${fmt(t, 2)}`, X(t), yb + 4);
+  c.textAlign = 'right'; c.fillText('s', x1, yb + 16);
+  c.textBaseline = 'middle'; [20, 50, 80].forEach(L => c.fillText(`${L} dB`, x0 - 4, Y(L)));
+  if (P4.tClap !== null && P4.tr !== undefined){ c.strokeStyle = colors.ink; c.lineWidth = 2; c.beginPath(); c.moveTo(X(Math.min(P4.tr, tMax)), y0); c.lineTo(X(Math.min(P4.tr, tMax)), yb); c.stroke(); }
+}
+function bind4echo(){
+  document.querySelectorAll('#p4slow .btn').forEach(b => b.onclick = () => { P4.slow = +b.dataset.s; upd4echo(); });
+  $('p4d').oninput = e => { P4.d = +e.target.value; upd4echo(); };
+  $('p4mat').onchange = e => { P4.mat = e.target.value; upd4echo(); };
+  $('p4clap').onclick = () => { P4.tClap = P4.t; P4.tr = 0; const e = echoInfo(); burst(0, 0.7); burst(e.te, 0.7 * Math.min(1, Math.pow(10, (e.Le - e.L0)/40))); };
+  const cv = $('p4cv');
+  cv.addEventListener('pointerdown', e => { if (!P4.geo) return; const r = cv.getBoundingClientRect(), x = e.clientX - r.left; if (Math.abs(x - P4.geo.xw - 9) < 30){ P4.drag = true; cv.setPointerCapture(e.pointerId); } });
+  cv.addEventListener('pointermove', e => { if (!P4.drag) return; const r = cv.getBoundingClientRect(); const d = (e.clientX - r.left - P4.geo.px) / P4.geo.scale; P4.d = Math.max(2, Math.min(150, Math.round(d*2)/2)); $('p4d').value = P4.d; upd4echo(); });
+  const end = () => { P4.drag = false; }; cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end);
+}
+function frame3(dt){ if (P3.mode === 'mat') drawMat(dt); else { drawEcho(dt); drawTimeline(); } }
+
+/* ================= TAB 4: ứng dụng ================= */
+const SEA_W = 2000;
+function seaDepth(x){ const d = 140 + 45*Math.sin(2*Math.PI*x/900) + 25*Math.sin(2*Math.PI*x/330 + 1) - 60*Math.exp(-(((x - 1400)/120)**2)); return Math.max(15, d); }
+const vSea = () => medwin(S.tempC, 35);
+function upd4(){
+  $('p4given').textContent = tpl(T('p4given'), { v: fmt(vSea()) });
+  const lt = P4.lastT;
+  rows('p4sread', [[T('rowTs'), lt ? fmtT(lt.t) : '—'], [T('rowH'), lt && P4.show ? `${fmt(lt.h, 1)} m` : '?']]);
+  $('p4show').setAttribute('aria-pressed', P4.show);
+}
+function drawSea(dt){
+  const cv = $('p4sea'), small = cv.clientWidth < 560, { c, w, h } = fit(cv, small ? 260 : 320);
+  const sy = 52, maxD = 240, Y = d => sy + d/maxD*(h - sy - 8), X = x => x/SEA_W*w;
+  c.fillStyle = colors.lane; c.fillRect(0, 0, w, sy);
+  c.fillStyle = rgba(colors.comp, 0.12); c.fillRect(0, sy, w, h - sy);
+  c.fillStyle = rgba(colors.rare, 0.55); c.beginPath(); c.moveTo(0, h);
+  for (let px = 0; px <= w; px += 3) c.lineTo(px, Y(seaDepth(px/w*SEA_W)));
+  c.lineTo(w, h); c.closePath(); c.fill();
+  c.fillStyle = colors.muted; c.font = `500 11px ${MONO}`; c.textAlign = 'left'; c.textBaseline = 'middle';
+  [50,100,150,200].forEach(d => { c.globalAlpha = 0.5; c.fillRect(0, Y(d), 8, 1); c.globalAlpha = 1; c.fillText(`${d} m`, 10, Y(d)); });
+  P4.pings.forEach(p => { c.fillStyle = colors.mark; c.beginPath(); c.arc(X(p.x), Y(p.h), 4, 0, 6.283); c.fill(); });
+  if (P4.pings.length > 1){ const ps = [...P4.pings].sort((a,b) => a.x - b.x); c.strokeStyle = colors.mark; c.lineWidth = 1.5; c.setLineDash([4,3]); c.beginPath(); ps.forEach((p, i) => i ? c.lineTo(X(p.x), Y(p.h)) : c.moveTo(X(p.x), Y(p.h))); c.stroke(); c.setLineDash([]); }
+  const xs = X(P4.shipX*SEA_W);
+  c.fillStyle = colors.ink; c.beginPath(); c.moveTo(xs - 34, sy - 16); c.lineTo(xs + 34, sy - 16); c.lineTo(xs + 24, sy); c.lineTo(xs - 24, sy); c.closePath(); c.fill();
+  c.fillRect(xs - 10, sy - 30, 22, 14); c.fillStyle = colors.accent; c.fillRect(xs - 4, sy - 2, 8, 6);
+  c.fillStyle = colors.muted; c.font = `500 12px ${FONT}`; c.textAlign = 'left'; c.textBaseline = 'top'; c.fillText(T('surface'), 8, sy - 18);
+  if (P4.ping){
+    const pg = P4.ping; pg.ta += dt;
+    const tr = pg.ta / 10, R = vSea()*tr, D = seaDepth(pg.x), xp = X(pg.x);
+    c.lineWidth = 3;
+    if (R < D){ c.strokeStyle = colors.accent; c.beginPath(); c.arc(xp, sy, (Y(R) - sy), Math.PI*0.35, Math.PI*0.65); c.stroke(); }
+    else if (R < 2*D){ const up = 2*D - R; c.strokeStyle = colors.mark; c.beginPath(); c.arc(xp, Y(D), (Y(D) - Y(up)), Math.PI*1.35, Math.PI*1.65); c.stroke(); }
+    else { const t = 2*D/vSea(); P4.lastT = { t, h:D }; P4.pings.push({ x:pg.x, h:vSea()*t/2 }); P4.ping = null; upd4(); }
+  }
+}
+function frame4(dt){ drawSea(dt); }
+function bind4(){
+  $('p4ping').onclick = () => { if (!P4.ping) P4.ping = { x:P4.shipX*SEA_W, ta:0 }; };
+  $('p4show').onclick = () => { P4.show = !P4.show; upd4(); };
+  $('p4clearMap').onclick = () => { P4.pings = []; upd4(); };
+  $('p4check').onclick = () => {
+    const fb = $('p4sfb'); fb.hidden = false; const lt = P4.lastT;
+    if (!lt){ fb.className = 'fb'; fb.textContent = T('p4need'); return; }
+    const a = parseFloat(String($('p4ans').value).replace(',', '.'));
+    const ok = isFinite(a) && Math.abs(a - lt.h)/lt.h < 0.02;
+    fb.className = 'fb ' + (ok ? 'good' : 'bad'); fb.textContent = ok ? tpl(T('p4right'), { h: fmt(lt.h, 1) }) : T('p4wrong');
+  };
+  const sea = $('p4sea');
+  sea.addEventListener('pointerdown', e => { if (P4.ping) return; const r = sea.getBoundingClientRect(); if (e.clientY - r.top > 90) return; P4.sdrag = true; sea.setPointerCapture(e.pointerId); P4.shipX = Math.max(0.03, Math.min(0.97, (e.clientX - r.left)/r.width)); });
+  sea.addEventListener('pointermove', e => { if (!P4.sdrag || P4.ping) return; const r = sea.getBoundingClientRect(); P4.shipX = Math.max(0.03, Math.min(0.97, (e.clientX - r.left)/r.width)); });
+  const end2 = () => { P4.sdrag = false; }; sea.addEventListener('pointerup', end2); sea.addEventListener('pointercancel', end2);
+}
+function appBody(k){ const a = T('apps')[k]; return `<h3>${T('mechL')}</h3><p>${a.m}</p><h3>${T('simpleL')}</h3><p>${a.s}</p>${VIDEOS[k] ? `<ul class="vids">${vidHTML(k)}</ul>` : ''}`; }
+function lang4(){
+  document.querySelector('#p4 [data-i18n="a1t"]').textContent = T('apps').a1.t;
+  document.querySelector('#p4 [data-app="a1"]').innerHTML = appBody('a1');
+  $('appcards').innerHTML = ['a2','a3','a4','a5','a6','a7'].map(k => `<article class="card app"><h2>${T('apps')[k].t}</h2>${appBody(k)}</article>`).join('');
+  upd4();
+}
+
+/* ================= Chuyển tab ================= */
+const TAB_IDS = ['truyen-am','nguon-am','phan-xa','ung-dung'];
+let curTab = 1;
+const FRAMES = { 2:frame2, 3:frame3, 4:frame4 };
+function showTab(n){
+  curTab = n;
+  document.querySelectorAll('nav.tabs button').forEach((b, i) => { b.classList.toggle('on', i + 1 === n); b.setAttribute('aria-selected', i + 1 === n); });
+  [1,2,3,4].forEach(i => $('p' + i).hidden = i !== n);
+  if (n !== 2){ tone2.stop(); upd2(); }
+  if (n === 1) layout();
+  try { history.replaceState(null, '', '#' + TAB_IDS[n-1]); } catch(e){}
+}
+document.querySelectorAll('nav.tabs button').forEach((b, i) => b.onclick = () => showTab(i + 1));
+buildSim(); bind2(); bind3(); bind4();
+const mq = window.matchMedia('(prefers-color-scheme: dark)');
+mq.addEventListener?.('change', readColors);
+new MutationObserver(readColors).observe(document.documentElement, { attributes:true, attributeFilter:['data-theme'] });
+window.addEventListener('resize', () => { if (curTab === 1) layout(); });
+readColors(); layout(); applyLang();
+{ const h0 = TAB_IDS.indexOf(location.hash.slice(1)); showTab(h0 >= 0 ? h0 + 1 : 1); }
+if (document.fonts) document.fonts.ready.then(() => { layout(); });
+requestAnimationFrame(loop);
+
+</script>
