@@ -918,6 +918,7 @@ function trace5(){const L0=S5.laser;let p=[L0.x,L0.y],d=[Math.cos(L0.a*DEG),Math
   S5.hit=hit;S5.path=path;S5.marks=marks;}
 function render5(){const cv=$('cv5'),{ctx,w,h}=size(cv,.62,480,240),v=view5(w,h);S5.v=v;const k=v.k,fs=w<520?12:14;
   trace5();ctx.fillStyle=C.lane;ctx.fillRect(0,0,w,h);
+  if(S5.trench){
     ctx.fillStyle=C.lane;ctx.fillRect(v.X(36),v.Y(12),v.X(44)-v.X(36),v.Y(62)-v.Y(12));ctx.fillRect(v.X(44),v.Y(40),v.X(100)-v.X(44),v.Y(62)-v.Y(40));}
   S5.walls.forEach(wl=>line(ctx,[[v.X(wl[0]),v.Y(wl[1])],[v.X(wl[2]),v.Y(wl[3])]],C.muted,6));
   if(!S5.trench)txt(ctx,T('lWall'),v.X(S5.walls[0][0])+8,v.Y(8),C.muted,fs,600,'left');
@@ -975,5 +976,6 @@ addEventListener('resize',draw);
 applyLang();
 {const t=+store.get('as-tab');setTab(t>=1&&t<=5?t:1);}
 </script>
+<script src="../../embed.js"></script>
 </body>
 </html>
