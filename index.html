@@ -30,6 +30,8 @@ h3.sec{max-width:1100px;margin:8px auto 12px;padding:0 16px;font-size:22px}
 .st.dang{background:#ffe8a3;color:#5c4400}
 .act a.ghost{background:transparent;color:var(--acc)}
 .top{max-width:1100px;margin:0 auto 12px;padding:0 16px;display:flex;justify-content:flex-end}
+.contrib{max-width:1068px;margin:0 auto 16px;padding:14px 16px;border:1px solid var(--line);border-left:5px solid var(--acc);border-radius:12px;background:var(--card);font-size:16px}
+@media (max-width:1100px){.contrib{margin:0 16px 16px}}
 footer{text-align:center;color:var(--mute);padding:24px 16px 40px;font-size:14px}
 .empty{grid-column:1/-1;color:var(--mute);text-align:center;padding:32px}
 </style>
@@ -37,30 +39,33 @@ footer{text-align:center;color:var(--mute);padding:24px 16px 40px;font-size:14px
 <body>
 <header><h1>Mô phỏng Vật lí 6789</h1><p>Mô phỏng tương tác KHTN lớp 6–9 theo chương trình GDPT 2018. Miễn phí, chạy trên điện thoại và máy chiếu, nhúng được vào slide của thầy cô.</p></header>
 <div class="bar" id="bar"></div>
+<div class="contrib"><b>Cùng xây bộ mô phỏng.</b> Nút <b>Đóng góp mô phỏng</b> trên mỗi thẻ dùng để: <b>báo lỗi hoặc góp ý</b> (sai kiến thức, số liệu, nút không chạy...), <b>tải lên mô phỏng mới</b> cho mục chưa có, hoặc <b>tải lên phiên bản tốt hơn</b> của mô phỏng đã có. Bấm vào sẽ mở một mẫu điền sẵn trên GitHub (cần tài khoản GitHub miễn phí); bạn chỉ cần chọn loại đóng góp, mô tả và kéo thả file (nén .html thành .zip). Mọi đóng góp được xem xét rồi mới đưa lên, có ghi tên người đóng góp.</div>
 <h3 class="sec">Đã có sẵn <small id="n1"></small></h3>
 <main id="grid"></main>
 <h3 class="sec">Chưa có sẵn <small id="n2"></small></h3>
 <main id="grid2"></main>
-<dialog id="dlg"><h2 style="margin-top:0">Nhúng vào slide</h2><p>Chép đoạn mã này vào slide HTML, Google Sites, Canva, LMS:</p><code id="code"></code><p><button id="cp">Chép mã</button> <button id="cl">Đóng</button></p></dialog>
+<dialog id="dlg"><h2 style="margin-top:0">Nhúng vào slide</h2><p id="dt" style="margin:0 0 8px"></p><p><label>Mở sẵn tab: <select id="tabSel"></select></label> <label><input type="checkbox" id="noTabs"> Ẩn thanh tab (chỉ hiện đúng tab đã chọn)</label></p><p>Chép đoạn mã này vào slide HTML, Google Sites, Canva, LMS:</p><code id="code"></code><p><button id="cp">Chép mã</button> <button id="cl">Đóng</button></p></dialog>
 <footer>Mã nguồn mở (MIT) · Cập nhật liên tục</footer>
 <script>
 const SIMS=[
-{g:6,id:"luc-hap-dan",t:"Lực hấp dẫn và trọng lượng",d:"Khối lượng, trọng lượng, trọng trường ở các hành tinh.",c:"Lực",k:"Hiện tượng"},
-{g:6,id:"luc-ma-sat",t:"Lực ma sát",d:"Ma sát nghỉ, trượt, lăn; yếu tố ảnh hưởng.",c:"Lực",k:"Thí nghiệm"},
-{g:7,id:"anh-sang-guong-phang",t:"Ánh sáng và gương phẳng",d:"Vùng tối, phản xạ, ảnh qua gương phẳng.",c:"Ánh sáng",k:"Thí nghiệm"},
-{g:7,id:"do-thi-quang-duong-thoi-gian",t:"Đồ thị quãng đường – thời gian",d:"Đọc đồ thị, tính tốc độ.",c:"Tốc độ",k:"Thí nghiệm"},
-{g:7,id:"song-am",t:"Sóng âm",d:"Tần số, biên độ, độ cao và độ to của âm.",c:"Âm thanh",k:"Hiện tượng"},
-{g:8,id:"archimedes-su-noi",t:"Archimedes và sự nổi",d:"Khối lượng riêng, lực đẩy Archimedes, điều kiện nổi.",c:"Lực",k:"Thí nghiệm"},
-{g:8,id:"don-bay",t:"Đòn bẩy và moment lực",d:"Cân bằng đòn bẩy, moment lực.",c:"Lực",k:"Ứng dụng"},
-{g:8,id:"no-vi-nhiet",t:"Sự nở vì nhiệt và băng kép",d:"Nở vì nhiệt, băng kép, joulemeter.",c:"Nhiệt",k:"Thí nghiệm"},
-{g:9,id:"cam-ung-dien-tu",t:"Cảm ứng điện từ",d:"Từ thông, dòng điện cảm ứng, máy phát điện xoay chiều.",c:"Điện từ",k:"Thí nghiệm"},
-{g:9,id:"khuc-xa-phan-xa-toan-phan",t:"Khúc xạ và phản xạ toàn phần",d:"Định luật khúc xạ, góc tới hạn.",c:"Ánh sáng",k:"Thí nghiệm"},
-{g:9,id:"mach-noi-tiep-song-song",t:"Mạch điện nối tiếp, song song",d:"Cường độ, hiệu điện thế, điện trở tương đương.",c:"Điện",k:"Thí nghiệm"},
-{g:9,id:"tan-sac-mau-sac",t:"Lăng kính và màu sắc",d:"Tán sắc ánh sáng trắng, màu vật.",c:"Ánh sáng",k:"Hiện tượng"},
-{g:9,id:"thau-kinh",t:"Thấu kính và sự tạo ảnh",d:"Ảnh thật, ảnh ảo, tiêu cự.",c:"Ánh sáng",k:"Thí nghiệm"}];
+{g:6,id:"luc-hap-dan",T:5,t:"Lực hấp dẫn và trọng lượng",d:"Khối lượng, trọng lượng, trọng trường ở các hành tinh.",c:"Lực",k:"Hiện tượng"},
+{g:6,id:"luc-ma-sat",T:4,t:"Lực ma sát",d:"Ma sát nghỉ, trượt, lăn; yếu tố ảnh hưởng.",c:"Lực",k:"Thí nghiệm"},
+{g:7,id:"anh-sang-guong-phang",T:5,t:"Ánh sáng và gương phẳng",d:"Vùng tối, phản xạ, ảnh qua gương phẳng.",c:"Ánh sáng",k:"Thí nghiệm"},
+{g:7,id:"do-thi-quang-duong-thoi-gian",T:4,t:"Đồ thị quãng đường – thời gian",d:"Đọc đồ thị, tính tốc độ.",c:"Tốc độ",k:"Thí nghiệm"},
+{g:7,id:"song-am",T:4,t:"Sóng âm",d:"Tần số, biên độ, độ cao và độ to của âm.",c:"Âm thanh",k:"Hiện tượng"},
+{g:8,id:"archimedes-su-noi",T:6,t:"Archimedes và sự nổi",d:"Khối lượng riêng, lực đẩy Archimedes, điều kiện nổi.",c:"Lực",k:"Thí nghiệm"},
+{g:8,id:"don-bay",T:3,t:"Đòn bẩy và moment lực",d:"Cân bằng đòn bẩy, moment lực.",c:"Lực",k:"Ứng dụng"},
+{g:8,id:"no-vi-nhiet",T:6,t:"Sự nở vì nhiệt và băng kép",d:"Nở vì nhiệt, băng kép, joulemeter.",c:"Nhiệt",k:"Thí nghiệm"},
+{g:9,id:"cam-ung-dien-tu",T:4,t:"Cảm ứng điện từ",d:"Từ thông, dòng điện cảm ứng, máy phát điện xoay chiều.",c:"Điện từ",k:"Thí nghiệm"},
+{g:9,id:"khuc-xa-phan-xa-toan-phan",T:6,t:"Khúc xạ và phản xạ toàn phần",d:"Định luật khúc xạ, góc tới hạn.",c:"Ánh sáng",k:"Thí nghiệm"},
+{g:9,id:"mach-noi-tiep-song-song",T:6,t:"Mạch điện nối tiếp, song song",d:"Cường độ, hiệu điện thế, điện trở tương đương.",c:"Điện",k:"Thí nghiệm"},
+{g:9,id:"tan-sac-mau-sac",T:5,t:"Lăng kính và màu sắc",d:"Tán sắc ánh sáng trắng, màu vật.",c:"Ánh sáng",k:"Hiện tượng"},
+{g:9,id:"thau-kinh",T:6,t:"Thấu kính và sự tạo ảnh",d:"Ảnh thật, ảnh ảo, tiêu cự.",c:"Ánh sáng",k:"Thí nghiệm"}];
 const TODO=[{"g": 6, "code": "l6-01", "c": "Các phép đo", "n": "Nhiệt kế và thang nhiệt độ Celsius", "k": "Thí nghiệm", "st": "chua"}, {"g": 6, "code": "l6-02", "c": "Các phép đo", "n": "Ước lượng và đo: những thao tác sai", "k": "Thí nghiệm", "st": "chua"}, {"g": 6, "code": "l6-03", "c": "Lực", "n": "Biểu diễn lực bằng mũi tên", "k": "Hiện tượng", "st": "chua"}, {"g": 6, "code": "l6-09", "c": "Năng lượng", "n": "Chuyển hoá năng lượng và năng lượng hao phí", "k": "Hiện tượng", "st": "chua"}, {"g": 6, "code": "l6-10", "c": "Năng lượng", "n": "Năng lượng tái tạo và tiết kiệm năng lượng", "k": "Ứng dụng", "st": "chua"}, {"g": 6, "code": "l6-11", "c": "Trái Đất và bầu trời", "n": "Mặt Trời mọc và lặn", "k": "Hiện tượng", "st": "chua"}, {"g": 6, "code": "l6-12", "c": "Trái Đất và bầu trời", "n": "Các pha của Mặt Trăng", "k": "Hiện tượng", "st": "chua"}, {"g": 6, "code": "l6-13", "c": "Trái Đất và bầu trời", "n": "Hệ Mặt Trời: khoảng cách và chu kì quay", "k": "Hiện tượng", "st": "chua"}, {"g": 7, "code": "l7-01", "c": "Tốc độ", "n": "Đo tốc độ bằng đồng hồ bấm giây và cổng quang điện", "k": "Thí nghiệm", "st": "chua"}, {"g": 7, "code": "l7-03", "c": "Tốc độ", "n": "Tốc độ và khoảng cách an toàn giao thông", "k": "Ứng dụng", "st": "chua"}, {"g": 7, "code": "l7-11", "c": "Từ", "n": "Từ phổ và đường sức từ của nam châm", "k": "Hiện tượng", "st": "chua"}, {"g": 7, "code": "l7-12", "c": "Từ", "n": "Từ trường Trái Đất và la bàn", "k": "Hiện tượng", "st": "chua"}, {"g": 7, "code": "l7-13", "c": "Từ", "n": "Nam châm điện", "k": "Thí nghiệm", "st": "chua"}, {"g": 8, "code": "l8-03", "c": "Khối lượng riêng và áp suất", "n": "Áp suất trên một bề mặt", "k": "Thí nghiệm", "st": "chua"}, {"g": 8, "code": "l8-04", "c": "Khối lượng riêng và áp suất", "n": "Áp suất chất lỏng và máy nén thuỷ lực", "k": "Ứng dụng", "st": "dang"}, {"g": 8, "code": "l8-05", "c": "Khối lượng riêng và áp suất", "n": "Áp suất khí quyển", "k": "Thí nghiệm", "st": "dang"}, {"g": 8, "code": "l8-08", "c": "Điện", "n": "Nhiễm điện do cọ xát", "k": "Hiện tượng", "st": "chua"}, {"g": 8, "code": "l8-09", "c": "Điện", "n": "Dòng điện trong mạch điện đơn giản", "k": "Hiện tượng", "st": "chua"}, {"g": 8, "code": "l8-10", "c": "Điện", "n": "Các tác dụng của dòng điện", "k": "Thí nghiệm", "st": "chua"}, {"g": 8, "code": "l8-11", "c": "Điện", "n": "Đo cường độ dòng điện và hiệu điện thế", "k": "Thí nghiệm", "st": "chua"}, {"g": 8, "code": "l8-12", "c": "Điện", "n": "Cầu chì, rơ le và cầu dao tự động", "k": "Ứng dụng", "st": "chua"}, {"g": 8, "code": "l8-13", "c": "Nhiệt", "n": "Nội năng và chuyển động phân tử", "k": "Hiện tượng", "st": "chua"}, {"g": 8, "code": "l8-14", "c": "Nhiệt", "n": "Dẫn nhiệt, đối lưu, bức xạ nhiệt", "k": "Hiện tượng", "st": "chua"}, {"g": 8, "code": "l8-15", "c": "Nhiệt", "n": "Hiệu ứng nhà kính", "k": "Hiện tượng", "st": "chua"}, {"g": 9, "code": "l9-01", "c": "Năng lượng cơ học", "n": "Động năng, thế năng và cơ năng", "k": "Hiện tượng", "st": "chua"}, {"g": 9, "code": "l9-02", "c": "Năng lượng cơ học", "n": "Công và công suất", "k": "Ứng dụng", "st": "chua"}, {"g": 9, "code": "l9-10", "c": "Điện", "n": "Điện trở của dây dẫn", "k": "Thí nghiệm", "st": "chua"}, {"g": 9, "code": "l9-11", "c": "Điện", "n": "Định luật Ohm", "k": "Thí nghiệm", "st": "chua"}, {"g": 9, "code": "l9-13", "c": "Điện", "n": "Năng lượng điện, công suất và tiền điện", "k": "Ứng dụng", "st": "chua"}, {"g": 9, "code": "l9-17", "c": "Năng lượng với cuộc sống", "n": "Vòng năng lượng trên Trái Đất", "k": "Ứng dụng", "st": "chua"}];
 const REPO='https://github.com/ntb866-ux/Physics-Simulations-for-67-89';
-function contrib(g,topic){const u=new URL(REPO+'/issues/new');u.searchParams.set('title','[Đóng góp] Lớp '+g+': '+topic);u.searchParams.set('body','**Lớp:** '+g+'\n**Chủ đề / tên mô phỏng:** '+topic+'\n**Tác giả:** \n\nKéo thả file .html vào khung này (hoặc dán link), kèm mô tả ngắn: yêu cầu cần đạt, cách dùng.');return u.href}
+function contrib(g,topic,have){const u=new URL(REPO+'/issues/new');u.searchParams.set('title','[Đóng góp] Lớp '+g+': '+topic);
+ const x=b=>b?'[x]':'[ ]';
+ u.searchParams.set('body',['**Mô phỏng:** Lớp '+g+' – '+topic,'**Người đóng góp (tên, trường, tuỳ chọn):** ','','### Bạn muốn đóng góp gì? (đánh dấu x)','- '+x(have)+' Báo lỗi hoặc góp ý (sai kiến thức, sai số liệu, nút không chạy, khó dùng trên điện thoại/máy chiếu...)','- '+x(!have)+' Tải lên mô phỏng mới cho mục này','- [ ] Tải lên phiên bản tốt hơn (thêm tính năng, giao diện, bài tập...)','','### Mô tả','- Nếu báo lỗi: lỗi ở tab nào, bạn đã làm gì, kết quả đúng phải là gì. Có ảnh chụp màn hình càng tốt (kéo thả ảnh vào đây).','- Nếu tải lên mô phỏng: nén file .html thành .zip rồi kéo thả vào khung này (GitHub không nhận trực tiếp file .html), hoặc dán link; ghi ngắn yêu cầu cần đạt và cách dùng.','','Cảm ơn bạn! Mọi đóng góp được xem xét trước khi đưa lên website và được ghi tên người đóng góp.'].join('\n'));return u.href}
 const COL={6:"--g6",7:"--g7",8:"--g8",9:"--g9"};
 let G=0,Q="";
 const bar=document.getElementById("bar"),grid=document.getElementById("grid"),dlg=document.getElementById("dlg"),code=document.getElementById("code");
@@ -77,16 +82,21 @@ function list(){
  const r=SIMS.filter(s=>(!G||s.g===G)&&(s.t+s.d+s.c+s.k).toLowerCase().includes(q));
  grid.innerHTML=r.length?"":'<p class="empty">Không có mô phỏng phù hợp.</p>';
  r.forEach(s=>{const e=document.createElement("article");e.className="card";e.style.setProperty("--c",`var(${COL[s.g]})`);
- e.innerHTML=`<div class="tags"><span class="tag">Lớp ${s.g}</span><span class="tag">${s.c}</span><span class="tag">${s.k}</span></div><h2>${s.t}</h2><p>${s.d}</p><div class="act"><a href="${path(s)}">Mở</a><button>Nhúng</button><a class="ghost" href="${contrib(s.g,s.t)}" target="_blank" rel="noopener">Đóng góp mô phỏng</a></div>`;
- e.querySelector("button").onclick=()=>{code.textContent=`<iframe src="${base()+path(s)}?embed=1" width="960" height="540" allowfullscreen style="border:0"></iframe>`;dlg.showModal()};
+ e.innerHTML=`<div class="tags"><span class="tag">Lớp ${s.g}</span><span class="tag">${s.c}</span><span class="tag">${s.k}</span></div><h2>${s.t}</h2><p>${s.d}</p><div class="act"><a href="${path(s)}">Mở</a><button>Nhúng</button><a class="ghost" title="Báo lỗi, góp ý, hoặc tải lên mô phỏng mới / bản tốt hơn" href="${contrib(s.g,s.t,1)}" target="_blank" rel="noopener">Đóng góp mô phỏng</a></div>`;
+ e.querySelector("button").onclick=()=>openEmbed(s);
  grid.append(e)});
  document.getElementById('n1').textContent='('+r.length+' mô phỏng)';
  const t=TODO.filter(s=>(!G||s.g===G)&&(s.n+s.c+s.k).toLowerCase().includes(q));
  const g2=document.getElementById('grid2');g2.innerHTML=t.length?'':'<p class="empty">Không có mục nào.</p>';
  document.getElementById('n2').textContent='('+t.length+' mục)';
  t.forEach(s=>{const e=document.createElement('article');e.className='card soon';e.style.setProperty('--c',`var(${COL[s.g]})`);
- e.innerHTML=`<div class="tags"><span class="tag">Lớp ${s.g}</span><span class="tag">${s.c}</span><span class="tag">${s.k}</span><span class="st ${s.st}">${s.st==='dang'?'Đang làm':'Chưa làm'}</span></div><h2>${s.n}</h2><div class="act"><a class="ghost" href="${contrib(s.g,s.n)}" target="_blank" rel="noopener">Đóng góp mô phỏng</a></div>`;g2.append(e)});
+ e.innerHTML=`<div class="tags"><span class="tag">Lớp ${s.g}</span><span class="tag">${s.c}</span><span class="tag">${s.k}</span><span class="st ${s.st}">${s.st==='dang'?'Đang làm':'Chưa làm'}</span></div><h2>${s.n}</h2><div class="act"><a class="ghost" title="Báo lỗi, góp ý, hoặc tải lên mô phỏng mới / bản tốt hơn" href="${contrib(s.g,s.n,0)}" target="_blank" rel="noopener">Đóng góp mô phỏng</a></div>`;g2.append(e)});
 }
+let cur=null;
+function embedCode(){const s=cur,tab=+tabSel.value,u=new URL(base()+path(s));u.searchParams.set('embed','1');if(tab)u.searchParams.set('tab',tab);if(tab&&noTabs.checked)u.searchParams.set('notabs','1');
+ code.textContent=`<iframe src="${u.href}" width="960" height="540" allowfullscreen style="border:0"></iframe>`;}
+function openEmbed(s){cur=s;document.getElementById('dt').textContent=s.t;tabSel.innerHTML='<option value="0">Tab đầu (mặc định)</option>'+Array.from({length:s.T},(_,i)=>`<option value="${i+1}">Tab ${i+1}</option>`).join('');noTabs.checked=false;embedCode();dlg.showModal();}
+const tabSel=document.getElementById('tabSel'),noTabs=document.getElementById('noTabs');tabSel.onchange=noTabs.onchange=embedCode;
 document.getElementById("cl").onclick=()=>dlg.close();
 document.getElementById("cp").onclick=()=>navigator.clipboard&&navigator.clipboard.writeText(code.textContent);
 render();
