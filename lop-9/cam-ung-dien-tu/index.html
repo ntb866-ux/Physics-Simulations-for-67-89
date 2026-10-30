@@ -1,0 +1,1127 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Cảm ứng điện từ</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Phòng thí nghiệm cảm ứng điện từ (KHTN 9): dải video thực tế, sân khấu canvas bên trái, sổ ghi chép bên phải. Điện thoại xếp một cột.
+   Cùng hệ màu, phông với bộ mô phỏng KHTN 6–9. */
+:root{
+  --bg:#edf0f3; --panel:#ffffff; --lane:#f4f6f9; --ink:#141c26; --muted:#556170; --line:#c9d1db;
+  --accent:#1d5fa8; --accent-ink:#ffffff; --ok:#1d8a4b; --warn:#c2410c;
+  --force:#d1323b; --vel:#1f6fd1; --nPole:#d1323b; --sPole:#1f6fd1; --copper:#c0702a; --copper2:#8a4a17;
+  --fieldc:#8d99ab; --fieldhi:#e07b00; --metal:#8b96a3; --metal2:#5b6673; --space:#0d1626; --star:#e9eef7;
+  --gold:#c99a2e; --ledR:#ef2b2b; --ledG:#16a34a; --heat:#e4572e; --water:#7fb7e8;
+  --font-ui:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-num:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Consolas,monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0e131a; --panel:#161e28; --lane:#111821; --ink:#e3e9f0; --muted:#97a3b2; --line:#2a3644;
+  --accent:#5ea6ec; --accent-ink:#04182c; --ok:#47c47d; --warn:#f08a4b;
+  --force:#ff5f67; --vel:#5aa2ff; --nPole:#f0535b; --sPole:#4b8fe8; --copper:#e08a3c; --copper2:#b06a2a;
+  --fieldc:#6c7889; --fieldhi:#ffa630; --metal:#7c8794; --metal2:#a9b4c1; --space:#060a12; --star:#cfd8e6;
+  --gold:#e0b24a; --ledR:#ff4d4d; --ledG:#3ddc7a; --heat:#ff7a50; --water:#3f7fb8;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e131a; --panel:#161e28; --lane:#111821; --ink:#e3e9f0; --muted:#97a3b2; --line:#2a3644;
+  --accent:#5ea6ec; --accent-ink:#04182c; --ok:#47c47d; --warn:#f08a4b;
+  --force:#ff5f67; --vel:#5aa2ff; --nPole:#f0535b; --sPole:#4b8fe8; --copper:#e08a3c; --copper2:#b06a2a;
+  --fieldc:#6c7889; --fieldhi:#ffa630; --metal:#7c8794; --metal2:#a9b4c1; --space:#060a12; --star:#cfd8e6;
+  --gold:#e0b24a; --ledR:#ff4d4d; --ledG:#3ddc7a; --heat:#ff7a50; --water:#3f7fb8;
+  color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-ui);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px 40px}
+.wrap{max-width:1320px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.hbtns{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.eyebrow{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{margin:0;font-size:clamp(25px,3.4vw,36px);line-height:1.15;font-weight:800;text-wrap:balance;letter-spacing:-.01em}
+h2{margin:0;font-size:17px;font-weight:700;text-wrap:balance}
+.btn{font:inherit;font-weight:600;font-size:15px;min-height:44px;padding:8px 14px;border-radius:8px;border:1px solid var(--line);
+  background:var(--panel);color:var(--ink);cursor:pointer;touch-action:manipulation}
+.btn:hover{border-color:var(--accent)}
+.btn:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible,a:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn.sm{min-height:40px;padding:4px 12px;font-size:14px}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
+.seg .btn{border:0;border-radius:0;min-width:52px}
+nav.tabs{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line)}
+nav.tabs button{font:inherit;font-size:15px;font-weight:600;white-space:nowrap;min-height:46px;padding:8px 14px;border:0;border-bottom:3px solid transparent;
+  background:none;color:var(--muted);cursor:pointer;margin-bottom:-1px}
+nav.tabs button.on{color:var(--ink);border-bottom-color:var(--accent)}
+.req{margin:0;font-size:14px;color:var(--muted);max-width:110ch}
+.req b{color:var(--ink);font-weight:600}
+.lab{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:14px;align-items:start}
+@media (max-width:1020px){.lab{grid-template-columns:minmax(0,1fr)}}
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.col{display:flex;flex-direction:column;gap:12px;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card p{margin:0}
+canvas{display:block;width:100%;border-radius:8px;background:var(--lane);touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.hint{margin:0;font-size:14px;color:var(--muted)}
+.status{margin:0;font-weight:600;min-height:1.5em}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chk{display:inline-flex;align-items:center;gap:8px;min-height:44px;font-size:15px;cursor:pointer}
+.chk input{width:22px;height:22px;accent-color:var(--accent)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:14px;color:var(--muted)}
+.legend i{display:inline-block;width:18px;height:5px;border-radius:3px;margin-right:6px;vertical-align:middle}
+.sl{display:flex;flex-direction:column;gap:4px}
+.sl .top{display:flex;justify-content:space-between;gap:8px;font-size:15px}
+.sl .val{font-family:var(--font-num);font-weight:600;text-align:right}
+input[type=range]{width:100%;height:44px;accent-color:var(--accent);margin:0}
+.kv{display:grid;grid-template-columns:minmax(0,1fr) max-content;gap:4px 12px;font-size:15px;margin:0}
+.kv dt{color:var(--muted)} .kv dd{margin:0;font-family:var(--font-num);font-variant-numeric:tabular-nums;text-align:right;overflow-wrap:anywhere}
+.kv dd{white-space:nowrap}.kv dd.t{font-family:var(--font-ui);font-weight:600;white-space:normal;grid-column:1/-1;text-align:left;margin:-2px 0 4px 12px}
+.opts{display:flex;flex-direction:column;gap:6px}
+.opts .btn{text-align:left;font-size:14px}
+.opts .btn.picked{border:2px solid var(--accent)}
+.opts .btn.right{background:color-mix(in srgb,var(--ok) 18%,var(--panel));border-color:var(--ok)}
+.ans{background:var(--lane);border-left:4px solid var(--ok);padding:8px 12px;border-radius:6px;font-size:15px}
+.muted{color:var(--muted);font-size:14px}
+details{border:1px solid var(--line);border-radius:var(--r);background:var(--panel);padding:0 14px}
+details[open]{padding-bottom:12px}
+summary{cursor:pointer;font-weight:700;min-height:44px;display:flex;align-items:center;font-size:15px}
+details p,details ul,details ol{margin:6px 0;font-size:15px;max-width:95ch}
+details ul,details ol{padding-left:22px}
+details li{margin:3px 0}
+.fine{font-size:13px;color:var(--muted);margin:0}
+.tblwrap{overflow-x:auto}
+table.log{border-collapse:collapse;width:100%;font-size:14px}
+table.log th,table.log td{padding:6px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+table.log th{color:var(--muted);font-weight:600}
+table.log tr.sel td{background:color-mix(in srgb,var(--accent) 12%,var(--panel))}
+table.log td.case{cursor:pointer;font-weight:600}
+.yn{display:flex;gap:4px}
+.yn .btn{min-height:40px;padding:4px 10px;font-size:14px;min-width:54px}
+.yn .btn.picked{border:2px solid var(--accent);background:color-mix(in srgb,var(--accent) 14%,var(--panel))}
+.res-ok{color:var(--ok);font-weight:700}.res-no{color:var(--warn);font-weight:700}
+.big{font-family:var(--font-num);font-size:clamp(26px,4vw,40px);font-weight:600;line-height:1.1}
+.zones{display:flex;flex-direction:column;gap:4px}
+.zone{display:grid;grid-template-columns:110px 1fr;gap:10px;padding:6px 10px;border-radius:8px;border:1px solid var(--line);font-size:14px}
+.zone b{font-family:var(--font-num)}
+.zone.on{border:2px solid var(--warn);background:color-mix(in srgb,var(--warn) 14%,var(--panel))}
+.warnbox{border-left:4px solid var(--warn);background:var(--lane);padding:8px 12px;border-radius:6px;font-size:15px;margin:0}
+/* Dải video thực tế: thumbnail bấm là phát ngay trong trang */
+.vbox{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:14px;align-items:start;background:var(--space);color:var(--star);border-radius:var(--r);padding:12px}
+.vbox.playing{grid-template-columns:minmax(0,1fr)}
+@media (max-width:720px){.vbox{grid-template-columns:minmax(0,1fr)}}
+.vmedia{position:relative;width:100%;aspect-ratio:16/9;border-radius:8px;overflow:hidden;background:linear-gradient(135deg,#1e2c44,#0b111c)}
+.vbox.playing .vmedia{max-width:860px}
+.thumb{all:unset;cursor:pointer;position:absolute;inset:0;display:block}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb .ph{position:absolute;left:10px;bottom:8px;font-size:13px;opacity:.75}
+.thumb .pbtn{position:absolute;left:50%;top:50%;width:64px;height:64px;margin:-32px 0 0 -32px;border-radius:50%;background:var(--force);box-shadow:0 2px 12px rgba(0,0,0,.4)}
+.thumb .pbtn::before{content:"";position:absolute;left:25px;top:20px;border-style:solid;border-width:12px 0 12px 20px;border-color:transparent transparent transparent #fff}
+.thumb .dur{position:absolute;right:8px;bottom:8px;background:rgba(0,0,0,.75);color:#fff;font:600 13px var(--font-num);padding:2px 6px;border-radius:4px}
+.thumb:focus-visible{outline:3px solid var(--star);outline-offset:-3px}
+.player{position:absolute;inset:0}
+.player video,.player iframe{width:100%;height:100%;border:0;display:block;background:#000}
+.vt{display:flex;flex-direction:column;gap:4px;min-width:0}
+.vt .lbl{font-size:12px;letter-spacing:.06em;text-transform:uppercase;opacity:.75;font-weight:600}
+.vt .ttl{font-weight:700;font-size:16px;line-height:1.3}
+.vt .look{font-size:14px;opacity:.92}
+.vt .src{font-size:12.5px;opacity:.7}
+.vchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.chip{font:inherit;font-size:14px;font-weight:600;min-height:40px;padding:6px 12px;border-radius:8px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;
+  background:transparent;color:var(--star);border:1px solid color-mix(in srgb,var(--star) 45%,transparent)}
+.chip.on{background:var(--star);color:var(--space)}
+/* Chế độ giáo viên: che số liệu để lớp dự đoán */
+body.hideNums .num{filter:blur(7px);user-select:none}
+body.hideNums .num:hover{filter:none}
+footer{font-size:13px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow" data-i18n="eyebrow"></div>
+      <h1 data-i18n="title"></h1>
+    </div>
+    <div class="hbtns">
+      <button class="btn" id="gvBtn" aria-pressed="false" data-i18n="gvBtn"></button>
+      <button class="btn" id="langBtn">EN</button>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="1" data-i18n="tab1"></button>
+    <button role="tab" data-tab="2" data-i18n="tab2"></button>
+    <button role="tab" data-tab="3" data-i18n="tab3"></button>
+    <button role="tab" data-tab="4" data-i18n="tab4"></button>
+  </nav>
+
+  <!-- ===================== TAB 1: THÍ NGHIỆM FARADAY ===================== -->
+  <section id="t1" class="col">
+    <p class="req" data-i18n-html="req1"></p>
+    <div class="vbox" id="v1"></div>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" data-i18n="hint1"></p>
+        <canvas id="cv1" aria-label="bar magnet, coil and galvanometer"></canvas>
+        <div class="controls">
+          <button class="btn primary" id="auto1"></button>
+          <button class="btn" id="flip1" data-i18n="flip"></button>
+          <button class="btn" id="sw1"></button>
+          <button class="btn" id="rst1" data-i18n="reset"></button>
+        </div>
+        <canvas id="gr1" aria-label="graphs of field lines through the coil and induced current against time"></canvas>
+        <div class="legend">
+          <span><i style="background:var(--fieldhi)"></i><span data-i18n="lgK"></span></span>
+          <span><i style="background:var(--vel)"></i><span data-i18n="lgI"></span></span>
+        </div>
+        <p class="fine" data-i18n="assume1"></p>
+      </div>
+      <div class="col">
+        <div class="card" id="p1"></div>
+        <div class="card"><h2 data-i18n="data"></h2><dl class="kv" id="kv1"></dl></div>
+        <div class="card">
+          <div class="sl"><div class="top"><span data-i18n="setN"></span><span class="val" id="n1V"></span></div>
+            <input type="range" id="n1" min="100" max="1000" step="100" value="400"></div>
+          <div><div class="muted" data-i18n="setStr"></div><div class="seg" id="str1"></div></div>
+          <div class="sl"><div class="top"><span data-i18n="setSpd"></span><span class="val" id="sp1V"></span></div>
+            <input type="range" id="sp1" min="0.05" max="1" step="0.05" value="0.3"></div>
+        </div>
+        <div class="card" id="p1b"></div>
+        <div class="card" id="c1"></div>
+      </div>
+    </div>
+    <details><summary data-i18n="whyT"></summary><div data-i18n-html="why1"></div></details>
+    <details><summary data-i18n="misT"></summary><div data-i18n-html="mis1"></div></details>
+  </section>
+
+  <!-- ===================== TAB 2: KHI NÀO CÓ DÒNG CẢM ỨNG ===================== -->
+  <section id="t2" class="col" hidden>
+    <p class="req" data-i18n-html="req2"></p>
+    <div class="vbox" id="v2"></div>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" data-i18n="hint2"></p>
+        <p class="status" id="st2"></p>
+        <canvas id="cv2" aria-label="scenario: magnet, coil and galvanometer"></canvas>
+        <div class="controls">
+          <button class="btn primary" id="run2"></button>
+          <span class="muted" id="desc2"></span>
+        </div>
+        <canvas id="gr2" aria-label="graphs of field lines through the coil and induced current"></canvas>
+        <div class="legend">
+          <span><i style="background:var(--fieldhi)"></i><span data-i18n="lgK"></span></span>
+          <span><i style="background:var(--vel)"></i><span data-i18n="lgI"></span></span>
+        </div>
+        <p class="fine" data-i18n="assume2"></p>
+      </div>
+      <div class="col">
+        <div class="card"><h2 data-i18n="tblT"></h2><div class="tblwrap"><table class="log" id="tb2"></table></div><p class="muted" id="score2"></p></div>
+        <div class="card" id="c2"></div>
+      </div>
+    </div>
+    <details><summary data-i18n="whyT"></summary><div data-i18n-html="why2"></div></details>
+    <details><summary data-i18n="misT"></summary><div data-i18n-html="mis2"></div></details>
+  </section>
+
+  <!-- ===================== TAB 3: MÁY PHÁT ĐIỆN XOAY CHIỀU ===================== -->
+  <section id="t3" class="col" hidden>
+    <p class="req" data-i18n-html="req3"></p>
+    <div class="vbox" id="v3"></div>
+    <div class="lab">
+      <div class="stage">
+        <div class="controls"><div class="seg" id="mode3"></div><div class="seg" id="ring3"></div><div class="seg" id="load3"></div></div>
+        <p class="hint" id="hint3"></p>
+        <canvas id="cv3" aria-label="AC generator"></canvas>
+        <div class="controls">
+          <button class="btn primary" id="run3"></button>
+          <label class="chk"><input type="checkbox" id="slow3" checked> <span data-i18n="slowLbl"></span></label>
+          <span class="muted" id="slowNote3"></span>
+        </div>
+        <canvas id="gr3" aria-label="oscilloscope trace of voltage against time"></canvas>
+        <div class="legend"><span><i style="background:var(--vel)"></i><span data-i18n="lgScope"></span></span></div>
+        <p class="fine" id="assume3"></p>
+      </div>
+      <div class="col">
+        <div class="card" id="p3"></div>
+        <div class="card"><h2 data-i18n="data"></h2><dl class="kv" id="kv3"></dl></div>
+        <div class="card">
+          <div class="sl"><div class="top"><span data-i18n="setF"></span><span class="val" id="f3V"></span></div>
+            <input type="range" id="f3" min="0" max="7" step="1" value="4"></div>
+          <div class="sl"><div class="top"><span data-i18n="setN"></span><span class="val" id="n3V"></span></div>
+            <input type="range" id="n3" min="50" max="500" step="50" value="200"></div>
+          <div><div class="muted" data-i18n="setStr"></div><div class="seg" id="str3"></div></div>
+        </div>
+        <div class="card" id="p3b"></div>
+        <div class="card" id="c3"></div>
+      </div>
+    </div>
+    <details><summary data-i18n="whyT"></summary><div data-i18n-html="why3"></div></details>
+    <details><summary data-i18n="misT"></summary><div data-i18n-html="mis3"></div></details>
+  </section>
+
+  <!-- ===================== TAB 4: TÁC DỤNG CỦA DÒNG XOAY CHIỀU ===================== -->
+  <section id="t4" class="col" hidden>
+    <p class="req" data-i18n-html="req4"></p>
+    <div class="vbox" id="v4"></div>
+    <div class="lab">
+      <div class="stage">
+        <div class="seg" id="eff4"></div>
+        <p class="hint" id="hint4"></p>
+        <div id="sim4">
+          <canvas id="cv4" aria-label="direct current and alternating current side by side"></canvas>
+          <div class="controls" style="margin-top:10px">
+            <button class="btn primary" id="run4"></button>
+            <button class="btn" id="rst4" data-i18n="reset4"></button>
+            <label class="chk"><input type="checkbox" id="slow4" checked> <span data-i18n="slowLbl"></span></label>
+            <span class="muted" id="slowNote4"></span>
+          </div>
+          <div class="sl" style="margin-top:6px"><div class="top"><span data-i18n="setF4"></span><span class="val" id="f4V"></span></div>
+            <input type="range" id="f4" min="0" max="6" step="1" value="6"></div>
+          <canvas id="gr4" style="margin-top:8px" aria-label="graph of current and effect against time"></canvas>
+          <div class="legend" id="lg4" style="margin-top:6px"></div>
+        </div>
+        <div id="body4" class="col" hidden>
+          <div><div class="muted" data-i18n="bodyU"></div><div class="seg" id="bu4"></div></div>
+          <div><div class="muted" data-i18n="bodyR"></div><div class="seg" id="br4"></div></div>
+          <div><div class="muted" data-i18n="bodyI"></div><div class="big num" id="bi4"></div></div>
+          <div class="zones" id="zones4"></div>
+          <p class="warnbox" data-i18n="bodyWarn"></p>
+        </div>
+        <p class="fine" id="assume4"></p>
+      </div>
+      <div class="col">
+        <div class="card" id="p4"></div>
+        <div class="card" id="kvc4"><h2 data-i18n="data"></h2><dl class="kv" id="kv4"></dl></div>
+        <div class="card"><h2 data-i18n="exT"></h2><div id="ex4"></div></div>
+        <div class="card" id="c4"></div>
+      </div>
+    </div>
+    <details><summary data-i18n="whyT"></summary><div data-i18n-html="why4"></div></details>
+    <details><summary data-i18n="misT"></summary><div data-i18n-html="mis4"></div></details>
+  </section>
+
+  <details><summary data-i18n="originT"></summary><div data-i18n-html="origin"></div></details>
+  <details><summary data-i18n="mediaT"></summary><p data-i18n-html="mediaIntro"></p><div class="tblwrap"><table class="log" id="mediaTbl"></table></div></details>
+  <footer data-i18n="footer"></footer>
+</div>
+<script>
+'use strict';
+/* ================= Chuỗi song ngữ ================= */
+const I18N={vi:{
+eyebrow:'KHTN 9 · Điện từ · Cảm ứng điện từ',title:'Cảm ứng điện từ và máy phát điện xoay chiều',gvBtn:'Che số liệu',
+tab1:'1. Thí nghiệm Faraday',tab2:'2. Khi nào có dòng cảm ứng?',tab3:'3. Máy phát điện xoay chiều',tab4:'4. Tác dụng của dòng xoay chiều',
+req1:'<b>Yêu cầu cần đạt:</b> Thực hiện thí nghiệm để rút ra được: khi số đường sức từ xuyên qua tiết diện của cuộn dây dẫn kín biến thiên thì trong cuộn dây đó xuất hiện dòng điện cảm ứng.',
+req2:'<b>Yêu cầu cần đạt:</b> (tiếp) Kiểm tra bảy cách làm khác nhau: cách nào làm số đường sức qua cuộn dây biến thiên thì có dòng điện cảm ứng, cách nào không.',
+req3:'<b>Yêu cầu cần đạt:</b> Thực hiện thí nghiệm để nêu được nguyên tắc tạo ra dòng điện xoay chiều (dòng điện luân phiên đổi chiều).',
+req4:'<b>Yêu cầu cần đạt:</b> Lấy được ví dụ chứng tỏ dòng điện xoay chiều có tác dụng nhiệt, phát sáng, tác dụng từ, tác dụng sinh lí.',
+data:'Số liệu',reset:'Đặt lại',run:'▶ Chạy',pause:'❚❚ Tạm dừng',
+predTitle:'Dự đoán trước',predThen:'Làm thí nghiệm để kiểm tra, rồi mở đáp án.',showAns:'Xem đáp án',hideAns:'Ẩn đáp án',conclTitle:'Rút ra kết luận',
+whyT:'Vì sao? Cơ chế khoa học và cách nói cho học sinh',misT:'Học sinh hay hiểu sai',
+lgK:'Số đường sức qua cuộn dây',lgI:'Cường độ dòng điện cảm ứng (mA)',
+grK:'Số đường sức qua cuộn dây',grI:'i (mA)',grT:'t (s)',
+/* Tab 1 */
+hint1:'Kéo nam châm (hoặc kéo cuộn dây) sang trái, sang phải. Các đường sức màu cam là đường sức đang đi qua cuộn dây. Nhìn kim điện kế G.',
+auto1On:'▶ Tự đưa vào – rút ra',auto1Off:'❚❚ Dừng tự động',flip:'Đảo cực nam châm',swOpen:'Công tắc K: đang HỞ',swClosed:'Công tắc K: đang ĐÓNG',
+kDist:'Vị trí nam châm so với cuộn dây',kV:'Tốc độ nam châm so với cuộn dây',kK:'Số đường sức qua tiết diện cuộn dây',kTrend:'Số đường sức đang',
+trUp:'tăng',trDown:'giảm',trSame:'không đổi',kE:'Hiệu điện thế cảm ứng',kI:'Dòng điện cảm ứng',kNeedle:'Kim điện kế',
+ndL:'lệch sang trái',ndR:'lệch sang phải',nd0:'ở số 0',kCirc:'Mạch điện',circC:'kín',circO:'hở',inside:'trong cuộn dây',left:'bên trái',right:'bên phải',
+setN:'Số vòng dây của cuộn dây',setStr:'Độ mạnh của nam châm',strW:'Yếu',strM:'Vừa',strS:'Mạnh',setSpd:'Tốc độ khi tự đưa vào – rút ra',
+p1q:'Em đưa nhanh cực Bắc (N) của nam châm vào trong cuộn dây rồi giữ yên ở đó. Kim điện kế sẽ thế nào?',
+p1a:'Lệch đi và giữ nguyên ở vị trí lệch suốt lúc nam châm nằm trong cuộn dây.',
+p1b:'Lệch đi trong lúc nam châm đang đi vào, rồi trở về số 0 khi nam châm đứng yên.',
+p1c:'Không lệch, vì nam châm không chạm vào dây dẫn.',
+p1e:'Kim chỉ lệch khi nam châm đang chuyển động, tức là khi số đường sức qua cuộn dây đang tăng. Nam châm nằm yên thì số đường sức qua cuộn dây vẫn nhiều nhưng không đổi, nên không có dòng điện. Nam châm không cần chạm vào dây: từ trường tác dụng qua khoảng không.',
+p1bq:'Bây giờ rút nam châm ra với tốc độ như lúc đưa vào. Kim điện kế lệch thế nào so với lúc đưa vào?',
+p1ba:'Lệch về cùng một phía như lúc đưa vào.',p1bb:'Lệch về phía ngược lại.',p1bc:'Không lệch.',
+p1be:'Lúc đưa vào, số đường sức qua cuộn dây tăng; lúc rút ra, số đường sức giảm. Tăng và giảm cho dòng điện cảm ứng ngược chiều nhau, nên kim lệch về hai phía khác nhau. Thử thêm: đảo cực nam châm thì chiều lệch cũng đảo.',
+c1q:'Hoàn thành câu: “Trong cuộn dây dẫn kín xuất hiện dòng điện cảm ứng khi …”. Dòng điện cảm ứng lớn hơn khi nào?',
+c1a:'… số đường sức từ xuyên qua tiết diện của cuộn dây <b>biến thiên</b> (tăng hoặc giảm). Số đường sức tăng và giảm cho dòng điện ngược chiều nhau. Số đường sức biến thiên <b>càng nhanh</b> (đưa nam châm nhanh hơn, dùng nam châm mạnh hơn) hoặc cuộn dây có <b>nhiều vòng hơn</b> thì dòng điện cảm ứng càng lớn.',
+assume1:'Giả thiết mô phỏng: nam châm thẳng dài 10 cm, cảm ứng từ trong lòng nam châm khoảng 0,2 T, coi như hai cực từ ở gần hai đầu. Cuộn dây bán kính 2,8 cm, dài 4 cm, 0,02 Ω mỗi vòng; điện kế 50 Ω, thang đo ±1 mA, kim có quán tính. Bỏ qua độ tự cảm của cuộn dây. Mỗi đường sức vẽ ra ứng với cùng một lượng từ trường, nên số đường sức đếm được tỉ lệ với từ thông.',
+why1:`<p><b>Cơ chế (định luật cảm ứng Faraday, 1831).</b> Đại lượng đo “lượng đường sức đi qua cuộn dây” gọi là từ thông Φ = B·S·cos α (đơn vị Wb, học kĩ ở lớp 11). Khi từ thông qua cuộn dây có N vòng biến thiên, trong cuộn dây xuất hiện suất điện động cảm ứng e = −N·ΔΦ/Δt. Nếu mạch kín, suất điện động này đẩy các electron tự do trong dây chuyển động thành dòng điện i = e/R.</p>
+<p>Dấu “−” là <b>định luật Lenz</b>: dòng cảm ứng có chiều sao cho từ trường của nó chống lại sự biến thiên đã sinh ra nó. Đưa cực N lại gần thì đầu cuộn dây phía nam châm trở thành cực N để đẩy nam châm ra; rút ra thì nó thành cực S để níu lại. Vì vậy phải tốn công để đẩy nam châm: cơ năng của tay biến thành điện năng, không có năng lượng nào “tự sinh ra”.</p>
+<p><b>Nói cho học sinh:</b> Cuộn dây kín giống một người gác cổng chỉ để ý xem <i>số đường sức đi qua cổng có đang thay đổi không</i>. Thêm đường sức hay bớt đường sức, nó đều “phản ứng” bằng một dòng điện, thêm và bớt thì dòng chạy ngược chiều nhau. Đường sức nhiều mà đứng yên thì nó không phản ứng. Thay đổi càng nhanh, phản ứng càng mạnh.</p>`,
+mis1:`<ul><li><b>“Có nam châm trong cuộn dây là có dòng điện.”</b> Sai: nam châm nằm yên thì kim về 0. Phải có sự <i>thay đổi</i> số đường sức.</li>
+<li><b>“Nam châm càng nằm sâu trong cuộn dây, dòng càng lớn.”</b> Sai: dòng lớn khi số đường sức thay đổi <i>nhanh</i>, thường là lúc nam châm đang đi qua miệng cuộn dây. Ở giữa cuộn dây số đường sức nhiều nhất nhưng gần như không đổi.</li>
+<li><b>“Dòng điện có sẵn trong nam châm, chạy sang dây.”</b> Sai: nam châm không có dòng điện chạy ra; electron tự do có sẵn trong dây đồng bị từ trường biến thiên làm cho chuyển động.</li>
+<li><b>“Nam châm phải chạm vào dây.”</b> Sai: từ trường tác dụng qua khoảng không.</li></ul>`,
+/* Tab 2 */
+hint2:'Chọn một tình huống trong bảng, chọn dự đoán Có hoặc Không, rồi bấm Chạy thí nghiệm. Kết quả tự điền vào bảng.',
+run2:'▶ Chạy thí nghiệm',running2:'Đang chạy…',tblT:'Bảng kết quả',thCase:'Tình huống',thPred:'Em đoán: có dòng?',thFlux:'Số đường sức',thCur:'Dòng cảm ứng',
+yes:'Có',no:'Không',fluxCh:'biến thiên',fluxSame:'không đổi',notRun:'chưa chạy',
+score2:'Đã chạy {m}/7 tình huống. Em đoán đúng {n}.',
+s1:'Đưa nam châm lại gần rồi ra xa',s2:'Nam châm nằm yên trong cuộn dây',s3:'Nam châm và cuộn dây cùng chuyển động',s4:'Quay nam châm trước cuộn dây',
+s5:'Đóng, ngắt công tắc của nam châm điện',s6:'Nam châm quay quanh trục của chính nó',s7:'Đưa nam châm ra vào nhưng mạch hở',
+s1d:'Nam châm chạy tới gần cuộn dây rồi lùi ra xa, cuộn dây đứng yên.',s2d:'Nam châm đã nằm sẵn giữa cuộn dây, không ai động vào.',
+s3d:'Nam châm và cuộn dây được gắn chung trên một xe, đi tới đi lui cùng nhau.',s4d:'Nam châm quay tròn quanh một trục vuông góc với trục cuộn dây.',
+s5d:'Cuộn dây có lõi sắt nối với pin qua công tắc K đặt cạnh cuộn dây G. Đóng K rồi một lúc sau ngắt K.',
+s6d:'Nam châm quay tròn quanh chính trục dọc của nó (như con quay), trục này trùng với trục cuộn dây.',
+s7d:'Giống tình huống 1, nhưng công tắc K mở nên mạch không kín.',
+stPick:'Hãy chọn dự đoán Có hoặc Không cho tình huống này trước khi chạy.',stDone:'Xong. Kết quả đã điền vào bảng.',stRun:'Đang chạy: quan sát kim điện kế và số đường sức màu cam.',
+c2q:'Dựa vào bảng: dòng điện cảm ứng xuất hiện khi nào? Vì sao tình huống 3 và 6 có chuyển động mà vẫn không có dòng điện?',
+c2a:'Dòng điện cảm ứng chỉ xuất hiện khi có đủ hai điều kiện: <b>mạch kín</b> và <b>số đường sức từ qua tiết diện cuộn dây biến thiên</b>. Không quan trọng cái gì chuyển động, hay có chuyển động hay không (tình huống 5 không có gì chuyển động mà vẫn có dòng). Ở tình huống 3 và 6, số đường sức qua cuộn dây không đổi nên không có dòng điện. Ở tình huống 7, số đường sức có biến thiên nhưng mạch hở nên không có dòng (chỉ có hiệu điện thế giữa hai đầu cuộn dây).',
+assume2:'Giả thiết mô phỏng: cùng nam châm, cuộn dây 400 vòng và điện kế như tab 1. Nam châm điện có lõi sắt, tạo từ trường giống nam châm thẳng; dòng qua nó tăng, giảm trong khoảng 0,1 s khi đóng, ngắt công tắc. Khi nam châm quay, từ thông được tính bằng tích phân số trên tiết diện cuộn dây.',
+why2:`<p><b>Cơ chế.</b> Định luật Faraday chỉ nói tới <i>tốc độ biến thiên của từ thông</i> ΔΦ/Δt, không nói tới chuyển động. Từ thông Φ = B·S·cos α thay đổi khi B thay đổi (lại gần, ra xa, bật tắt nam châm điện), khi S thay đổi, hoặc khi góc α giữa đường sức và mặt cuộn dây thay đổi (quay nam châm hoặc quay cuộn dây). Nếu vị trí tương đối và từ trường không đổi (cùng chuyển động, quay quanh trục đối xứng) thì Φ không đổi, e = 0.</p>
+<p>Tình huống 5 chính là nguyên tắc của <b>máy biến áp</b> (học ở lớp 12): một cuộn dây có dòng thay đổi làm số đường sức qua cuộn dây bên cạnh thay đổi.</p>
+<p><b>Nói cho học sinh:</b> Đừng hỏi “có cái gì chuyển động không?”, hãy hỏi “số đường sức qua cuộn dây có đang tăng hay giảm không?”. Có thì có dòng (nếu mạch kín), không thì không.</p>`,
+mis2:`<ul><li><b>“Cứ có chuyển động là có dòng điện.”</b> Sai: nam châm và cuộn dây cùng chuyển động, hoặc nam châm quay quanh trục của nó, đều không cho dòng.</li>
+<li><b>“Phải có chuyển động mới có dòng.”</b> Sai: đóng, ngắt nam châm điện không cần gì chuyển động.</li>
+<li><b>“Mạch hở thì không có gì xảy ra.”</b> Chưa đủ: vẫn có hiệu điện thế cảm ứng giữa hai đầu cuộn dây (vôn kế sẽ chỉ), chỉ là không có dòng điện.</li></ul>`,
+/* Tab 3 */
+modeCoil:'Khung dây quay',modeMag:'Nam châm quay',ringSlip:'Vành khuyên',ringComm:'Cổ góp',loadG:'Điện kế',loadLED:'Hai đèn LED',
+hint3Coil:'Khung dây (nhìn từ trên xuống) quay đều giữa hai cực nam châm. Hai đầu khung nối với hai vành khuyên, chổi than tì vào vành để đưa điện ra ngoài. Hai đèn LED mắc ngược chiều nhau: đèn đỏ sáng khi dòng chạy chiều này, đèn xanh sáng khi dòng chạy chiều kia.',
+hint3Mag:'Nam châm quay đều trước cuộn dây có lõi sắt đứng yên (giống đinamô xe đạp và máy phát ở nhà máy điện). Không cần vành khuyên vì cuộn dây không quay.',
+slowLbl:'Xem chậm để mắt theo kịp',slowNote:'đang xem chậm ×1/{k}',realNote:'đang chạy đúng tốc độ thật',
+setF:'Tốc độ quay',kF:'Tần số f (số vòng quay mỗi giây)',kT:'Chu kì T',kRpm:'Số vòng quay mỗi phút',kRev:'Số lần dòng điện đổi chiều mỗi giây',
+kEmax:'Hiệu điện thế cực đại',kEnow:'Hiệu điện thế tức thời',kK3:'Số đường sức qua khung dây',kK3m:'Số đường sức qua cuộn dây (tính cả lõi sắt)',kI3:'Dòng điện qua tải',
+lgScope:'Dao động kí: hiệu điện thế u (V) theo thời gian t (s)',insetSlip:'Vành khuyên, chổi than (nhìn nghiêng)',insetComm:'Cổ góp, chổi than (nhìn nghiêng)',
+brush:'chổi than',core:'lõi sắt',oneT:'1 chu kì T',
+p3q:'Khung dây quay đều theo một chiều duy nhất. Dòng điện qua hai đèn LED sẽ thế nào?',
+p3a:'Chỉ chạy một chiều, nên chỉ một đèn sáng.',p3b:'Luân phiên đổi chiều, hai đèn thay nhau sáng.',p3c:'Không có dòng điện vì nam châm đứng yên, từ trường không đổi.',
+p3e:'Khi khung quay, số đường sức qua khung lúc tăng lúc giảm (và đổi cả phía đi vào khung). Tăng và giảm cho dòng ngược chiều nhau, nên dòng điện luân phiên đổi chiều: đó là dòng điện xoay chiều. Nam châm đứng yên nhưng góc giữa đường sức và mặt khung thay đổi liên tục.',
+p3bq:'Trong một vòng quay của khung dây, dòng điện đổi chiều mấy lần?',p3ba:'1 lần.',p3bb:'2 lần.',p3bc:'4 lần.',
+p3be:'2 lần. Nhìn đồ thị trên dao động kí: mỗi chu kì (một vòng quay) có một nửa dương và một nửa âm, nên dòng đổi chiều 2 lần mỗi vòng, đúng lúc mặt khung vuông góc với đường sức (số đường sức qua khung nhiều nhất, sắp chuyển từ tăng sang giảm). Lưới điện Việt Nam 50 Hz, nên dòng điện trong nhà đổi chiều 100 lần mỗi giây.',
+c3q:'Nêu nguyên tắc tạo ra dòng điện xoay chiều. Tăng tốc độ quay thì dòng điện thay đổi thế nào?',
+c3a:'Cho cuộn dây dẫn kín quay trong từ trường của nam châm, hoặc cho nam châm quay trước cuộn dây, để <b>số đường sức từ qua tiết diện cuộn dây luân phiên tăng, giảm</b>. Khi đó trong cuộn dây xuất hiện dòng điện cảm ứng <b>luân phiên đổi chiều</b> (dòng điện xoay chiều), mỗi vòng quay đổi chiều 2 lần. Quay càng nhanh thì dòng đổi chiều càng nhiều lần mỗi giây (tần số lớn hơn) và hiệu điện thế cực đại càng lớn.',
+assume3Coil:'Giả thiết mô phỏng: khung dây {N} vòng, diện tích 20 cm² (4 cm × 5 cm), quay trong từ trường đều B = {B} T, nên u = N·B·S·ω·sin ωt. Hai LED mắc ngược chiều, mỗi đèn cần khoảng 1,8 V mới sáng, nối tiếp điện trở 100 Ω. Điện kế 100 Ω, thang đo ±20 mA, kim có quán tính nên không theo kịp dòng đổi chiều nhanh.',
+assume3Mag:'Giả thiết mô phỏng: nam châm thẳng như tab 1 quay quanh tâm; cuộn dây {N} vòng quấn trên lõi sắt, lõi sắt làm số đường sức qua cuộn dây tăng lên nhiều lần (ở đây lấy 500 lần, giá trị minh hoạ). Số đường sức qua cuộn dây được lấy biến đổi theo dạng sin (máy phát thật tạo hình các cực từ để được điều này). Máy phát thật dùng nam châm nhiều cực và lõi thép kĩ thuật điện.',
+why3:`<p><b>Cơ chế.</b> Khung dây N vòng, diện tích S quay đều với tốc độ góc ω = 2πf trong từ trường đều B. Góc giữa pháp tuyến của khung và đường sức là α = ωt, nên từ thông Φ = N·B·S·cos ωt. Theo định luật Faraday, u = −ΔΦ/Δt = N·B·S·ω·sin ωt: hiệu điện thế biến đổi theo hình sin, đổi dấu sau mỗi nửa vòng. Giá trị cực đại U₀ = N·B·S·ω tỉ lệ với tốc độ quay.</p>
+<p><b>Vành khuyên và chổi than</b> giúp khung quay mà dây nối ra ngoài không bị xoắn; mỗi đầu khung luôn nối với cùng một chổi than nên dòng ra ngoài vẫn đổi chiều. Nếu thay bằng <b>cổ góp</b> (hai nửa vành), cứ nửa vòng hai đầu khung lại đổi chổi than: dòng ra ngoài chỉ một chiều (máy phát một chiều, đinamô cũ).</p>
+<p>Máy phát ở nhà máy điện thường để cuộn dây đứng yên (stato) và cho nam châm điện quay (rôto), vì lấy dòng lớn ra từ cuộn dây đứng yên dễ hơn. Tần số f = p·n/60 (p là số cặp cực, n là số vòng quay mỗi phút): tua bin nhiệt điện quay 3000 vòng/phút với 1 cặp cực cho 50 Hz; tua bin thủy điện quay chậm hơn nên rôto có nhiều cặp cực.</p>
+<p><b>Nói cho học sinh:</b> Quay khung dây giống như liên tục xoay một cánh cổng trong gió: lúc cổng đón gió nhiều nhất, lúc cổng nằm song song với gió, rồi lại đón gió từ phía bên kia. Số đường sức qua khung lên xuống đều đặn, nên dòng điện chạy tới, chạy lui đều đặn.</p>`,
+mis3:`<ul><li><b>“Máy phát điện tạo ra điện từ không.”</b> Sai: máy phát biến cơ năng (nước, hơi nước, gió, sức người) thành điện năng. Lấy càng nhiều điện thì càng khó quay (định luật Lenz).</li>
+<li><b>“Dòng điện ở ổ cắm chạy một chiều từ nhà máy tới.”</b> Sai: electron trong dây chỉ dao động tới lui 50 lần mỗi giây, năng lượng truyền đi chứ electron không chạy từ nhà máy về.</li>
+<li><b>“Quay nhanh hơn chỉ làm dòng mạnh hơn.”</b> Chưa đủ: quay nhanh hơn còn làm tần số tăng (đổi chiều nhiều lần hơn mỗi giây).</li>
+<li><b>“Điện kế kim chỉ 0 nghĩa là không có dòng.”</b> Ở 50 Hz kim không kịp lệch theo dòng đổi chiều nên đứng gần 0, dù dòng vẫn có. Thử kéo tốc độ quay lên 50 Hz với tải là điện kế.</li></ul>`,
+/* Tab 4 */
+effHeat:'Tác dụng nhiệt',effLight:'Tác dụng phát sáng',effMag:'Tác dụng từ',effBody:'Tác dụng sinh lí',
+dcSide:'Nguồn một chiều 12 V',acSide:'Nguồn xoay chiều 12 V',reset4:'Đun lại từ đầu',setF4:'Tần số dòng điện xoay chiều',
+hint4heat:'Hai ấm giống nhau, mỗi ấm có 200 g nước và dây đốt 6 Ω. Bên trái nối nguồn một chiều 12 V, bên phải nối nguồn xoay chiều 12 V. Nhiệt độ nước được tua nhanh ×60.',
+hint4light:'Mỗi bên có một bóng đèn sợi đốt 12 V – 5 W và một đèn LED (nối tiếp điện trở). Bật xem chậm để thấy đèn LED bên xoay chiều nhấp nháy.',
+hint4mag:'Mỗi bên có một nam châm điện (cuộn dây quấn trên lõi sắt). Bên trái nam châm điện là một cái đinh sắt treo trên lò xo, bên phải là một kim nam châm quay được. Hạ tần số xuống 1–2 Hz để thấy rõ.',
+hint4body:'Dòng điện đi qua cơ thể làm cơ co giật, tim rối loạn. Chọn hiệu điện thế và tình trạng da để xem dòng điện qua người lớn cỡ nào. Chỉ tính toán trên màn hình, tuyệt đối không thử thật.',
+water:'nước',tempL:'Nhiệt độ nước',heatT:'Thời gian đun (đã tua nhanh)',pNow:'Công suất tức thời',pAvg:'Công suất trung bình',
+bulb:'Đèn sợi đốt',led:'LED',nail:'đinh sắt',needle:'kim nam châm',
+kIdc:'Dòng điện một chiều',kIacR:'Dòng xoay chiều: giá trị hiệu dụng',kIacP:'Dòng xoay chiều: giá trị cực đại',kTD:'Nhiệt độ nước bên một chiều',kTA:'Nhiệt độ nước bên xoay chiều',
+kBulbD:'Độ sáng đèn sợi đốt (một chiều)',kBulbA:'Độ sáng đèn sợi đốt (xoay chiều)',kLedA:'Đèn LED bên xoay chiều',ledFlick:'nhấp nháy {n} lần/giây',
+kNailD:'Đinh sắt bên một chiều',kNailA:'Đinh sắt bên xoay chiều',pulled:'bị hút',kNdD:'Kim nam châm bên một chiều',kNdA:'Kim nam châm bên xoay chiều',
+ndStill:'lệch về một phía, đứng yên',ndOsc:'dao động qua lại {n} lần/giây',ndBuzz:'rung rất nhẹ (gần như đứng yên)',
+lg4heat:['p bên một chiều (W)','p bên xoay chiều (W)','công suất trung bình bên xoay chiều'],lg4light:['dòng bên một chiều','dòng bên xoay chiều','độ sáng LED bên xoay chiều'],lg4mag:['dòng bên một chiều','dòng bên xoay chiều','góc lệch kim nam châm bên xoay chiều'],
+bodyU:'Hiệu điện thế chạm phải',bodyR:'Tình trạng da, tiếp xúc',skinDry:'Da khô (~20 kΩ)',skinMoist:'Da ẩm mồ hôi (~5 kΩ)',skinWet:'Da ướt, chân trần (~1 kΩ)',
+bodyI:'Cường độ dòng điện qua cơ thể (I = U/R)',
+z0:'Thường không cảm thấy gì.',z1:'Thấy tê, giật nhẹ (ngưỡng cảm nhận khoảng 0,5 mA).',z2:'Đau, co cơ mạnh; từ khoảng 10 mA tay nắm chặt, không tự buông ra được.',
+z3:'Khó thở, có thể rối loạn nhịp tim nếu kéo dài. Aptomat chống giật được chế tạo để ngắt điện ở 30 mA.',z4:'Rung tim (tim co bóp hỗn loạn, ngừng bơm máu): nguy hiểm tính mạng.',
+bodyWarn:'Số liệu ở trên chỉ là ước lượng: điện trở cơ thể thay đổi rất nhiều theo hiệu điện thế, diện tích tiếp xúc, đường đi của dòng điện (theo IEC 60479-1). Điện lưới 220 V có thể gây chết người. Không bao giờ chạm vào dây điện trần, ổ cắm, thiết bị điện khi tay ướt.',
+p4heatq:'Hai ấm giống hệt nhau, một nối nguồn một chiều 12 V, một nối nguồn xoay chiều 12 V. Ấm nào nước nóng nhanh hơn?',
+p4heata:'Ấm nối nguồn một chiều.',p4heatb:'Ấm nối nguồn xoay chiều.',p4heatc:'Nóng nhanh như nhau.',
+p4heate:'Như nhau. Dây đốt nóng lên khi có dòng điện chạy qua, theo chiều nào cũng vậy: công suất p = i²·R luôn dương. “12 V xoay chiều” là giá trị hiệu dụng, được định nghĩa đúng bằng hiệu điện thế một chiều gây ra cùng tác dụng nhiệt. Lúc cực đại, u xoay chiều lên tới 12·√2 ≈ 17 V.',
+p4lightq:'Đèn LED nối nguồn xoay chiều 50 Hz trông sáng liên tục. Thật ra nó thế nào?',
+p4lighta:'Sáng liên tục như nối nguồn một chiều.',p4lightb:'Tắt, sáng rất nhanh (50 lần mỗi giây), mắt không theo kịp nên thấy sáng liên tục.',p4lightc:'Chỉ sáng một nửa độ sáng nhưng không nhấp nháy.',
+p4lighte:'LED chỉ cho dòng đi một chiều, nên chỉ sáng trong nửa chu kì dòng chạy đúng chiều: tắt, sáng 50 lần mỗi giây. Mắt người không nhận ra nhấp nháy nhanh hơn khoảng 50–60 lần mỗi giây. Đèn sợi đốt gần như không nhấp nháy vì dây tóc nóng không kịp nguội. Quay chậm bằng điện thoại sẽ thấy rõ (xem video).',
+p4magq:'Đặt một kim nam châm cạnh nam châm điện dùng dòng xoay chiều tần số thấp (2 Hz). Kim nam châm sẽ thế nào?',
+p4maga:'Bị hút về một phía và đứng yên, giống như với dòng một chiều.',p4magb:'Dao động qua lại, vì cực của nam châm điện đổi liên tục theo chiều dòng.',p4magc:'Không bị tác dụng gì.',
+p4mage:'Dòng xoay chiều đổi chiều thì cực N, S của nam châm điện cũng đổi, nên kim nam châm lúc bị hút, lúc bị đẩy: nó dao động. Còn đinh sắt thì luôn bị hút (sắt bị hút bởi cả cực N lẫn cực S), chỉ lực hút lúc mạnh lúc yếu. Ở 50 Hz kim nam châm quá nặng nên chỉ rung rất nhẹ; đó là tiếng “ù ù” của máy biến áp, chấn lưu.',
+p4bodyq:'Cùng chạm vào một chỗ hở điện, khi nào dòng điện qua người lớn hơn?',
+p4bodya:'Khi da khô.',p4bodyb:'Khi tay ướt, chân trần đứng trên nền ẩm.',p4bodyc:'Như nhau, vì hiệu điện thế như nhau.',
+p4bodye:'Tay ướt, chân trần làm điện trở cơ thể giảm mạnh (khoảng vài chục lần), nên dòng I = U/R tăng mạnh. Vì vậy không được chạm vào thiết bị điện khi tay ướt, khi đang tắm.',
+exT:'Ví dụ trong đời sống',
+exheat:'<ul><li>Ấm siêu tốc, nồi cơm điện, bình nóng lạnh, bàn là, máy sấy tóc dùng điện xoay chiều 220 V.</li><li>Dây dẫn điện bị nóng khi dùng nhiều thiết bị cùng lúc (tác dụng nhiệt có hại).</li><li>Cầu chì: dây chì nóng chảy, ngắt mạch khi dòng quá lớn.</li></ul>',
+exlight:'<ul><li>Bóng đèn sợi đốt: dây tóc nóng tới khoảng 2500 °C thì phát sáng (tác dụng nhiệt dẫn tới phát sáng).</li><li>Đèn LED, đèn huỳnh quang, đèn ống, bút thử điện (đèn nêon sáng khi chạm dây pha).</li><li>Quay chậm đèn đường, đèn trong lớp bằng điện thoại sẽ thấy đèn nhấp nháy.</li></ul>',
+exmag:'<ul><li>Chuông điện, rơ-le, cần cẩu điện từ (hút sắt cả với dòng xoay chiều).</li><li>Quạt điện, máy bơm, máy giặt: động cơ điện xoay chiều quay được nhờ tác dụng từ.</li><li>Loa: màng loa rung theo dòng điện xoay chiều. Máy biến áp kêu “ù ù” vì lõi thép rung 100 lần/giây.</li></ul>',
+exbody:'<ul><li>Có hại: điện giật khi chạm vào dây pha, ổ cắm hở, thiết bị rò điện.</li><li>Có ích (dòng nhỏ, có kiểm soát): điện châm, máy kích thích cơ trong vật lí trị liệu, máy khử rung tim (sốc điện) ở bệnh viện.</li><li>Bảo vệ: aptomat chống giật (RCD) ngắt điện trong khoảng 0,03 s khi dòng rò từ 30 mA.</li></ul>',
+c4q:'Lấy một ví dụ cho mỗi tác dụng của dòng điện xoay chiều. Tác dụng nào phụ thuộc vào chiều dòng điện?',
+c4a:'Nhiệt: ấm siêu tốc, bàn là. Phát sáng: bóng đèn, đèn LED. Từ: chuông điện, quạt điện, loa. Sinh lí: điện giật, điện châm. <b>Tác dụng nhiệt và phát sáng không phụ thuộc chiều dòng điện</b>, nên dòng xoay chiều dùng tốt như dòng một chiều. <b>Tác dụng từ phụ thuộc chiều dòng điện</b>: với dòng xoay chiều, cực của nam châm điện đổi liên tục, kim nam châm bị hút đẩy luân phiên (nhưng sắt vẫn luôn bị hút).',
+assume4heat:'Giả thiết: dây đốt 6 Ω, 200 g nước (nhiệt dung 840 J/K), hao phí nhiệt 0,5 W/K ra môi trường, bắt đầu từ 25 °C. Công suất trung bình P = U²/R = 24 W ở cả hai bên.',
+assume4light:'Giả thiết: đèn sợi đốt 12 V – 5 W (28,8 Ω), dây tóc có quán tính nhiệt khoảng 0,04 s; LED cần 2 V mới sáng, nối tiếp 500 Ω; mắt người “nhòe” ánh sáng trong khoảng 0,04 s.',
+assume4mag:'Giả thiết: cuộn dây 24 Ω. Lực hút đinh sắt tỉ lệ i², lực trên kim nam châm tỉ lệ i (đổi dấu theo chiều dòng). Đinh trên lò xo dao động riêng 6 Hz, kim nam châm 2 Hz, có ma sát.',
+assume4body:'Giả thiết: I = U/R với R là điện trở cơ thể ước lượng. Các mức tác dụng lấy theo dòng xoay chiều 50 Hz trong IEC 60479-1; dòng một chiều cùng cường độ ít nguy hiểm hơn nhưng vẫn nguy hiểm.',
+why4:`<p><b>Cơ chế.</b> Các tác dụng của dòng điện đều do electron chuyển động có hướng trong dây dẫn và từ trường của dòng điện gây ra.</p>
+<ul><li><b>Nhiệt:</b> electron va chạm với các ion kim loại, truyền năng lượng làm dây nóng lên. Công suất p = i²R không phụ thuộc chiều của i. Giá trị hiệu dụng I = I₀/√2 được định nghĩa từ tác dụng nhiệt.</li>
+<li><b>Phát sáng:</b> dây tóc nóng sáng (do tác dụng nhiệt), hoặc trong LED electron và lỗ trống kết hợp phát ra ánh sáng. LED chỉ dẫn điện một chiều nên với dòng xoay chiều chỉ sáng nửa chu kì.</li>
+<li><b>Từ:</b> dòng điện sinh ra từ trường, chiều từ trường theo chiều dòng. Dòng xoay chiều tạo từ trường đổi chiều: vật bằng sắt chưa nhiễm từ bị hút theo cả hai chiều (lực tỉ lệ i²), còn nam châm vĩnh cửu bị hút, đẩy luân phiên (lực tỉ lệ i).</li>
+<li><b>Sinh lí:</b> dòng điện qua cơ thể kích thích dây thần kinh và cơ. Dòng 50 Hz kích thích cơ 100 lần mỗi giây nên gây co cơ liên tục (không buông tay ra được) và dễ gây rung tim.</li></ul>
+<p><b>Nói cho học sinh:</b> Dòng xoay chiều giống người cưa gỗ: lưỡi cưa đi tới đi lui nhưng vẫn làm gỗ nóng và đứt. Việc “làm nóng”, “làm sáng” không cần dòng chạy một chiều. Chỉ những việc cần biết “chiều nào” (như kim nam châm chỉ hướng) mới bị dòng xoay chiều làm cho dao động qua lại.</p>`,
+mis4:`<ul><li><b>“Dòng xoay chiều đổi chiều nên tác dụng triệt tiêu, không làm nóng.”</b> Sai: nhiệt toả ra theo cả hai chiều, cộng dồn lại.</li>
+<li><b>“Đèn trong nhà sáng liên tục.”</b> Thật ra nhiều loại đèn nhấp nháy 100 lần mỗi giây, mắt không nhận ra.</li>
+<li><b>“Dòng xoay chiều không hút được sắt.”</b> Sai: nam châm điện xoay chiều vẫn hút sắt (chuông điện, rơ-le, cần cẩu).</li>
+<li><b>“Điện xoay chiều an toàn hơn vì đổi chiều liên tục.”</b> Sai: dòng 50 Hz đặc biệt nguy hiểm cho tim.</li></ul>`,
+/* Chung */
+originT:'Nguồn gốc các thuật ngữ',
+origin:`<ul><li><b>Cảm ứng</b> (感應): <i>cảm</i> 感 là chịu tác động, <i>ứng</i> 應 là đáp lại, nghĩa là “chịu tác động mà đáp lại”: cuộn dây “đáp lại” sự thay đổi của từ trường bằng dòng điện. Tiếng Anh <i>induction</i>, từ Latinh <i>inducere</i> = <i>in</i> (vào) + <i>ducere</i> (dẫn), nghĩa là “dẫn vào, gây ra”. Faraday dùng từ này năm 1831. Tiếng Pháp <i>induction</i>, tiếng Đức <i>Induktion</i>; tiếng Trung 電磁感應 (điện từ cảm ứng), tiếng Nhật 電磁誘導 <i>denji yūdō</i> (điện từ dụ dẫn).</li>
+<li><b>Điện từ</b> (電磁): <i>điện</i> 電 vốn nghĩa là tia chớp; <i>từ</i> 磁 trong <i>từ thạch</i> 磁石, “đá hút sắt”. Tiếng Anh <i>magnet</i> từ Hy Lạp <i>Magnētis lithos</i>, “đá xứ Magnesia”, nơi có nhiều quặng sắt từ; <i>electric</i> từ Hy Lạp <i>ēlektron</i>, “hổ phách”.</li>
+<li><b>Xoay chiều</b>: từ thuần Việt, “chiều dòng điện xoay qua xoay lại”. Tiếng Trung 交流電 (giao lưu điện, “dòng chảy qua lại”), viết tắt quốc tế AC. Tiếng Anh <i>alternating current</i>, từ Latinh <i>alternare</i>, “làm luân phiên” (<i>alter</i> = cái kia trong hai cái). Ngược lại là <i>một chiều</i>, 直流 (trực lưu), <i>direct current</i>, DC.</li>
+<li><b>Điện kế</b> (galvanometer): đặt theo tên nhà khoa học Ý Luigi Galvani; Ampère gọi dụng cụ này là <i>galvanomètre</i> năm 1820.</li>
+<li><b>Máy phát điện</b>: tiếng Anh <i>generator</i>, từ Latinh <i>generare</i>, “sinh ra”. <i>Đinamô</i> (dynamo) từ Hy Lạp <i>dynamis</i>, “sức mạnh”, do Werner von Siemens dùng năm 1867 (<i>dynamoelektrische Maschine</i>).</li>
+<li><b>Hiệu dụng</b> (有效, hữu hiệu): “có hiệu quả”, giá trị một chiều gây cùng tác dụng nhiệt. Tiếng Anh <i>effective value</i> hoặc <i>RMS</i> (root mean square, căn trung bình bình phương).</li></ul>`,
+mediaT:'Danh sách video (dùng cho bản offline)',
+mediaIntro:'Bản offline: tạo thư mục <b>media</b> cạnh file <b>index.html</b>, tải từng video về và đặt đúng tên file trong bảng (có thể thêm ảnh bìa cùng tên, đuôi <b>.jpg</b>). Khi bấm hình, trang sẽ phát file trong <b>media/</b> trước; nếu không có file thì phát YouTube (cần mạng). Thời lượng ghi “?” là chưa kiểm tra được, thầy cô nên xem trước.',
+mTab:'Tab',mFile:'Tên file cần lưu',mVideo:'Video',mDur:'Thời lượng',mType:'Loại',
+vLbl:'Video thực tế',vLook:'Để ý:',vMain:'Video chính',vAlt:'Video phụ',vDurUnk:'chưa kiểm tra thời lượng',vNoThumb:'Bấm để phát video',
+vNote:'Bấm hình để phát ngay trong trang. Nếu khung phát để trống (xem trên claude.ai không nhúng được YouTube), bấm “YouTube ↗”.',
+vt_exp:'Thí nghiệm',vt_phen:'Hiện tượng',vt_app:'Ứng dụng',
+footer:'Mô phỏng KHTN 9 · Chủ đề Điện từ · Chương trình GDPT 2018. Số liệu theo đơn vị SI; các chỗ đơn giản hoá ghi ở dòng “Giả thiết mô phỏng” của từng tab.'
+},
+en:{
+eyebrow:'Science 9 · Electromagnetism · Electromagnetic induction',title:'Electromagnetic induction and the AC generator',gvBtn:'Hide numbers',
+tab1:'1. Faraday’s experiment',tab2:'2. When is current induced?',tab3:'3. AC generator',tab4:'4. Effects of alternating current',
+req1:'<b>Learning outcome:</b> Do an experiment to conclude that when the number of magnetic field lines through the cross-section of a closed coil changes, an induced current appears in the coil.',
+req2:'<b>Learning outcome:</b> (continued) Test seven different situations: which ones change the number of field lines through the coil and produce an induced current, and which do not.',
+req3:'<b>Learning outcome:</b> Do an experiment to state the principle for producing alternating current (current that keeps reversing direction).',
+req4:'<b>Learning outcome:</b> Give examples showing that alternating current has heating, lighting, magnetic and physiological effects.',
+data:'Data',reset:'Reset',run:'▶ Run',pause:'❚❚ Pause',
+predTitle:'Predict first',predThen:'Do the experiment to check, then reveal the answer.',showAns:'Show answer',hideAns:'Hide answer',conclTitle:'Draw a conclusion',
+whyT:'Why? The science and how to explain it to students',misT:'Common misconceptions',
+lgK:'Field lines through the coil',lgI:'Induced current (mA)',grK:'Field lines through coil',grI:'i (mA)',grT:'t (s)',
+hint1:'Drag the magnet (or the coil) left and right. Orange lines are field lines passing through the coil. Watch the galvanometer G.',
+auto1On:'▶ Move in and out automatically',auto1Off:'❚❚ Stop automatic motion',flip:'Flip the magnet',swOpen:'Switch K: OPEN',swClosed:'Switch K: CLOSED',
+kDist:'Magnet position relative to the coil',kV:'Speed of magnet relative to coil',kK:'Field lines through the coil’s cross-section',kTrend:'Number of field lines is',
+trUp:'increasing',trDown:'decreasing',trSame:'not changing',kE:'Induced voltage',kI:'Induced current',kNeedle:'Galvanometer needle',
+ndL:'deflects left',ndR:'deflects right',nd0:'at zero',kCirc:'Circuit',circC:'closed',circO:'open',inside:'inside the coil',left:'to the left',right:'to the right',
+setN:'Number of turns in the coil',setStr:'Magnet strength',strW:'Weak',strM:'Medium',strS:'Strong',setSpd:'Speed of automatic motion',
+p1q:'You quickly push the north (N) pole of the magnet into the coil and then hold it still there. What does the galvanometer needle do?',
+p1a:'It deflects and stays deflected as long as the magnet is inside the coil.',p1b:'It deflects while the magnet is moving in, then returns to zero when the magnet stops.',p1c:'It does not move, because the magnet does not touch the wire.',
+p1e:'The needle deflects only while the magnet moves, i.e. while the number of field lines through the coil is increasing. When the magnet rests, many lines still pass through the coil but their number does not change, so there is no current. The magnet does not need to touch the wire: the magnetic field acts across empty space.',
+p1bq:'Now pull the magnet out at the same speed. How does the needle deflect compared with pushing it in?',
+p1ba:'To the same side.',p1bb:'To the opposite side.',p1bc:'It does not deflect.',
+p1be:'Pushing in increases the number of field lines through the coil; pulling out decreases it. Increasing and decreasing give currents in opposite directions. Try flipping the magnet too: the deflection reverses.',
+c1q:'Complete: “An induced current appears in a closed coil when …”. When is the induced current larger?',
+c1a:'… the number of field lines through the coil’s cross-section <b>changes</b> (increases or decreases). Increasing and decreasing give opposite currents. The current is larger when the number changes <b>faster</b> (faster motion, stronger magnet) or the coil has <b>more turns</b>.',
+assume1:'Model: 10 cm bar magnet, about 0.2 T inside, treated as two magnetic poles near its ends. Coil radius 2.8 cm, length 4 cm, 0.02 Ω per turn; galvanometer 50 Ω, range ±1 mA, needle has inertia. Coil self-inductance is ignored. Each drawn field line carries the same amount of field, so the number of lines counted is proportional to the magnetic flux.',
+why1:`<p><b>Mechanism (Faraday’s law, 1831).</b> The quantity measuring “how many field lines pass through the coil” is the magnetic flux Φ = B·S·cos α (unit Wb, studied in grade 11). When the flux through a coil of N turns changes, an induced emf e = −N·ΔΦ/Δt appears. In a closed circuit this emf drives the free electrons in the wire, giving a current i = e/R.</p>
+<p>The minus sign is <b>Lenz’s law</b>: the induced current flows so that its own field opposes the change that produced it. Push an N pole in and the near end of the coil becomes an N pole that repels the magnet; pull it out and that end becomes an S pole that holds it back. You must do work to move the magnet: mechanical energy becomes electrical energy.</p>
+<p><b>For students:</b> A closed coil is like a gatekeeper who only cares whether <i>the number of field lines through the gate is changing</i>. More lines or fewer lines, it “reacts” with a current, in opposite directions. Many lines that stay put get no reaction. The faster the change, the stronger the reaction.</p>`,
+mis1:`<ul><li><b>“A magnet inside a coil makes a current.”</b> No: a resting magnet gives zero. There must be a <i>change</i>.</li>
+<li><b>“The deeper the magnet, the larger the current.”</b> No: the current is large when the number of lines changes <i>quickly</i>, usually as the magnet passes the coil’s mouth.</li>
+<li><b>“The current comes out of the magnet.”</b> No: the free electrons are already in the copper wire; the changing field sets them moving.</li>
+<li><b>“The magnet must touch the wire.”</b> No: the field acts across space.</li></ul>`,
+hint2:'Pick a situation in the table, choose your prediction Yes or No, then press Run. Results fill in automatically.',
+run2:'▶ Run experiment',running2:'Running…',tblT:'Results table',thCase:'Situation',thPred:'Your prediction: current?',thFlux:'Field lines',thCur:'Induced current',
+yes:'Yes',no:'No',fluxCh:'changing',fluxSame:'constant',notRun:'not run',
+score2:'Situations run: {m}/7. Correct predictions: {n}.',
+s1:'Move the magnet towards and away',s2:'Magnet resting inside the coil',s3:'Magnet and coil moving together',s4:'Rotate the magnet in front of the coil',
+s5:'Switch an electromagnet on and off',s6:'Magnet spinning about its own axis',s7:'Move the magnet, circuit open',
+s1d:'The magnet moves towards the coil and back; the coil stays still.',s2d:'The magnet already sits in the middle of the coil; nobody touches it.',
+s3d:'Magnet and coil are fixed on one cart and move back and forth together.',s4d:'The magnet spins about an axis perpendicular to the coil’s axis.',
+s5d:'An iron-cored coil, connected to a battery through switch K, sits next to coil G. Close K, then open it.',
+s6d:'The magnet spins about its own long axis (like a spinning top), which lies along the coil’s axis.',s7d:'As situation 1, but switch K is open so the circuit is not closed.',
+stPick:'Choose Yes or No for this situation before running.',stDone:'Done. The result is in the table.',stRun:'Running: watch the needle and the orange field lines.',
+c2q:'From the table: when does an induced current appear? Why do situations 3 and 6 have motion but no current?',
+c2a:'An induced current appears only when <b>the circuit is closed</b> and <b>the number of field lines through the coil changes</b>. It does not matter what moves, or whether anything moves (situation 5 has no motion yet gives a current). In 3 and 6 the number of lines stays the same, so there is no current. In 7 the number changes but the circuit is open: there is a voltage across the coil but no current.',
+assume2:'Model: same magnet, 400-turn coil and galvanometer as tab 1. The electromagnet has an iron core and a field like the bar magnet; its current rises and falls in about 0.1 s when switched. For a rotating magnet the flux is found by numerical integration over the coil cross-section.',
+why2:`<p><b>Mechanism.</b> Faraday’s law involves only the <i>rate of change of flux</i> ΔΦ/Δt, not motion. Φ = B·S·cos α changes when B changes (approaching, receding, switching an electromagnet), when S changes, or when the angle α changes (rotating magnet or coil). If relative position and field stay the same (moving together, spinning about the symmetry axis), Φ is constant and e = 0.</p>
+<p>Situation 5 is the principle of the <b>transformer</b> (grade 12).</p>
+<p><b>For students:</b> Don’t ask “is something moving?”, ask “is the number of field lines through the coil going up or down?”.</p>`,
+mis2:`<ul><li><b>“Any motion gives a current.”</b> No: moving together, or spinning about its own axis, gives none.</li>
+<li><b>“Motion is needed.”</b> No: switching an electromagnet needs no motion.</li>
+<li><b>“Nothing happens in an open circuit.”</b> Not quite: there is still an induced voltage across the coil, just no current.</li></ul>`,
+modeCoil:'Rotating coil',modeMag:'Rotating magnet',ringSlip:'Slip rings',ringComm:'Commutator',loadG:'Galvanometer',loadLED:'Two LEDs',
+hint3Coil:'A coil (seen from above) turns steadily between two magnet poles. Its ends connect to two slip rings; carbon brushes press on the rings to carry current out. Two LEDs face opposite ways: red lights for one direction, green for the other.',
+hint3Mag:'A magnet turns in front of a fixed iron-cored coil (like a bicycle dynamo or a power-station generator). No slip rings are needed because the coil does not turn.',
+slowLbl:'Slow motion so your eyes can follow',slowNote:'slowed down ×1/{k}',realNote:'running at real speed',
+setF:'Rotation speed',kF:'Frequency f (turns per second)',kT:'Period T',kRpm:'Turns per minute',kRev:'Current reversals per second',
+kEmax:'Peak voltage',kEnow:'Instantaneous voltage',kK3:'Field lines through the coil',kK3m:'Field lines through the coil (with iron core)',kI3:'Current in the load',
+lgScope:'Oscilloscope: voltage u (V) against time t (s)',insetSlip:'Slip rings and brushes (side view)',insetComm:'Commutator and brushes (side view)',
+brush:'brush',core:'iron core',oneT:'1 period T',
+p3q:'The coil turns steadily in one direction only. What does the current through the two LEDs do?',
+p3a:'Flows one way only, so one LED lights.',p3b:'Keeps reversing, so the two LEDs take turns.',p3c:'No current, because the magnet is still and the field is constant.',
+p3e:'As the coil turns, the number of lines through it rises and falls (and even enters from the other face). Rising and falling give opposite currents, so the current keeps reversing: alternating current. The magnet is still, but the angle between the lines and the coil keeps changing.',
+p3bq:'In one turn of the coil, how many times does the current reverse?',p3ba:'Once.',p3bb:'Twice.',p3bc:'Four times.',
+p3be:'Twice: each cycle on the graph has a positive half and a negative half. Mains in Vietnam is 50 Hz, so household current reverses 100 times every second.',
+c3q:'State the principle for producing alternating current. What happens when the coil turns faster?',
+c3a:'Turn a closed coil in a magnet’s field, or turn a magnet near a coil, so that <b>the number of field lines through the coil rises and falls in turn</b>. An induced current that <b>keeps reversing</b> appears (alternating current), reversing twice per turn. Faster turning gives more reversals per second (higher frequency) and a larger peak voltage.',
+assume3Coil:'Model: coil of {N} turns, area 20 cm² (4 cm × 5 cm), in a uniform field B = {B} T, so u = N·B·S·ω·sin ωt. The two LEDs face opposite ways, each needing about 1.8 V, in series with 100 Ω. Galvanometer 100 Ω, range ±20 mA; its needle has inertia and cannot follow fast reversals.',
+assume3Mag:'Model: the tab 1 bar magnet spins about its centre; the {N}-turn coil is wound on an iron core, which multiplies the field lines through it many times (500 here, illustrative). The flux through the coil is taken to vary as a sine (real generators shape their poles to achieve this). Real generators use multi-pole magnets and laminated steel cores.',
+why3:`<p><b>Mechanism.</b> A coil of N turns and area S turns at angular speed ω = 2πf in a uniform field B. The angle between its normal and the field is α = ωt, so Φ = N·B·S·cos ωt and u = −ΔΦ/Δt = N·B·S·ω·sin ωt: a sine wave that changes sign every half turn, with peak U₀ = N·B·S·ω proportional to rotation speed.</p>
+<p><b>Slip rings and brushes</b> let the coil turn without twisting the leads; each end always touches the same brush, so the output still alternates. With a <b>commutator</b> (split ring) the ends swap brushes every half turn and the output flows one way only (a DC dynamo).</p>
+<p>Power-station generators keep the coils still (stator) and spin an electromagnet (rotor). Frequency f = p·n/60 (p pole pairs, n rpm): steam turbines spin at 3000 rpm with one pole pair for 50 Hz; slower hydro turbines use many pole pairs.</p>
+<p><b>For students:</b> Turning the coil is like turning a gate in the wind: it catches the most wind, then lies edge-on, then catches wind from the other side. Field lines through the coil rise and fall steadily, so the current flows forwards and backwards steadily.</p>`,
+mis3:`<ul><li><b>“A generator makes electricity from nothing.”</b> No: it turns mechanical energy into electrical energy. The more current you draw, the harder it is to turn (Lenz’s law).</li>
+<li><b>“Mains current flows one way from the power station.”</b> No: electrons only jiggle back and forth 50 times a second; energy travels, not the electrons.</li>
+<li><b>“Turning faster only makes the current stronger.”</b> It also raises the frequency.</li>
+<li><b>“A needle at zero means no current.”</b> At 50 Hz the needle cannot follow, so it stays near zero although current flows. Try 50 Hz with the galvanometer.</li></ul>`,
+effHeat:'Heating',effLight:'Lighting',effMag:'Magnetic',effBody:'Physiological',
+dcSide:'12 V DC supply',acSide:'12 V AC supply',reset4:'Heat again',setF4:'AC frequency',
+hint4heat:'Two identical kettles, each with 200 g of water and a 6 Ω heater. Left: 12 V DC. Right: 12 V AC. Water temperature is fast-forwarded ×60.',
+hint4light:'Each side has a 12 V 5 W filament bulb and an LED (with resistor). Use slow motion to see the AC LED flicker.',
+hint4mag:'Each side has an electromagnet (coil on an iron core). Left of it hangs an iron nail on a spring; right of it is a pivoted compass needle. Lower the frequency to 1–2 Hz to see clearly.',
+hint4body:'Current through the body makes muscles contract and disturbs the heart. Choose a voltage and skin condition to see how large the current would be. Calculation only: never try it.',
+water:'water',tempL:'Water temperature',heatT:'Heating time (fast-forwarded)',pNow:'Instantaneous power',pAvg:'Average power',
+bulb:'Filament bulb',led:'LED',nail:'iron nail',needle:'compass needle',
+kIdc:'Direct current',kIacR:'Alternating current: rms value',kIacP:'Alternating current: peak value',kTD:'Water temperature, DC side',kTA:'Water temperature, AC side',
+kBulbD:'Bulb brightness (DC)',kBulbA:'Bulb brightness (AC)',kLedA:'LED on the AC side',ledFlick:'flickers {n} times per second',
+kNailD:'Iron nail, DC side',kNailA:'Iron nail, AC side',pulled:'attracted',kNdD:'Compass needle, DC side',kNdA:'Compass needle, AC side',
+ndStill:'deflected one way, steady',ndOsc:'swings back and forth {n} times per second',ndBuzz:'trembles very slightly (almost still)',
+lg4heat:['p on DC side (W)','p on AC side (W)','average power on AC side'],lg4light:['current on DC side','current on AC side','LED brightness on AC side'],lg4mag:['current on DC side','current on AC side','compass needle angle on AC side'],
+bodyU:'Voltage touched',bodyR:'Skin and contact',skinDry:'Dry skin (~20 kΩ)',skinMoist:'Sweaty skin (~5 kΩ)',skinWet:'Wet skin, bare feet (~1 kΩ)',
+bodyI:'Current through the body (I = U/R)',
+z0:'Usually not felt.',z1:'Tingling, slight shock (perception threshold about 0.5 mA).',z2:'Pain, strong muscle contraction; from about 10 mA the hand grips and cannot let go.',
+z3:'Breathing difficulty, possible heart rhythm disturbance if prolonged. Residual-current breakers trip at 30 mA.',z4:'Ventricular fibrillation (the heart quivers and stops pumping): life-threatening.',
+bodyWarn:'Estimates only: body resistance varies greatly with voltage, contact area and current path (IEC 60479-1). 230/220 V mains can kill. Never touch bare wires, sockets or appliances with wet hands.',
+p4heatq:'Two identical kettles: one on 12 V DC, one on 12 V AC. Which heats faster?',
+p4heata:'The DC kettle.',p4heatb:'The AC kettle.',p4heatc:'Both the same.',
+p4heate:'The same. The heater warms whichever way the current flows: p = i²·R is always positive. “12 V AC” is the rms value, defined as the DC voltage with the same heating effect. At its peak the AC voltage reaches 12·√2 ≈ 17 V.',
+p4lightq:'An LED on 50 Hz AC looks steadily lit. What is really happening?',
+p4lighta:'It is lit steadily, as on DC.',p4lightb:'It switches off and on very fast (50 times a second); the eye cannot follow.',p4lightc:'It glows at half brightness without flickering.',
+p4lighte:'An LED conducts one way only, so it lights only during the half cycle in the right direction: off and on 50 times a second. Our eyes cannot see flicker faster than about 50–60 Hz. A filament bulb hardly flickers because its hot filament cannot cool quickly. A slow-motion phone video shows it clearly.',
+p4magq:'A compass needle sits next to an electromagnet on low-frequency AC (2 Hz). What does it do?',
+p4maga:'It is pulled to one side and stays, as with DC.',p4magb:'It swings back and forth, because the electromagnet’s poles keep swapping.',p4magc:'Nothing.',
+p4mage:'When the current reverses, the electromagnet’s N and S poles swap, so the compass needle is attracted then repelled: it oscillates. An iron nail is always attracted (iron is pulled by either pole); only the strength pulses. At 50 Hz the needle is too heavy and only trembles; this is the hum of transformers.',
+p4bodyq:'Touching the same live part, when is the current through the body larger?',
+p4bodya:'With dry skin.',p4bodyb:'With wet hands and bare feet on a damp floor.',p4bodyc:'The same, since the voltage is the same.',
+p4bodye:'Wet skin and bare feet lower the body’s resistance many times, so I = U/R rises sharply. Never touch electrical devices with wet hands or while bathing.',
+exT:'Everyday examples',
+exheat:'<ul><li>Electric kettles, rice cookers, water heaters, irons and hair dryers run on 220 V AC.</li><li>Wires get warm when many appliances run at once (an unwanted heating effect).</li><li>Fuses: the fuse wire melts and breaks the circuit when the current is too large.</li></ul>',
+exlight:'<ul><li>Filament bulbs: the filament reaches about 2500 °C and glows.</li><li>LED lamps, fluorescent tubes, neon tester screwdrivers.</li><li>Film street lights or classroom lights in slow motion with a phone and you can see them flicker.</li></ul>',
+exmag:'<ul><li>Electric bells, relays, electromagnetic cranes (they attract iron on AC too).</li><li>Fans, pumps, washing machines: AC motors turn because of the magnetic effect.</li><li>Loudspeakers vibrate with AC. Transformers hum because their cores vibrate 100 times a second.</li></ul>',
+exbody:'<ul><li>Harmful: electric shock from live wires, exposed sockets, faulty appliances.</li><li>Useful (small, controlled currents): electro-acupuncture, muscle stimulators in physiotherapy, defibrillators in hospitals.</li><li>Protection: residual-current devices cut the power within about 0.03 s when 30 mA leaks.</li></ul>',
+c4q:'Give one example of each effect of AC. Which effect depends on the current’s direction?',
+c4a:'Heating: kettle, iron. Lighting: bulbs, LEDs. Magnetic: bells, fans, loudspeakers. Physiological: electric shock, electro-acupuncture. <b>Heating and lighting do not depend on direction</b>, so AC works as well as DC. <b>The magnetic effect does</b>: with AC the electromagnet’s poles keep swapping and a compass needle is pushed and pulled in turn (but iron is still always attracted).',
+assume4heat:'Model: 6 Ω heater, 200 g water (heat capacity 840 J/K), heat loss 0.5 W/K, starting at 25 °C. Average power P = U²/R = 24 W on both sides.',
+assume4light:'Model: 12 V 5 W filament bulb (28.8 Ω) with about 0.04 s thermal lag; LED needs 2 V, in series with 500 Ω; the eye blends light over about 0.04 s.',
+assume4mag:'Model: 24 Ω coil. Force on the nail ∝ i², force on the compass needle ∝ i (reverses with current). Nail on spring has a natural frequency of 6 Hz, needle 2 Hz, both damped.',
+assume4body:'Model: I = U/R with an estimated body resistance. Effect levels are for 50 Hz AC from IEC 60479-1; DC of the same size is less dangerous but still dangerous.',
+why4:`<p><b>Mechanism.</b> All effects of current come from electrons drifting through the conductor and from the magnetic field of the current.</p>
+<ul><li><b>Heating:</b> electrons collide with metal ions and pass on energy. Power p = i²R does not depend on the sign of i. The rms value I = I₀/√2 is defined by the heating effect.</li>
+<li><b>Lighting:</b> a filament glows when hot, or in an LED electrons and holes recombine and emit light. An LED conducts one way, so on AC it lights for half of each cycle.</li>
+<li><b>Magnetic:</b> current creates a magnetic field whose direction follows the current. AC gives a reversing field: unmagnetised iron is attracted either way (force ∝ i²), a permanent magnet is pulled and pushed in turn (force ∝ i).</li>
+<li><b>Physiological:</b> current through the body stimulates nerves and muscles. 50 Hz stimulates them 100 times a second, causing sustained contraction (cannot let go) and easily triggering fibrillation.</li></ul>
+<p><b>For students:</b> AC is like sawing wood: the saw goes back and forth, yet the wood still heats up and is cut. Heating and lighting do not need one-way current. Only jobs that care about direction, like a compass needle pointing, are made to swing back and forth by AC.</p>`,
+mis4:`<ul><li><b>“AC reverses, so its effects cancel and it does not heat.”</b> No: heat is released in both directions and adds up.</li>
+<li><b>“Lights at home shine continuously.”</b> Many flicker 100 times a second without us noticing.</li>
+<li><b>“AC cannot attract iron.”</b> No: AC electromagnets attract iron (bells, relays, cranes).</li>
+<li><b>“AC is safer because it keeps reversing.”</b> No: 50 Hz current is especially dangerous to the heart.</li></ul>`,
+originT:'Where the terms come from',
+origin:`<ul><li><b>Cảm ứng</b> (感應, “induction”): <i>cảm</i> = to be affected, <i>ứng</i> = to respond. English <i>induction</i> from Latin <i>inducere</i> = <i>in</i> (into) + <i>ducere</i> (to lead): “to lead in, bring about”, used by Faraday in 1831. French <i>induction</i>, German <i>Induktion</i>; Chinese 電磁感應, Japanese 電磁誘導 <i>denji yūdō</i>.</li>
+<li><b>Điện từ</b> (電磁, electromagnetic): 電 originally “lightning”; 磁 as in 磁石 “iron-attracting stone”. English <i>magnet</i> from Greek <i>Magnētis lithos</i>, “stone of Magnesia”; <i>electric</i> from Greek <i>ēlektron</i>, “amber”.</li>
+<li><b>Xoay chiều</b> (alternating): native Vietnamese, “direction turning back and forth”. Chinese 交流電 (“current flowing to and fro”). English <i>alternating</i> from Latin <i>alternare</i>, “to do by turns” (<i>alter</i> = the other of two). Opposite: <i>một chiều</i>, 直流, direct current.</li>
+<li><b>Galvanometer</b>: named after Luigi Galvani; Ampère coined <i>galvanomètre</i> in 1820.</li>
+<li><b>Generator</b> from Latin <i>generare</i>, “to beget”. <i>Dynamo</i> from Greek <i>dynamis</i>, “power”, used by Werner von Siemens in 1867.</li>
+<li><b>Hiệu dụng</b> (有效, effective): the DC value with the same heating effect; English <i>effective</i> or <i>RMS</i> (root mean square).</li></ul>`,
+mediaT:'Video list (for the offline version)',
+mediaIntro:'Offline version: make a folder <b>media</b> next to <b>index.html</b>, download each video and save it with the file name in the table (optionally add a cover image with the same name ending in <b>.jpg</b>). Clicking a video plays the file in <b>media/</b> first, otherwise YouTube (needs internet). Durations marked “?” were not checked; please preview them.',
+mTab:'Tab',mFile:'File name to save',mVideo:'Video',mDur:'Length',mType:'Type',
+vLbl:'Real-world video',vLook:'Look for:',vMain:'Main video',vAlt:'Second video',vDurUnk:'length not checked',vNoThumb:'Click to play',
+vNote:'Click the picture to play it here. If the player stays blank (YouTube cannot be embedded on claude.ai), use “YouTube ↗”.',
+vt_exp:'Experiment',vt_phen:'Phenomenon',vt_app:'Application',
+footer:'Science 9 simulation · Electromagnetism · Vietnam 2018 curriculum. SI units throughout; simplifications are listed in each tab’s “Model” line.'
+}};
+</script>
+<script>
+'use strict';
+/* ================= Tiện ích ================= */
+const $=id=>document.getElementById(id);
+let lang='vi';
+const T=k=>{const v=I18N[lang][k];return v!=null?v:(I18N.vi[k]!=null?I18N.vi[k]:k);};
+const Tf=(k,o)=>T(k).replace(/\{(\w+)\}/g,(_,n)=>o[n]);
+const nf=(x,d=2,mn=0)=>{if(!isFinite(x))x=0;if(Math.abs(x)<0.5*Math.pow(10,-d))x=0;return new Intl.NumberFormat(lang==='vi'?'vi-VN':'en-US',{maximumFractionDigits:d,minimumFractionDigits:mn}).format(x);};
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const TAU=Math.PI*2;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const store={get(k){try{return localStorage.getItem(k);}catch(e){return null;}},set(k,v){try{localStorage.setItem(k,v);}catch(e){}}};
+let CS={};
+function readColors(){const s=getComputedStyle(document.documentElement);
+  ['bg','panel','lane','ink','muted','line','accent','ok','warn','force','vel','nPole','sPole','copper','copper2','fieldc','fieldhi','metal','metal2','space','star','gold','ledR','ledG','heat','water']
+  .forEach(k=>CS[k]=s.getPropertyValue('--'+k).trim());}
+readColors();
+try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',readColors);}catch(e){}
+const isPhone=()=>innerWidth<640;
+function fit(cv,asp){const w=Math.max(260,cv.clientWidth|0);const h=Math.round(w*asp);const d=Math.min(2.5,window.devicePixelRatio||1);
+  if(cv._w!==w||cv._h!==h||cv._d!==d){cv.width=Math.round(w*d);cv.height=Math.round(h*d);cv.style.height=h+'px';cv._w=w;cv._h=h;cv._d=d;}
+  const c=cv.getContext('2d');c.setTransform(d,0,0,d,0,0);c.clearRect(0,0,w,h);return{c,w,h};}
+function mkView(w,h,x0,x1,ycF){const S=w/(x1-x0),yc=h*ycF;return{S,w,h,p:(x,y)=>[(x-x0)*S,yc-y*S],wx:X=>X/S+x0,wy:Y=>(yc-Y)/S};}
+function arrowHead(c,x,y,ang,sz,col){c.save();c.translate(x,y);c.rotate(ang);c.fillStyle=col;c.beginPath();c.moveTo(sz,0);c.lineTo(-sz*.7,sz*.6);c.lineTo(-sz*.7,-sz*.6);c.closePath();c.fill();c.restore();}
+function txt(c,s,x,y,o={}){c.font=`${o.w||600} ${o.sz||13}px ${o.mono?'"IBM Plex Mono",monospace':'"Be Vietnam Pro",system-ui,sans-serif'}`;c.fillStyle=o.col||CS.ink;c.textAlign=o.al||'center';c.textBaseline=o.bl||'middle';c.fillText(s,x,y);}
+function rrect(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath();}
+function seg(id,items,cur,pick){const el=$(id);el.innerHTML='';items.forEach(it=>{const b=document.createElement('button');b.className='btn';b.textContent=it.label;
+  b.setAttribute('aria-pressed',String(it.k===cur));b.onclick=()=>pick(it.k);el.appendChild(b);});}
+
+/* Đồ thị theo thời gian: series = [{d:[[t,v],...], col, w, dash}] */
+function plot(c,x,y,w,h,o){const {t0,t1,ymin,ymax}=o;
+  c.save();c.fillStyle=CS.panel;c.fillRect(x,y,w,h);c.strokeStyle=CS.line;c.lineWidth=1;c.strokeRect(x+.5,y+.5,w-1,h-1);
+  const X=t=>x+(t-t0)/(t1-t0)*w,Y=v=>y+h-(v-ymin)/(ymax-ymin)*h;
+  if(ymin<0&&ymax>0){c.strokeStyle=CS.muted;c.globalAlpha=.6;c.beginPath();c.moveTo(x,Y(0));c.lineTo(x+w,Y(0));c.stroke();c.globalAlpha=1;}
+  c.beginPath();c.rect(x,y,w,h);c.clip();
+  for(const s of o.series){if(!s.d.length)continue;c.strokeStyle=s.col;c.lineWidth=s.w||2;c.setLineDash(s.dash||[]);c.beginPath();
+    let first=true;for(const [t,v] of s.d){if(t<t0-1e-9)continue;const px=X(t),py=Y(clamp(v,ymin-(ymax-ymin),ymax+(ymax-ymin)));first?c.moveTo(px,py):c.lineTo(px,py);first=false;}c.stroke();}
+  c.setLineDash([]);c.restore();
+  txt(c,o.ylab||'',x+6,y+12,{al:'left',sz:12,col:CS.muted});
+  if(o.xlab)txt(c,o.xlab,x+w-6,y+h-10,{al:'right',sz:12,col:CS.muted});
+  if(o.ytick){txt(c,o.ytick[0],x-4,Y(ymax),{al:'right',sz:11,col:CS.muted,mono:1,bl:'top'});txt(c,o.ytick[1],x-4,Y(ymin),{al:'right',sz:11,col:CS.muted,mono:1,bl:'bottom'});}
+  return{X,Y};}
+
+/* ================= Mô hình nam châm thẳng và cuộn dây ================= */
+/* Nam châm: hai cực từ điểm cách tâm lp; q = μ0·(cường độ cực) tính theo Wb. Cuộn dây đồng trục bán kính a. */
+const MAG={hl:0.05,ht:0.009,lp:0.042,q0:4e-5};
+const COIL={a:0.028,l:0.04,r1:0.02,rg:50,iFS:1e-3};
+const PHI_UNIT=MAG.q0/16;              // từ thông ứng với một đường sức vẽ ra (8 đường mỗi nửa ở độ mạnh "Vừa")
+const NH={0.5:4,1:8,1.5:12};
+const g=(d,a)=>d/Math.sqrt(d*d+a*a);
+function fluxAxial(X,xm,dir,q){const xN=xm+dir*MAG.lp,xS=xm-dir*MAG.lp;return q/2*(g(X-xS,COIL.a)-g(X-xN,COIL.a));}
+const NR=16,NPH=32;
+function fluxPole(X,px,py,q){const a=COIL.a,dx=X-px,dr=a/NR,dph=Math.PI/NPH;let s=0;
+  for(let i=0;i<NR;i++){const r=(i+.5)*dr;for(let j=0;j<NPH;j++){const ph=(j+.5)*dph,yy=r*Math.cos(ph)-py,zz=r*Math.sin(ph);
+    s+=dx/Math.pow(dx*dx+yy*yy+zz*zz,1.5)*r;}}
+  return q/(4*Math.PI)*2*s*dr*dph;}
+function fluxGeneral(X,xm,ym,ang,q){const c=Math.cos(ang),s=Math.sin(ang);
+  return fluxPole(X,xm+c*MAG.lp,ym+s*MAG.lp,q)-fluxPole(X,xm-c*MAG.lp,ym-s*MAG.lp,q);}
+/* Đường sức trong hệ quy chiếu nam châm (cực N ở +x); gieo đều theo từ thông để số đường tỉ lệ từ thông */
+function bF(x,y){const dxN=x-MAG.lp,dxS=x+MAG.lp;const rN=Math.pow(dxN*dxN+y*y,1.5)+1e-12,rS=Math.pow(dxS*dxS+y*y,1.5)+1e-12;return[dxN/rN-dxS/rS,y/rN-y/rS];}
+const LINES={};
+function getLines(n){if(LINES[n])return LINES[n];const out=[];
+  for(let i=0;i<n;i++){const th=Math.acos(1-(2*i+1)/n);let x=MAG.lp+0.002*Math.cos(th),y=0.002*Math.sin(th);const pts=[];let left=false;
+    for(let k=0;k<5000;k++){const inM=Math.abs(x)<MAG.hl&&Math.abs(y)<MAG.ht;
+      if(!inM){left=true;pts.push(x,y);}else if(left)break;
+      if(Math.hypot(x+MAG.lp,y)<0.0025||Math.abs(x)>1.2||Math.abs(y)>0.8)break;
+      const ds=0.0012+0.012*Math.hypot(x,y);
+      let [bx,by]=bF(x,y),m=Math.hypot(bx,by)||1;const mx=x+bx/m*ds/2,my=y+by/m*ds/2;[bx,by]=bF(mx,my);m=Math.hypot(bx,by)||1;x+=bx/m*ds;y+=by/m*ds;}
+    out.push(pts);}
+  /* đường sức trong lòng nam châm: từ S sang N */
+  const inner=[];for(let k=0;k<2*n;k++){const y=MAG.ht*.85*((k+.5)/(2*n)*2-1);inner.push([-MAG.hl,y,MAG.hl,y]);}
+  return LINES[n]={out,inner};}
+
+/* Vẽ đường sức của nam châm (hoặc nam châm điện) đặt tại S.xm, góc S.ang; tô cam các đường cắt mặt phẳng giữa cuộn dây trong tiết diện */
+function drawField(c,V,xm,ym,ang,n,alpha,coilX){if(alpha<=0.02)return;const L=getLines(n),ca=Math.cos(ang),sa=Math.sin(ang);
+  const W=(px,py)=>[xm+ca*px-sa*py,ym+sa*px+ca*py];
+  const one=(pts,sgn,thin)=>{let hit=false,px0,py0;const P=[];
+    for(let k=0;k<pts.length;k+=2){const [wx,wy]=W(pts[k],pts[k+1]*sgn);
+      if(k&&coilX!=null&&(px0-coilX)*(wx-coilX)<=0&&Math.abs((py0+wy)/2)<COIL.a)hit=true;px0=wx;py0=wy;P.push(V.p(wx,wy));}
+    if(P.length<2)return;c.beginPath();c.moveTo(P[0][0],P[0][1]);for(let k=1;k<P.length;k++)c.lineTo(P[k][0],P[k][1]);
+    const col=hit?CS.fieldhi:CS.fieldc;c.strokeStyle=col;c.globalAlpha=alpha*(hit?1:thin?.45:.75);c.lineWidth=hit?2.4:thin?1:1.3;c.stroke();
+    if(!thin){const m=Math.floor(P.length*.5);if(m>0&&m<P.length){const a=Math.atan2(P[m][1]-P[m-1][1],P[m][0]-P[m-1][0]);arrowHead(c,P[m][0],P[m][1],a,hit?6:5,col);}}};
+  for(const s of [1,-1])for(const pts of L.out)one(pts,s,false);
+  for(const r of L.inner)one(r,1,true);
+  c.globalAlpha=1;}
+
+function drawCoil(c,V,xc,half,label){/* half: 'back' hoặc 'front' */const n=11,a=COIL.a,l=COIL.l,rx=Math.max(3,0.006*V.S);
+  for(let j=0;j<n;j++){const [X,Y]=V.p(xc-l/2+l*j/(n-1),0);c.beginPath();
+    if(half==='back')c.ellipse(X,Y,rx,a*V.S,0,-Math.PI/2,Math.PI/2);else c.ellipse(X,Y,rx,a*V.S,0,Math.PI/2,Math.PI*1.5);
+    c.strokeStyle=half==='back'?CS.copper2:CS.copper;c.lineWidth=half==='back'?2:3.2;c.stroke();}
+  if(half==='front'&&label){const [X,Y]=V.p(xc,-a);txt(c,label,X,Y+16,{sz:12,col:CS.muted});}}
+
+function drawMagnet(c,V,xm,ym,ang,spin,alpha=1){const ca=Math.cos(ang),sa=Math.sin(ang);c.save();const [X,Y]=V.p(xm,ym);c.translate(X,Y);c.rotate(-ang);c.globalAlpha=alpha;
+  const hl=MAG.hl*V.S,ht=MAG.ht*V.S;c.fillStyle=CS.sPole;c.fillRect(-hl,-ht,hl,2*ht);c.fillStyle=CS.nPole;c.fillRect(0,-ht,hl,2*ht);
+  if(spin!=null){c.save();c.beginPath();c.rect(-hl,-ht,2*hl,2*ht);c.clip();c.strokeStyle='rgba(255,255,255,.55)';c.lineWidth=2;
+    for(let k=-4;k<=4;k++){const yy=((k*0.25+spin)%1+1)%1*2*ht-ht;c.beginPath();c.moveTo(-hl,yy-ht*.6);c.lineTo(hl,yy+ht*.6);c.stroke();}c.restore();}
+  c.strokeStyle='rgba(0,0,0,.35)';c.lineWidth=1;c.strokeRect(-hl,-ht,2*hl,2*ht);c.restore();
+  const [nx,ny]=V.p(xm+ca*MAG.hl*.55,ym+sa*MAG.hl*.55),[sx,sy]=V.p(xm-ca*MAG.hl*.55,ym-sa*MAG.hl*.55);
+  c.globalAlpha=alpha;txt(c,'N',nx,ny,{col:'#fff',sz:Math.max(11,ht*1.3),w:800});txt(c,'S',sx,sy,{col:'#fff',sz:Math.max(11,ht*1.3),w:800});c.globalAlpha=1;}
+
+function drawElectromagnet(c,V,xm,I,on){const [X,Y]=V.p(xm,0),hl=MAG.hl*V.S,ht=MAG.ht*V.S;
+  c.fillStyle=CS.metal;c.fillRect(X-hl,Y-ht,2*hl,2*ht);c.strokeStyle=CS.copper;c.lineWidth=2.4;
+  for(let k=0;k<14;k++){const x=X-hl*.85+k*hl*1.7/13;c.beginPath();c.moveTo(x-2,Y-ht-3);c.lineTo(x+2,Y+ht+3);c.stroke();}
+  if(I>0.05){c.globalAlpha=clamp(I,0,1);txt(c,'N',X+hl+9,Y,{col:CS.nPole,w:800,sz:14});txt(c,'S',X-hl-9,Y,{col:CS.sPole,w:800,sz:14});c.globalAlpha=1;}
+  /* pin và công tắc */
+  const by=Y+ht+0.05*V.S,bx=X;c.strokeStyle=CS.ink;c.lineWidth=2;
+  c.beginPath();c.moveTo(X-hl*.85,Y+ht);c.lineTo(X-hl*.85,by);c.lineTo(bx-14,by);c.moveTo(bx+14,by);c.lineTo(X+hl*.85-22,by);c.moveTo(X+hl*.85,by);c.lineTo(X+hl*.85,Y+ht);c.stroke();
+  c.lineWidth=3;c.beginPath();c.moveTo(bx-6,by-12);c.lineTo(bx-6,by+12);c.stroke();c.lineWidth=5;c.beginPath();c.moveTo(bx+6,by-6);c.lineTo(bx+6,by+6);c.stroke();
+  c.lineWidth=2;c.beginPath();c.moveTo(X+hl*.85-22,by);on?c.lineTo(X+hl*.85,by):c.lineTo(X+hl*.85-4,by-14);c.stroke();
+  c.fillStyle=CS.ink;c.beginPath();c.arc(X+hl*.85-22,by,3,0,TAU);c.arc(X+hl*.85,by,3,0,TAU);c.fill();
+  txt(c,'K',X+hl*.85-11,by+14,{sz:12});txt(c,'+  −',bx,by-20,{sz:11,col:CS.muted});}
+
+/* Điện kế số 0 ở giữa. val = -1..1 ứng với cả thang đo */
+function drawMeter(c,cx,cy,R,val,lbl,scale){c.save();rrect(c,cx-R,cy-R*.95,2*R,1.7*R,10);c.fillStyle=CS.panel;c.fill();c.strokeStyle=CS.ink;c.lineWidth=2;c.stroke();
+  const px=cx,py=cy+R*.3,rr=R*1.0,A=50*Math.PI/180;c.lineWidth=1.5;c.strokeStyle=CS.muted;
+  c.beginPath();c.arc(px,py,rr,-Math.PI/2-A,-Math.PI/2+A);c.stroke();
+  for(let k=-4;k<=4;k++){const a=-Math.PI/2+A*k/4,l=k%2===0?9:5;c.beginPath();c.moveTo(px+Math.cos(a)*rr,py+Math.sin(a)*rr);c.lineTo(px+Math.cos(a)*(rr-l),py+Math.sin(a)*(rr-l));c.stroke();}
+  txt(c,'0',px,py-rr+16,{sz:11,col:CS.muted,mono:1});txt(c,'−',px+Math.cos(-Math.PI/2-A)*(rr-16),py+Math.sin(-Math.PI/2-A)*(rr-16),{sz:13,col:CS.muted});
+  txt(c,'+',px+Math.cos(-Math.PI/2+A)*(rr-16),py+Math.sin(-Math.PI/2+A)*(rr-16),{sz:13,col:CS.muted});
+  const a=-Math.PI/2+A*clamp(val,-1.12,1.12);c.strokeStyle=CS.force;c.lineWidth=2.6;c.beginPath();c.moveTo(px,py);c.lineTo(px+Math.cos(a)*(rr-4),py+Math.sin(a)*(rr-4));c.stroke();
+  c.fillStyle=CS.ink;c.beginPath();c.arc(px,py,4,0,TAU);c.fill();
+  txt(c,lbl,cx-R*.62,cy+R*.52,{w:800,sz:Math.max(11,Math.min(16,R*.3))});if(scale&&R>=34)txt(c,scale,cx+R*.42,cy+R*.55,{sz:11,col:CS.muted,mono:1});c.restore();}
+
+/* ================= Cảnh nam châm – cuộn dây – điện kế (tab 1, tab 2) ================= */
+function mkScene(){return{xm:-0.18,ym:0,ang:0,spin:null,xc:0.03,N:400,str:1,closed:true,em:false,Iem:0,emOn:false,
+  phi:0,tot:null,e:0,i:0,nd:0,ndv:0,dot:0,v:0,lastRel:null};}
+function sceneFlux(S){const q=MAG.q0*S.str*(S.em?S.Iem:1);if(Math.abs(q)<1e-15)return 0;
+  const axial=Math.abs(Math.sin(S.ang))<1e-9&&S.ym===0;const nP=axial?7:3;let sum=0;
+  for(let j=0;j<nP;j++){const X=S.xc+COIL.l*(j/(nP-1)-.5);sum+=axial?fluxAxial(X,S.xm,Math.cos(S.ang)>0?1:-1,q):fluxGeneral(X,S.xm,S.ym,S.ang,q);}
+  return sum/nP;}
+function resync(S){S.tot=null;}
+function physStep(S,dt){const phi=sceneFlux(S);S.phi=phi;const tot=S.N*phi;if(S.tot==null)S.tot=tot;
+  const e=-(tot-S.tot)/dt;S.tot=tot;S.e+=(e-S.e)*Math.min(1,dt/0.012);
+  const rel=S.xm-S.xc;if(S.lastRel==null)S.lastRel=rel;S.v+=((rel-S.lastRel)/dt-S.v)*Math.min(1,dt/0.05);S.lastRel=rel;
+  const R=COIL.r1*S.N+COIL.rg;S.i=S.closed?S.e/R:0;
+  const w0=TAU*2.2,z=.62,tg=clamp(S.i/COIL.iFS,-1.2,1.2);S.ndv+=(w0*w0*(tg-S.nd)-2*z*w0*S.ndv)*dt;S.nd+=S.ndv*dt;
+  if(Math.abs(S.nd)>1.12){S.nd=Math.sign(S.nd)*1.12;S.ndv=0;}S.dot+=S.i*dt*900;}
+const METER={x:0.19,y:0.085,R:0.042};
+function drawWires(c,V,S){const a=COIL.a,l=COIL.l;const L0=[S.xc-l/2,a],R0=[S.xc+l/2,a],mb=METER.y-METER.R*.75;
+  const mL=[METER.x-METER.R*.45,mb],mR=[METER.x+METER.R*.45,mb],yw=0.05;
+  const pathL=[L0,[L0[0],yw],[mL[0],yw],mL],pathR=[R0,[R0[0],yw-0.012],[mR[0],yw-0.012],mR];
+  c.strokeStyle=CS.ink;c.lineWidth=2;
+  for(const P of [pathL,pathR]){c.beginPath();P.forEach((p,k)=>{const [X,Y]=V.p(p[0],p[1]);k?c.lineTo(X,Y):c.moveTo(X,Y);});c.stroke();}
+  /* công tắc trên dây trái */
+  const swx=Math.min(L0[0]+0.03,(L0[0]+mL[0])/2),[sx,sy]=V.p(swx,yw),gap=14;c.strokeStyle=CS.lane;c.lineWidth=5;c.beginPath();c.moveTo(sx-gap,sy);c.lineTo(sx+gap,sy);c.stroke();
+  c.strokeStyle=CS.ink;c.lineWidth=2.4;c.beginPath();c.moveTo(sx-gap,sy);S.closed?c.lineTo(sx+gap,sy):c.lineTo(sx+gap-4,sy-15);c.stroke();
+  c.fillStyle=CS.ink;c.beginPath();c.arc(sx-gap,sy,3,0,TAU);c.arc(sx+gap,sy,3,0,TAU);c.fill();txt(c,'K',sx,sy+13,{sz:12});
+  /* các chấm biểu diễn dòng điện (electron) chạy trong dây */
+  if(Math.abs(S.i)>2e-5){const pts=[];const add=P=>{for(let k=0;k<P.length-1;k++){const [x1,y1]=V.p(P[k][0],P[k][1]),[x2,y2]=V.p(P[k+1][0],P[k+1][1]);pts.push([x1,y1,x2,y2,Math.hypot(x2-x1,y2-y1)]);}};
+    add(pathL.slice().reverse());add(pathR);let tot=0;pts.forEach(p=>tot+=p[4]);const sp=26,off=((S.dot%sp)+sp)%sp;c.fillStyle=CS.vel;
+    for(let s=off;s<tot;s+=sp){let r=s;for(const p of pts){if(r<=p[4]){const f=r/p[4];c.beginPath();c.arc(p[0]+(p[2]-p[0])*f,p[1]+(p[3]-p[1])*f,3,0,TAU);c.fill();break;}r-=p[4];}}}}
+function drawScene(c,V,S){const n=NH[S.str]||8;
+  if(S.em)drawField(c,V,S.xm,0,0,n,S.Iem,S.xc);else drawField(c,V,S.xm,S.ym,S.ang,n,1,S.xc);
+  drawCoil(c,V,S.xc,'back');
+  if(S.em)drawElectromagnet(c,V,S.xm,S.Iem,S.emOn);else drawMagnet(c,V,S.xm,S.ym,S.ang,S.spin);
+  drawCoil(c,V,S.xc,'front');
+  drawWires(c,V,S);
+  const [mx,my]=V.p(METER.x,METER.y);drawMeter(c,mx,my,METER.R*V.S,S.nd,'G','±1 mA');}
+function sceneView(w,h){return mkView(w,h,-0.33,0.25,0.62);}
+const kCount=S=>S.phi/PHI_UNIT;
+
+/* Đồ thị hai tầng: số đường sức và dòng điện */
+function drawHist(cv,H,tNow,win){const asp=isPhone()?.55:.3;const {c,w,h}=fit(cv,asp);const L=40,gap=10,ph=(h-gap-14)/2;
+  const t1=Math.max(win,tNow),t0=t1-win;let kM=4,iM=1,neg=false;for(const p of H){kM=Math.max(kM,Math.abs(p[1]));iM=Math.max(iM,Math.abs(p[2]));if(p[1]<-0.2)neg=true;}
+  kM=Math.ceil(kM/4)*4;iM=iM<=1?1:iM<=2?2:iM<=5?5:Math.ceil(iM/5)*5;
+  plot(c,L,4,w-L-6,ph,{t0,t1,ymin:neg?-kM:-kM*.15,ymax:kM,ylab:T('grK'),ytick:[String(kM),neg?'−'+kM:''],series:[{d:H.map(p=>[p[0],p[1]]),col:CS.fieldhi,w:2.4}]});
+  plot(c,L,4+ph+gap,w-L-6,ph,{t0,t1,ymin:-iM,ymax:iM,ylab:T('grI'),xlab:T('grT'),ytick:['+'+nf(iM,0),'−'+nf(iM,0)],series:[{d:H.map(p=>[p[0],p[2]]),col:CS.vel,w:2.4}]});}
+
+/* ================= Dự đoán và kết luận ================= */
+const PRED={p1:{q:'p1q',o:['p1a','p1b','p1c'],c:1,e:'p1e'},p1b:{q:'p1bq',o:['p1ba','p1bb','p1bc'],c:1,e:'p1be'},
+  p3:{q:'p3q',o:['p3a','p3b','p3c'],c:1,e:'p3e'},p3b:{q:'p3bq',o:['p3ba','p3bb','p3bc'],c:1,e:'p3be'}};
+const P4={heat:{q:'p4heatq',o:['p4heata','p4heatb','p4heatc'],c:2,e:'p4heate'},light:{q:'p4lightq',o:['p4lighta','p4lightb','p4lightc'],c:1,e:'p4lighte'},
+  mag:{q:'p4magq',o:['p4maga','p4magb','p4magc'],c:1,e:'p4mage'},body:{q:'p4bodyq',o:['p4bodya','p4bodyb','p4bodyc'],c:1,e:'p4bodye'}};
+function predHTML(P){return `<h2>${T('predTitle')}</h2><p>${T(P.q)}</p><div class="opts">${P.o.map((k,i)=>`<button class="btn ${P.pick===i?'picked':''} ${P.show&&i===P.c?'right':''}" data-i="${i}">${T(k)}</button>`).join('')}</div>`+
+  (P.pick==null?'':`<p class="muted">${T('predThen')}</p><div><button class="btn sm rv">${T(P.show?'hideAns':'showAns')}</button></div>`)+(P.show?`<div class="ans">${T(P.e)}</div>`:'');}
+function predClick(P,e,re){const b=e.target.closest('button');if(!b)return;if(b.classList.contains('rv'))P.show=!P.show;else if(b.dataset.i!=null)P.pick=+b.dataset.i;re();}
+function renderPred(id){$(id).innerHTML=predHTML(PRED[id]);}
+Object.keys(PRED).forEach(id=>$(id).addEventListener('click',e=>predClick(PRED[id],e,()=>renderPred(id))));
+const CONC={c1:{q:'c1q',a:'c1a'},c2:{q:'c2q',a:'c2a'},c3:{q:'c3q',a:'c3a'},c4:{q:'c4q',a:'c4a'}};
+function renderConc(id){const C=CONC[id];$(id).innerHTML=`<h2>${T('conclTitle')}</h2><p>${T(C.q)}</p><div><button class="btn sm">${T(C.show?'hideAns':'showAns')}</button></div>${C.show?`<div class="ans">${T(C.a)}</div>`:''}`;}
+Object.keys(CONC).forEach(id=>$(id).addEventListener('click',e=>{if(e.target.closest('button')){CONC[id].show=!CONC[id].show;renderConc(id);}}));
+
+/* ================= TAB 1: Thí nghiệm Faraday ================= */
+const S1=Object.assign(mkScene(),{xm:-0.2,xc:0.03});
+const U1={tx:-0.2,txc:0.03,drag:null,off:0,auto:false,dir:1,spd:0.3,t:0,H:[],hT:0,flipped:false};
+function reset1(){Object.assign(S1,mkScene(),{xm:-0.2,xc:0.03,N:+$('n1').value,str:S1.str,closed:true});U1.tx=-0.2;U1.txc=0.03;U1.auto=false;U1.H=[];U1.t=0;ui1(true);}
+function pickCanvas(cv,e){const r=cv.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top];}
+const cv1=$('cv1');
+cv1.addEventListener('pointerdown',e=>{const V=cv1._V;if(!V)return;const [X,Y]=pickCanvas(cv1,e),x=V.wx(X),y=V.wy(Y);
+  const onMag=Math.abs(x-S1.xm)<MAG.hl+0.008&&Math.abs(y)<MAG.ht+0.014,onCoil=Math.abs(x-S1.xc)<COIL.l/2+0.01&&Math.abs(y)<COIL.a+0.012;
+  if(onMag&&(!onCoil||Math.abs(y)<MAG.ht+0.006)){U1.drag='m';U1.off=x-S1.xm;}else if(onCoil){U1.drag='c';U1.off=x-S1.xc;}else return;
+  U1.auto=false;cv1.setPointerCapture(e.pointerId);e.preventDefault();ui1(true);});
+cv1.addEventListener('pointermove',e=>{const V=cv1._V;if(!V)return;const [X,Y]=pickCanvas(cv1,e),x=V.wx(X),y=V.wy(Y);
+  if(!U1.drag){const hov=(Math.abs(x-S1.xm)<MAG.hl&&Math.abs(y)<MAG.ht+0.01)||(Math.abs(x-S1.xc)<COIL.l/2+0.01&&Math.abs(y)<COIL.a+0.01);cv1.style.cursor=hov?'grab':'default';return;}
+  if(U1.drag==='m')U1.tx=clamp(x-U1.off,-0.28,0.14);else U1.txc=clamp(x-U1.off,-0.22,0.12);});
+const end1=()=>{U1.drag=null;};cv1.addEventListener('pointerup',end1);cv1.addEventListener('pointercancel',end1);
+$('auto1').onclick=()=>{U1.auto=!U1.auto;if(U1.auto){U1.dir=S1.xm<S1.xc?1:-1;}ui1(true);};
+$('flip1').onclick=()=>{S1.ang=S1.ang===0?Math.PI:0;resync(S1);};
+$('sw1').onclick=()=>{S1.closed=!S1.closed;ui1(true);};
+$('rst1').onclick=reset1;
+$('n1').oninput=e=>{S1.N=+e.target.value;resync(S1);ui1(true);};
+$('sp1').oninput=e=>{U1.spd=+e.target.value;ui1(true);};
+function step1(dt){const n=Math.max(1,Math.round(dt*240)),h=dt/n,x0=S1.xm,xc0=S1.xc;
+  for(let k=0;k<n;k++){
+    if(U1.auto){S1.xm+=U1.dir*U1.spd*h;if(S1.xm>=S1.xc){S1.xm=S1.xc;U1.dir=-1;}if(S1.xm<=-0.24){S1.xm=-0.24;U1.dir=1;}U1.tx=S1.xm;}
+    else{S1.xm=x0+(U1.tx-x0)*(k+1)/n;}
+    S1.xc=xc0+(U1.txc-xc0)*(k+1)/n;physStep(S1,h);}
+  U1.t+=dt;U1.hT+=dt;if(U1.hT>=1/30){U1.hT=0;U1.H.push([U1.t,kCount(S1),S1.i*1000]);while(U1.H.length&&U1.H[0][0]<U1.t-8.5)U1.H.shift();}}
+function draw1(){const {c,w,h}=fit(cv1,isPhone()?.62:.5);const V=sceneView(w,h);cv1._V=V;drawScene(c,V,S1);
+  drawHist($('gr1'),U1.H,U1.t,8);}
+function trendOf(S,H){if(H.length<4)return 'trSame';const a=H[H.length-1][1],b=H[H.length-4][1];return Math.abs(a-b)<0.06?'trSame':a>b?'trUp':'trDown';}
+function ui1(full){if(full){$('auto1').textContent=T(U1.auto?'auto1Off':'auto1On');$('sw1').textContent=T(S1.closed?'swClosed':'swOpen');
+    $('n1V').textContent=S1.N+' '+(lang==='vi'?'vòng':'turns');$('sp1V').textContent=nf(U1.spd,2,2)+' m/s';
+    seg('str1',[{k:.5,label:T('strW')},{k:1,label:T('strM')},{k:1.5,label:T('strS')}],S1.str,k=>{S1.str=k;resync(S1);ui1(true);});}
+  const d=S1.xm-S1.xc,pos=Math.abs(d)<COIL.l/2+0.005?T('inside'):(nf(Math.abs(d)*100,1)+' cm '+T(d<0?'left':'right'));
+  const nd=Math.abs(S1.nd)<0.03?'nd0':S1.nd<0?'ndL':'ndR';
+  $('kv1').innerHTML=`<dt>${T('kDist')}</dt><dd class="t num">${pos}</dd><dt>${T('kV')}</dt><dd class="num">${nf(Math.abs(S1.v),2,2)} m/s</dd>
+  <dt>${T('kK')}</dt><dd class="num">${nf(Math.round(kCount(S1)),0)}</dd><dt>${T('kTrend')}</dt><dd class="t num">${T(trendOf(S1,U1.H))}</dd>
+  <dt>${T('kE')}</dt><dd class="num">${nf(S1.e*1000,1,1)} mV</dd><dt>${T('kI')}</dt><dd class="num">${nf(S1.i*1000,2,2)} mA</dd>
+  <dt>${T('kNeedle')}</dt><dd class="t num">${T(nd)}</dd><dt>${T('kCirc')}</dt><dd class="t">${T(S1.closed?'circC':'circO')}</dd>`;}
+
+/* ================= TAB 2: Bảy tình huống ================= */
+const S2=mkScene();
+const SC=[
+  {k:'s1',set(S,t){S.xc=0.03;S.xm=-0.105-0.135*Math.cos(TAU*t/3);}},
+  {k:'s2',set(S,t){S.xc=0.03;S.xm=0.03;}},
+  {k:'s3',set(S,t){S.xm=-0.13+0.05*Math.sin(TAU*t/3);S.xc=S.xm+0.15;}},
+  {k:'s4',set(S,t){S.xc=0.04;S.xm=-0.04;S.ang=TAU*t/1.2;}},
+  {k:'s5',em:true,set(S,t,dt){S.xc=0.03;S.xm=-0.045;const ph=t%5;S.emOn=ph>0.8&&ph<3.2;if(dt)S.Iem+=((S.emOn?2:0)-S.Iem)*Math.min(1,dt/0.05);}},
+  {k:'s6',set(S,t){S.xc=0.03;S.xm=-0.075;S.spin=t*1.6;}},
+  {k:'s7',open:true,set(S,t){S.xc=0.03;S.xm=-0.105-0.135*Math.cos(TAU*t/3);}}];
+const U2={cur:0,run:false,t:0,dur:6,H:[],hT:0,pred:{},res:{},kMin:0,kMax:0,iMax:0};
+function setup2(){const sc=SC[U2.cur];Object.assign(S2,mkScene(),{em:!!sc.em,closed:!sc.open,N:400});S2.spin=null;sc.set(S2,0,0);resync(S2);U2.t=0;U2.H=[];}
+function select2(i){if(U2.run)return;U2.cur=i;setup2();ui2(true);}
+$('run2').onclick=()=>{if(U2.run)return;if(U2.pred[SC[U2.cur].k]==null){$('st2').textContent=T('stPick');return;}
+  setup2();U2.run=true;U2.kMin=1e9;U2.kMax=-1e9;U2.iMax=0;ui2(true);};
+function step2(dt){if(!U2.run)return;const sc=SC[U2.cur];const n=Math.max(1,Math.round(dt*240)),h=dt/n;
+  for(let k=0;k<n;k++){U2.t+=h;sc.set(S2,U2.t,h);physStep(S2,h);if(U2.t>0.15){const K=kCount(S2);U2.kMin=Math.min(U2.kMin,K);U2.kMax=Math.max(U2.kMax,K);U2.iMax=Math.max(U2.iMax,Math.abs(S2.i));}}
+  U2.hT+=dt;if(U2.hT>=1/30){U2.hT=0;U2.H.push([U2.t,kCount(S2),S2.i*1000]);}
+  if(U2.t>=U2.dur){U2.run=false;U2.res[sc.k]={flux:U2.kMax-U2.kMin>0.2,cur:U2.iMax>3e-5};ui2(true);$('st2').textContent=T('stDone');}}
+function draw2(){const cv=$('cv2');const {c,w,h}=fit(cv,isPhone()?.62:.5);const V=sceneView(w,h);drawScene(c,V,S2);
+  if(SC[U2.cur].k==='s6'){const [X,Y]=V.p(S2.xm,0);txt(c,'↻',X,Y-MAG.ht*V.S-14,{sz:20,col:CS.accent,w:700});}
+  if(SC[U2.cur].k==='s4'){const [X,Y]=V.p(S2.xm,0);c.fillStyle=CS.ink;c.beginPath();c.arc(X,Y,3.5,0,TAU);c.fill();}
+  if(SC[U2.cur].k==='s3'){const [a,b]=V.p(S2.xm-0.06,-0.045),[d]=V.p(S2.xc+0.03,-0.045);c.strokeStyle=CS.muted;c.lineWidth=4;c.beginPath();c.moveTo(a,b);c.lineTo(d,b);c.stroke();
+    c.fillStyle=CS.muted;for(const x of [a+12,d-12]){c.beginPath();c.arc(x,b+8,6,0,TAU);c.fill();}}
+  drawHist($('gr2'),U2.H,U2.t,U2.dur);}
+function ui2(full){const sc=SC[U2.cur];$('run2').textContent=T(U2.run?'running2':'run2');$('run2').disabled=U2.run;$('desc2').textContent=T(sc.k+'d');
+  if(!U2.run&&full&&!U2.res[sc.k])$('st2').textContent=(U2.cur+1)+'. '+T(sc.k);if(U2.run)$('st2').textContent=T('stRun');
+  if(!full)return;let html=`<thead><tr><th>${T('thCase')}</th><th>${T('thPred')}</th><th>${T('thFlux')}</th><th>${T('thCur')}</th></tr></thead><tbody>`;
+  let m=0,ok=0;SC.forEach((s,i)=>{const p=U2.pred[s.k],r=U2.res[s.k];if(r){m++;if(p===r.cur)ok++;}
+    html+=`<tr class="${i===U2.cur?'sel':''}"><td class="case" data-sel="${i}">${i+1}. ${T(s.k)}</td>
+    <td><div class="yn"><button class="btn ${p===true?'picked':''}" data-p="${i}:1">${T('yes')}</button><button class="btn ${p===false?'picked':''}" data-p="${i}:0">${T('no')}</button></div></td>
+    <td>${r?T(r.flux?'fluxCh':'fluxSame'):'<span class="muted">'+T('notRun')+'</span>'}</td>
+    <td>${r?`<span class="${p===r.cur?'res-ok':'res-no'}">${T(r.cur?'yes':'no')} ${p===r.cur?'✓':'✗'}</span>`:'<span class="muted">—</span>'}</td></tr>`;});
+  $('tb2').innerHTML=html+'</tbody>';$('score2').textContent=Tf('score2',{m,n:ok});}
+$('tb2').addEventListener('click',e=>{const s=e.target.closest('[data-sel]'),p=e.target.closest('[data-p]');
+  if(p){const [i,v]=p.dataset.p.split(':');U2.pred[SC[+i].k]=v==='1';if(!U2.run&&U2.cur!==+i){U2.cur=+i;setup2();}ui2(true);}else if(s)select2(+s.dataset.sel);});
+
+/* ================= TAB 3: Máy phát điện xoay chiều ================= */
+const F3=[0.5,1,2,3,5,10,25,50];
+const G3={mode:'coil',ring:'slip',load:'led',fi:4,N:200,str:1,slow:true,run:true,th:0,t:0,H:[],nd:0,ndv:0,bR:0,bG:0,e:0,i:0};
+const S3={w:0.04,h:0.05};const XC3=0.13,KCORE=500;
+let PHI3=null,DPHI3=null,DMAX3=1;
+function buildPhi3(){const n=360;PHI3=new Float64Array(n);for(let k=0;k<n;k++){const th=k/n*TAU;let s=0;for(let j=0;j<3;j++){const X=XC3+COIL.l*(j/2-.5);s+=fluxGeneral(X,0,0,th,MAG.q0);}PHI3[k]=s/3;}
+  DPHI3=new Float64Array(n);DMAX3=0;for(let k=0;k<n;k++){DPHI3[k]=(PHI3[(k+1)%n]-PHI3[(k-1+n)%n])/(2*TAU/n);DMAX3=Math.max(DMAX3,Math.abs(DPHI3[k]));}}
+const lerpTab=(tab,th)=>{const n=tab.length,u=((th/TAU)%1+1)%1*n,k=Math.floor(u),f=u-k;return tab[k%n]*(1-f)+tab[(k+1)%n]*f;};
+const f3=()=>F3[G3.fi],B3=()=>0.2*G3.str;
+function emax3(){const w=TAU*f3();return G3.mode==='coil'?G3.N*B3()*S3.w*S3.h*w:G3.N*KCORE*G3.str*PHI3[0]*w;}
+function emf3(th){const w=TAU*f3();if(G3.mode==='coil')return G3.N*B3()*S3.w*S3.h*w*Math.sin(th);return G3.N*KCORE*G3.str*PHI3[0]*w*Math.sin(th);}
+const slowK3=()=>G3.slow?Math.max(1,f3()/0.5):1;
+function step3(dt){if(!G3.run)return;const k=slowK3(),sim=dt/k,f=f3(),Tp=1/f,n=Math.min(4000,Math.max(1,Math.ceil(sim/(Tp/160)))),h=sim/n;
+  const Rc=COIL.r1*G3.N;let lastPush=G3.H.length?G3.H[G3.H.length-1][0]:-1;
+  for(let s=0;s<n;s++){G3.t+=h;G3.th+=TAU*f*h;let e=emf3(G3.th);if(G3.mode==='coil'&&G3.ring==='comm')e=Math.abs(e);G3.e=e;
+    let i;if(G3.load==='led')i=Math.sign(e)*Math.max(0,Math.abs(e)-1.8)/(Rc+100);else i=e/(Rc+100);G3.i=i;
+    const w0=TAU*2,z=.55,tg=clamp(i/0.02,-1.2,1.2);G3.ndv+=(w0*w0*(tg-G3.nd)-2*z*w0*G3.ndv)*h;G3.nd+=G3.ndv*h;if(Math.abs(G3.nd)>1.12){G3.nd=Math.sign(G3.nd)*1.12;G3.ndv=0;}
+    const a=Math.min(1,h*k/0.04),bi=clamp(Math.abs(i)/0.015,0,1);G3.bR+=((i>0?bi:0)-G3.bR)*a;G3.bG+=((i<0?bi:0)-G3.bG)*a;
+    if(G3.t-lastPush>=Tp/150){G3.H.push([G3.t,e]);lastPush=G3.t;}}
+  const W=2.6/f;while(G3.H.length&&G3.H[0][0]<G3.t-W)G3.H.shift();}
+function view3(w,h){return mkView(w,h,-0.16,0.32,0.5);}
+function drawLED(c,X,Y,col,b,lbl,dirRight){c.save();c.globalAlpha=1;if(b>0.02){const gr=c.createRadialGradient(X,Y,2,X,Y,34);gr.addColorStop(0,col);gr.addColorStop(1,'rgba(0,0,0,0)');c.globalAlpha=b;c.fillStyle=gr;c.beginPath();c.arc(X,Y,34,0,TAU);c.fill();}
+  c.globalAlpha=1;c.fillStyle=b>0.05?col:CS.panel;c.strokeStyle=col;c.lineWidth=2.5;c.beginPath();c.arc(X,Y,11,0,TAU);c.fill();c.stroke();
+  if(lbl)txt(c,lbl,X,Y+26,{sz:12,col:CS.muted});txt(c,dirRight?'→':'←',X,Y-20,{sz:14,col:col,w:800});c.restore();}
+function drawOutput3(c,V,src){/* src: hai điểm nguồn [x,y] (m); tải đặt ở góc dưới bên phải */const oX=0.262,oY=-0.055,led=G3.load==='led';
+  const ax=led?oX-0.04:oX-0.018,bx=led?oX+0.04:oX+0.018,ty=led?oY-0.022:oY-0.03;c.strokeStyle=CS.ink;c.lineWidth=2;
+  let P1,P2;if(G3.mode==='coil'){P1=[src[0],[ax,src[0][1]],[ax,ty]];P2=[src[1],[bx,src[1][1]],[bx,ty]];}
+  else{P1=[src[1],[src[1][0],-0.095],[ax,-0.095],[ax,ty]];P2=[src[0],[src[0][0],-0.118],[bx,-0.118],[bx,ty]];}
+  for(const P of [P1,P2]){c.beginPath();P.forEach((p,k)=>{const [X,Y]=V.p(p[0],p[1]);k?c.lineTo(X,Y):c.moveTo(X,Y);});c.stroke();}
+  if(led){const [A,y1]=V.p(ax,oY+0.022),[B,y2]=V.p(bx,oY-0.022),[,yt]=V.p(0,ty),[X]=V.p(oX,0);
+    c.beginPath();c.moveTo(A,yt);c.lineTo(A,y1);c.lineTo(B,y1);c.lineTo(B,yt);c.moveTo(A,y2);c.lineTo(B,y2);c.stroke();
+    drawLED(c,X,y1,CS.ledR,G3.bR,'',true);drawLED(c,X,y2,CS.ledG,G3.bG,'',false);
+    }
+  else{const [X,Y]=V.p(oX,oY+0.012);drawMeter(c,X,Y,0.034*V.S,G3.nd,'G','±20 mA');}}
+function drawGen3Coil(c,V,th,alpha){const r=0.075,yL=0.065,[cx,cy]=V.p(0,0),S=V.S;
+  if(alpha===1){/* hai cực nam châm */for(const sd of [-1,1]){c.beginPath();const x0=sd*0.112,phi=Math.asin(yL/r);
+      const [a,b]=V.p(x0,yL),[d,e]=V.p(x0,-yL);c.moveTo(a,b);c.lineTo(d,e);
+      if(sd<0){c.lineTo(...V.p(-r*Math.cos(phi),-yL));c.arc(cx,cy,r*S,Math.PI-phi,Math.PI+phi,false);}else{c.lineTo(...V.p(r*Math.cos(phi),-yL));c.arc(cx,cy,r*S,phi,-phi,true);}
+      c.closePath();c.fillStyle=sd<0?CS.nPole:CS.sPole;c.fill();const [tx,ty]=V.p(sd*0.095,0);txt(c,sd<0?'N':'S',tx,ty,{col:'#fff',w:800,sz:20});}
+    /* đường sức đều */const lim=0.045*Math.abs(Math.cos(th));
+    for(let j=0;j<11;j++){const y=-0.05+0.01*j,xe=Math.sqrt(r*r-y*y),hit=Math.abs(y)<lim;const [a,b]=V.p(-xe,y),[d]=V.p(xe,y);
+      c.strokeStyle=hit?CS.fieldhi:CS.fieldc;c.lineWidth=hit?2.4:1.3;c.globalAlpha=hit?1:.75;c.beginPath();c.moveTo(a,b);c.lineTo(d,b);c.stroke();arrowHead(c,(a+d)/2+0.045*S,b,0,hit?6:5,hit?CS.fieldhi:CS.fieldc);}
+    c.globalAlpha=1;}
+  /* khung dây nhìn từ trên xuống: một đoạn thẳng quay quanh tâm; mặt đỏ, mặt xanh */
+  const u=[Math.sin(th),Math.cos(th)],nrm=[Math.cos(th),-Math.sin(th)],L=0.045,o=0.0025;c.globalAlpha=alpha;c.lineCap='round';
+  for(const [sd,col] of [[1,CS.ledR],[-1,CS.ledG]]){c.strokeStyle=col;c.lineWidth=3;c.beginPath();c.moveTo(...V.p(-L*u[0]+sd*o*nrm[0],-L*u[1]+sd*o*nrm[1]));c.lineTo(...V.p(L*u[0]+sd*o*nrm[0],L*u[1]+sd*o*nrm[1]));c.stroke();}
+  c.lineCap='butt';
+  if(alpha===1){const e=G3.e;for(const sd of [1,-1]){const [X,Y]=V.p(sd*L*u[0],sd*L*u[1]);c.fillStyle=CS.copper;c.beginPath();c.arc(X,Y,9,0,TAU);c.fill();c.strokeStyle=CS.ink;c.lineWidth=1.5;c.stroke();
+      if(Math.abs(G3.i)>1e-4||G3.load==='g'&&Math.abs(e)>0.02){const out=(e>0)===(sd>0);c.fillStyle='#fff';c.strokeStyle='#fff';
+        if(out){c.beginPath();c.arc(X,Y,2.6,0,TAU);c.fill();}else{c.lineWidth=2;c.beginPath();c.moveTo(X-4,Y-4);c.lineTo(X+4,Y+4);c.moveTo(X+4,Y-4);c.lineTo(X-4,Y+4);c.stroke();}}}
+    c.fillStyle=CS.ink;c.beginPath();c.arc(cx,cy,4,0,TAU);c.fill();}
+  c.globalAlpha=1;}
+function drawRings3(c,V,th){/* hình nhỏ: vành khuyên / cổ góp nhìn nghiêng */const bx=0.124,by=-0.126,bw=0.08,bh=0.096;const [X0,Y0]=V.p(bx,by+bh),[X1,Y1]=V.p(bx+bw,by);
+  rrect(c,X0,Y0,X1-X0,Y1-Y0,8);c.fillStyle=CS.panel;c.fill();c.strokeStyle=CS.line;c.lineWidth=1;c.stroke();
+  if(V.w>=560)txt(c,T(G3.ring==='comm'?'insetComm':'insetSlip'),X1,Y0-9,{sz:11,col:CS.muted,al:'right'});
+  const sx=bx+0.026,[shX,shT]=V.p(sx,by+bh-0.008),[,shB]=V.p(sx,by+0.008),rx=0.016*V.S,ry=0.005*V.S;
+  c.strokeStyle=CS.metal2;c.lineWidth=5;c.beginPath();c.moveTo(shX,shT);c.lineTo(shX,shB);c.stroke();
+  const ringYs=G3.ring==='comm'?[by+0.05]:[by+0.068,by+0.032];const src=[];
+  ringYs.forEach((ry0,idx)=>{const [,RY]=V.p(sx,ry0);c.lineWidth=7;
+    if(G3.ring==='comm'){const firstHalf=Math.sin(th)>=0;c.strokeStyle=firstHalf?CS.ledR:CS.ledG;c.beginPath();c.ellipse(shX,RY,rx,ry,0,-Math.PI/2,Math.PI/2);c.stroke();
+      c.strokeStyle=firstHalf?CS.ledG:CS.ledR;c.beginPath();c.ellipse(shX,RY,rx,ry,0,Math.PI/2,Math.PI*1.5);c.stroke();}
+    else{c.strokeStyle=idx?CS.ledG:CS.ledR;c.beginPath();c.ellipse(shX,RY,rx,ry,0,0,TAU);c.stroke();
+      const mx=shX+rx*Math.sin(th+idx*Math.PI),front=Math.cos(th+idx*Math.PI)>0;c.fillStyle=front?'#fff':'rgba(255,255,255,.35)';c.beginPath();c.arc(mx,RY+(front?ry:-ry)*.6,2.4,0,TAU);c.fill();}
+    /* chổi than bên phải */const bX=shX+rx+3;c.fillStyle=CS.ink;c.fillRect(bX,RY-5,10,10);src.push([V.wx(bX+10),V.wy(RY)]);});
+  if(G3.ring==='comm'){const [,RY]=V.p(sx,by+0.05);const bX=shX-rx-13;c.fillStyle=CS.ink;c.fillRect(bX,RY-5,10,10);
+    c.strokeStyle=CS.ink;c.lineWidth=2;c.beginPath();c.moveTo(bX,RY);c.lineTo(bX-6,RY);c.lineTo(bX-6,RY+0.03*V.S);c.lineTo(shX+rx+26,RY+0.03*V.S);c.stroke();
+    src.push([V.wx(shX+rx+26),V.wy(RY+0.03*V.S)]);}
+  if(V.w>=560)txt(c,T('brush'),shX+rx+28,V.p(0,ringYs[0])[1]-12,{sz:10,col:CS.muted,al:'left'});
+  return src;}
+function drawGen3Mag(c,V,th,alpha){drawField(c,V,0,0,th,NH[G3.str]||8,alpha,alpha===1?XC3:null);drawMagnet(c,V,0,0,th,null,alpha);}
+function draw3(){const cv=$('cv3');const {c,w,h}=fit(cv,isPhone()?.62:.56);const V=view3(w,h);const k=slowK3(),fD=f3()/k,blur=fD>2.5&&G3.run;
+  let src;
+  if(G3.mode==='coil'){drawGen3Coil(c,V,G3.th,1);if(blur)for(let j=1;j<6;j++)drawGen3Coil(c,V,G3.th-j*0.5,0.18);src=drawRings3(c,V,G3.th);}
+  else{if(blur){for(let j=1;j<6;j++)drawMagnet(c,V,0,0,G3.th-j*0.5,null,0.18);}drawGen3Mag(c,V,G3.th,1);
+    const [cx,cy]=V.p(XC3,0),hw=0.02*V.S,hh=0.012*V.S;
+    drawCoil(c,V,XC3,'back');c.fillStyle=CS.metal;c.globalAlpha=.85;c.fillRect(cx-hw,cy-hh,2*hw,2*hh);c.globalAlpha=1;drawCoil(c,V,XC3,'front');
+    txt(c,T('core'),cx,cy+COIL.a*V.S+14,{sz:11,col:CS.muted});src=[[XC3-COIL.l/2,COIL.a],[XC3+COIL.l/2,COIL.a]];}
+  drawOutput3(c,V,src);
+  /* dao động kí */const g=$('gr3'),{c:c2,w:w2,h:h2}=fit(g,isPhone()?.55:.3),f=f3(),W=2.6/f,t1=Math.max(W,G3.t),t0=t1-W,E=emax3()||1;
+  const comm=G3.mode==='coil'&&G3.ring==='comm',ymin=comm?-E*.25:-E*1.2,L=52;
+  const P=plot(c2,L,6,w2-L-8,h2-30,{t0,t1,ymin,ymax:E*1.2,ylab:'u (V)',xlab:'t (s)',ytick:['+'+nf(E*1.2,E<1?2:1),comm?'':'−'+nf(E*1.2,E<1?2:1)],series:[{d:G3.H,col:CS.vel,w:2.4}]});
+  const tA=t0+0.2/f,tB=tA+1/f,yy=h2-12;c2.strokeStyle=CS.ink;c2.lineWidth=1.5;c2.beginPath();c2.moveTo(P.X(tA),yy);c2.lineTo(P.X(tB),yy);c2.stroke();
+  arrowHead(c2,P.X(tA),yy,Math.PI,5,CS.ink);arrowHead(c2,P.X(tB),yy,0,5,CS.ink);txt(c2,T('oneT')+' = '+nf(1/f,3)+' s',(P.X(tA)+P.X(tB))/2,yy-9,{sz:11});}
+function kLines3(){if(G3.mode==='coil'){const lim=0.045*Math.abs(Math.cos(G3.th));let n=0;for(let j=0;j<11;j++)if(Math.abs(-0.05+0.01*j)<lim)n++;return n*Math.sign(Math.cos(G3.th));}
+  return PHI3[0]*KCORE*Math.cos(G3.th)*G3.str/PHI_UNIT;}
+function ui3(full){const f=f3();if(full){
+    seg('mode3',[{k:'coil',label:T('modeCoil')},{k:'mag',label:T('modeMag')}],G3.mode,k=>{G3.mode=k;if(k==='mag'&&!PHI3)buildPhi3();G3.H=[];ui3(true);});
+    seg('ring3',[{k:'slip',label:T('ringSlip')},{k:'comm',label:T('ringComm')}],G3.ring,k=>{G3.ring=k;G3.H=[];ui3(true);});$('ring3').hidden=G3.mode!=='coil';
+    seg('load3',[{k:'led',label:T('loadLED')},{k:'g',label:T('loadG')}],G3.load,k=>{G3.load=k;ui3(true);});
+    seg('str3',[{k:.5,label:T('strW')},{k:1,label:T('strM')},{k:1.5,label:T('strS')}],G3.str,k=>{G3.str=k;ui3(true);});
+    $('hint3').textContent=T(G3.mode==='coil'?'hint3Coil':'hint3Mag');$('run3').textContent=T(G3.run?'pause':'run');
+    $('f3V').textContent=nf(f,1)+' Hz · '+nf(f*60,0)+(lang==='vi'?' vòng/phút':' rpm');$('n3V').textContent=G3.N+(lang==='vi'?' vòng':' turns');
+    $('assume3').textContent=Tf(G3.mode==='coil'?'assume3Coil':'assume3Mag',{N:G3.N,B:nf(B3(),2)});}
+  const k=slowK3();$('slowNote3').textContent=k>1?Tf('slowNote',{k:nf(k,0)}):T('realNote');
+  const K=kLines3(),comm=G3.mode==='coil'&&G3.ring==='comm';
+  $('kv3').innerHTML=`<dt>${T('kF')}</dt><dd class="num">${nf(f,1)} Hz</dd><dt>${T('kT')}</dt><dd class="num">${nf(1/f,3)} s</dd><dt>${T('kRpm')}</dt><dd class="num">${nf(f*60,0)}</dd>
+  <dt>${T('kRev')}</dt><dd class="num">${comm?'0':nf(2*f,0)}</dd><dt>${T('kEmax')}</dt><dd class="num">${nf(emax3(),2,2)} V</dd><dt>${T('kEnow')}</dt><dd class="num">${nf(G3.e,2,2)} V</dd>
+  <dt>${T(G3.mode==='coil'?'kK3':'kK3m')}</dt><dd class="num">${(K>0.5?'+':'')+nf(Math.round(K),0)}</dd><dt>${T('kI3')}</dt><dd class="num">${nf(G3.i*1000,1,1)} mA</dd>`;}
+$('run3').onclick=()=>{G3.run=!G3.run;ui3(true);};
+$('slow3').onchange=e=>{G3.slow=e.target.checked;G3.H=[];ui3();};
+$('f3').oninput=e=>{G3.fi=+e.target.value;G3.H=[];ui3(true);};
+$('n3').oninput=e=>{G3.N=+e.target.value;ui3(true);};
+
+/* ================= TAB 4: Tác dụng của dòng xoay chiều ================= */
+const F4=[1,2,5,10,20,25,50];
+const E4={eff:'heat',fi:6,slow:true,run:true,t:0,H:[],
+  heat:{TD:25,TA:25,tH:0},light:{fD:1,fA:1,eyeD:0,eyeA:0,ledA:0},mag:{yD:0,vD:0,yA:0,vA:0,aD:0,wD:0,aA:0,wA:0},bodyU:220,bodyR:20000};
+const U4=12,R4={heat:6,light:28.8,mag:24};
+const f4=()=>F4[E4.fi],slowK4=()=>E4.slow?Math.max(1,f4()/0.5):1;
+function iAC(t){const R=R4[E4.eff]||6;return U4/R*Math.SQRT2*Math.sin(TAU*f4()*t);}
+function iDC(){return U4/(R4[E4.eff]||6);}
+function heatE(t1,t2,R){/* năng lượng toả ra bởi dòng xoay chiều trong [t1,t2]: ∫2P sin²(ωt) dt */const P=U4*U4/R,w=TAU*f4();return P*((t2-t1)-(Math.sin(2*w*t2)-Math.sin(2*w*t1))/(2*w));}
+function reset4(){E4.heat={TD:25,TA:25,tH:0};E4.mag={yD:1,vD:0,yA:1,vA:0,aD:0.6,wD:0,aA:0,wA:0};E4.light={fD:1,fA:1,eyeD:1,eyeA:0.3,ledA:0};E4.t=0;E4.H=[];}
+function step4(dt){if(!E4.run||E4.eff==='body')return;const k=slowK4(),sim=dt/k,f=f4(),n=Math.min(3000,Math.max(1,Math.ceil(sim/(1/f/160)))),h=sim/n;
+  if(E4.eff==='heat'){const H=E4.heat,C=840,kl=0.5,R=R4.heat,P=U4*U4/R,d=dt*60;const t1=H.tH,t2=H.tH+d;
+    H.TD+=(P*d-kl*(H.TD-25)*d)/C;H.TA+=(heatE(t1,t2,R)-kl*(H.TA-25)*d)/C;H.TD=Math.min(H.TD,100);H.TA=Math.min(H.TA,100);H.tH=t2;}
+  let last=E4.H.length?E4.H[E4.H.length-1][0]:-1;
+  for(let s=0;s<n;s++){E4.t+=h;const iA=iAC(E4.t),iD=iDC(),wall=h*k;
+    if(E4.eff==='light'){const L=E4.light,Pn=5;L.fD+=(iD*iD*28.8/Pn-L.fD)*Math.min(1,h/0.04);L.fA+=(iA*iA*28.8/Pn-L.fA)*Math.min(1,h/0.04);
+      const uA=U4*Math.SQRT2*Math.sin(TAU*f*E4.t),led=Math.max(0,uA-2)/500;L.ledA=led;L.eyeA+=(led/0.02-L.eyeA)*Math.min(1,wall/0.04);L.eyeD+=((U4-2)/500/0.02-L.eyeD)*Math.min(1,wall/0.04);}
+    if(E4.eff==='mag'){const M=E4.mag,I=iDC();
+      const wn=TAU*6,zn=.25,tD=1,tA=(iA*iA)/(I*I);M.vD+=(wn*wn*(tD-M.yD)-2*zn*wn*M.vD)*h;M.yD+=M.vD*h;M.vA+=(wn*wn*(tA-M.yA)-2*zn*wn*M.vA)*h;M.yA+=M.vA*h;
+      const wk=TAU*2,zk=.15;M.wD+=(wk*wk*(0.6-M.aD)-2*zk*wk*M.wD)*h;M.aD+=M.wD*h;M.wA+=(wk*wk*(0.6*iA/I-M.aA)-2*zk*wk*M.wA)*h;M.aA+=M.wA*h;}
+    if(E4.t-last>=1/f/150){last=E4.t;let row;
+      if(E4.eff==='heat')row=[E4.t,iD*iD*R4.heat,iA*iA*R4.heat];
+      else if(E4.eff==='light')row=[E4.t,iD,iA,E4.light.ledA];
+      else row=[E4.t,iD,iA,E4.mag.aA];E4.H.push(row);}}
+  const W=2.6/f;while(E4.H.length&&E4.H[0][0]<E4.t-W)E4.H.shift();}
+function drawHeatSide(c,x0,w,h,T_,glow,lbl){const cx=x0+w/2;txt(c,lbl,cx,18,{sz:14,w:700});
+  const bw=Math.min(120,w*.4),bh=h*.5,bx=cx-bw/2-20,by=h*.28;c.fillStyle=CS.water;c.globalAlpha=.55;c.fillRect(bx,by+bh*.18,bw,bh*.82);c.globalAlpha=1;
+  c.strokeStyle=CS.ink;c.lineWidth=2.5;c.beginPath();c.moveTo(bx,by);c.lineTo(bx,by+bh);c.lineTo(bx+bw,by+bh);c.lineTo(bx+bw,by);c.stroke();
+  /* dây đốt xoắn */c.strokeStyle=glow>0.02?`rgba(255,${Math.round(140-100*glow)},40,${0.35+0.65*glow})`:CS.metal2;c.lineWidth=3;c.beginPath();
+  for(let k=0;k<=40;k++){const xx=bx+bw*.15+bw*.7*k/40,yy=by+bh*.78+Math.sin(k*1.2)*6;k?c.lineTo(xx,yy):c.moveTo(xx,yy);}c.stroke();
+  if(glow>0.02){c.globalAlpha=glow*.5;c.fillStyle=CS.heat;c.beginPath();c.ellipse(bx+bw/2,by+bh*.78,bw*.45,12,0,0,TAU);c.fill();c.globalAlpha=1;}
+  /* nhiệt kế */const tx=bx+bw+34,ty=by-6,th=bh+6,fr=(T_-20)/80;c.strokeStyle=CS.ink;c.lineWidth=1.5;rrect(c,tx-6,ty,12,th,6);c.fillStyle=CS.panel;c.fill();c.stroke();
+  c.fillStyle=CS.force;c.fillRect(tx-3,ty+th-th*clamp(fr,0,1),6,th*clamp(fr,0,1));c.beginPath();c.arc(tx,ty+th+6,9,0,TAU);c.fill();
+  txt(c,nf(T_,1,1)+' °C',tx+14,ty+th-th*clamp(fr,0,1),{al:'left',mono:1,sz:14});txt(c,T('water'),bx+bw/2,by+bh*.4,{sz:12,col:CS.muted});}
+function drawBulb(c,X,Y,b){if(b>0.02){const gr=c.createRadialGradient(X,Y,4,X,Y,70);gr.addColorStop(0,'rgba(255,214,90,1)');gr.addColorStop(1,'rgba(255,214,90,0)');c.globalAlpha=clamp(b,0,1);c.fillStyle=gr;c.beginPath();c.arc(X,Y,70,0,TAU);c.fill();c.globalAlpha=1;}
+  c.strokeStyle=CS.ink;c.lineWidth=2;c.fillStyle=b>0.05?`rgba(255,226,120,${0.25+0.7*clamp(b,0,1)})`:CS.panel;c.beginPath();c.arc(X,Y,24,0,TAU);c.fill();c.stroke();
+  c.fillStyle=CS.metal2;c.fillRect(X-10,Y+22,20,14);c.strokeStyle=b>0.05?'#ff9a1f':CS.metal2;c.lineWidth=2;c.beginPath();c.moveTo(X-8,Y+22);c.lineTo(X-6,Y);c.lineTo(X-2,Y-6);c.lineTo(X+2,Y);c.lineTo(X+6,Y-6);c.lineTo(X+8,Y+22);c.stroke();}
+function drawMagSide(c,x0,w,h,y,ang,iNow,I,lbl){const cx=x0+w/2;txt(c,lbl,cx,18,{sz:14,w:700});const S=Math.min(w,h*1.3)/320;
+  /* nam châm điện thẳng đứng */const cw=34*S,chh=90*S,cy=h*.62;c.fillStyle=CS.metal;c.fillRect(cx-cw/2,cy-chh/2,cw,chh);c.strokeStyle=CS.copper;c.lineWidth=2.5;
+  for(let k=0;k<10;k++){const yy=cy-chh*.42+k*chh*.84/9;c.beginPath();c.moveTo(cx-cw/2-4,yy-3);c.lineTo(cx+cw/2+4,yy+3);c.stroke();}
+  const pol=Math.abs(iNow)<I*0.05?'':iNow>0?'N':'S';if(pol){txt(c,pol,cx,cy-chh/2-10,{w:800,sz:15,col:pol==='N'?CS.nPole:CS.sPole});txt(c,pol==='N'?'S':'N',cx,cy+chh/2+12,{w:800,sz:15,col:pol==='N'?CS.sPole:CS.nPole});}
+  /* đinh sắt treo lò xo, bên trái */const nx=cx-cw/2-46*S,top=40,rest=cy-chh/2-46*S,ny=rest+clamp(y,-.3,1.4)*24*S;c.strokeStyle=CS.metal2;c.lineWidth=1.8;c.beginPath();c.moveTo(nx,top);
+  for(let k=1;k<=12;k++){c.lineTo(nx+(k%2?7:-7),top+(ny-top)*k/12);}c.lineTo(nx,ny);c.stroke();c.fillStyle=CS.metal2;c.fillRect(nx-3,ny,6,34*S);c.beginPath();c.moveTo(nx-3,ny+34*S);c.lineTo(nx,ny+42*S);c.lineTo(nx+3,ny+34*S);c.fill();
+  txt(c,T('nail'),nx,top-10,{sz:11,col:CS.muted});
+  /* kim nam châm bên phải */const kx=cx+cw/2+60*S,ky=cy-chh*.15,kl=38*S;c.save();c.translate(kx,ky);c.rotate(-Math.PI/2+clamp(ang,-1.4,1.4));
+  c.fillStyle=CS.nPole;c.beginPath();c.moveTo(kl,0);c.lineTo(0,6);c.lineTo(0,-6);c.fill();c.fillStyle=CS.sPole;c.beginPath();c.moveTo(-kl,0);c.lineTo(0,6);c.lineTo(0,-6);c.fill();c.restore();
+  c.fillStyle=CS.ink;c.beginPath();c.arc(kx,ky,3,0,TAU);c.fill();c.strokeStyle=CS.line;c.lineWidth=1;c.beginPath();c.arc(kx,ky,kl+6,0,TAU);c.stroke();txt(c,T('needle'),kx,ky+kl+18,{sz:11,col:CS.muted});}
+function draw4(){if(E4.eff==='body')return;const cv=$('cv4');const ph=isPhone();const {c,w,h}=fit(cv,ph?.9:.46);const half=w/2;
+  c.strokeStyle=CS.line;c.lineWidth=1;c.beginPath();c.moveTo(half,8);c.lineTo(half,h-8);c.stroke();
+  const iD=iDC(),iA=iAC(E4.t),I=iD;
+  if(E4.eff==='heat'){drawHeatSide(c,0,half,h,E4.heat.TD,1/2,T('dcSide'));drawHeatSide(c,half,half,h,E4.heat.TA,(iA*iA)/(2*I*I)*1,T('acSide'));
+    txt(c,T('heatT')+': '+nf(E4.heat.tH/60,1,1)+(lang==='vi'?' phút':' min'),w/2,h-12,{sz:12,col:CS.muted});}
+  else if(E4.eff==='light'){const L=E4.light;for(const [x0,lbl,fl,eye] of [[0,T('dcSide'),L.fD,L.eyeD],[half,T('acSide'),L.fA,L.eyeA]]){const cx=x0+half/2;txt(c,lbl,cx,18,{sz:14,w:700});
+      drawBulb(c,cx-half*.2,h*.48,Math.pow(clamp(fl,0,2)/1,1.5)*.9);txt(c,T('bulb'),cx-half*.2,h*.48+52,{sz:12,col:CS.muted});
+      drawLED(c,cx+half*.2,h*.48,CS.ledR,clamp(eye,0,1),T('led'),true);}}
+  else{const M=E4.mag;drawMagSide(c,0,half,h,M.yD,M.aD,iD,I,T('dcSide'));drawMagSide(c,half,half,h,M.yA,M.aA,iA,I,T('acSide'));}
+  /* đồ thị */const g=$('gr4'),{c:c2,w:w2,h:h2}=fit(g,ph?.6:.3),f=f4(),W=2.6/f,t1=Math.max(W,E4.t),t0=t1-W,L=48,H=E4.H,lg=T('lg4'+E4.eff);
+  if(E4.eff==='heat'){const P=U4*U4/R4.heat;plot(c2,L,6,w2-L-8,h2-14,{t0,t1,ymin:0,ymax:2.3*P,ylab:'p (W)',xlab:'t (s)',ytick:[nf(2.3*P,0),'0'],
+      series:[{d:H.map(r=>[r[0],r[1]]),col:CS.muted,w:2.4,dash:[6,4]},{d:H.map(r=>[r[0],r[2]]),col:CS.heat,w:2.4},{d:[[t0,P],[t1,P]],col:CS.heat,w:1.2,dash:[2,4]}]});}
+  else if(E4.eff==='light'){const I=iDC()*1.6;plot(c2,L,6,w2-L-8,h2-14,{t0,t1,ymin:-I,ymax:I,ylab:'i (A)',xlab:'t (s)',ytick:['+'+nf(I,2),'−'+nf(I,2)],
+      series:[{d:H.map(r=>[r[0],r[1]]),col:CS.muted,w:2.2,dash:[6,4]},{d:H.map(r=>[r[0],r[2]]),col:CS.vel,w:2.4},{d:H.map(r=>[r[0],r[3]/0.03*I*.9]),col:CS.ledR,w:2}]});}
+  else{const I=iDC()*1.6;plot(c2,L,6,w2-L-8,h2-14,{t0,t1,ymin:-I,ymax:I,ylab:'i (A)',xlab:'t (s)',ytick:['+'+nf(I,2),'−'+nf(I,2)],
+      series:[{d:H.map(r=>[r[0],r[1]]),col:CS.muted,w:2.2,dash:[6,4]},{d:H.map(r=>[r[0],r[2]]),col:CS.vel,w:2.4},{d:H.map(r=>[r[0],r[3]/0.9*I*.9]),col:CS.nPole,w:2}]});}
+  const cols=E4.eff==='heat'?[CS.muted,CS.heat,CS.heat]:E4.eff==='light'?[CS.muted,CS.vel,CS.ledR]:[CS.muted,CS.vel,CS.nPole];
+  const lgEl=$('lg4');const key=lang+E4.eff;if(lgEl._k!==key){lgEl._k=key;lgEl.innerHTML=lg.map((s,i)=>`<span><i style="background:${cols[i]}"></i>${esc(s)}</span>`).join('');}}
+function zoneOf(mA){return mA<0.5?0:mA<10?1:mA<30?2:mA<50?3:4;}
+function ui4(full){const eff=E4.eff,f=f4();if(full){
+    seg('eff4',['heat','light','mag','body'].map(k=>({k,label:T('eff'+k[0].toUpperCase()+k.slice(1))})),eff,k=>{E4.eff=k;reset4();ui4(true);});
+    $('hint4').textContent=T('hint4'+eff);$('sim4').hidden=eff==='body';$('body4').hidden=eff!=='body';$('kvc4').hidden=eff==='body';
+    $('assume4').textContent=T('assume4'+eff);$('ex4').innerHTML=T('ex'+eff);$('p4').innerHTML=predHTML(P4[eff]);
+    $('run4').textContent=T(E4.run?'pause':'run');$('rst4').hidden=eff!=='heat';$('f4V').textContent=nf(f,0)+' Hz';
+    if(eff==='body'){seg('bu4',[1.5,12,36,220].map(v=>({k:v,label:nf(v,1)+' V'})),E4.bodyU,k=>{E4.bodyU=k;ui4(true);});
+      seg('br4',[{k:20000,label:T('skinDry')},{k:5000,label:T('skinMoist')},{k:1000,label:T('skinWet')}],E4.bodyR,k=>{E4.bodyR=k;ui4(true);});
+      const mA=E4.bodyU/E4.bodyR*1000,z=zoneOf(mA);$('bi4').textContent=nf(mA,mA<1?2:1)+' mA';
+      const lim=['< 0,5 mA','0,5 – 10 mA','10 – 30 mA','30 – 50 mA','> 50 mA'];
+      $('zones4').innerHTML=lim.map((l,i)=>`<div class="zone ${i===z?'on':''}"><b>${lang==='vi'?l:l.replace(/,/g,'.')}</b><span>${T('z'+i)}</span></div>`).join('');}}
+  const k=slowK4();$('slowNote4').textContent=k>1?Tf('slowNote',{k:nf(k,0)}):T('realNote');
+  if(eff==='body')return;const I=iDC();let html=`<dt>${T('kIdc')}</dt><dd class="num">${nf(I,2,2)} A</dd><dt>${T('kIacR')}</dt><dd class="num">${nf(I,2,2)} A</dd><dt>${T('kIacP')}</dt><dd class="num">${nf(I*Math.SQRT2,2,2)} A</dd>`;
+  if(eff==='heat')html+=`<dt>${T('kTD')}</dt><dd class="num">${nf(E4.heat.TD,1,1)} °C</dd><dt>${T('kTA')}</dt><dd class="num">${nf(E4.heat.TA,1,1)} °C</dd><dt>${T('pAvg')}</dt><dd class="num">${nf(U4*U4/R4.heat,0)} W</dd>`;
+  else if(eff==='light')html+=`<dt>${T('kBulbD')}</dt><dd class="num">${nf(E4.light.fD*100,0)} %</dd><dt>${T('kBulbA')}</dt><dd class="num">${nf(E4.light.fA*100,0)} %</dd><dt>${T('kLedA')}</dt><dd class="t num">${Tf('ledFlick',{n:nf(f,0)})}</dd>`;
+  else html+=`<dt>${T('kNailD')}</dt><dd class="t num">${T('pulled')}</dd><dt>${T('kNailA')}</dt><dd class="t num">${T('pulled')}</dd><dt>${T('kNdD')}</dt><dd class="t num">${T('ndStill')}</dd><dt>${T('kNdA')}</dt><dd class="t num">${f>=10?T('ndBuzz'):Tf('ndOsc',{n:nf(f,0)})}</dd>`;
+  $('kv4').innerHTML=html;}
+$('p4').addEventListener('click',e=>predClick(P4[E4.eff],e,()=>{$('p4').innerHTML=predHTML(P4[E4.eff]);}));
+$('run4').onclick=()=>{E4.run=!E4.run;ui4(true);};$('rst4').onclick=()=>{reset4();ui4();};
+$('slow4').onchange=e=>{E4.slow=e.target.checked;E4.H=[];ui4();};$('f4').oninput=e=>{E4.fi=+e.target.value;E4.H=[];ui4(true);};
+
+/* ================= Video thực tế ================= */
+const VIDEOS={
+1:[{id:'h_7cKCGiVmQ',file:'tab1-thi-nghiem.mp4',t:'Magnet in Coil',c:'WSU Physics Videos',d:'2:00',type:'exp',
+   look:{vi:'Cuộn dây nối thẳng với điện kế. Để ý: kim chỉ lệch khi nam châm đang đi vào hoặc đi ra; giữ yên nam châm trong cuộn dây thì kim về 0. Đi vào và đi ra cho kim lệch về hai phía khác nhau.',en:'The coil is wired straight to a galvanometer. Notice: the needle moves only while the magnet goes in or out; holding it still inside gives zero. In and out deflect opposite ways.'}},
+  {id:'Hh58afwzHfA',file:'tab1-so-vong-day.mp4',t:'Faraday’s Law Demo: Induction Coils',c:'Physics Demos (Utah State University)',d:'3:25',type:'exp',
+   look:{vi:'Ba cuộn dây có số vòng khác nhau. Để ý: cùng một cách đưa nam châm, cuộn dây nhiều vòng hơn cho kim lệch nhiều hơn. Thử lại bằng thanh trượt “Số vòng dây” trong mô phỏng.',en:'Three coils with different numbers of turns. Notice: the same magnet motion gives a bigger deflection with more turns. Try the “Number of turns” slider.'}}],
+2:[{id:'SRsKXScqGGE',file:'tab2-thi-nghiem.mp4',t:'Electromagnetic induction phenomenon – Experiment',c:'Everest Physics',d:'?',type:'exp',
+   look:{vi:'Lần lượt: đưa nam châm vào, ra; đảo cực nam châm; giữ nam châm đứng yên và di chuyển cuộn dây; để cả hai đứng yên. Để ý tình huống nào kim không lệch, so với bảng kết quả của em.',en:'In turn: magnet in and out; poles swapped; magnet held still while the coil moves; both still. Notice which cases give no deflection and compare with your table.'}},
+  {id:'b-tPc7t4JZs',file:'tab2-thi-nghiem-2.mp4',t:'Generator effect / Electromagnetic induction with coil and magnet',c:'Physics with Simon Poliakoff',d:'?',type:'exp',
+   look:{vi:'Thí nghiệm cảm ứng điện từ cho học sinh THCS (GCSE) ở Anh. Để ý các yếu tố làm dòng điện mạnh hơn: tốc độ, số vòng dây, độ mạnh nam châm.',en:'Induction demo for GCSE students. Notice what makes the current larger: speed, number of turns, magnet strength.'}}],
+3:[{id:'Lx6UfiEU3Q0',file:'tab3-ung-dung.mp4',t:'How a hydro generator works',c:'TranspowerNZ',d:'?',type:'app',
+   look:{vi:'Hoạt hình bên trong máy phát của nhà máy thủy điện. Để ý: nước làm quay tua bin, tua bin quay rôto (nam châm điện) bên trong, cuộn dây (stato) đứng yên bao quanh. Giống chế độ “Nam châm quay” trong mô phỏng.',en:'Animation inside a hydro generator. Notice: water turns the turbine, which spins the rotor (electromagnet) inside a stationary coil (stator), like “Rotating magnet” mode.'}},
+  {id:'JwuO9XrH_aI',file:'tab3-thi-nghiem.mp4',t:'Genecon Hand Crank Generator – Demos & Experiments',c:'James Lincoln',d:'4:40',type:'exp',
+   look:{vi:'Máy phát quay tay dùng trong phòng thí nghiệm. Để ý: quay càng nhanh đèn càng sáng; càng lấy nhiều điện thì càng khó quay (năng lượng không tự sinh ra).',en:'A hand-crank lab generator. Notice: faster cranking makes the bulb brighter; drawing more current makes it harder to turn (energy is not free).'}}],
+4:[{id:'9zE5EtHQk_g',file:'tab4-hien-tuong.mp4',t:'Electricity – AC flicker in a light bulb',c:'Adam Vulic',d:'?',type:'phen',
+   look:{vi:'Bóng đèn quay chậm bằng máy quay tốc độ cao. Để ý: đèn sáng lên, tối đi đều đặn theo nhịp dòng điện xoay chiều, điều mắt thường không thấy được.',en:'A light bulb filmed in slow motion. Notice: it brightens and dims steadily with the AC rhythm, which our eyes cannot see.'}},
+  {id:'3wdljou1M8Q',file:'tab4-led-quay-cham.mp4',t:'1/6 Slow Motion (300fps) LED Light Bulb',c:'Environmental Radiation LLC',d:'?',type:'phen',
+   look:{vi:'Đèn LED quay 300 hình mỗi giây. Để ý: đèn nhấp nháy rất nhanh, giống đèn LED bên xoay chiều trong mô phỏng khi bật xem chậm.',en:'An LED bulb at 300 frames per second. Notice the fast flicker, like the AC-side LED in slow motion.'}}]};
+const VSEL={1:0,2:0,3:0,4:0},VPLAY={};
+function renderVideo(n){const list=VIDEOS[n],V=list[VSEL[n]],el=$('v'+n),pl=!!VPLAY[n];el.classList.toggle('playing',pl);
+  const dur=V.d==='?'?T('vDurUnk'):V.d;
+  el.innerHTML=`<div class="vmedia">${pl?`<div class="player" id="pl${n}"></div>`:`<button class="thumb" data-play="${n}" aria-label="${esc(V.t)}"><span class="ph">${T('vNoThumb')}</span><img alt="" src="media/${V.file.replace('.mp4','.jpg')}"><span class="pbtn"></span>${V.d!=='?'?`<span class="dur">${V.d}</span>`:''}</button>`}</div>
+  <div class="vt"><span class="lbl">${T('vLbl')} · ${T('vt_'+V.type)} · ${esc(V.c)} · ${dur}</span><span class="ttl">${esc(V.t)}</span>
+  <span class="look"><b>${T('vLook')}</b> ${esc(V.look[lang])}</span>
+  <div class="vchips">${list.map((x,i)=>`<button class="chip ${i===VSEL[n]?'on':''}" data-vsel="${n}:${i}">${T(i?'vAlt':'vMain')}</button>`).join('')}<a class="chip" href="https://www.youtube.com/watch?v=${V.id}" target="_blank" rel="noopener">YouTube ↗</a></div>
+  <span class="src">${T('vNote')}</span></div>`;
+  const img=el.querySelector('img');if(img){img.onerror=()=>{if(!img.dataset.t){img.dataset.t=1;img.src='https://i.ytimg.com/vi/'+V.id+'/hqdefault.jpg';}else img.remove();};}
+  if(pl){const box=$('pl'+n),vid=document.createElement('video');vid.controls=true;vid.autoplay=true;vid.playsInline=true;
+    vid.onerror=()=>{const f=document.createElement('iframe');f.src='https://www.youtube-nocookie.com/embed/'+V.id+'?autoplay=1&rel=0&playsinline=1';
+      f.allow='autoplay; encrypted-media; picture-in-picture; fullscreen';f.allowFullscreen=true;f.title=V.t;box.replaceChildren(f);};
+    vid.src='media/'+V.file;box.replaceChildren(vid);}}
+document.addEventListener('click',e=>{const p=e.target.closest('[data-play]'),s=e.target.closest('[data-vsel]');
+  if(p){VPLAY[+p.dataset.play]=true;renderVideo(+p.dataset.play);}
+  else if(s){const [n,i]=s.dataset.vsel.split(':').map(Number);VSEL[n]=i;VPLAY[n]=false;renderVideo(n);}});
+function renderMedia(){let h=`<thead><tr><th>${T('mTab')}</th><th>${T('mFile')}</th><th>${T('mVideo')}</th><th>${T('mDur')}</th><th>${T('mType')}</th></tr></thead><tbody>`;
+  for(const n of [1,2,3,4])VIDEOS[n].forEach((V,i)=>{h+=`<tr><td>${n}${i?' ('+T('vAlt').toLowerCase()+')':''}</td><td><code>media/${V.file}</code></td><td><a href="https://www.youtube.com/watch?v=${V.id}" target="_blank" rel="noopener">${esc(V.t)}</a> · ${esc(V.c)}</td><td>${V.d}</td><td>${T('vt_'+V.type)}</td></tr>`;});
+  $('mediaTbl').innerHTML=h+'</tbody>';}
+
+/* ================= Tab, ngôn ngữ, chế độ GV ================= */
+let tab=1;
+function setTab(n){tab=n;document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.toggle('on',+b.dataset.tab===n));
+  for(let k=1;k<=4;k++)$('t'+k).hidden=k!==n;store.set('cudt-tab',String(n));
+  if(n===3&&G3.mode==='mag'&&!PHI3)buildPhi3();}
+document.querySelectorAll('nav.tabs button').forEach(b=>b.onclick=()=>setTab(+b.dataset.tab));
+$('gvBtn').onclick=()=>{const on=!document.body.classList.contains('hideNums');document.body.classList.toggle('hideNums',on);$('gvBtn').setAttribute('aria-pressed',on);};
+function applyLang(){document.documentElement.lang=lang;document.title=lang==='vi'?'Cảm ứng điện từ':'Electromagnetic induction';
+  document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=T(el.dataset.i18n));
+  document.querySelectorAll('[data-i18n-html]').forEach(el=>el.innerHTML=T(el.dataset.i18nHtml));
+  $('langBtn').textContent=lang==='vi'?'EN':'VI';
+  Object.keys(PRED).forEach(renderPred);Object.keys(CONC).forEach(renderConc);[1,2,3,4].forEach(renderVideo);renderMedia();
+  ui1(true);ui2(true);ui3(true);ui4(true);}
+$('langBtn').onclick=()=>{lang=lang==='vi'?'en':'vi';applyLang();};
+
+/* ================= Vòng lặp ================= */
+setup2();reset4();applyLang();
+{const t=+store.get('cudt-tab');setTab(t>=1&&t<=4?t:1);}
+let last=performance.now(),uiT=0;
+function loop(now){const dt=Math.min((now-last)/1000,.05);last=now;uiT+=dt;
+  try{
+    if(tab===1){step1(dt);draw1();if(uiT>.12){uiT=0;ui1();}}
+    else if(tab===2){step2(dt);draw2();if(uiT>.12&&U2.run){uiT=0;ui2();}}
+    else if(tab===3){step3(dt);draw3();if(uiT>.12){uiT=0;ui3();}}
+    else{step4(dt);draw4();if(uiT>.15){uiT=0;ui4();}}
+  }catch(err){console.error(err);}
+  requestAnimationFrame(loop);}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

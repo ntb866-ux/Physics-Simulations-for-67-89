@@ -1,0 +1,1013 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Lực ma sát</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Phòng thí nghiệm ma sát: sân khấu canvas bên trái, sổ ghi chép bên phải. Điện thoại xếp một cột. */
+:root{
+  --bg:#eef1ee; --panel:#ffffff; --lane:#f4f7f5; --ink:#16211c; --muted:#56655d; --line:#cbd5ce;
+  --accent:#14606b; --accent-ink:#ffffff; --ok:#1d8a4b; --warn:#c2410c;
+  --force:#d1323b; --fric:#7a3fc2; --normal:#1f6fd1; --vel:#1f6fd1; --bond:#e07b00;
+  --matA:#9a8e7c; --matA2:#6f6455; --matB:#7f9db5; --matB2:#4f6f88; --oil:rgba(232,176,40,.55);
+  --road:#5b6168; --mark:#f3f3f3; --sky:#dbe9f3; --grass:#8fb77a;
+  --water:rgba(64,140,214,.30); --air:rgba(170,200,225,.16);
+  --laneA:#0f7c8a; --laneB:#d0661c; --react:#e7b416; --brake:#d1323b;
+  --font-ui:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-num:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Consolas,monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1513; --panel:#17201c; --lane:#121a17; --ink:#e3ebe6; --muted:#97a89f; --line:#2b3933;
+  --accent:#4fb8c4; --accent-ink:#04252a; --ok:#47c47d; --warn:#f08a4b;
+  --force:#ff5f67; --fric:#b28cff; --normal:#5aa2ff; --vel:#5aa2ff; --bond:#ffa630;
+  --matA:#7d7363; --matA2:#a99c86; --matB:#5d7c94; --matB2:#9cc0dc; --oil:rgba(232,176,40,.5);
+  --road:#3c4147; --mark:#d8d8d8; --sky:#1a2833; --grass:#3d5a33;
+  --water:rgba(80,150,230,.30); --air:rgba(150,180,210,.10);
+  --laneA:#3cc3d2; --laneB:#ff9a4d; --react:#e8c13a; --brake:#ff5f67;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1513; --panel:#17201c; --lane:#121a17; --ink:#e3ebe6; --muted:#97a89f; --line:#2b3933;
+  --accent:#4fb8c4; --accent-ink:#04252a; --ok:#47c47d; --warn:#f08a4b;
+  --force:#ff5f67; --fric:#b28cff; --normal:#5aa2ff; --vel:#5aa2ff; --bond:#ffa630;
+  --matA:#7d7363; --matA2:#a99c86; --matB:#5d7c94; --matB2:#9cc0dc; --oil:rgba(232,176,40,.5);
+  --road:#3c4147; --mark:#d8d8d8; --sky:#1a2833; --grass:#3d5a33;
+  --water:rgba(80,150,230,.30); --air:rgba(150,180,210,.10);
+  --laneA:#3cc3d2; --laneB:#ff9a4d; --react:#e8c13a; --brake:#ff5f67;
+  color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-ui);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px 40px}
+.wrap{max-width:1320px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.eyebrow{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{margin:0;font-size:clamp(25px,3.4vw,36px);line-height:1.15;font-weight:800;text-wrap:balance;letter-spacing:-.01em}
+h2{margin:0;font-size:17px;font-weight:700;text-wrap:balance}
+h3{margin:0;font-size:15px;font-weight:700}
+.btn{font:inherit;font-weight:600;font-size:15px;min-height:44px;padding:8px 14px;border-radius:8px;border:1px solid var(--line);
+  background:var(--panel);color:var(--ink);cursor:pointer;touch-action:manipulation}
+.btn:hover{border-color:var(--accent)}
+.btn:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
+.seg .btn{border:0;border-radius:0;min-width:52px}
+nav.tabs{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line)}
+nav.tabs button{font:inherit;font-size:15px;font-weight:600;white-space:nowrap;min-height:46px;padding:8px 14px;border:0;border-bottom:3px solid transparent;
+  background:none;color:var(--muted);cursor:pointer;margin-bottom:-1px}
+nav.tabs button.on{color:var(--ink);border-bottom-color:var(--accent)}
+.req{margin:0;font-size:14px;color:var(--muted);max-width:110ch}
+.req b{color:var(--ink);font-weight:600}
+.lab{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:14px;align-items:start}
+@media (max-width:1020px){.lab{grid-template-columns:minmax(0,1fr)}}
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.col{display:flex;flex-direction:column;gap:12px;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card p{margin:0}
+canvas{display:block;width:100%;border-radius:8px;background:var(--lane);touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.hint{margin:0;font-size:14px;color:var(--muted)}
+.status{margin:0;font-weight:600;min-height:1.5em}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chk{display:inline-flex;align-items:center;gap:8px;min-height:44px;font-size:15px;cursor:pointer}
+.chk input{width:22px;height:22px;accent-color:var(--accent)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:14px;color:var(--muted)}
+.legend i{display:inline-block;width:18px;height:5px;border-radius:3px;margin-right:6px;vertical-align:middle}
+.sl{display:flex;flex-direction:column;gap:4px}
+.sl .top{display:flex;justify-content:space-between;gap:8px;font-size:15px}
+.sl .val{font-family:var(--font-num);font-weight:600}
+.sl .ends{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+input[type=range]{width:100%;height:44px;accent-color:var(--accent);margin:0}
+select{font:inherit;font-size:15px;min-height:44px;padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);width:100%}
+.kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;font-size:15px;margin:0}
+.kv dt{color:var(--muted)} .kv dd{margin:0;font-family:var(--font-num);font-variant-numeric:tabular-nums;text-align:right}
+.bigfig{font-family:var(--font-num);font-size:clamp(22px,2.6vw,30px);font-weight:600;line-height:1.2}
+.bar{height:16px;border-radius:8px;background:var(--line);overflow:hidden;display:flex}
+.bar i{display:block;height:100%}
+.opts{display:flex;flex-direction:column;gap:6px}
+.opts .btn{text-align:left;font-size:14px}
+.opts .btn.picked{border:2px solid var(--accent)}
+.opts .btn.right{background:color-mix(in srgb,var(--ok) 18%,var(--panel));border-color:var(--ok)}
+.ans{background:var(--lane);border-left:4px solid var(--ok);padding:8px 12px;border-radius:6px;font-size:15px}
+.muted{color:var(--muted);font-size:14px}
+details{border:1px solid var(--line);border-radius:var(--r);background:var(--panel);padding:0 14px}
+details[open]{padding-bottom:12px}
+summary{cursor:pointer;font-weight:700;min-height:44px;display:flex;align-items:center;font-size:15px}
+details p,details ul{margin:6px 0;font-size:15px}
+details ul{padding-left:20px}
+.tagline{font-size:13px;color:var(--muted);font-style:italic}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:520px){.two{grid-template-columns:1fr}}
+.lanehdr{font-weight:700;font-size:14px;display:flex;align-items:center;gap:6px}
+.lanehdr i{width:12px;height:12px;border-radius:50%;display:inline-block}
+.fine{font-size:13px;color:var(--muted);margin:0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow" data-i18n="eyebrow"></div>
+      <h1 data-i18n="title"></h1>
+    </div>
+    <button class="btn" id="langBtn">EN</button>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="1" data-i18n="tab1"></button>
+    <button role="tab" data-tab="2" data-i18n="tab2"></button>
+    <button role="tab" data-tab="3" data-i18n="tab3"></button>
+    <button role="tab" data-tab="4" data-i18n="tab4"></button>
+  </nav>
+
+  <!-- ===================== TAB 1: VÌ SAO CÓ MA SÁT ===================== -->
+  <section id="t1" class="col">
+    <p class="req" data-i18n-html="req1"></p>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" data-i18n="hint1"></p>
+        <canvas id="cv1" aria-label="micro view"></canvas>
+        <p class="status" id="st1"></p>
+        <div class="controls">
+          <button class="btn primary" id="push1" data-i18n="push1"></button>
+          <button class="btn" id="rst1" data-i18n="reset"></button>
+          <label class="chk"><input type="checkbox" id="bond1" checked> <span data-i18n="showBonds"></span></label>
+          <label class="chk"><input type="checkbox" id="lube1"> <span data-i18n="lube"></span></label>
+        </div>
+        <div class="legend">
+          <span><i style="background:var(--bond)"></i><span data-i18n="lgContact"></span></span>
+          <span><i style="background:var(--force)"></i><span data-i18n="lgPull"></span></span>
+          <span><i style="background:var(--fric)"></i><span data-i18n="lgFric"></span></span>
+          <span><i style="background:var(--normal)"></i><span data-i18n="lgPress"></span></span>
+        </div>
+        <p class="fine" data-i18n="assume1"></p>
+      </div>
+      <div class="col">
+        <div class="card">
+          <div class="sl"><div class="top"><span data-i18n="rough"></span><span class="val" id="roughV"></span></div>
+            <input type="range" id="rough" min="0" max="1" step="0.01" value="0.6">
+            <div class="ends"><span data-i18n="smoothEnd"></span><span data-i18n="roughEnd"></span></div></div>
+          <div class="sl"><div class="top"><span data-i18n="press"></span><span class="val" id="pressV"></span></div>
+            <input type="range" id="press" min="5" max="40" step="5" value="10">
+            <div class="ends"><span id="pressN"></span></div><p class="fine" data-i18n="pressHint"></p></div>
+        </div>
+        <div class="card">
+          <h2 data-i18n="obs"></h2>
+          <dl class="kv">
+            <dt data-i18n="nContacts"></dt><dd id="o1n"></dd>
+            <dt data-i18n="realArea"></dt><dd id="o1a"></dd>
+            <dt data-i18n="slideDist"></dt><dd id="o1d"></dd>
+          </dl>
+          <div><p class="muted" data-i18n="fricRel"></p>
+            <div class="bar"><i id="barM" style="background:var(--matB2)"></i><i id="barA" style="background:var(--bond)"></i></div>
+            <div class="legend" style="margin-top:6px"><span><i style="background:var(--matB2)"></i><span data-i18n="partMech"></span></span><span><i style="background:var(--bond)"></i><span data-i18n="partAdh"></span></span></div>
+          </div>
+        </div>
+        <div class="card"><h2 data-i18n="trialsT"></h2><p class="muted" data-i18n="trialsHint"></p><dl class="kv" id="trials1"></dl></div>
+        <div class="card" id="p1c"></div>
+        <div class="card" id="p1"></div>
+        <div class="card" id="p1b"></div>
+      </div>
+    </div>
+    <details open><summary data-i18n="mechT"></summary><div data-i18n-html="mech1"></div></details>
+    <details><summary data-i18n="simpleT"></summary><div data-i18n-html="simple1"></div></details>
+    <details><summary data-i18n="wordT"></summary><div data-i18n-html="word1"></div></details>
+  </section>
+
+  <!-- ===================== TAB 2: MA SÁT NGHỈ, MA SÁT TRƯỢT ===================== -->
+  <section id="t2" class="col" hidden>
+    <p class="req" data-i18n-html="req2"></p>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" data-i18n="hint2"></p>
+        <canvas id="cv2" aria-label="spring scale"></canvas>
+        <p class="status" id="st2"></p>
+        <div class="controls">
+          <button class="btn primary" id="pull2" data-i18n="pull2"></button>
+          <button class="btn" id="run2"></button>
+          <button class="btn" id="stepB2" data-i18n="step"></button>
+          <button class="btn" id="rst2" data-i18n="reset"></button>
+          <div class="seg" role="group" id="spd2"></div>
+        </div>
+        <canvas id="g2" aria-label="graph"></canvas>
+        <div class="legend">
+          <span><i style="background:var(--force)"></i><span data-i18n="lgScale"></span></span>
+          <span><i style="background:var(--fric)"></i><span data-i18n="lgFric"></span></span>
+        </div>
+        <p class="fine" data-i18n="assume2"></p>
+      </div>
+      <div class="col">
+        <div class="card">
+          <div class="sl"><div class="top"><span data-i18n="surface"></span></div><select id="surf2"></select></div>
+          <div class="sl"><div class="top"><span data-i18n="mass"></span><span class="val" id="massV"></span></div>
+            <input type="range" id="mass" min="0.2" max="5" step="0.1" value="1"></div>
+          <div class="sl"><div class="top"><span data-i18n="face"></span></div>
+            <div class="seg" id="face2"><button class="btn" data-f="wide" data-i18n="faceWide"></button><button class="btn" data-f="narrow" data-i18n="faceNarrow"></button></div></div>
+          <label class="chk"><input type="checkbox" id="pn2"> <span data-i18n="showPN"></span></label>
+        </div>
+        <div class="card">
+          <h2 data-i18n="obs"></h2>
+          <div class="bigfig" id="o2F"></div>
+          <dl class="kv">
+            <dt data-i18n="fricNow"></dt><dd id="o2f"></dd>
+            <dt data-i18n="fricKind"></dt><dd id="o2k"></dd>
+            <dt data-i18n="weight"></dt><dd id="o2P"></dd>
+            <dt data-i18n="peak"></dt><dd id="o2pk"></dd>
+            <dt data-i18n="slideF"></dt><dd id="o2sl"></dd>
+          </dl>
+        </div>
+        <div class="card" id="p2"></div>
+        <div class="card" id="p2b"></div>
+      </div>
+    </div>
+    <details open><summary data-i18n="mechT"></summary><div data-i18n-html="mech2"></div></details>
+    <details><summary data-i18n="simpleT"></summary><div data-i18n-html="simple2"></div></details>
+  </section>
+
+  <!-- ===================== TAB 3: GIAO THÔNG ===================== -->
+  <section id="t3" class="col" hidden>
+    <p class="req" data-i18n-html="req3"></p>
+    <div class="lab">
+      <div class="stage">
+        <div class="seg" id="mode3"><button class="btn" data-m="brake" data-i18n="modeBrake"></button><button class="btn" data-m="start" data-i18n="modeStart"></button></div>
+        <p class="hint" id="hint3"></p>
+        <canvas id="cv3" aria-label="road"></canvas>
+        <p class="status" id="st3"></p>
+        <div class="controls">
+          <button class="btn primary" id="run3"></button>
+          <button class="btn" id="rst3" data-i18n="reset"></button>
+          <div class="seg" role="group" id="spd3"></div>
+        </div>
+        <canvas id="g3" aria-label="graph"></canvas>
+        <p class="fine" data-i18n="assume3"></p>
+      </div>
+      <div class="col">
+        <div class="card">
+          <div class="sl"><div class="top"><span data-i18n="roadT"></span></div><select id="road3"></select></div>
+          <div class="sl"><div class="top"><span id="spdLbl3"></span><span class="val" id="vV"></span></div>
+            <input type="range" id="v3" min="10" max="100" step="5" value="50"></div>
+          <div class="sl" id="trBox"><div class="top"><span data-i18n="react"></span><span class="val" id="trV"></span></div>
+            <input type="range" id="tr3" min="0.5" max="2.5" step="0.1" value="1"></div>
+        </div>
+        <div class="card">
+          <h2 data-i18n="obs"></h2>
+          <dl class="kv" id="o3"></dl>
+        </div>
+        <div class="card" id="p3"></div>
+        <div class="card" id="p3b"></div>
+      </div>
+    </div>
+    <details open><summary data-i18n="mechT"></summary><div data-i18n-html="mech3"></div></details>
+    <details><summary data-i18n="simpleT"></summary><div data-i18n-html="simple3"></div></details>
+  </section>
+
+  <!-- ===================== TAB 4: LỰC CẢN CỦA NƯỚC, KHÔNG KHÍ ===================== -->
+  <section id="t4" class="col" hidden>
+    <p class="req" data-i18n-html="req4"></p>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" data-i18n="hint4"></p>
+        <canvas id="cv4" aria-label="tubes"></canvas>
+        <p class="status" id="st4"></p>
+        <div class="controls">
+          <button class="btn primary" id="run4"></button>
+          <button class="btn" id="rst4" data-i18n="reset"></button>
+          <div class="seg" role="group" id="spd4"></div>
+          <label class="chk"><input type="checkbox" id="fb4"> <span data-i18n="showFb"></span></label>
+        </div>
+        <canvas id="g4" aria-label="graph"></canvas>
+        <canvas id="g4f" aria-label="drag graph"></canvas>
+        <div class="legend"><span><i style="background:var(--laneA)"></i><span data-i18n="lgDragA"></span></span><span><i style="background:var(--laneB)"></i><span data-i18n="lgDragB"></span></span><span><i style="background:repeating-linear-gradient(90deg,var(--muted) 0 5px,transparent 5px 8px)"></i><span data-i18n="lgWnet"></span></span></div>
+        <p class="fine" data-i18n="assume4"></p>
+      </div>
+      <div class="col">
+        <div class="card">
+          <div class="two">
+            <div class="sl"><div class="lanehdr"><i style="background:var(--laneA)"></i><span data-i18n="laneA"></span></div>
+              <select id="medA"></select><select id="objA"></select></div>
+            <div class="sl"><div class="lanehdr"><i style="background:var(--laneB)"></i><span data-i18n="laneB"></span></div>
+              <select id="medB"></select><select id="objB"></select></div>
+          </div>
+          <div class="controls">
+            <button class="btn" id="pre4a" data-i18n="pre4a"></button>
+            <button class="btn" id="pre4b" data-i18n="pre4b"></button>
+            <button class="btn" id="pre4c" data-i18n="pre4c"></button>
+          </div>
+        </div>
+        <div class="card">
+          <h2 data-i18n="obs"></h2>
+          <dl class="kv" id="o4"></dl>
+        </div>
+        <div class="card" id="p4"></div>
+        <div class="card" id="p4b"></div>
+      </div>
+    </div>
+    <details open><summary data-i18n="mechT"></summary><div data-i18n-html="mech4"></div></details>
+    <details><summary data-i18n="simpleT"></summary><div data-i18n-html="simple4"></div></details>
+  </section>
+</div>
+
+<script>
+"use strict";
+/* ================= I18N ================= */
+const I18N={
+vi:{
+eyebrow:'KHTN 6 · Lực · Mô phỏng',title:'Lực ma sát: vì sao có, khi nào có lợi, khi nào có hại',
+tab1:'1. Vì sao có ma sát?',tab2:'2. Ma sát nghỉ và ma sát trượt',tab3:'3. Ma sát và giao thông',tab4:'4. Lực cản của nước, không khí',
+obs:'Quan sát',run:'▶ Chạy',pause:'⏸ Tạm dừng',step:'Bước',reset:'Đặt lại',
+mechT:'Cơ chế (giải thích khoa học)',simpleT:'Nói cho học sinh dễ hiểu',wordT:'Nguồn gốc từ “ma sát”',
+predTitle:'Dự đoán trước',predThen:'Giờ hãy làm thí nghiệm trong mô phỏng để kiểm tra.',showAns:'Xem đáp án',hideAns:'Ẩn đáp án',
+lgPull:'lực kéo',lgFric:'lực ma sát',lgPress:'lực ép (trọng lượng)',lgContact:'chỗ hai mặt chạm nhau thật',lgScale:'số chỉ lực kế (lực kéo)',
+/* tab 1 */
+req1:'<b>Yêu cầu cần đạt:</b> Nêu được lực ma sát là lực tiếp xúc xuất hiện ở bề mặt tiếp xúc giữa hai vật. Dùng hình vẽ, học liệu điện tử để nêu được: sự tương tác giữa bề mặt của hai vật tạo ra lực ma sát giữa chúng.',
+hint1:'Bấm vào bên trái hoặc bên phải khối gỗ: bàn tay sẽ đẩy khối với lực không đổi 15 N rồi rời ra. Khối trượt tiếp nhờ quán tính rồi tự dừng. Nhìn vào kính lúp: các gờ và các chỗ chạm nhau thay đổi thế nào?',
+push1:'Đẩy (tay đẩy 15 N)',showBonds:'Hiện liên kết phân tử',lube:'Bôi dầu',slideDist:'Khoảng cách tới vị trí ban đầu',
+trialsT:'Kết quả các lần đẩy',trialsHint:'Lần nào tay cũng đẩy cùng một lực 15 N trong cùng một khoảng thời gian. Đổi độ nhám, số quả nặng hoặc bôi dầu rồi so sánh.',trialRow:'Nhám {r} · ép {l} N{o}',trialOil:' · có dầu',noTrial:'Chưa có lần đẩy nào.',
+lbStart:'vị trí ban đầu',lbPress:'F ép = {F} N',lbScale:'tỉ xích: mỗi vạch 5 N',lbFmsN:'F ms ≈ {F} N',lbInertia:'tay đã rời: khối trượt tiếp nhờ quán tính',lbPush:'F đẩy = 15 N',st1Push:'Tay đang đẩy khối với lực 15 N.',st1Stuck:'Lực đẩy 15 N chưa thắng được lực ma sát nghỉ: khối không nhúc nhích. Thử bớt quả nặng hoặc bôi dầu.',st1Stop:'Khối dừng lại cách vị trí ban đầu {d} m: lực ma sát làm nó chậm dần.',st1Coast:'Đã thả tay: khối vẫn trượt tiếp nhờ quán tính, lực ma sát làm nó chậm dần.',
+p1cq:'Tay đẩy khối gỗ rồi rời ra. Nếu bôi dầu (ma sát ít đi), cũng cú đẩy đó, khối sẽ…',p1ca:'Dừng ngay khi tay rời ra',p1cb:'Trượt xa hơn',p1cc:'Trượt mãi không dừng',
+p1ce:'Đáp án: trượt xa hơn. Sau khi tay rời ra không còn lực đẩy; khối trượt tiếp nhờ quán tính và chỉ có lực ma sát làm nó chậm dần. Ma sát càng nhỏ, khối càng đi xa. Nếu hoàn toàn không có ma sát (và lực cản), khối sẽ trượt mãi.',
+rough:'Độ nhám của hai bề mặt',smoothEnd:'đánh bóng rất nhẵn',roughEnd:'rất nhám',press:'Lực ép khối xuống bàn',pressHint:'Khối gỗ nặng 5 N; mỗi quả nặng đặt thêm lên nặng 5 N.',pressDesc:'{F} N (khối + {n} quả nặng)',lbWeights:'{n} quả nặng × 5 N',
+nContacts:'Số chỗ chạm thật (trong khung)',realArea:'Phần bề mặt chạm nhau thật',fricRel:'Độ lớn lực ma sát (so sánh tương đối, không phải số đo):',
+partMech:'do các gờ cài vào nhau',partAdh:'do các phân tử ở chỗ chạm hút nhau',
+assume1:'Mô hình minh hoạ: phóng to khoảng 10 000 lần, không đúng tỉ lệ; các chấm tượng trưng cho hạt (phân tử, nguyên tử) ở sát bề mặt; độ lớn ma sát chỉ để so sánh. Ngoài đời, phần bề mặt chạm nhau thật thường còn nhỏ hơn nhiều (dưới 1%).',
+lbBlock:'Khối gỗ',lbTable:'Mặt bàn',lbZoom:'Kính lúp: phóng to chỗ tiếp xúc',lbOil:'lớp dầu',scaleBar:'≈ 1 µm (một phần nghìn milimét)',
+st1Rest:'Khối đang nằm yên: chỉ đỉnh các gờ chạm nhau.',st1Move:'Đang trượt: gờ phải vượt qua gờ, các liên kết ở chỗ chạm bị bứt ra rồi nối lại liên tục.',st1Oil:'Lớp dầu tách hai mặt ra: gần như không còn chỗ chạm, ma sát rất nhỏ.',
+p1q:'Mặt bàn và khối gỗ nhìn rất phẳng. Nếu soi bằng kính hiển vi thật mạnh, em nghĩ sẽ thấy gì?',p1a:'Phẳng tuyệt đối, hai mặt áp sát hoàn toàn',p1b:'Lồi lõm như núi đồi, chỉ chạm nhau ở vài đỉnh',p1c:'Hai mặt không chạm nhau chỗ nào',
+p1e:'Đáp án: lồi lõm như núi đồi. Mọi bề mặt, kể cả mặt kính, đều nhấp nhô ở kích thước micrômét. Hai vật chỉ thực sự chạm nhau ở đỉnh các gờ, và ma sát sinh ra chính ở những chỗ chạm đó.',
+p1bq:'Nếu đánh bóng cả hai mặt thật nhẵn (kéo thanh độ nhám về bên trái), lực ma sát sẽ…',p1ba:'Luôn giảm, tiến về gần bằng 0',p1bb:'Giảm lúc đầu, nhưng khi quá nhẵn thì lại tăng',p1bc:'Không thay đổi',
+p1be:'Đáp án: giảm lúc đầu rồi lại tăng. Khi mặt quá nhẵn, rất nhiều chỗ áp sát nhau nên các phân tử hai bên hút nhau mạnh hơn. Hai tấm kính thật phẳng và sạch ép vào nhau rất khó trượt; các khối căn mẫu bằng thép đánh bóng có thể “dính” vào nhau.',
+mech1:`<p><b>1. Bề mặt nào cũng nhấp nhô.</b> Dù trông nhẵn, mọi bề mặt đều có các gờ cao thấp cỡ micrômét (phần nghìn milimét). Đặt khối gỗ lên bàn thì hai mặt chỉ chạm nhau ở đỉnh các gờ. Phần diện tích chạm nhau thật rất nhỏ so với diện tích nhìn thấy.</p>
+<p><b>2. Gờ cài vào nhau.</b> Muốn khối trượt, các gờ phải được nâng lên vượt qua nhau, hoặc bị đè bẹp, bị mài gãy. Việc đó cần lực. Kéo trên hình để thấy khối gỗ bị nâng lên hạ xuống khi gờ vượt qua gờ.</p>
+<p><b>3. Phân tử ở chỗ chạm hút nhau.</b> Ở các chỗ chạm thật, hạt của hai vật ở rất gần nhau nên hút nhau (lực liên kết giữa các phân tử, có khi tạo thành “mối hàn” rất nhỏ). Muốn trượt phải bứt các liên kết này ra. Chúng đứt rồi lại nối ở chỗ chạm mới, liên tục, nên năng lượng chuyển thành nhiệt: xoa hai bàn tay thấy ấm.</p>
+<p><b>4. Hệ quả.</b> Ép mạnh hơn thì các gờ bẹp thêm, số chỗ chạm thật tăng, nên ma sát tăng. Bôi dầu thì lớp dầu tách hai mặt ra, ít chỗ chạm, ma sát giảm. Mặt quá nhẵn và sạch thì chỗ chạm rất nhiều, lực hút phân tử lớn, ma sát lại tăng.</p>
+<p><b>Lực ma sát là lực tiếp xúc:</b> nó chỉ xuất hiện ở bề mặt tiếp xúc giữa hai vật, vì chỉ ở đó các gờ và các phân tử của hai vật mới tác dụng lên nhau.</p>`,
+simple1:`<ul><li>Hãy úp hai bàn chải đánh răng vào nhau rồi kéo: lông của chúng cài vào nhau nên khó kéo. Bề mặt mọi vật, nhìn thật gần, cũng “lởm chởm” như vậy.</li>
+<li>Ở mỗi chỗ chạm có rất nhiều “miếng băng dính tí hon” (các hạt hút nhau). Kéo vật đi là phải giật đứt các miếng băng dính đó.</li>
+<li>Ấn mạnh thì nhiều chỗ chạm hơn, nhiều băng dính hơn, nên khó kéo hơn. Bôi dầu giống như chèn một lớp trơn ở giữa, các gờ ít chạm nhau.</li>
+<li>Câu cần nhớ: <b>lực ma sát xuất hiện ở chỗ hai vật tiếp xúc, do bề mặt hai vật “bám” và “cài” vào nhau.</b></li></ul>`,
+word1:`<p><b>Ma sát</b> là từ Hán Việt 摩擦. <b>Ma</b> (摩) nghĩa là xoa, mài, chà (như trong <i>ma luyện</i>: mài giũa, rèn luyện); <b>sát</b> (擦) nghĩa là chà, cọ, lau. Ghép lại: cọ xát vào nhau. Tiếng Trung hiện đại vẫn dùng 摩擦 (mócā), tiếng Nhật là 摩擦 (masatsu), tiếng Hàn 마찰 (machal), cùng một gốc chữ Hán.</p>
+<p><b>Friction</b> (tiếng Anh), <b>frottement</b> (tiếng Pháp), <b>Reibung</b> (tiếng Đức) đều mang nghĩa “chà xát”. Từ friction đến từ tiếng Latinh <i>frictio</i>, gốc là động từ <i>fricare</i>: chà, xoa. Ngành khoa học nghiên cứu ma sát, mài mòn và bôi trơn tên là <b>tribology</b> (ma sát học), từ tiếng Hy Lạp <i>τρίβω</i> (tribō): cọ xát, mài.</p>
+<p>Điểm chung: mọi ngôn ngữ đều đặt tên hiện tượng theo hành động <b>cọ hai bề mặt vào nhau</b>, đúng với cơ chế ở trên: ma sát sinh ra ở chỗ hai bề mặt tiếp xúc.</p>`,
+/* tab 2 */
+req2:'<b>Yêu cầu cần đạt:</b> Nêu được khái niệm lực ma sát trượt, lực ma sát nghỉ. Đo được lực bằng lực kế lò xo, đơn vị là niutơn (N).',
+hint2:'Kéo bàn tay (vòng tròn nét đứt) sang phải để kéo lực kế, hoặc bấm “Kéo đều tay”. Theo dõi số chỉ lực kế lúc khối còn đứng yên và lúc khối bắt đầu trượt.',
+pull2:'Kéo đều tay',pull2Stop:'Ngừng kéo',surface:'Hai mặt tiếp xúc',mass:'Khối lượng của khối',face:'Mặt đặt xuống bàn',faceWide:'Mặt rộng',faceNarrow:'Mặt hẹp',
+showPN:'Hiện trọng lượng và lực đỡ của bàn',fricNow:'Lực ma sát lúc này',fricKind:'Loại ma sát',weight:'Trọng lượng P',
+peak:'Lực kéo lớn nhất khi khối còn đứng yên',slideF:'Số chỉ lực kế khi khối đang trượt',
+kNone:'không có',kStatic:'ma sát nghỉ',kSlide:'ma sát trượt',
+sWood:'Khối gỗ trên mặt gỗ',sRubber:'Khối cao su trên mặt bê tông khô',sSteel:'Khối thép trên mặt thép (khô)',sIce:'Khối nước đá trên mặt nước đá',sTeflon:'Khối Teflon trên mặt Teflon (chất chống dính)',
+st2Idle:'Chưa kéo: không có lực ma sát.',st2Static:'Khối vẫn đứng yên dù đang bị kéo: lực ma sát nghỉ giữ khối lại, bằng đúng lực kéo.',st2Slide:'Khối đang trượt: lực ma sát trượt cản lại.',st2Wall:'Khối đã tới mép bàn. Bấm “Đặt lại” để làm lại.',
+reading:'Lực kế',hand:'tay',lbP:'P',lbN:'lực đỡ',lbF:'F kéo',lbFms:'F ms',
+assume2:'Giả thiết: g = 9,8 m/s²; hệ số ma sát lấy theo bảng tham khảo (giá trị thật thay đổi theo độ sạch, độ ẩm); lò xo lực kế có độ cứng 100 N/m. Ma sát được coi là không phụ thuộc diện tích mặt tiếp xúc nhìn thấy.',
+p2q:'Kéo từ từ cho tới khi khối bắt đầu trượt. Ngay lúc khối bắt đầu trượt, số chỉ lực kế sẽ…',p2a:'Tăng vọt lên',p2b:'Giảm xuống một chút',p2c:'Giữ nguyên',
+p2e:'Đáp án: giảm xuống. Lực ma sát nghỉ lớn nhất (lúc sắp trượt) lớn hơn lực ma sát trượt. Khi đã trượt, các chỗ chạm không kịp “bám chặt” và khối hơi nảy trên đỉnh các gờ, nên cần lực nhỏ hơn để giữ cho khối tiếp tục trượt. (Riêng Teflon thì hai giá trị gần bằng nhau.)',
+p2bq:'Lật khối để mặt hẹp úp xuống bàn (diện tích tiếp xúc nhỏ đi). Lực cần để làm khối trượt sẽ…',p2ba:'Nhỏ đi vì ít diện tích chạm',p2bb:'Lớn lên vì áp lực tập trung',p2bc:'Gần như không đổi',
+p2be:'Đáp án: gần như không đổi. Diện tích nhìn thấy nhỏ đi, nhưng mỗi chỗ chạm bị ép mạnh hơn nên bẹp nhiều hơn. Tổng diện tích chạm nhau THẬT gần như chỉ phụ thuộc lực ép, không phụ thuộc mặt nào úp xuống. Đây là quy luật Amontons (1699), đúng gần đúng với các vật rắn thông thường.',
+mech2:`<p><b>Ma sát nghỉ</b> xuất hiện khi có lực kéo (hoặc đẩy) mà vật vẫn đứng yên. Nó giữ cho vật không trượt và luôn có độ lớn bằng lực kéo, ngược chiều. Kéo mạnh thêm thì ma sát nghỉ cũng tăng theo, cho tới một giá trị lớn nhất. Trong mô phỏng, đó là lúc đồ thị đỏ và đồ thị tím trùng nhau và cùng đi lên.</p>
+<p><b>Ma sát trượt</b> xuất hiện khi vật trượt trên bề mặt vật khác. Nó ngược chiều chuyển động và gần như không đổi khi tốc độ thay đổi. Thường thì ma sát trượt nhỏ hơn ma sát nghỉ lớn nhất: các chỗ chạm chỉ tồn tại rất ngắn nên liên kết phân tử chưa kịp hình thành nhiều.</p>
+<p><b>Ma sát phụ thuộc vào gì?</b> Vào chất liệu và tình trạng hai bề mặt (thử đổi “Hai mặt tiếp xúc”) và vào lực ép hai mặt vào nhau (thử đổi khối lượng). Ma sát hầu như không phụ thuộc diện tích mặt tiếp xúc nhìn thấy.</p>
+<p><b>Hiện tượng “dính – trượt”:</b> ngoài đời, nếu kéo rất chậm bằng dây mềm, khối có thể trượt giật cục: trượt một đoạn rồi dừng, lặp lại. Đó là vì ma sát nghỉ lớn nhất lớn hơn ma sát trượt, và cũng là lí do bản lề cửa kêu cót két, phanh xe rít, dây đàn vĩ cầm phát ra tiếng. (Lực kế trong mô phỏng có giảm chấn nên số chỉ ổn định nhanh.)</p>`,
+simple2:`<ul><li><b>Ma sát nghỉ</b> = ma sát “giữ”: em đẩy cái tủ mà tủ chưa nhúc nhích, vì ma sát nghỉ giữ nó lại.</li>
+<li><b>Ma sát trượt</b> = ma sát “cản”: tủ đã trượt rồi mà vẫn bị sàn cản lại.</li>
+<li>Đẩy tủ, lúc đầu phải gồng hết sức, khi tủ đã nhích đi thì đẩy nhẹ hơn: vì ma sát nghỉ lớn nhất lớn hơn ma sát trượt.</li>
+<li>Muốn đo lực ma sát trượt: kéo vật bằng lực kế cho nó trượt <b>đều</b>; lúc đó số chỉ lực kế bằng lực ma sát trượt.</li></ul>`,
+/* tab 3 */
+req3:'<b>Yêu cầu cần đạt:</b> Nêu được tác dụng cản trở và tác dụng thúc đẩy chuyển động của lực ma sát. Lấy được ví dụ về một số ảnh hưởng của lực ma sát trong an toàn giao thông đường bộ.',
+modeBrake:'Phanh gấp',modeStart:'Khởi hành',
+hint3Brake:'Chọn mặt đường và tốc độ, kéo thả người đi đường tới vị trí muốn thử, rồi bấm Chạy. Người lái thấy người đi đường thì phanh hết sức.',
+hint3Start:'Chọn mặt đường rồi bấm Chạy: người lái nhấn ga mạnh để xe chạy nhanh lên. Để ý chiều của lực ma sát ở bánh xe.',
+roadT:'Mặt đường',spdBrake:'Tốc độ xe lúc thấy người đi đường',spdStart:'Tốc độ muốn đạt',react:'Thời gian phản ứng của người lái',
+rDry:'Đường nhựa khô',rWet:'Đường nhựa ướt mưa',rGravel:'Đường có sỏi, cát',rIce:'Đường đóng băng',
+o3v:'Tốc độ lúc này',o3s1:'Quãng đường đi trong lúc phản ứng',o3s2:'Quãng đường phanh',o3tot:'Tổng quãng đường dừng xe',o3res:'Kết quả',o3t:'Thời gian đạt tốc độ',o3d:'Quãng đường đã đi',o3slip:'Bánh xe',
+resSafe:'Dừng kịp, cách người đi đường {d} m',resHit:'Không dừng kịp! Húc vào người đi đường ở {v} km/h',grip:'bám đường',spin:'quay trượt (bị “bốc đầu” tại chỗ)',
+st3Ready:'Bấm Chạy để bắt đầu.',st3React:'Người lái đang phản ứng: xe vẫn chạy với tốc độ cũ.',st3Brake:'Đang phanh: lực ma sát giữa lốp và đường cản trở chuyển động.',st3Stop:'Xe đã dừng.',st3Hit:'Va chạm!',
+st3Go:'Lực ma sát giữa lốp và mặt đường đẩy xe tiến lên.',st3Spin:'Ma sát quá nhỏ, bánh xe quay trượt, xe tăng tốc rất chậm.',st3Done:'Đã đạt tốc độ.',
+lbObst:'người đi đường',lbReact:'phản ứng',lbBrake:'phanh',lbFmsFwd:'F ms đẩy xe',lbFmsBack:'F ms cản xe',
+assume3:'Giả thiết: xe có phanh chống bó cứng; hệ số bám (gần đúng): khô 0,8; ướt 0,5; sỏi cát 0,35; băng 0,1; khi khởi hành xe muốn tăng tốc 3 m/s²; bỏ qua sức cản không khí. Xe và người vẽ to hơn tỉ lệ thật để dễ nhìn.',
+p3q:'Xe đang chạy 30 km/h thì phanh. Nếu xe chạy 60 km/h (gấp đôi), quãng đường PHANH (sau khi đạp phanh) sẽ…',p3a:'Gấp đôi',p3b:'Gấp bốn',p3c:'Không đổi',
+p3e:'Đáp án: gấp bốn. Quãng đường phanh tỉ lệ với bình phương tốc độ. Thử 30 rồi 60 km/h trên đường khô: khoảng 4,4 m thành khoảng 17,7 m. Vì vậy chạy nhanh rất nguy hiểm, nhất là khi đường ướt.',
+p3bq:'Khi xe khởi hành và chạy nhanh dần, lực ma sát của mặt đường tác dụng lên bánh xe chủ động hướng về đâu?',p3ba:'Ngược chiều chuyển động (cản xe lại)',p3bb:'Cùng chiều chuyển động (đẩy xe đi tới)',p3bc:'Không có ma sát',
+p3be:'Đáp án: cùng chiều chuyển động. Bánh xe quay, đẩy mặt đường về phía sau; mặt đường đẩy lại bánh xe về phía trước bằng lực ma sát. Không có ma sát (đường băng) thì bánh chỉ quay tít tại chỗ. Bước chân đi bộ cũng vậy.',
+mech3:`<p><b>Ma sát thúc đẩy chuyển động.</b> Khi động cơ làm bánh xe quay, chỗ lốp chạm đất có xu hướng trượt về phía sau. Ma sát nghỉ giữa lốp và mặt đường chống lại xu hướng đó nên hướng về phía trước và đẩy xe đi. Người đi bộ cũng thế: chân đạp đất về sau, ma sát đẩy người về trước. Ma sát nghỉ chỉ lớn tới một giới hạn; nếu xe đòi lực lớn hơn (đường băng, nhấn ga quá mạnh) thì bánh quay trượt.</p>
+<p><b>Ma sát cản trở chuyển động.</b> Khi phanh, ma sát giữa lốp và mặt đường hướng ngược chiều chuyển động và làm xe chậm dần rồi dừng. Ma sát càng lớn, xe dừng càng nhanh.</p>
+<p><b>An toàn giao thông.</b> Tổng quãng đường dừng xe gồm quãng đi trong lúc người lái phản ứng (tỉ lệ với tốc độ) và quãng đường phanh (tỉ lệ với bình phương tốc độ, tỉ lệ nghịch với độ bám). Nước mưa, sỏi cát, dầu loang hay băng làm giảm số chỗ bám giữa lốp và đường, nên quãng đường phanh dài ra nhiều lần. Lốp mòn hết rãnh không thoát được nước nên trơn hơn. Người lái mệt, dùng điện thoại hay uống rượu bia thì phản ứng chậm.</p>`,
+simple3:`<ul><li>Không có ma sát thì xe không chạy được và cũng không dừng được: bánh xe chỉ quay tít như trên mặt băng.</li>
+<li>Ma sát có lợi: giúp ta đi, giúp xe chạy, giúp phanh xe. Ma sát có hại: làm mòn lốp, mòn phanh, tốn nhiên liệu.</li>
+<li>Trời mưa đường trơn: phải đi chậm, giữ khoảng cách xa hơn với xe trước.</li>
+<li>Chạy nhanh gấp đôi thì cần đoạn đường phanh dài gấp bốn!</li></ul>`,
+/* tab 4 */
+req4:'<b>Yêu cầu cần đạt:</b> Thực hiện được thí nghiệm chứng tỏ vật chịu tác dụng của lực cản khi chuyển động trong nước (hoặc không khí).',
+hint4:'Chọn chất trong ống và vật thả ở mỗi ống, dự đoán vật nào chạm đáy trước, rồi bấm “Thả vật”. Ống cao 1,5 m.',
+drop:'▶ Thả vật',laneA:'Ống A',laneB:'Ống B',showFb:'Hiện lực đẩy của chất lỏng (học kĩ ở lớp 8)',
+mVac:'Chân không',mAir:'Không khí',mWater:'Nước',
+oSteel:'Bi thép (bán kính 1 cm)',oGlass:'Bi thuỷ tinh (bán kính 0,8 cm)',oClayBall:'Đất nặn vo tròn (12 g)',oClayFlat:'Đất nặn dát mỏng 5 cm × 5 cm (12 g)',oPaperFlat:'Tờ giấy phẳng khổ A5 (2,5 g)',oPaperBall:'Tờ giấy đó vo tròn (2,5 g)',
+pre4a:'Bi thép: không khí và nước',pre4b:'Giấy phẳng và giấy vo',pre4c:'Đất nặn tròn và dẹt trong nước',
+o4t:'Thời gian chạm đáy',o4v:'Tốc độ lúc chạm đáy',o4d:'Lực cản lúc này',o4float:'Vật nổi, không chìm xuống',o4run:'đang rơi…',
+st4Ready:'Bấm “Thả vật” để hai vật rơi cùng lúc.',st4Run:'Đang rơi…',st4Done:'Xong. So sánh thời gian và đồ thị tốc độ.',
+lgDragA:'lực cản, ống A',lgDragB:'lực cản, ống B',lgWnet:'trọng lượng trừ lực đẩy của chất lỏng',gFd:'Lực cản (mN)',phAcc:'nhanh dần',phUni:'đều',phDec:'chậm dần',o4ph:'Kiểu chuyển động',
+st4Explain:'Vật rơi nhanh dần thì lực cản tăng dần; khi lực cản lớn bằng trọng lượng (trừ lực đẩy) thì vật rơi đều.',lbW:'P',lbDrag:'F cản',lbFb:'F đẩy',lbVac:'(đã hút hết không khí)',lbBig:'vật vẽ to hơn thật',
+gv:'Tốc độ (m/s)',gt:'Thời gian (s)',gF:'Lực (N)',gvk:'Tốc độ (km/h)',
+assume4:'Mô hình: lực cản = ½·ρ·C·S·v² cộng với phần ma sát nhớt (Stokes); hệ số cản C: hình cầu 0,47; tấm phẳng 1,17; giấy vo 0,8. Bỏ qua việc tờ giấy chao lắc, giấy thấm nước và phần nước bị kéo theo vật.',
+p4q:'Thả cùng một viên bi thép trong ống không khí và ống nước. Viên nào chạm đáy trước?',p4a:'Trong không khí',p4b:'Trong nước',p4c:'Cùng lúc, vì cùng một viên bi',
+p4e:'Đáp án: trong không khí. Nước cản mạnh hơn không khí rất nhiều (nước đặc hơn không khí khoảng 800 lần), nên trong nước viên bi nhanh chóng đạt một tốc độ không tăng thêm được (đồ thị nằm ngang). Đó là bằng chứng có lực cản của nước.',
+p4bq:'Thả cùng lúc tờ giấy phẳng và tờ giấy giống hệt nhưng đã vo tròn, trong không khí. Kết quả?',p4ba:'Hai tờ chạm đất cùng lúc vì cùng khối lượng',p4bb:'Tờ phẳng chạm đất trước',p4bc:'Tờ vo tròn chạm đất trước',
+p4be:'Đáp án: tờ vo tròn chạm trước. Cùng trọng lượng, nhưng tờ phẳng có mặt cản không khí lớn hơn nên lực cản lớn hơn. Thử đổi ống A thành chân không: trong chân không không có lực cản, mọi vật rơi nhanh như nhau.',
+mech4:`<p><b>Vì sao có lực cản?</b> Khi vật chuyển động trong nước hay không khí, nó phải đẩy các hạt chất lỏng, chất khí ra khỏi đường đi và kéo lớp chất lỏng sát mặt vật đi theo. Chất lỏng, chất khí tác dụng ngược lại lên vật một lực ngược chiều chuyển động: đó là lực cản.</p>
+<p><b>Lực cản lớn khi:</b> vật chuyển động nhanh (lực cản tăng rất nhanh theo tốc độ), vật có mặt hứng lớn hoặc hình dạng không thuôn, chất lưu đặc (nước đặc hơn không khí khoảng 800 lần).</p>
+<p><b>Tốc độ giới hạn.</b> Khi vật rơi nhanh dần, lực cản tăng dần tới khi bằng trọng lượng (trừ lực đẩy của chất lỏng). Từ đó vật rơi đều, đồ thị tốc độ nằm ngang. Trong chân không không có lực cản, mọi vật rơi như nhau.</p>
+<p><b>Liên hệ ma sát.</b> Lực cản của nước và không khí cũng là một lực cản trở chuyển động như ma sát, nhưng không do gờ cài vào nhau mà do vật phải đẩy chất lưu ra và do các lớp chất lưu trượt lên nhau (ma sát nhớt).</p>`,
+simple4:`<ul><li>Đi bộ dưới hồ bơi rất mệt vì nước cản mạnh hơn không khí.</li>
+<li>Thả tờ giấy phẳng thì nó bay lả tả, vo tròn lại thì rơi nhanh: cùng nặng như nhau, nhưng tờ phẳng “hứng” nhiều không khí hơn.</li>
+<li>Cá, tàu thuỷ, máy bay có dạng thuôn để giảm lực cản. Dù (dù nhảy) có mặt rất rộng để tăng lực cản, rơi chậm và an toàn.</li></ul>`
+},
+en:{
+eyebrow:'Natural Science 6 · Forces · Simulation',title:'Friction: why it exists, when it helps, when it hurts',
+tab1:'1. Why is there friction?',tab2:'2. Static and kinetic friction',tab3:'3. Friction and road safety',tab4:'4. Water and air resistance',
+obs:'Observations',run:'▶ Run',pause:'⏸ Pause',step:'Step',reset:'Reset',
+mechT:'Mechanism (scientific explanation)',simpleT:'For students, in plain words',wordT:'Where the word “friction” comes from',
+predTitle:'Predict first',predThen:'Now test it with the simulation.',showAns:'Show answer',hideAns:'Hide answer',
+lgPull:'pulling force',lgFric:'friction force',lgPress:'pressing force (weight)',lgContact:'where the surfaces really touch',lgScale:'spring scale reading (pull)',
+req1:'<b>Learning outcome:</b> State that friction is a contact force acting at the surface between two objects. Use pictures or digital media to state that the interaction between the two surfaces produces friction.',
+hint1:'Tap left or right of the wooden block: a hand pushes it with a constant 15 N, then lets go. The block coasts by inertia and stops by itself. Watch the magnifier: how do the bumps and contacts change?',
+push1:'Push (hand pushes 15 N)',showBonds:'Show molecular bonds',lube:'Add oil',slideDist:'Distance from the starting point',
+trialsT:'Results of each push',trialsHint:'Every push is the same 15 N for the same short time. Change roughness, the number of weights or oil and compare.',trialRow:'Rough {r} · press {l} N{o}',trialOil:' · oiled',noTrial:'No pushes yet.',
+lbStart:'starting point',lbPress:'F press = {F} N',lbScale:'scale: each mark 5 N',lbFmsN:'F fr ≈ {F} N',lbInertia:'hand gone: the block coasts by inertia',lbPush:'F push = 15 N',st1Push:'The hand pushes the block with 15 N.',st1Stuck:'The 15 N push cannot overcome static friction: the block does not move. Try fewer weights or oil.',st1Stop:'The block stopped {d} m from the starting point: friction slowed it down.',st1Coast:'Let go: the block keeps sliding by inertia; friction slows it down.',
+p1cq:'Give the block a gentle push and let go. If it is oiled (less friction), with the same push the block will…',p1ca:'Stop as soon as you let go',p1cb:'Slide farther',p1cc:'Slide forever',
+p1ce:'Answer: slide farther. After you let go there is no push; the block coasts by inertia and only friction slows it. Less friction, longer slide. With no friction at all (and no air resistance) it would slide forever.',
+rough:'Roughness of the two surfaces',smoothEnd:'highly polished',roughEnd:'very rough',press:'Force pressing the block down',pressHint:'The block weighs 5 N; each added weight adds 5 N.',pressDesc:'{F} N (block + {n} weights)',lbWeights:'{n} weights × 5 N',
+nContacts:'Real contact points (in view)',realArea:'Surface really in contact',fricRel:'Size of friction (relative comparison, not a measurement):',
+partMech:'from bumps interlocking',partAdh:'from molecules attracting at contacts',
+assume1:'Illustrative model: magnified about 10,000×, not to scale; dots stand for particles (molecules, atoms) at the surface; friction size is for comparison only. In reality the true contact area is usually far smaller (under 1%).',
+lbBlock:'Wooden block',lbTable:'Table top',lbZoom:'Magnifier: the contact zone',lbOil:'oil film',scaleBar:'≈ 1 µm (a thousandth of a millimetre)',
+st1Rest:'Block at rest: only the tips of the bumps touch.',st1Move:'Sliding: bumps must ride over bumps; bonds at the contacts break and re-form constantly.',st1Oil:'The oil film keeps the surfaces apart: almost no contacts, very little friction.',
+p1q:'The table and the block look perfectly flat. Under a very powerful microscope, what would you see?',p1a:'Perfectly flat, touching everywhere',p1b:'Hills and valleys, touching only at a few peaks',p1c:'The surfaces do not touch at all',
+p1e:'Answer: hills and valleys. Every surface, even glass, is bumpy at the micrometre scale. The objects really touch only at the tips of the bumps, and friction is produced at those contacts.',
+p1bq:'If both surfaces are polished very smooth (slide roughness to the left), friction will…',p1ba:'Keep decreasing, almost to zero',p1bb:'Decrease at first, then rise again when extremely smooth',p1bc:'Stay the same',
+p1be:'Answer: decrease, then rise again. Extremely smooth surfaces touch in very many places, so the molecules attract more strongly. Two flat clean glass plates pressed together are hard to slide; polished steel gauge blocks can “wring” together.',
+mech1:`<p><b>1. Every surface is bumpy.</b> Even smooth-looking surfaces have peaks and valleys about a micrometre high. Put the block on the table and they touch only at the tips of the bumps. The real contact area is tiny compared with the visible area.</p>
+<p><b>2. Bumps interlock.</b> To slide, the bumps must be lifted over one another, squashed or broken off. That takes force. Drag the picture and watch the block rise and fall as bumps ride over bumps.</p>
+<p><b>3. Molecules attract at the contacts.</b> At the real contacts the particles of the two objects are very close, so they attract (intermolecular bonds, sometimes tiny “cold welds”). Sliding means tearing these bonds. They break and re-form at new contacts again and again, turning energy into heat: rub your hands and they get warm.</p>
+<p><b>4. Consequences.</b> Press harder: bumps flatten more, there are more real contacts, so more friction. Add oil: the film separates the surfaces, fewer contacts, less friction. Make surfaces too smooth and clean: lots of contact, strong attraction, friction rises again.</p>
+<p><b>Friction is a contact force:</b> it appears only at the surface between the two objects, because only there do their bumps and molecules act on each other.</p>`,
+simple1:`<ul><li>Press two toothbrushes together bristle to bristle and pull: the bristles catch on each other. Seen up close, every surface is “bristly” like that.</li>
+<li>Every contact point has lots of “tiny sticky tapes” (particles attracting). Moving the object means ripping those tapes.</li>
+<li>Press harder: more contacts, more tape, harder to pull. Oil is like a slippery layer in between, so the bumps hardly touch.</li>
+<li>Key sentence: <b>friction appears where two objects touch, because their surfaces stick to and catch on each other.</b></li></ul>`,
+word1:`<p>The Vietnamese word <b>ma sát</b> is Sino-Vietnamese 摩擦: <b>ma</b> (摩) means to rub or grind, <b>sát</b> (擦) means to scrub or wipe; together, “rubbing against each other”. Chinese 摩擦 (mócā), Japanese 摩擦 (masatsu) and Korean 마찰 (machal) share the same characters.</p>
+<p><b>Friction</b> comes from Latin <i>frictio</i>, from the verb <i>fricare</i>, “to rub”. French <b>frottement</b> and German <b>Reibung</b> also mean “rubbing”. The science of friction, wear and lubrication is <b>tribology</b>, from Greek <i>τρίβω</i> (tribō), “to rub”.</p>
+<p>All these languages name the phenomenon after <b>rubbing two surfaces together</b>, which matches the mechanism: friction arises where the surfaces touch.</p>`,
+req2:'<b>Learning outcome:</b> State the concepts of kinetic (sliding) friction and static friction. Measure force with a spring scale, unit newton (N).',
+hint2:'Drag the hand (dashed circle) to the right to pull the spring scale, or press “Pull steadily”. Watch the reading while the block is still and when it starts to slide.',
+pull2:'Pull steadily',pull2Stop:'Stop pulling',surface:'Surfaces in contact',mass:'Mass of the block',face:'Face resting on the table',faceWide:'Wide face',faceNarrow:'Narrow face',
+showPN:'Show weight and support force',fricNow:'Friction now',fricKind:'Type of friction',weight:'Weight P',
+peak:'Largest pull while the block was still',slideF:'Reading while the block slides',
+kNone:'none',kStatic:'static friction',kSlide:'kinetic friction',
+sWood:'Wood block on wood',sRubber:'Rubber block on dry concrete',sSteel:'Steel block on steel (dry)',sIce:'Ice block on ice',sTeflon:'Teflon block on Teflon (non-stick)',
+st2Idle:'Not pulling: no friction.',st2Static:'The block stays still though pulled: static friction holds it, exactly equal to the pull.',st2Slide:'The block is sliding: kinetic friction resists.',st2Wall:'The block reached the edge. Press “Reset” to try again.',
+reading:'Spring scale',hand:'hand',lbP:'P',lbN:'support',lbF:'F pull',lbFms:'F fr',
+assume2:'Assumptions: g = 9.8 m/s²; friction coefficients from reference tables (real values vary with cleanliness and humidity); spring constant 100 N/m. Friction is taken to be independent of the visible contact area.',
+p2q:'Pull slowly until the block starts to slide. At the moment it starts sliding, the reading will…',p2a:'Jump up',p2b:'Drop a little',p2c:'Stay the same',
+p2e:'Answer: it drops. Maximum static friction (just before sliding) is larger than kinetic friction. Once sliding, contacts have no time to “grip” and the block skims over the bump tips, so less force keeps it going. (For Teflon the two are almost equal.)',
+p2bq:'Turn the block so the narrow face is down (smaller contact area). The force needed to make it slide will…',p2ba:'Decrease, less area touching',p2bb:'Increase, pressure is concentrated',p2bc:'Stay about the same',
+p2be:'Answer: about the same. The visible area is smaller, but each contact is pressed harder and flattens more. The REAL contact area depends almost only on the pressing force, not on which face is down. This is Amontons’ law (1699), approximately true for ordinary solids.',
+mech2:`<p><b>Static friction</b> appears when a pull (or push) acts but the object stays still. It stops the object sliding and always equals the pull, in the opposite direction. Pull harder and static friction grows too, up to a maximum. In the simulation the red and purple graphs overlap and rise together.</p>
+<p><b>Kinetic (sliding) friction</b> appears when an object slides over another. It opposes the motion and stays nearly constant with speed. Usually it is smaller than maximum static friction: each contact lasts so briefly that fewer molecular bonds form.</p>
+<p><b>What does friction depend on?</b> The materials and condition of the surfaces (change “Surfaces in contact”) and how hard they are pressed together (change the mass). It hardly depends on the visible contact area.</p>
+<p><b>Stick–slip:</b> in real life, pulled very slowly through a soft string, a block may jerk: slide a little, stop, repeat. That happens because maximum static friction exceeds kinetic friction, and it is why hinges creak, brakes squeal and violin strings sing. (The simulated spring scale is damped, so its reading settles quickly.)</p>`,
+simple2:`<ul><li><b>Static friction</b> = “holding” friction: you push a wardrobe and it does not budge, because static friction holds it.</li>
+<li><b>Kinetic friction</b> = “resisting” friction: the wardrobe slides but the floor still drags on it.</li>
+<li>You strain to get the wardrobe moving, then it gets easier: maximum static friction is larger than kinetic friction.</li>
+<li>To measure kinetic friction: pull with a spring scale so the object slides <b>steadily</b>; the reading then equals the kinetic friction.</li></ul>`,
+req3:'<b>Learning outcome:</b> State that friction can hinder and can drive motion. Give examples of how friction affects road safety.',
+modeBrake:'Emergency stop',modeStart:'Pulling away',
+hint3Brake:'Choose the road and speed, drag the pedestrian where you want, then press Run. The driver brakes as hard as possible on seeing them.',
+hint3Start:'Choose the road and press Run: the driver accelerates hard. Watch the direction of friction on the wheels.',
+roadT:'Road surface',spdBrake:'Speed when the pedestrian is seen',spdStart:'Target speed',react:'Driver reaction time',
+rDry:'Dry asphalt',rWet:'Wet asphalt',rGravel:'Gravel and sand',rIce:'Icy road',
+o3v:'Speed now',o3s1:'Distance during reaction',o3s2:'Braking distance',o3tot:'Total stopping distance',o3res:'Result',o3t:'Time to reach speed',o3d:'Distance travelled',o3slip:'Wheels',
+resSafe:'Stopped in time, {d} m before the pedestrian',resHit:'Too late! Hit the pedestrian at {v} km/h',grip:'gripping',spin:'spinning (wheelspin)',
+st3Ready:'Press Run to start.',st3React:'Driver reacting: the car keeps its speed.',st3Brake:'Braking: tyre–road friction opposes the motion.',st3Stop:'The car has stopped.',st3Hit:'Collision!',
+st3Go:'Tyre–road friction pushes the car forward.',st3Spin:'Friction too small: wheels spin, the car speeds up very slowly.',st3Done:'Target speed reached.',
+lbObst:'pedestrian',lbReact:'reaction',lbBrake:'braking',lbFmsFwd:'friction pushes car',lbFmsBack:'friction slows car',
+assume3:'Assumptions: anti-lock brakes; grip coefficients (approx.): dry 0.8, wet 0.5, gravel 0.35, ice 0.1; when pulling away the car tries to accelerate at 3 m/s²; air resistance ignored. Car and person drawn larger than scale.',
+p3q:'A car brakes from 30 km/h. At 60 km/h (twice as fast), the BRAKING distance (after the brake is pressed) will be…',p3a:'Twice as long',p3b:'Four times as long',p3c:'The same',
+p3e:'Answer: four times. Braking distance grows with the square of speed. Try 30 then 60 km/h on a dry road: about 4.4 m becomes about 17.7 m. That is why speeding is so dangerous, especially in the wet.',
+p3bq:'As a car pulls away and speeds up, which way does the road’s friction on the driven wheels point?',p3ba:'Against the motion (slowing the car)',p3bb:'Along the motion (pushing the car forward)',p3bc:'There is no friction',
+p3be:'Answer: along the motion. The turning wheel pushes the road backwards; the road pushes the wheel forwards through friction. With no friction (ice) the wheel just spins. Walking works the same way.',
+mech3:`<p><b>Friction drives motion.</b> When the engine turns the wheel, the tyre patch on the road tends to slip backwards. Static friction opposes that tendency, so it points forwards and pushes the car. Walking is the same: your foot pushes the ground back, friction pushes you forward. Static friction has a limit; demand more (ice, flooring the pedal) and the wheels spin.</p>
+<p><b>Friction hinders motion.</b> When braking, tyre–road friction points against the motion and slows the car to a stop. More friction, shorter stop.</p>
+<p><b>Road safety.</b> Stopping distance = distance during the driver’s reaction (proportional to speed) + braking distance (proportional to speed squared, inversely to grip). Rain, gravel, spilled oil or ice reduce grip, so braking distance becomes several times longer. Bald tyres cannot clear water. Tired, distracted or drunk drivers react later.</p>`,
+simple3:`<ul><li>Without friction a car could neither go nor stop: the wheels would just spin, as on ice.</li>
+<li>Helpful friction: lets us walk, lets cars move and brake. Harmful friction: wears tyres and brakes, wastes fuel.</li>
+<li>Wet roads are slippery: drive slower and keep a bigger gap.</li>
+<li>Twice the speed needs four times the braking distance!</li></ul>`,
+req4:'<b>Learning outcome:</b> Carry out an experiment showing that objects moving through water (or air) experience a resistive force.',
+hint4:'Choose the fluid and the object for each tube, predict which reaches the bottom first, then press “Drop”. Tubes are 1.5 m tall.',
+drop:'▶ Drop',laneA:'Tube A',laneB:'Tube B',showFb:'Show buoyant force (studied in grade 8)',
+mVac:'Vacuum',mAir:'Air',mWater:'Water',
+oSteel:'Steel ball (radius 1 cm)',oGlass:'Glass marble (radius 0.8 cm)',oClayBall:'Clay rolled into a ball (12 g)',oClayFlat:'Clay pressed flat 5 cm × 5 cm (12 g)',oPaperFlat:'Flat A5 sheet of paper (2.5 g)',oPaperBall:'The same sheet crumpled (2.5 g)',
+pre4a:'Steel ball: air vs water',pre4b:'Flat vs crumpled paper',pre4c:'Round vs flat clay in water',
+o4t:'Time to reach bottom',o4v:'Speed at bottom',o4d:'Resistive force now',o4float:'Floats, does not sink',o4run:'falling…',
+st4Ready:'Press “Drop” to release both objects together.',st4Run:'Falling…',st4Done:'Done. Compare the times and the speed graphs.',
+lgDragA:'drag, tube A',lgDragB:'drag, tube B',lgWnet:'weight minus buoyancy',gFd:'Drag (mN)',phAcc:'speeding up',phUni:'steady',phDec:'slowing down',o4ph:'Type of motion',
+st4Explain:'As the object speeds up, drag grows; once drag equals the weight (minus buoyancy) it falls at a steady speed.',lbW:'P',lbDrag:'F drag',lbFb:'F buoy',lbVac:'(all air pumped out)',lbBig:'objects drawn larger',
+gv:'Speed (m/s)',gt:'Time (s)',gF:'Force (N)',gvk:'Speed (km/h)',
+assume4:'Model: drag = ½·ρ·C·A·v² plus a viscous (Stokes) part; drag coefficient C: sphere 0.47, flat plate 1.17, crumpled paper 0.8. Ignores fluttering of paper, paper soaking up water and water dragged along with the object.',
+p4q:'Drop the same steel ball in an air tube and a water tube. Which reaches the bottom first?',p4a:'In air',p4b:'In water',p4c:'At the same time, it is the same ball',
+p4e:'Answer: in air. Water resists much more than air (it is about 800 times denser), so in water the ball soon reaches a speed it cannot exceed (flat graph). That is evidence of water resistance.',
+p4bq:'Drop a flat sheet of paper and an identical sheet crumpled into a ball, in air. Result?',p4ba:'They land together, same mass',p4bb:'The flat sheet lands first',p4bc:'The crumpled ball lands first',
+p4be:'Answer: the crumpled ball lands first. Same weight, but the flat sheet presents a bigger face to the air, so more drag. Switch tube A to vacuum: with no air there is no drag and everything falls alike.',
+mech4:`<p><b>Why is there drag?</b> An object moving through water or air must push the fluid’s particles out of its way and drags the layer next to its surface along. The fluid pushes back on the object with a force opposite to its motion: drag.</p>
+<p><b>Drag is large when</b> the object moves fast (drag rises steeply with speed), has a large or blunt front, or moves through a dense fluid (water is about 800 times denser than air).</p>
+<p><b>Terminal speed.</b> As the object speeds up, drag grows until it equals the weight (minus buoyancy). Then it falls at constant speed and the speed graph goes flat. In a vacuum there is no drag and everything falls alike.</p>
+<p><b>Link to friction.</b> Drag also resists motion like friction, but it comes from pushing fluid aside and from fluid layers sliding over each other (viscous friction), not from interlocking bumps.</p>`,
+simple4:`<ul><li>Walking in a swimming pool is tiring because water resists much more than air.</li>
+<li>A flat sheet of paper flutters down slowly; crumpled, it drops fast. Same weight, but the flat sheet “catches” more air.</li>
+<li>Fish, ships and planes are streamlined to reduce drag. Parachutes are wide to increase drag and land safely.</li></ul>`
+}};
+let lang='vi';
+const $=id=>document.getElementById(id);
+const T=k=>(I18N[lang][k]!==undefined?I18N[lang][k]:k);
+const nf=(x,d=1)=>new Intl.NumberFormat(lang==='vi'?'vi-VN':'en-US',{minimumFractionDigits:d,maximumFractionDigits:d}).format(x);
+const FONT='"Be Vietnam Pro",system-ui,sans-serif', MONO='"IBM Plex Mono",ui-monospace,monospace';
+const g=9.8, DT=1/600;
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const R=(desk,phone)=>innerWidth<640?phone:desk;
+
+/* ================= Màu ================= */
+let C={};
+function readColors(){const cs=getComputedStyle(document.documentElement);
+  ['ink','muted','line','panel','lane','force','fric','normal','vel','bond','matA','matA2','matB','matB2','oil','road','mark','sky','grass','water','air','laneA','laneB','react','brake','accent','ok','warn']
+  .forEach(k=>C[k]=cs.getPropertyValue('--'+k).trim());}
+readColors();
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',readColors);
+
+/* ================= Vẽ chung ================= */
+function size(cv,ratio,maxH){
+  const w=cv.clientWidth||300; let h=Math.round(w*ratio); if(maxH)h=Math.min(h,maxH); h=Math.max(h,160);
+  if(cv._h!==h){cv.style.height=h+'px';cv._h=h;}
+  const d=window.devicePixelRatio||1,W=Math.round(w*d),H=Math.round(h*d);
+  if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H;}
+  const ctx=cv.getContext('2d');ctx.setTransform(d,0,0,d,0,0);ctx.clearRect(0,0,w,h);return {ctx,w,h};
+}
+function txt(ctx,s,x,y,col,sz=14,wt=600,al='left',bl='middle',font=FONT){ctx.fillStyle=col;ctx.font=`${wt} ${sz}px ${font}`;ctx.textAlign=al;ctx.textBaseline=bl;ctx.fillText(s,x,y);}
+function pill(ctx,s,x,y,col,sz=13,al='center'){ctx.font=`700 ${sz}px ${FONT}`;const tw=ctx.measureText(s).width;let x0=al==='center'?x-tw/2:al==='right'?x-tw:x;
+  ctx.fillStyle=C.panel;ctx.globalAlpha=.88;ctx.beginPath();ctx.roundRect(x0-5,y-sz*.75,tw+10,sz*1.5,5);ctx.fill();ctx.globalAlpha=1;txt(ctx,s,x0,y,col,sz,700,'left');}
+function arrow(ctx,x1,y1,x2,y2,col,lw=4){
+  const dx=x2-x1,dy=y2-y1,L=Math.hypot(dx,dy);if(L<3)return;const ux=dx/L,uy=dy/L,hl=Math.min(14,L*.7),hw=hl*.55;
+  ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=lw;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2-ux*hl*.8,y2-uy*hl*.8);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(x2,y2);ctx.lineTo(x2-ux*hl-uy*hw,y2-uy*hl+ux*hw);ctx.lineTo(x2-ux*hl+uy*hw,y2-uy*hl-ux*hw);ctx.closePath();ctx.fill();
+}
+function niceStep(range,n=5){const r=range/n,p=10**Math.floor(Math.log10(r)),m=r/p;return (m<1.5?1:m<3?2:m<7?5:10)*p;}
+function graph(cv,series,o){
+  const {ctx,w,h}=size(cv,R(.3,.55),240);
+  const L=52,Rr=12,Tt=14,B=36,pw=w-L-Rr,ph=h-Tt-B;
+  const x0=o.x0||0,x1=o.x1,y0=o.y0||0,y1=o.y1;
+  const X=x=>L+(x-x0)/(x1-x0)*pw,Y=y=>Tt+ph-(y-y0)/(y1-y0)*ph;
+  ctx.strokeStyle=C.line;ctx.lineWidth=1;
+  const sx=niceStep(x1-x0,R(6,4)),sy=niceStep(y1-y0,4);
+  for(let x=Math.ceil(x0/sx)*sx;x<=x1+1e-9;x+=sx){ctx.beginPath();ctx.moveTo(X(x),Tt);ctx.lineTo(X(x),Tt+ph);ctx.stroke();txt(ctx,nf(x,sx<1?1:0),X(x),Tt+ph+12,C.muted,12,500,'center');}
+  for(let y=Math.ceil(y0/sy)*sy;y<=y1+1e-9;y+=sy){ctx.beginPath();ctx.moveTo(L,Y(y));ctx.lineTo(L+pw,Y(y));ctx.stroke();txt(ctx,nf(y,sy<1?1:0),L-6,Y(y),C.muted,12,500,'right');}
+  txt(ctx,o.xl,L+pw,Tt+ph+28,C.muted,12,600,'right');
+  ctx.save();ctx.translate(13,Tt+ph/2);ctx.rotate(-Math.PI/2);txt(ctx,o.yl,0,0,C.muted,12,600,'center');ctx.restore();
+  ctx.save();ctx.beginPath();ctx.rect(L,Tt-2,pw,ph+4);ctx.clip();
+  series.forEach(s=>{if(!s.d.length)return;ctx.strokeStyle=s.c;ctx.lineWidth=s.lw||2.5;ctx.setLineDash(s.dash||[]);ctx.beginPath();
+    s.d.forEach((p,i)=>{const px=X(p[0]),py=Y(p[1]);i?ctx.lineTo(px,py):ctx.moveTo(px,py);});ctx.stroke();});
+  ctx.setLineDash([]);ctx.restore();
+}
+
+/* ================= Dự đoán ================= */
+const PRED={
+  p1c:{q:'p1cq',o:['p1ca','p1cb','p1cc'],c:1,e:'p1ce'},p1:{q:'p1q',o:['p1a','p1b','p1c'],c:1,e:'p1e'},p1b:{q:'p1bq',o:['p1ba','p1bb','p1bc'],c:1,e:'p1be'},
+  p2:{q:'p2q',o:['p2a','p2b','p2c'],c:1,e:'p2e'},p2b:{q:'p2bq',o:['p2ba','p2bb','p2bc'],c:2,e:'p2be'},
+  p3:{q:'p3q',o:['p3a','p3b','p3c'],c:1,e:'p3e'},p3b:{q:'p3bq',o:['p3ba','p3bb','p3bc'],c:1,e:'p3be'},
+  p4:{q:'p4q',o:['p4a','p4b','p4c'],c:0,e:'p4e'},p4b:{q:'p4bq',o:['p4ba','p4bb','p4bc'],c:2,e:'p4be'}};
+function renderPred(id){const P=PRED[id],el=$(id);
+  el.innerHTML=`<h2>${T('predTitle')}</h2><p>${T(P.q)}</p><div class="opts">${P.o.map((k,i)=>`<button class="btn ${P.pick===i?'picked':''} ${P.show&&i===P.c?'right':''}" data-i="${i}">${T(k)}</button>`).join('')}</div>`+
+  (P.pick==null?'':`<p class="muted">${T('predThen')}</p><div><button class="btn rv">${T(P.show?'hideAns':'showAns')}</button></div>`)+(P.show?`<div class="ans">${T(P.e)}</div>`:'');}
+Object.keys(PRED).forEach(id=>$(id).addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const P=PRED[id];
+  if(b.classList.contains('rv'))P.show=!P.show;else P.pick=+b.dataset.i;renderPred(id);}));
+
+/* ================= Tab chung ================= */
+let tab=1;
+function setTab(n){tab=n;document.querySelectorAll('nav.tabs button').forEach(b=>{const on=+b.dataset.tab===n;b.classList.toggle('on',on);b.setAttribute('aria-selected',on);});
+  [1,2,3,4].forEach(i=>$('t'+i).hidden=i!==n);}
+document.querySelectorAll('nav.tabs button').forEach(b=>b.onclick=()=>setTab(+b.dataset.tab));
+function speedSeg(id,S,opts){const el=$(id);el.innerHTML=opts.map(s=>`<button class="btn" data-s="${s}">×${String(s).replace('.',lang==='vi'?',':'.')}</button>`).join('');
+  el.querySelectorAll('button').forEach(b=>{b.setAttribute('aria-pressed',+b.dataset.s===S.speed);b.onclick=()=>{S.speed=+b.dataset.s;speedSeg(id,S,opts);};});}
+
+/* ================= TAB 1: vi mô ================= */
+const S1={rough:.6,load:10,lube:false,bonds:true,off:0,v:0,drag:null,sparks:[],prevSegs:[],stretch:0,xm:0,vm:0,x0:null,dist:null,coast:false,trials:[]};
+const F_PUSH=15,T_PUSH=.15,T_APP=.35,T_RET=.6,OFF_PER_M=300; // tay đẩy luôn 15 N trong 0,15 s; dịch hình phóng to theo quãng đường (px/m, chỉ để nhìn)
+const PROF=(x,s)=>.15*Math.sin(x*.012+s)+.35*Math.sin(x*.061+2.1*s)+.3*Math.sin(x*.113+3.7*s)+.25*Math.sin(x*.171+5.3*s)+.18*Math.sin(x*.237+.7*s);
+function micro(zw){
+  const A=6+50*S1.rough,st=3,n=Math.ceil(zw/st)+1,pb=new Float32Array(n),pt=new Float32Array(n);
+  let mx=-1e9;
+  for(let i=0;i<n;i++){const x=i*st;pb[i]=A*PROF(x,1.3);pt[i]=A*PROF(x-S1.off,4.1);mx=Math.max(mx,pb[i]+pt[i]);}
+  // lực ép càng lớn, các gờ càng bẹp (delta), số chỗ chạm thật càng nhiều; dầu đỡ phần lớn tải, chỉ còn vài đỉnh cao nhất chạm nhau
+  const delta=.45*S1.load**.7*(1+A/40),film=S1.lube?Math.max(0,2-.05*S1.load):0,y0=mx-(S1.lube?delta*.2:delta)+film;
+  const segs=[];let cur=null,cnt=0;
+  for(let i=0;i<n;i++){const gap=y0-pt[i]-pb[i];if(gap<0){cnt++;if(!cur){cur={a:i,b:i};segs.push(cur);}else cur.b=i;}else cur=null;}
+  const fc=cnt/n;
+  const lubeK=S1.lube?(segs.length?.5:.12):1;
+  const mech=.75*S1.rough*(S1.load/40)*lubeK, adh=2.5*fc;
+  return {A,st,n,pb,pt,y0,segs,fc,mech,adh,film};
+}
+// Hệ số ma sát "hiệu dụng" lấy trung bình từ mô hình vi mô (độ nhám, lực ép, dầu); lực ép = trọng lượng nên gia tốc hãm a = μ·g
+function calcMu(){const off=S1.off;let mech=0,adh=0;for(let k=0;k<16;k++){S1.off=k*37;const M=micro(600);mech+=M.mech;adh+=M.adh;}S1.off=off;
+  mech/=16;adh/=16;S1.mech=mech;S1.adh=adh;S1.mu=Math.max(.08,.7*(mech+adh)*40/S1.load);}
+function addTrial(){S1.resetT=5;S1.dist=Math.abs(S1.xm-S1.x0);S1.trials.unshift({r:S1.rough,l:S1.load,o:S1.lube,d:S1.dist});S1.trials=S1.trials.slice(0,6);renderTrials();}
+// Bàn tay: tiến tới (app) → đẩy với lực không đổi F_PUSH trong T_PUSH giây (push) → rút về (ret). Lực ép = trọng lượng nên m = P/g.
+function t1Frame(dt){
+  const H=S1.hand,m=S1.load/g,fk=S1.mu*S1.load,fsMax=1.2*fk;
+  if(H){H.t+=dt;
+    if(H.ph==='app'&&H.t>=T_APP){H.ph='push';H.t=0;S1.x0=S1.xm;S1.dist=null;S1.stuck=F_PUSH<=fsMax;}
+    else if(H.ph==='push'&&H.t>=T_PUSH){H.ph='ret';H.t=0;H.relX=S1.xm;if(S1.stuck)addTrial();else S1.coast=true;}
+    else if(H.ph==='ret'&&H.t>=T_RET)S1.hand=null;}
+  // 5 s sau khi khối dừng: dời mốc "vị trí ban đầu" về chính giữa khối, sẵn sàng cho lần đẩy sau
+  if(S1.resetT>0&&!H&&!S1.coast){S1.resetT-=dt;if(S1.resetT<=0){S1.resetT=0;S1.x0=S1.xm;}}
+  const pushing=H&&H.ph==='push'&&!S1.stuck;
+  if(pushing){S1.vm+=H.dir*(F_PUSH-fk)/m*dt;}
+  else if(S1.coast){const d=Math.sign(S1.vm);S1.vm-=d*S1.mu*g*dt;if(Math.sign(S1.vm)!==d){S1.vm=0;S1.coast=false;addTrial();}}
+  if(pushing||S1.coast){S1.xm+=S1.vm*dt;S1.off+=S1.vm*dt*OFF_PER_M;}
+  S1.v=S1.vm*OFF_PER_M;
+  S1.stretch=clamp(S1.v*.05,-7,7);
+  S1.sparks=S1.sparks.filter(p=>(p.t-=dt)>0);S1.sparks.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;});
+}
+function renderT1(){
+  const cv=$('cv1');const {ctx,w,h}=size(cv,R(.6,1.05),innerHeight*.66);
+  const KF=R(2,1.5); // tỉ xích chung cho mọi lực ở tab 1: px trên 1 N
+  const hm=Math.round(h*R(.27,.3)),zx=10,zy=hm+Math.round(40*KF)+30,zw=w-20,zh=h-zy-10;
+  const M=micro(zw);const moving=Math.abs(S1.v)>8,PXM=R(320,170);
+  // ---- dải vĩ mô ----
+  const ty=hm-20;ctx.fillStyle=C.matA;ctx.fillRect(0,ty,w,20);
+  // camera đi theo khối: bàn trượt ngược lại, có vạch chia 0,5 m
+  const SX=m=>w/2+(m-S1.xm)*PXM;
+  ctx.strokeStyle=C.matA2;ctx.lineWidth=1;const sh=((-S1.xm*PXM)%30+30)%30;
+  for(let x=-30+sh;x<w;x+=30){ctx.beginPath();ctx.moveTo(x,ty+4);ctx.lineTo(x+12,ty+16);ctx.stroke();}
+  for(let m=Math.floor((S1.xm-w/2/PXM)*2)/2;m<=S1.xm+w/2/PXM;m+=.5){const x=SX(m);ctx.fillStyle='#fff';ctx.fillRect(x,ty,1.5,7);txt(ctx,nf(m,1)+' m',x+3,ty+13,'#fff',10,600);}
+  if(S1.x0!=null){const x=SX(S1.x0);ctx.strokeStyle=C.accent;ctx.lineWidth=2;ctx.setLineDash([4,3]);ctx.beginPath();ctx.moveTo(x,ty);ctx.lineTo(x,ty-hm*.62);ctx.stroke();ctx.setLineDash([]);
+    pill(ctx,T('lbStart'),x,ty-hm*.62,C.accent,11);}
+  const bw=Math.min(150,w*.34),bh=Math.min(40,hm*.3),bx=w/2-bw/2,by=ty-bh;
+  ctx.fillStyle=C.matB;ctx.beginPath();ctx.roundRect(bx,by,bw,bh,4);ctx.fill();
+  txt(ctx,T('lbBlock'),w/2,by+bh*.68,'#fff',13,700,'center');
+  // quả nặng chồng lên khối: mỗi quả 5 N, khối 5 N
+  const nW=Math.round((S1.load-5)/5),dh=Math.min(9,(hm-bh-34)/7),dw=bw*.46;
+  for(let k=0;k<nW;k++){const y=by-(k+1)*(dh+1);ctx.fillStyle=C.matA2;ctx.beginPath();ctx.roundRect(w/2-dw/2,y,dw,dh,2);ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,.25)';ctx.fillRect(w/2-dw/2+3,y+1,dw-6,Math.max(1,dh*.25));}
+  if(nW>0){ctx.fillStyle=C.matA2;ctx.fillRect(w/2-2,by-nW*(dh+1)-6,4,6);
+    pill(ctx,T('lbWeights').replace('{n}',nW),w/2+dw/2+8,by-nW*(dh+1)/2,C.ink,11,'left');}
+  // lực ép của khối lên bàn: điểm đặt trên mặt bàn (chỗ tiếp xúc), phương thẳng đứng, chiều xuống, dài theo tỉ xích; mỗi vạch = 5 N
+  {const ax=w/2-bw/4,L=S1.load*KF;arrow(ctx,ax,ty,ax,ty+L,C.normal,4);ctx.fillStyle=C.normal;ctx.beginPath();ctx.arc(ax,ty,4,0,7);ctx.fill();
+    ctx.strokeStyle=C.panel;ctx.lineWidth=2;for(let f=5;f<S1.load;f+=5){ctx.beginPath();ctx.moveTo(ax-5,ty+f*KF);ctx.lineTo(ax+5,ty+f*KF);ctx.stroke();}
+    pill(ctx,T('lbPress').replace('{F}',nf(S1.load,0)),ax,ty+L+16,C.normal,12);
+    pill(ctx,T('lbScale'),ax,ty+L+36,C.muted,11);}
+  const H=S1.hand,ay=by+bh*.5;
+  if(H){const d=H.dir;let tip,al=1;
+    if(H.ph==='app'){const k=H.t/T_APP;tip=w/2-d*bw/2-d*(1-k)*70;al=Math.min(1,k*3);}
+    else if(H.ph==='push')tip=w/2-d*bw/2+(S1.stuck?d*Math.sin(H.t*90):0);
+    else{const k=H.t/T_RET;tip=SX(H.relX)-d*bw/2-d*k*60;al=1-k;}
+    ctx.globalAlpha=al;drawHand(ctx,tip,ay,d,bh/40);ctx.globalAlpha=1;
+    if(H.ph==='push'){const fx=w/2-d*bw/2,py=by+bh*.3;arrow(ctx,fx,py,fx+d*F_PUSH*KF,py,C.force,4);ctx.fillStyle=C.force;ctx.beginPath();ctx.arc(fx,py,3.5,0,7);ctx.fill();
+      pill(ctx,T('lbPush'),fx+d*20,by-12,C.force,12);
+      if(S1.stuck){arrow(ctx,w/2,ty-3,w/2-d*F_PUSH*KF,ty-3,C.fric,4);pill(ctx,T('lbFmsN').replace('{F}',nf(F_PUSH,0)),w/2+bw/2+8,ty+12,C.fric,11,'left');}}}
+  if(moving){const d=Math.sign(S1.v);
+    if(S1.coast&&!(H&&H.ph==='push'))pill(ctx,T('lbInertia'),12,14,C.ink,12,'left');
+    const fk=S1.mu*S1.load;arrow(ctx,w/2,ty-3,w/2-d*Math.max(10,fk*KF),ty-3,C.fric,4);pill(ctx,T('lbFmsN').replace('{F}',nf(fk,1)),w/2+bw/2+8,ty+12,C.fric,11,'left');}
+  // kính lúp
+  const lx=w/2,ly=ty;ctx.strokeStyle=C.ink;ctx.lineWidth=2;ctx.beginPath();ctx.arc(lx,ly,12,0,7);ctx.stroke();
+  ctx.setLineDash([4,4]);ctx.strokeStyle=C.muted;ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(lx-12,ly+4);ctx.lineTo(zx,zy);ctx.moveTo(lx+12,ly+4);ctx.lineTo(zx+zw,zy);ctx.stroke();ctx.setLineDash([]);
+  // ---- khung phóng to ----
+  ctx.save();ctx.beginPath();ctx.roundRect(zx,zy,zw,zh,12);ctx.clip();
+  ctx.fillStyle=C.panel;ctx.fillRect(zx,zy,zw,zh);
+  const yc=zy+zh*.52,ref=M.A*.9;const sy=y=>yc-(y-ref);
+  const yB=i=>sy(M.pb[i]),yT=i=>sy(M.y0-M.pt[i]);
+  // dầu
+  if(S1.lube){ctx.fillStyle=C.oil;ctx.beginPath();for(let i=0;i<M.n;i++)ctx.lineTo(zx+i*M.st,yT(i));for(let i=M.n-1;i>=0;i--)ctx.lineTo(zx+i*M.st,yB(i));ctx.fill();}
+  // mặt dưới
+  ctx.fillStyle=C.matA;ctx.beginPath();ctx.moveTo(zx,zy+zh);for(let i=0;i<M.n;i++)ctx.lineTo(zx+i*M.st,yB(i));ctx.lineTo(zx+zw,zy+zh);ctx.fill();
+  // mặt trên
+  ctx.fillStyle=C.matB;ctx.beginPath();ctx.moveTo(zx,zy);for(let i=0;i<M.n;i++)ctx.lineTo(zx+i*M.st,yT(i));ctx.lineTo(zx+zw,zy);ctx.fill();
+  // hạt sát bề mặt
+  const dot=(x,y,c)=>{ctx.fillStyle=c;ctx.beginPath();ctx.arc(x,y,2.4,0,7);ctx.fill();};
+  for(let i=0;i<M.n;i+=3){const x=zx+i*M.st;dot(x,yB(i)+6,C.matA2);dot(x,yB(i)+15,C.matA2);dot(x,yT(i)-6,C.matB2);dot(x,yT(i)-15,C.matB2);}
+  // chỗ chạm
+  const segX=[];
+  M.segs.forEach(s=>{const a=Math.max(0,s.a-1),b=Math.min(M.n-1,s.b+1),cx=zx+(a+b)/2*M.st,cy=(yB((a+b)>>1)+yT((a+b)>>1))/2;segX.push(cx);
+    ctx.fillStyle=C.bond;ctx.globalAlpha=.35;ctx.beginPath();ctx.ellipse(cx,cy,Math.max(6,(b-a)*M.st/2+4),7,0,0,7);ctx.fill();ctx.globalAlpha=1;
+    if(S1.bonds){ctx.strokeStyle=C.bond;ctx.lineWidth=2;for(let i=a;i<=b;i+=2){const x=zx+i*M.st,ym=(yB(i)+yT(i))/2;
+      ctx.beginPath();ctx.moveTo(x-S1.stretch/2,ym+8);ctx.lineTo(x+S1.stretch/2,ym-8);ctx.stroke();dot(x-S1.stretch/2,ym+8,C.bond);dot(x+S1.stretch/2,ym-8,C.bond);}}});
+  // liên kết đứt → tia lửa nhỏ
+  if(moving&&S1.bonds){S1.prevSegs.forEach(p=>{if(!segX.some(x=>Math.abs(x-p.x)<10)&&S1.sparks.length<150)for(let k=0;k<5;k++)
+    S1.sparks.push({x:p.x,y:p.y,vx:(Math.random()-.5)*90,vy:(Math.random()-.5)*90,t:.45});});}
+  S1.prevSegs=M.segs.map((s,i)=>({x:segX[i],y:(yB((s.a+s.b)>>1)+yT((s.a+s.b)>>1))/2}));
+  S1.sparks.forEach(p=>{ctx.globalAlpha=p.t/.45;dot(p.x,p.y,C.bond);});ctx.globalAlpha=1;
+  // nhãn
+  pill(ctx,T('lbBlock'),zx+12,zy+18,C.ink,13,'left');pill(ctx,T('lbTable'),zx+12,zy+zh-18,C.ink,13,'left');
+  pill(ctx,T('lbZoom'),zx+zw-12,zy+18,C.muted,12,'right');
+  if(S1.lube)pill(ctx,T('lbOil'),zx+zw/2,yc,C.ink,12);
+  // thước
+  const sbx=zx+zw-60,sby=zy+zh-16;ctx.strokeStyle=C.ink;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(sbx,sby-5);ctx.lineTo(sbx,sby);ctx.lineTo(sbx+40,sby);ctx.lineTo(sbx+40,sby-5);ctx.stroke();
+  pill(ctx,'1 µm',sbx+20,sby-14,C.ink,12);
+  ctx.restore();
+  ctx.strokeStyle=C.line;ctx.lineWidth=1.5;ctx.beginPath();ctx.roundRect(zx,zy,zw,zh,12);ctx.stroke();
+  // số liệu
+  $('o1n').textContent=M.segs.length;$('o1a').textContent=nf(M.fc*100,0)+' %';
+  const mx=1.05;$('barM').style.width=clamp(S1.mech/mx*100,0,100)+'%';$('barA').style.width=clamp(S1.adh/mx*100,0,100-S1.mech/mx*100)+'%';
+  $('o1d').textContent=S1.coast?nf(Math.abs(S1.xm-S1.x0),2)+' m':S1.dist!=null?nf(S1.dist,2)+' m':'—';
+  $('st1').textContent=S1.hand&&S1.hand.ph==='push'?T(S1.stuck?'st1Stuck':'st1Push'):S1.stuck&&!S1.coast?T('st1Stuck'):S1.coast?T('st1Coast'):S1.dist!=null?T('st1Stop').replace('{d}',nf(S1.dist,2)):S1.lube&&M.segs.length<2?T('st1Oil'):T('st1Rest');
+}
+$('rough').oninput=e=>{S1.rough=+e.target.value;upd1();};
+$('press').oninput=e=>{S1.load=+e.target.value;upd1();};
+$('bond1').onchange=e=>S1.bonds=e.target.checked;
+$('lube1').onchange=e=>{S1.lube=e.target.checked;calcMu();};
+function startPush(dir){if(S1.hand||S1.coast)return;S1.hand={dir,ph:'app',t:0};S1.stuck=false;S1.resetT=0;S1.x0=S1.xm;}
+$('push1').onclick=()=>startPush(1);
+$('rst1').onclick=()=>{Object.assign(S1,{xm:0,vm:0,x0:null,dist:null,coast:false,hand:null,stuck:false,trials:[]});renderTrials();};
+// Bàn tay: ngón trỏ chạm mặt khối tại (x,y), dir=+1 là đẩy sang phải (tay ở bên trái khối)
+function drawHand(ctx,x,y,dir,k){k=clamp(k,.7,1.2);ctx.save();ctx.translate(x,y);ctx.scale(dir*k,k);
+  ctx.fillStyle='#f2c49b';ctx.strokeStyle='#9a6440';ctx.lineWidth=1.6;ctx.lineJoin='round';
+  ctx.beginPath();ctx.roundRect(-30,-7,30,11,5.5);ctx.fill();ctx.stroke();               // ngón trỏ duỗi
+  ctx.beginPath();ctx.roundRect(-66,-12,40,30,9);ctx.fill();ctx.stroke();                // bàn tay
+  for(let i=0;i<3;i++){ctx.beginPath();ctx.roundRect(-34,3+i*5.5,12,6,3);ctx.fill();ctx.stroke();} // ba ngón gập
+  ctx.beginPath();ctx.ellipse(-44,-12,11,5,-.35,0,7);ctx.fill();ctx.stroke();              // ngón cái
+  ctx.fillStyle='#f2c49b';ctx.fillRect(-90,-8,26,22);ctx.strokeStyle='#9a6440';ctx.beginPath();ctx.moveTo(-90,-8);ctx.lineTo(-66,-8);ctx.moveTo(-90,14);ctx.lineTo(-66,14);ctx.stroke(); // cổ tay
+  ctx.restore();}
+function renderTrials(){const el=$('trials1');if(!S1.trials.length){el.innerHTML=`<dt>${T('noTrial')}</dt><dd></dd>`;return;}
+  el.innerHTML=S1.trials.map(t=>`<dt>${T('trialRow').replace('{r}',nf(t.r*100,0)+' %').replace('{l}',nf(t.l,0)).replace('{o}',t.o?T('trialOil'):'')}</dt><dd>${nf(t.d,2)} m</dd>`).join('');}
+function upd1(){$('roughV').textContent=nf(S1.rough*100,0)+' %';$('pressV').textContent=nf(S1.load,0)+' N';$('pressN').textContent=T('pressDesc').replace('{F}',nf(S1.load,0)).replace('{n}',Math.round((S1.load-5)/5));calcMu();}
+(()=>{const cv=$('cv1');let lx=0,lt=0;
+  // bấm bên trái khối → tay đẩy sang phải; bấm bên phải → tay đẩy sang trái
+  cv.addEventListener('pointerdown',e=>{const r=cv.getBoundingClientRect();startPush(e.clientX-r.left<r.width/2?1:-1);});})();
+
+/* ================= TAB 2: ma sát nghỉ, trượt ================= */
+const SURF=[{k:'sWood',ms:.5,mk:.3,top:'#c58f57',bot:'#9b6a3c'},{k:'sRubber',ms:1.0,mk:.8,top:'#3d3d3d',bot:'#a3a39b'},
+  {k:'sSteel',ms:.74,mk:.57,top:'#9aa6b2',bot:'#6f7c88'},{k:'sIce',ms:.1,mk:.03,top:'#cfe9f7',bot:'#a7d3ea'},{k:'sTeflon',ms:.04,mk:.04,top:'#f2f2ee',bot:'#d9d9d2'}];
+const K2=100,LS=.10,BODY=.13,XEND=1.08,XWALL=.95,VPULL=.06,VIEW=1.12;
+const S2={m:1,si:0,face:'wide',speed:1,running:true,pull:false,drag:false,showPN:false};
+function reset2(){Object.assign(S2,{x:.08,v:0,vh:0,t:0,sliding:false,fric:0,F:0,hist:[],peak:0,slipped:false,slideAvg:null,wall:false,pull:false,lastRec:-1});S2.xh=S2.x+blen()+LS+BODY;upd2();}
+function blen(){return S2.face==='wide'?.20:.08;} function bht(){return S2.face==='wide'?.08:.20;}
+function step2(dt){
+  const s=SURF[S2.si],m=S2.m,N=m*g,fsm=s.ms*N,fk=s.mk*N,len=blen();
+  if(S2.pull&&!S2.drag){S2.vh=VPULL;S2.xh=Math.min(XEND,S2.xh+VPULL*dt);if(S2.xh>=XEND)S2.pull=false;}
+  else if(!S2.drag)S2.vh=0;
+  else if(performance.now()-S2.lastMove>60)S2.vh=0; // tay giữ yên thì vận tốc tay = 0
+  const ext=S2.xh-BODY-(S2.x+len)-LS;
+  // số chỉ lực kế = lực đàn hồi của lò xo (k·Δl); giảm chấn chỉ giúp khối không rung, không tính vào số chỉ
+  const Fs=ext>0?K2*ext:0;
+  let F=ext>0?Fs+2*Math.sqrt(K2*m)*(S2.vh-S2.v):0;if(F<0)F=0;
+  if(!S2.sliding){if(F>fsm&&!S2.wall){S2.sliding=true;S2.slipped=true;}else{S2.fric=Math.min(F,fsm);S2.v=0;S2.peak=Math.max(S2.peak,Fs);}}
+  if(S2.sliding){S2.v+=(F-fk)/m*dt;if(S2.v<=0){S2.v=0;if(F<=fsm){S2.sliding=false;S2.fric=F;}else S2.fric=fk;}else S2.fric=fk;S2.x+=S2.v*dt;
+    S2.slideAvg=S2.slideAvg==null?Fs:S2.slideAvg*.995+Fs*.005;}
+  if(S2.x+len>XWALL){S2.x=XWALL-len;S2.v=0;S2.sliding=false;S2.wall=true;S2.pull=false;}
+  S2.F=Fs;S2.t+=dt;
+  if(S2.t-S2.lastRec>=1/40){S2.lastRec=S2.t;S2.hist.push([S2.t,Fs,S2.fric]);if(S2.hist.length>4000)S2.hist.shift();}
+}
+function renderT2(){
+  const s=SURF[S2.si];const cv=$('cv2');const {ctx,w,h}=size(cv,R(.27,.55),innerHeight*.5);
+  const PX=(w-24)/VIEW,X=m=>12+m*PX,ty=h*.7;
+  // bàn
+  ctx.fillStyle=s.bot;ctx.fillRect(4,ty,w-8,16);ctx.fillStyle=C.line;ctx.fillRect(14,ty+16,10,h-ty-16);ctx.fillRect(w-24,ty+16,10,h-ty-16);
+  ctx.fillStyle=C.muted;ctx.fillRect(X(XWALL),ty-10,5,10);
+  // khối
+  const len=blen(),ht=bht(),bx=X(S2.x),bw=len*PX,bh=ht*PX;
+  ctx.fillStyle=s.top;ctx.strokeStyle=C.ink;ctx.lineWidth=1.5;ctx.beginPath();ctx.roundRect(bx,ty-bh,bw,bh,3);ctx.fill();ctx.stroke();
+  txt(ctx,nf(S2.m,1)+' kg',bx+bw/2,ty-bh/2,S2.si>=3?'#223':'#fff',Math.min(15,bw/4),700,'center');
+  // lực kế
+  const ay=ty-.04*PX,xa=bx+bw,xs=X(S2.xh-BODY),xhP=X(S2.xh);
+  ctx.strokeStyle=C.ink;ctx.lineWidth=2;ctx.beginPath();const coils=10,sl=Math.max(4,xs-xa);ctx.moveTo(xa,ay);
+  for(let i=1;i<=coils*2;i++)ctx.lineTo(xa+sl*i/(coils*2),ay+(i%2?-7:7));ctx.lineTo(xs,ay);ctx.stroke();
+  ctx.fillStyle=C.panel;ctx.strokeStyle=C.ink;ctx.beginPath();ctx.roundRect(xs,ay-13,xhP-xs,26,5);ctx.fill();ctx.stroke();
+  const frac=clamp(S2.F/50,0,1);ctx.fillStyle=C.force;ctx.fillRect(xs+4,ay-3,(xhP-xs-8)*frac,6);
+  // tay
+  ctx.setLineDash([5,4]);ctx.strokeStyle=C.accent;ctx.lineWidth=2;ctx.beginPath();ctx.arc(xhP+16,ay,18,0,7);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle=C.matB;ctx.beginPath();ctx.arc(xhP+16,ay,11,0,7);ctx.fill();txt(ctx,T('hand'),xhP+16,ay+30,C.muted,12,600,'center');
+  pill(ctx,T('reading')+': '+nf(S2.F,1)+' N',(xs+xhP)/2,ay-30,C.force,14);
+  // vectơ
+  const fsm=s.ms*S2.m*g,sc=Math.min(130/Math.max(fsm*1.15,1),12);
+  if(S2.F>.05){arrow(ctx,xa,ty-bh*.5,xa+S2.F*sc,ty-bh*.5,C.force,4);txt(ctx,T('lbF'),xa+S2.F*sc,ty-bh*.5-14,C.force,13,700,'center');}
+  if(S2.fric>.05){arrow(ctx,bx+bw/2,ty+2,bx+bw/2-S2.fric*sc,ty+2,C.fric,4);txt(ctx,T('lbFms'),bx+bw/2-S2.fric*sc,ty+18,C.fric,13,700,'center');}
+  if(S2.showPN){const P=S2.m*g,ps=Math.min(80/P,sc);arrow(ctx,bx+bw*.3,ty-bh/2,bx+bw*.3,ty-bh/2+P*ps,C.ink,3);txt(ctx,T('lbP'),bx+bw*.3-10,ty-bh/2+P*ps,C.ink,13,700,'right');
+    arrow(ctx,bx+bw*.7,ty-bh/2,bx+bw*.7,ty-bh/2-P*ps,C.normal,3);txt(ctx,T('lbN'),bx+bw*.7+8,ty-bh/2-P*ps,C.normal,13,700);}
+  // đồ thị
+  const t1=Math.max(10,S2.t),t0=Math.max(0,t1-15),ymax=Math.max(2,fsm*1.25,S2.peak*1.1);
+  graph($('g2'),[{d:S2.hist.filter(p=>p[0]>=t0).map(p=>[p[0],p[1]]),c:C.force,lw:3},{d:S2.hist.filter(p=>p[0]>=t0).map(p=>[p[0],p[2]]),c:C.fric,lw:2.5,dash:[7,4]}],
+    {x0:t0,x1:t1,y0:0,y1:ymax,xl:T('gt'),yl:T('gF')});
+  // số liệu
+  $('o2F').textContent=T('reading')+': '+nf(S2.F,1)+' N';$('o2f').textContent=nf(S2.fric,1)+' N';
+  $('o2k').textContent=T(S2.F<.05&&!S2.sliding?'kNone':S2.sliding?'kSlide':'kStatic');
+  $('o2P').textContent=nf(S2.m*g,1)+' N';$('o2pk').textContent=S2.slipped?nf(S2.peak,1)+' N':'—';
+  $('o2sl').textContent=S2.slideAvg!=null?'≈ '+nf(S2.slideAvg,1)+' N':'—';
+  $('st2').textContent=S2.wall?T('st2Wall'):S2.sliding?T('st2Slide'):S2.F>.05?T('st2Static'):T('st2Idle');
+}
+function upd2(){$('massV').textContent=nf(S2.m,1)+' kg';$('pull2').textContent=T(S2.pull?'pull2Stop':'pull2');$('run2').textContent=T(S2.running?'pause':'run');
+  $('face2').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.f===S2.face));$('surf2').value=S2.si;}
+function fillSelect(sel,items,val){sel.innerHTML=items.map((it,i)=>`<option value="${i}">${T(it.k)}</option>`).join('');sel.value=val;}
+$('surf2').onchange=e=>{S2.si=+e.target.value;reset2();};
+$('mass').oninput=e=>{S2.m=+e.target.value;reset2();};
+$('face2').querySelectorAll('button').forEach(b=>b.onclick=()=>{S2.face=b.dataset.f;reset2();});
+$('pn2').onchange=e=>S2.showPN=e.target.checked;
+$('pull2').onclick=()=>{if(S2.wall)return;S2.pull=!S2.pull;S2.running=true;upd2();};
+$('run2').onclick=()=>{S2.running=!S2.running;upd2();};
+$('stepB2').onclick=()=>{S2.running=false;for(let i=0;i<20;i++)step2(DT);upd2();};
+$('rst2').onclick=reset2;
+(()=>{const cv=$('cv2');let lx=0,lt=0;
+  const toM=e=>{const r=cv.getBoundingClientRect(),PX=(r.width-24)/VIEW;return (e.clientX-r.left-12)/PX;};
+  cv.addEventListener('pointerdown',e=>{const m=toM(e);if(Math.abs(m-(S2.xh+16/((cv.clientWidth-24)/VIEW)))<.1){S2.drag=true;S2.pull=false;S2.running=true;upd2();lx=m;lt=performance.now();cv.setPointerCapture(e.pointerId);}});
+  cv.addEventListener('pointermove',e=>{if(!S2.drag)return;const m=toM(e),now=performance.now(),dt=Math.max(.008,(now-lt)/1000);
+    const nx=clamp(m-16/((cv.clientWidth-24)/VIEW),S2.x+blen()+BODY+.02,XEND);S2.vh=S2.vh*.5+.5*(nx-S2.xh)/dt;S2.xh=nx;lt=now;S2.lastMove=now;});
+  const up=()=>{S2.drag=false;};cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);})();
+
+/* ================= TAB 3: giao thông ================= */
+const ROADS=[{k:'rDry',mu:.8},{k:'rWet',mu:.5},{k:'rGravel',mu:.35},{k:'rIce',mu:.1}];
+const A_WANT=3,CARL=4.2;
+const S3={mode:'brake',ri:0,vk:50,tr:1,D:30,speed:1,running:false};
+function reset3(){Object.assign(S3,{t:0,x:0,v:S3.mode==='brake'?S3.vk/3.6:0,phase:'ready',hist:[],done:false,hit:null,spin:false,wheel:0,running:false,s1:null,lastRec:-1,tReach:null,ped:null});upd3();}
+function plan3(){const mu=ROADS[S3.ri].mu,v=S3.vk/3.6;if(S3.mode==='brake'){const s1=v*S3.tr,s2=v*v/(2*mu*g);return {s1,s2,tot:s1+s2,L:S3.Lfix||Math.max(S3.D+12,s1+s2+12,30)};}
+  const grip=A_WANT<=mu*g,a=grip?A_WANT:.75*mu*g;return {a,grip,L:v*v/(2*a)+15};}
+// người bị xe húc: văng lên theo kiểu ném xiên (minh hoạ), rơi xuống thì nằm trên đường
+function stepPed(dt){const P=S3.ped;if(!P||P.land)return;P.vy-=g*dt;P.x+=P.vx*dt;P.y+=P.vy*dt;P.rot+=P.w*dt;
+  if(P.y<=0&&P.vy<0){P.y=0;P.land=true;P.rot=Math.PI/2;}}
+function step3(dt){
+  if(S3.done){stepPed(dt);S3.t+=dt;if(!S3.ped||S3.ped.land){S3.running=false;upd3();}return;}
+  const mu=ROADS[S3.ri].mu,front=()=>S3.x+CARL;
+  if(S3.mode==='brake'){
+    if(S3.phase==='ready')S3.phase='react';
+    if(S3.phase==='react'&&S3.t>=S3.tr){S3.phase='brake';S3.s1=S3.x;}
+    if(S3.phase==='brake'){S3.v-=mu*g*dt;if(S3.v<=0){S3.v=0;S3.done=true;S3.phase=S3.hit!=null?'hit':'stop';if(!S3.ped)S3.running=false;}}
+    S3.x+=S3.v*dt;stepPed(dt);
+    if(S3.hit==null&&front()>=S3.D&&S3.v>0){S3.hit=S3.v;const vy=.6*S3.v+3,T2=2*vy/g;S3.ped={x:S3.D,y:0,vx:Math.min(.5*S3.v,Math.max(0,(plan3().L-3-S3.D)/T2)),vy,rot:0,w:5+S3.v*.3,land:false};}
+  }else{
+    S3.phase='go';const grip=A_WANT<=mu*g,a=grip?A_WANT:.75*mu*g;S3.spin=!grip;
+    S3.v+=a*dt;S3.x+=S3.v*dt;if(S3.v>=S3.vk/3.6){S3.v=S3.vk/3.6;S3.done=true;S3.tReach=S3.t;S3.running=false;}
+  }
+  S3.wheel+=(S3.spin?S3.v+12:S3.v)/.32*dt;S3.t+=dt;
+  if(S3.t-S3.lastRec>=1/20){S3.lastRec=S3.t;S3.hist.push([S3.t,S3.v*3.6]);}
+  if(S3.done){S3.hist.push([S3.t,S3.v*3.6]);upd3();}
+}
+function pedDraw(ctx,x,y,s,rot){ctx.save();ctx.translate(x,y-s*.45);ctx.rotate(rot);drawPerson(ctx,0,s*.45,s);ctx.restore();}
+function drawCar(ctx,x,y,L,wheel,dir){ // x = mép sau, y = mặt đường
+  const H=L*.36,r=L*.12;ctx.fillStyle=C.normal;ctx.strokeStyle=C.ink;ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(x,y-r*.9);ctx.lineTo(x,y-H*.62);ctx.lineTo(x+L*.22,y-H*.66);ctx.lineTo(x+L*.36,y-H);ctx.lineTo(x+L*.7,y-H);ctx.lineTo(x+L*.84,y-H*.62);
+  ctx.lineTo(x+L,y-H*.55);ctx.lineTo(x+L,y-r*.9);ctx.closePath();ctx.fill();ctx.stroke();
+  ctx.fillStyle=C.sky;ctx.beginPath();ctx.moveTo(x+L*.39,y-H*.93);ctx.lineTo(x+L*.68,y-H*.93);ctx.lineTo(x+L*.79,y-H*.66);ctx.lineTo(x+L*.3,y-H*.66);ctx.closePath();ctx.fill();
+  [x+L*.2,x+L*.8].forEach(cx=>{ctx.fillStyle='#222';ctx.beginPath();ctx.arc(cx,y-r,r,0,7);ctx.fill();ctx.strokeStyle='#bbb';ctx.lineWidth=2;
+    for(let k=0;k<3;k++){const a=wheel+k*2.094;ctx.beginPath();ctx.moveTo(cx,y-r);ctx.lineTo(cx+Math.cos(a)*r*.75,y-r+Math.sin(a)*r*.75);ctx.stroke();}});
+}
+function drawPerson(ctx,x,y,s){ctx.strokeStyle=C.warn;ctx.fillStyle=C.warn;ctx.lineWidth=Math.max(2,s*.12);ctx.lineCap='round';
+  ctx.beginPath();ctx.arc(x,y-s*.88,s*.12,0,7);ctx.fill();ctx.beginPath();ctx.moveTo(x,y-s*.75);ctx.lineTo(x,y-s*.38);ctx.lineTo(x-s*.18,y);ctx.moveTo(x,y-s*.38);ctx.lineTo(x+s*.18,y);
+  ctx.moveTo(x-s*.22,y-s*.6);ctx.lineTo(x+s*.22,y-s*.6);ctx.stroke();}
+function renderT3(){
+  const cv=$('cv3');const {ctx,w,h}=size(cv,R(.28,.62),innerHeight*.48);const pl=plan3();
+  const L=pl.L,off0=15+Math.max(0,56-CARL*(w-30)/L),PX=(w-off0-15)/L,X=m=>off0+m*PX,ry=h*.62;S3.PX=PX;S3.off0=off0;
+  ctx.fillStyle=C.sky;ctx.fillRect(0,0,w,ry-22);ctx.fillStyle=C.grass;ctx.fillRect(0,ry-26,w,6);
+  const rc=[C.road,'#4b5560','#8b7b62','#b9d4e3'][S3.ri];ctx.fillStyle=rc;ctx.fillRect(0,ry-20,w,34);
+  if(S3.ri===1){ctx.fillStyle='rgba(120,170,230,.35)';for(let x=10;x<w;x+=46)ctx.fillRect(x,ry-6,24,4);}
+  if(S3.ri===2){ctx.fillStyle='#c9b48e';for(let x=5;x<w;x+=9)ctx.fillRect(x,ry-12+((x*7)%13),3,3);}
+  ctx.fillStyle=C.mark;for(let m=0;m<L;m+=6)ctx.fillRect(X(m),ry-4,Math.max(2,3*PX),3);
+  // vạch thước
+  const tick=niceStep(L,R(8,5));for(let m=0;m<=L;m+=tick){ctx.fillStyle=C.muted;ctx.fillRect(X(m),ry+14,1.5,6);txt(ctx,nf(m,0)+' m',X(m),ry+28,C.muted,11,500,'center');}
+  // dải phản ứng / phanh
+  if(S3.mode==='brake'&&S3.phase!=='ready'){const yb=ry+40;const e1=S3.s1!=null?S3.s1:S3.x;
+    ctx.fillStyle=C.react;ctx.fillRect(X(CARL),yb,(e1)*PX,12);if(e1*PX>50)txt(ctx,T('lbReact'),X(CARL)+e1*PX/2,yb+24,C.muted,12,700,'center');
+    if(S3.s1!=null){ctx.fillStyle=C.brake;ctx.fillRect(X(CARL+S3.s1),yb,(S3.x-S3.s1)*PX,12);if((S3.x-S3.s1)*PX>40)txt(ctx,T('lbBrake'),X(CARL+S3.s1)+(S3.x-S3.s1)*PX/2,yb+24,C.muted,12,700,'center');}}
+  // vật cản
+  if(S3.mode==='brake'){const ox=X(S3.D);ctx.setLineDash([4,4]);ctx.strokeStyle=C.warn;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(ox,ry-80);ctx.lineTo(ox,ry+14);ctx.stroke();ctx.setLineDash([]);
+    const P=S3.ped;if(P){const PY=Math.max(PX,22);pedDraw(ctx,X(P.x)+10,ry-8-P.y*PY,46,P.rot);}
+    else{drawPerson(ctx,ox+10,ry-8,46);ctx.setLineDash([3,3]);ctx.strokeStyle=C.warn;ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(ox+10,ry-30,22,30,0,0,7);ctx.stroke();ctx.setLineDash([]);}
+    pill(ctx,T('lbObst')+' · '+nf(S3.D,0)+' m',ox+10,ry-70,C.warn,12);}
+  // xe
+  const cl=Math.max(CARL*PX,56),cx=X(S3.x+CARL)-cl;drawCar(ctx,cx,ry-6,cl,S3.wheel,1);
+  if(S3.spin&&!S3.done){ctx.fillStyle=C.muted;ctx.globalAlpha=.4;for(let k=0;k<4;k++){ctx.beginPath();ctx.arc(cx+cl*.2-10-k*9-Math.random()*4,ry-12-k*3,5+k*2,0,7);ctx.fill();}ctx.globalAlpha=1;}
+  // lực ma sát ở bánh
+  const wy=ry-2;
+  if(S3.mode==='brake'&&S3.phase==='brake'){arrow(ctx,cx+cl*.5,wy,cx+cl*.5-60,wy,C.fric,5);pill(ctx,T('lbFmsBack'),cx+cl*.5-30,wy+20,C.fric,12);}
+  if(S3.mode==='start'&&S3.phase==='go'&&!S3.done){const len=S3.spin?18:60;arrow(ctx,cx+cl*.2,wy,cx+cl*.2+len,wy,C.fric,5);pill(ctx,T('lbFmsFwd'),cx+cl*.2+30,wy+20,C.fric,12);}
+  // đồ thị
+  const tmax=Math.max(4,S3.t*1.1),vmax=Math.max(S3.vk*1.1,10);
+  graph($('g3'),[{d:S3.hist,c:C.vel,lw:3}],{x0:0,x1:tmax,y0:0,y1:vmax,xl:T('gt'),yl:T('gvk')});
+  // trạng thái
+  let st=T('st3Ready');if(S3.mode==='brake'){if(S3.hit!=null)st=T('st3Hit');else if(S3.phase==='react')st=T('st3React');else if(S3.phase==='brake')st=T('st3Brake');else if(S3.phase==='stop')st=T('st3Stop');else if(S3.phase==='hit')st=T('st3Hit');}
+  else if(S3.phase==='go')st=S3.done?T('st3Done'):S3.spin?T('st3Spin'):T('st3Go');
+  $('st3').textContent=st;
+  const kv=[];const fv=v=>nf(v*3.6,0)+' km/h';
+  if(S3.mode==='brake'){kv.push(['o3v',fv(S3.v)]);
+    if(S3.done){const p=plan3();kv.push(['o3s1',nf(p.s1,1)+' m'],['o3s2',nf(p.s2,1)+' m'],['o3tot',nf(p.tot,1)+' m']);
+      kv.push(['o3res',S3.hit!=null?T('resHit').replace('{v}',nf(S3.hit*3.6,0)):T('resSafe').replace('{d}',nf(S3.D-CARL-S3.x,1))]);}
+    else kv.push(['o3s1','—'],['o3s2','—'],['o3tot','—']);}
+  else{kv.push(['o3v',fv(S3.v)],['o3slip',S3.phase==='go'?T(S3.spin?'spin':'grip'):'—'],['o3d',nf(S3.x,1)+' m'],['o3t',S3.tReach!=null?nf(S3.tReach,1)+' s':'—']);}
+  $('o3').innerHTML=kv.map(([k,v])=>`<dt>${T(k)}</dt><dd>${v}</dd>`).join('');
+}
+function upd3(){$('run3').textContent=T(S3.running?'pause':'run');$('vV').textContent=nf(S3.vk,0)+' km/h';$('trV').textContent=nf(S3.tr,1)+' s';
+  $('spdLbl3').textContent=T(S3.mode==='brake'?'spdBrake':'spdStart');$('hint3').textContent=T(S3.mode==='brake'?'hint3Brake':'hint3Start');
+  $('trBox').hidden=S3.mode!=='brake';$('mode3').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===S3.mode));}
+$('mode3').querySelectorAll('button').forEach(b=>b.onclick=()=>{S3.mode=b.dataset.m;reset3();});
+$('road3').onchange=e=>{S3.ri=+e.target.value;reset3();};
+$('v3').oninput=e=>{S3.vk=+e.target.value;reset3();};
+$('tr3').oninput=e=>{S3.tr=+e.target.value;reset3();};
+$('run3').onclick=()=>{if(S3.done)reset3();S3.running=!S3.running;upd3();};
+$('rst3').onclick=reset3;
+(()=>{const cv=$('cv3');let on=false;
+  const toM=e=>{const r=cv.getBoundingClientRect();return (e.clientX-r.left-S3.off0)/S3.PX;};
+  // kéo thả người đi đường (khi xe chưa chạy hoặc đã xong); giữ nguyên tỉ lệ đường trong lúc kéo
+  cv.addEventListener('pointerdown',e=>{if(S3.mode!=='brake'||S3.running)return;const m=toM(e);
+    if(Math.abs(m-S3.D)*S3.PX<45||(S3.ped&&Math.abs(m-S3.ped.x)*S3.PX<45)){if(S3.phase!=='ready')reset3();S3.Lfix=plan3().L;on=true;cv.setPointerCapture(e.pointerId);}});
+  cv.addEventListener('pointermove',e=>{if(!on)return;const L=S3.Lfix;S3.D=clamp(Math.round(toM(e)-10/S3.PX),CARL+2,L-4);});
+  const up=()=>{if(!on)return;on=false;S3.Lfix=0;};cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);})();
+
+/* ================= TAB 4: lực cản ================= */
+const MED=[{k:'mVac',rho:0,eta:0},{k:'mAir',rho:1.2,eta:1.8e-5},{k:'mWater',rho:1000,eta:1.0e-3}];
+const ball=(k,r,rho,cd=.47)=>{const V=4/3*Math.PI*r**3;return {k,shape:'ball',m:rho*V,V,S:Math.PI*r*r,Cd:cd,r};};
+const OBJ=[ball('oSteel',.01,7800),ball('oGlass',.008,2500),ball('oClayBall',.0121,1600),
+  {k:'oClayFlat',shape:'plate',m:.01186,V:.01186/1600,S:.0025,Cd:1.17,r:Math.sqrt(.0025/Math.PI)},
+  {k:'oPaperFlat',shape:'plate',m:.0025,V:.0025/750,S:.0311,Cd:1.17,r:Math.sqrt(.0311/Math.PI)},
+  {k:'oPaperBall',shape:'crumple',m:.0025,V:4/3*Math.PI*.02**3,S:Math.PI*.02*.02,Cd:.8,r:.02}];
+const H4=1.5;
+const S4={speed:.5,running:false,showFb:false,lanes:[{med:1,obj:0},{med:2,obj:0}]};
+function reset4(){S4.running=false;S4.t=0;S4.lastRec=-1;S4.lanes.forEach(l=>Object.assign(l,{y:0,v:0,done:false,tHit:null,vHit:null,float:false,hist:[[0,0,0]],Fd:0,Fb:0,a:0,Wn:OBJ[l.obj].m*g-MED[l.med].rho*OBJ[l.obj].V*g}));upd4();}
+function forces(l){const o=OBJ[l.obj],md=MED[l.med];const W=o.m*g,Fb=md.rho*o.V*g,Fd=.5*md.rho*o.Cd*o.S*l.v*Math.abs(l.v)+6*Math.PI*md.eta*o.r*l.v;return {W,Fb,Fd,m:o.m};}
+function step4(dt){
+  S4.lanes.forEach(l=>{if(l.done||l.float)return;const f=forces(l);let a=(f.W-f.Fb-f.Fd)/f.m;
+    if(l.y<=0&&l.v<=0&&a<=0){l.float=true;l.v=0;l.y=0;l.Fb=f.Fb;l.Fd=0;return;}
+    l.v+=a*dt;l.y+=l.v*dt;if(l.y<0){l.y=0;l.v=0;}l.Fd=f.Fd;l.Fb=f.Fb;l.a=a;l.Wn=f.W-f.Fb;
+    if(l.y>=H4){l.y=H4;l.done=true;l.tHit=S4.t+dt;l.vHit=l.v;l.hist.push([S4.t+dt,l.v,l.Fd]);}});
+  S4.t+=dt;
+  if(S4.t-S4.lastRec>=1/60){S4.lastRec=S4.t;S4.lanes.forEach(l=>{if(!l.done&&!l.float)l.hist.push([S4.t,l.v,l.Fd]);});}
+  if(S4.lanes.every(l=>l.done||l.float)){S4.running=false;upd4();}
+}
+function phase4(l){return l.a>.03*g?'phAcc':l.a<-.03*g?'phDec':'phUni';}
+function drawObj(ctx,o,x,y,col){ctx.fillStyle=col;ctx.strokeStyle=C.ink;ctx.lineWidth=1.5;
+  if(o.shape==='ball'){const r=o.k==='oClayBall'?11:o.k==='oSteel'?9:8;ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();ctx.stroke();}
+  else if(o.shape==='plate'){const wd=o.k==='oPaperFlat'?52:26;ctx.beginPath();ctx.rect(x-wd/2,y-2.5,wd,5);ctx.fill();ctx.stroke();}
+  else{ctx.beginPath();for(let k=0;k<12;k++){const a=k/12*Math.PI*2,r=12+(k%3?2:-3);ctx.lineTo(x+Math.cos(a)*r,y+Math.sin(a)*r);}ctx.closePath();ctx.fill();ctx.stroke();}}
+function renderT4(){
+  const cv=$('cv4');const {ctx,w,h}=size(cv,R(.62,1.15),innerHeight*.62);
+  const top=58,bot=h-22,PX=(bot-top)/H4,tw=Math.min(130,w*.24);
+  S4.lanes.forEach((l,i)=>{const cx=w*(i?.72:.28),md=MED[l.med],o=OBJ[l.obj],col=i?C.laneB:C.laneA;
+    ctx.fillStyle=md.rho>100?C.water:md.rho>0?C.air:C.panel;ctx.fillRect(cx-tw/2,top,tw,bot-top);
+    if(md.rho>100){ctx.strokeStyle=C.normal;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(cx-tw/2,top);ctx.lineTo(cx+tw/2,top);ctx.stroke();}
+    ctx.strokeStyle=C.ink;ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(cx-tw/2,top-10);ctx.lineTo(cx-tw/2,bot);ctx.lineTo(cx+tw/2,bot);ctx.lineTo(cx+tw/2,top-10);ctx.stroke();
+    if(md.rho===0){ctx.setLineDash([3,5]);ctx.strokeStyle=C.muted;ctx.lineWidth=1;ctx.strokeRect(cx-tw/2+4,top,tw-8,bot-top-4);ctx.setLineDash([]);}
+    txt(ctx,T(i?'laneB':'laneA')+': '+T(md.k),cx,14,col,14,700,'center');
+    if(md.rho===0)txt(ctx,T('lbVac'),cx,32,C.muted,11,500,'center');
+    for(let m=0;m<=H4+1e-9;m+=.5){ctx.fillStyle=C.muted;ctx.fillRect(cx+tw/2,top+m*PX,6,1.5);txt(ctx,nf(m,1)+' m',cx+tw/2+9,top+m*PX,C.muted,11,500);}
+    let oy=top+12+l.y*PX*(bot-top-22)/(bot-top);drawObj(ctx,o,cx,oy,col);
+    // vectơ
+    const W=o.m*g,sc=46/W,ax=cx-tw/2-16;oy=Math.min(oy,bot-50);
+    arrow(ctx,ax,oy,ax,oy+W*sc,C.force,3.5);txt(ctx,T('lbW'),ax-6,oy+W*sc,C.force,12,700,'right');
+    if(l.Fd>W*.01){arrow(ctx,ax-10,oy,ax-10,oy-l.Fd*sc,C.fric,3.5);txt(ctx,T('lbDrag'),ax-16,oy-l.Fd*sc,C.fric,12,700,'right');}
+    if(S4.showFb&&l.Fb>W*.01){arrow(ctx,ax+8,oy,ax+8,oy-l.Fb*sc,C.normal,3);txt(ctx,T('lbFb'),ax+12,oy-l.Fb*sc-8,C.normal,12,700);}
+    if(l.float)pill(ctx,T('o4float'),cx,top+40,C.ink,12);
+    else if(S4.t>0)pill(ctx,T(phase4(l)),cx+tw/2-4,Math.max(top+12,oy-20),col,12,'right');
+  });
+  txt(ctx,T('lbBig'),w/2,h-8,C.muted,11,500,'center');
+  const tmax=Math.max(1,S4.t*1.08,...S4.lanes.map(l=>l.tHit||0)),vmax=Math.max(1,...S4.lanes.flatMap(l=>l.hist.map(p=>p[1])))*1.15;
+  graph($('g4'),S4.lanes.map((l,i)=>({d:l.hist,c:i?C.laneB:C.laneA,lw:3})),{x0:0,x1:tmax,y0:0,y1:vmax,xl:T('gt'),yl:T('gv')});
+  const live=S4.lanes.filter(l=>!l.float),fmax=Math.max(1,...live.map(l=>l.Wn*1000),...live.flatMap(l=>l.hist.map(p=>p[2]*1000)))*1.15;
+  graph($('g4f'),S4.lanes.flatMap((l,i)=>l.float?[]:[{d:l.hist.map(p=>[p[0],p[2]*1000]),c:i?C.laneB:C.laneA,lw:3},{d:[[0,l.Wn*1000],[tmax,l.Wn*1000]],c:i?C.laneB:C.laneA,lw:1.5,dash:[6,4]}]),
+    {x0:0,x1:tmax,y0:0,y1:fmax,xl:T('gt'),yl:T('gFd')});
+  $('o4').innerHTML=S4.lanes.map((l,i)=>`<dt style="color:${i?C.laneB:C.laneA};font-weight:700">${T(i?'laneB':'laneA')}</dt><dd></dd>
+    <dt>${T('o4t')}</dt><dd>${l.float?T('o4float'):l.tHit!=null?nf(l.tHit,2)+' s':(S4.t>0?T('o4run'):'—')}</dd>
+    <dt>${T('o4v')}</dt><dd>${l.vHit!=null?nf(l.vHit,2)+' m/s':'—'}</dd><dt>${T('o4d')}</dt><dd>${nf(l.Fd*1000,1)} mN</dd><dt>${T('o4ph')}</dt><dd>${l.float||S4.t===0?'—':T(phase4(l))}</dd>`).join('');
+  $('st4').textContent=(S4.running?T('st4Run'):S4.t>0?T('st4Done'):T('st4Ready'))+(S4.t>0?' '+T('st4Explain'):'');
+}
+function upd4(){$('run4').textContent=S4.running?T('pause'):T('drop');
+  ['A','B'].forEach((L,i)=>{fillSelect($('med'+L),MED,S4.lanes[i].med);fillSelect($('obj'+L),OBJ,S4.lanes[i].obj);});}
+['A','B'].forEach((L,i)=>{$('med'+L).onchange=e=>{S4.lanes[i].med=+e.target.value;reset4();};$('obj'+L).onchange=e=>{S4.lanes[i].obj=+e.target.value;reset4();};});
+const preset=(a,b)=>{S4.lanes[0].med=a[0];S4.lanes[0].obj=a[1];S4.lanes[1].med=b[0];S4.lanes[1].obj=b[1];reset4();};
+$('pre4a').onclick=()=>preset([1,0],[2,0]);$('pre4b').onclick=()=>preset([1,4],[1,5]);$('pre4c').onclick=()=>preset([2,2],[2,3]);
+$('fb4').onchange=e=>S4.showFb=e.target.checked;
+$('run4').onclick=()=>{if(S4.lanes.every(l=>l.done||l.float))reset4();S4.running=!S4.running;upd4();};
+$('rst4').onclick=reset4;
+
+/* ================= Ngôn ngữ ================= */
+function applyLang(){document.documentElement.lang=lang;document.title=I18N[lang].title.split(':')[0];
+  document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=T(el.dataset.i18n));
+  document.querySelectorAll('[data-i18n-html]').forEach(el=>el.innerHTML=T(el.dataset.i18nHtml));
+  $('langBtn').textContent=lang==='vi'?'EN':'VI';
+  Object.keys(PRED).forEach(renderPred);
+  fillSelect($('surf2'),SURF,S2.si);fillSelect($('road3'),ROADS,S3.ri);
+  speedSeg('spd2',S2,[.25,.5,1]);speedSeg('spd3',S3,[.5,1,2]);speedSeg('spd4',S4,[.25,.5,1]);
+  upd1();upd2();upd3();upd4();renderTrials();}
+$('langBtn').onclick=()=>{lang=lang==='vi'?'en':'vi';applyLang();};
+
+/* ================= Vòng lặp ================= */
+reset2();reset3();reset4();applyLang();renderTrials();setTab(1);
+let last=performance.now(),acc=0;
+function loop(now){const dt=Math.min((now-last)/1000,.1);last=now;
+  try{
+    if(tab===1){t1Frame(dt);renderT1();}
+    else{const S=[0,0,S2,S3,S4][tab],st=[0,0,step2,step3,step4][tab];
+      if(S.running){acc+=dt*S.speed;let n=0;while(acc>=DT&&n<3000){st(DT);acc-=DT;n++;}}else acc=0;
+      [0,0,renderT2,renderT3,renderT4][tab]();}
+  }catch(err){console.error(err);}
+  requestAnimationFrame(loop);}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

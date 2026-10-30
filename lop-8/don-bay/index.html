@@ -1,0 +1,1343 @@
+<title>Đòn bẩy và moment lực</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Xưởng đòn bẩy: sân khấu canvas bên trái, sổ ghi chép bên phải; tab 3 thêm cột Archimedes dẫn đường. Điện thoại xếp một cột. */
+:root{
+  --bg:#edf1ee; --panel:#ffffff; --lane:#f4f7f5; --ink:#16211c; --muted:#56655d; --line:#cbd5ce;
+  --accent:#14606b; --accent-ink:#ffffff; --ok:#1d8a4b; --warn:#c2410c;
+  --force:#d1323b; --effort:#6a3fc2; --arm:#b26c12;
+  --wood:#c78d55; --wood-dark:#7f5229; --pivot:#3b4850; --ground:#8f9e95;
+  --space:#0a0f1f; --space-ink:#e7ecf8; --space-muted:#9aa6c4; --star:#d5ddff;
+  --toga:#f4f1ea; --toga-line:#b8ae9c; --sash:#9b3d2e; --skin:#e0b08a; --hair:#a7a7a7; --hair-dark:#6f6f6f;
+  --font-ui:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-num:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Consolas,monospace;
+  --emoji:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;
+  --r:10px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1513; --panel:#17201c; --lane:#121a17; --ink:#e3ebe6; --muted:#97a89f; --line:#2b3933;
+  --accent:#4fb8c4; --accent-ink:#04252a; --ok:#47c47d; --warn:#f08a4b;
+  --force:#ff5f67; --effort:#a98bf5; --arm:#f0a948;
+  --wood:#b98552; --wood-dark:#e0b080; --pivot:#9fb0b9; --ground:#5d6c64;
+  --toga:#e6e1d6; --toga-line:#8f8676; --sash:#c0574a; --skin:#d9a77f; --hair:#b9b9b9; --hair-dark:#8a8a8a;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1513; --panel:#17201c; --lane:#121a17; --ink:#e3ebe6; --muted:#97a89f; --line:#2b3933;
+  --accent:#4fb8c4; --accent-ink:#04252a; --ok:#47c47d; --warn:#f08a4b;
+  --force:#ff5f67; --effort:#a98bf5; --arm:#f0a948;
+  --wood:#b98552; --wood-dark:#e0b080; --pivot:#9fb0b9; --ground:#5d6c64;
+  --toga:#e6e1d6; --toga-line:#8f8676; --sash:#c0574a; --skin:#d9a77f; --hair:#b9b9b9; --hair-dark:#8a8a8a;
+  color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-ui);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px 40px}
+.wrap{max-width:1320px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.eyebrow{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{margin:0;font-size:clamp(25px,3.4vw,36px);line-height:1.15;font-weight:800;text-wrap:balance;letter-spacing:-.01em}
+h2{margin:0;font-size:17px;font-weight:700;text-wrap:balance}
+h3{margin:0;font-size:15px;font-weight:700}
+.hdr-ctl{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{font:inherit;font-weight:600;font-size:15px;min-height:44px;padding:8px 14px;border-radius:8px;border:1px solid var(--line);
+  background:var(--panel);color:var(--ink);cursor:pointer;touch-action:manipulation}
+.btn:hover{border-color:var(--accent)}
+.btn:focus-visible,select:focus-visible,input:focus-visible,.chipcard:focus-visible,.zone:focus-visible,.lrow:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
+.seg .btn{border:0;border-radius:0;min-width:52px}
+nav.tabs{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line)}
+nav.tabs button{font:inherit;font-size:15px;font-weight:600;white-space:nowrap;min-height:46px;padding:8px 14px;border:0;border-bottom:3px solid transparent;
+  background:none;color:var(--muted);cursor:pointer;margin-bottom:-1px}
+nav.tabs button.on{color:var(--ink);border-bottom-color:var(--accent)}
+.req{margin:0;font-size:14px;color:var(--muted);max-width:110ch}
+.req b{color:var(--ink);font-weight:600}
+.lab{display:grid;grid-template-columns:minmax(0,1fr) 370px;gap:14px;align-items:start}
+.lab3{display:grid;grid-template-columns:310px minmax(0,1fr);gap:14px;align-items:start}
+@media (max-width:1020px){.lab,.lab3{grid-template-columns:minmax(0,1fr)}}
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.col{display:flex;flex-direction:column;gap:12px;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card p{margin:0}
+.card.predict{border-color:var(--accent);border-width:2px}
+canvas{display:block;width:100%;touch-action:none;border-radius:8px;background:var(--lane)}
+canvas.space{background:var(--space);touch-action:pan-y}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.hint{font-size:14px;color:var(--muted);margin:0}
+.status{font-size:15px;font-weight:600;margin:0;min-height:24px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.fld{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted);font-weight:600;min-width:0}
+.fld .val{color:var(--ink);font-family:var(--font-num);font-size:15px}
+select{font:inherit;font-size:15px;min-height:44px;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:var(--lane);color:var(--ink);width:100%}
+input[type=range]{width:100%;min-width:0;height:32px;accent-color:var(--accent)}
+.chk{display:flex;align-items:center;gap:10px;font-size:15px;min-height:44px;cursor:pointer}
+.chk input{width:22px;height:22px;accent-color:var(--accent)}
+.num{font-family:var(--font-num);font-variant-numeric:tabular-nums}
+.choices{display:flex;flex-wrap:wrap;gap:6px}
+.choices .btn{flex:1 1 120px;font-size:14px}
+.choices .btn.right{border-color:var(--ok);box-shadow:inset 0 0 0 2px var(--ok)}
+.choices .btn.wrong{border-color:var(--warn);box-shadow:inset 0 0 0 2px var(--warn)}
+.fb{font-size:15px;padding:8px 10px;border-radius:8px;background:var(--lane)}
+.fb.good{color:var(--ok)} .fb.bad{color:var(--warn)}
+.tblwrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:6px 4px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.03em}
+td.n{font-family:var(--font-num);font-variant-numeric:tabular-nums;white-space:nowrap}
+.sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:middle}
+.concl{font-size:15px;padding:10px 12px;border-radius:8px;border:1px dashed var(--accent);background:var(--lane)}
+.formula{font-family:var(--font-num);font-size:15px;background:var(--lane);padding:8px 10px;border-radius:8px;overflow-x:auto;white-space:nowrap}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--muted)}
+.legend i{display:inline-block;width:18px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}
+footer{font-size:13px;color:var(--muted)}
+footer p{margin:0 0 4px}
+/* Tab 2: loại đòn bẩy */
+.types{display:flex;flex-direction:column;gap:6px}
+.types .btn{display:flex;justify-content:space-between;align-items:center;gap:8px;text-align:left}
+.types .btn .ord{font-family:var(--font-num);font-size:13px;opacity:.85}
+.obs{display:flex;flex-direction:column;gap:6px;font-size:15px}
+.obs p{margin:0}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:2px 8px;border-radius:99px;border:1px solid currentColor;margin-right:6px}
+/* Trò chơi phân loại */
+.sort{display:flex;flex-direction:column;gap:12px}
+.pool{display:flex;flex-wrap:wrap;gap:8px;min-height:56px;padding:8px;border-radius:10px;background:var(--lane)}
+.zones{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.zone{border:2px dashed var(--line);border-radius:12px;padding:10px;min-height:96px;min-width:0;display:flex;flex-direction:column;gap:8px;cursor:pointer;background:var(--panel)}
+.zone.hover,.zone.armed{border-color:var(--accent);background:var(--lane)}
+.zone h3 span+span{font-family:var(--font-num);font-size:12px;color:var(--muted);font-weight:600;margin-left:6px}
+.chipcard{display:flex;align-items:center;gap:8px;min-height:48px;padding:6px 12px;border:1px solid var(--line);border-radius:10px;background:var(--panel);
+  cursor:grab;touch-action:pan-y;user-select:none;-webkit-user-select:none;font-weight:600;font-size:15px;color:var(--ink)}
+.chipcard .em{font-family:var(--emoji);font-size:24px;line-height:1}
+.chipcard.sel{outline:3px solid var(--accent);outline-offset:1px}
+.chipcard.done{cursor:default;border-color:var(--ok);align-items:flex-start;touch-action:auto}
+.chipcard.done .det{font-weight:500;font-size:13px;color:var(--muted)}
+@media (max-width:760px){.zone{padding:6px;gap:6px}.zone h3{font-size:13px;display:flex;flex-direction:column}.zone h3 span+span{margin-left:0}
+  .chipcard.done{padding:4px 6px;gap:4px;font-size:13px;flex-direction:column;align-items:center;text-align:center}.chipcard.done .det{display:none}.chipcard.done .em{font-size:20px}}
+.chipcard .txt{display:flex;flex-direction:column;min-width:0}
+.ghost{position:fixed;pointer-events:none;z-index:50;opacity:.92;transform:translate(-50%,-60%);box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.shake{animation:shake .4s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+/* Tab 3: Archimedes */
+.guide{position:sticky;top:12px}
+@media (max-width:1020px){.guide{position:static}}
+.guide .who{display:flex;flex-direction:column;align-items:center;gap:8px}
+.archi{width:170px;height:auto;display:block}
+@media (max-width:1020px){.guide .who{flex-direction:row;align-items:flex-start}.archi{width:96px;flex:0 0 96px}}
+.archi .toga{fill:var(--toga);stroke:var(--toga-line);stroke-width:1.5}
+.archi .fold{fill:none;stroke:var(--toga-line);stroke-width:1.5}
+.archi .sash{fill:var(--sash)}
+.archi .skin{fill:var(--skin)}
+.archi .skinln{fill:none;stroke:var(--skin);stroke-linecap:round}
+.archi .hair{fill:var(--hair)}
+.archi .hairln{fill:none;stroke:var(--hair-dark);stroke-width:2.5;stroke-linecap:round}
+.archi .eye{fill:#2a2a2a}
+.archi .tool{fill:none;stroke:var(--muted);stroke-width:3;stroke-linecap:round}
+.bubble{position:relative;background:var(--lane);border:2px solid var(--accent);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;font-size:15px;min-width:0;flex:1}
+.bubble p{margin:0}
+.bubble blockquote{margin:0;padding:6px 10px;border-left:3px solid var(--accent);font-weight:700;font-size:16px}
+.bubble ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
+.bubble .stepn{font-size:12px;color:var(--muted);font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.bubble .choices .btn{flex:1 1 100%;text-align:left;font-size:14px}
+.bnav{display:flex;justify-content:space-between;gap:8px}
+.bigfig{font-family:var(--font-num);font-size:clamp(20px,2.6vw,28px);font-weight:600;line-height:1.2}
+.kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;font-size:15px}
+.kv dt{color:var(--muted)} .kv dd{margin:0;font-family:var(--font-num);font-variant-numeric:tabular-nums}
+.ladder{display:flex;flex-direction:column}
+.lrow{display:grid;grid-template-columns:30px minmax(0,1fr) auto;grid-template-areas:"e n r" "e b b";gap:2px 10px;padding:7px 6px;border-bottom:1px solid var(--line);cursor:pointer;border-radius:6px}
+.lrow:hover{background:var(--lane)}
+@media (max-width:600px){.lrow{grid-template-columns:30px minmax(0,1fr);grid-template-areas:"e n" "e r" "e b"}.lrow .rt{white-space:normal}}
+.lrow .e{grid-area:e;font-family:var(--emoji);font-size:20px;line-height:1.3}
+.lrow .nm{grid-area:n;font-size:14px;min-width:0}
+.lrow .nm small{color:var(--muted);font-family:var(--font-num);margin-left:6px}
+.lrow .rt{grid-area:r;font-family:var(--font-num);font-size:13px;color:var(--muted);white-space:nowrap}
+.lrow .bar{grid-area:b;height:6px;border-radius:3px;background:var(--line);position:relative;overflow:hidden}
+.lrow .bar i{position:absolute;left:0;top:0;bottom:0;background:var(--muted);border-radius:3px}
+.lrow.me{background:var(--lane);border:2px solid var(--accent)}
+.lrow.me .bar i{background:var(--accent)}
+.lrow.me .nm{font-weight:700}
+.lrow.cur .nm{text-decoration:underline;text-decoration-color:var(--arm);text-decoration-thickness:3px;text-underline-offset:3px}
+@media (prefers-reduced-motion:reduce){.shake{animation:none}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow" data-i18n="eyebrow"></div>
+      <h1 data-i18n="title"></h1>
+    </div>
+    <div class="hdr-ctl">
+      <div class="seg" role="group" aria-label="level">
+        <button class="btn" id="lvQual" data-i18n="lvQual"></button>
+        <button class="btn" id="lvQuant" data-i18n="lvQuant"></button>
+      </div>
+      <button class="btn" id="langBtn">EN</button>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="1" data-i18n="tab1"></button>
+    <button role="tab" data-tab="2" data-i18n="tab2"></button>
+    <button role="tab" data-tab="3" data-i18n="tab3"></button>
+  </nav>
+
+  <!-- ===================== TAB 1 ===================== -->
+  <section id="t1" class="col">
+    <p class="req" data-i18n-html="req1"></p>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" data-i18n="hint1"></p>
+        <canvas id="cv1" aria-label="lever"></canvas>
+        <p class="status" id="st1"></p>
+        <div class="controls">
+          <button class="btn primary" id="rel1" data-i18n="release"></button>
+          <button class="btn" id="rst1" data-i18n="reset"></button>
+          <div class="seg" role="group" id="spd1">
+            <button class="btn" data-s="0.25">×0,25</button>
+            <button class="btn" data-s="0.5">×0,5</button>
+            <button class="btn" data-s="1">×1</button>
+          </div>
+          <label class="chk"><input type="checkbox" id="vec1" checked> <span data-i18n="showVec"></span></label>
+          <button class="btn" id="chal1" data-i18n="challenge"></button>
+        </div>
+        <div class="legend"><span><i style="background:var(--force)"></i><span data-i18n="lgWeight"></span></span><span><i style="background:var(--arm)"></i><span data-i18n="lgArm"></span></span></div>
+      </div>
+      <aside class="col">
+        <div class="card">
+          <h2 data-i18n="cObjs"></h2>
+          <div class="grid2">
+            <div class="fld"><span><span class="sw" style="background:var(--accent)"></span><span data-i18n="objA"></span></span>
+              <select id="selA"></select>
+              <div id="cusA" hidden><input type="range" id="rngA" min="0.5" max="300" step="0.5" value="20"></div>
+              <span class="val" id="mA"></span></div>
+            <div class="fld"><span><span class="sw" style="background:var(--effort)"></span><span data-i18n="objB"></span></span>
+              <select id="selB"></select>
+              <div id="cusB" hidden><input type="range" id="rngB" min="0.5" max="300" step="0.5" value="20"></div>
+              <span class="val" id="mB"></span></div>
+          </div>
+        </div>
+        <div class="card">
+          <h2 data-i18n="cPivot"></h2>
+          <div class="row">
+            <button class="btn" id="pvL" aria-label="pivot left">◀</button>
+            <span id="pvTxt" style="flex:1;min-width:0"></span>
+            <button class="btn" id="pvR" aria-label="pivot right">▶</button>
+          </div>
+          <label class="chk"><input type="checkbox" id="ign1" checked> <span data-i18n="ignBeam"></span></label>
+          <div class="fld" id="beamBox" hidden><span><span data-i18n="beamMass"></span>: <span class="val" id="mbTxt"></span></span>
+            <input type="range" id="rngMb" min="1" max="60" step="1" value="10"></div>
+          <div class="row" id="gRow"><span class="hint" data-i18n="gLbl"></span>
+            <div class="seg" id="gSeg"><button class="btn" data-g="9.8">9,8</button><button class="btn" data-g="10">10</button></div></div>
+        </div>
+        <div class="card predict">
+          <h2 data-i18n="cPred"></h2>
+          <p data-i18n="predQ"></p>
+          <div class="choices" id="pred1">
+            <button class="btn" data-p="L" data-i18n="pL"></button>
+            <button class="btn" data-p="B" data-i18n="pB"></button>
+            <button class="btn" data-p="R" data-i18n="pR"></button>
+          </div>
+          <p class="fb" id="fb1" hidden></p>
+        </div>
+        <div class="card">
+          <h2 data-i18n="cData"></h2>
+          <div class="tblwrap"><table id="tbl1"></table></div>
+          <p id="cmp1" class="obs"></p>
+          <p class="concl" id="concl1" hidden></p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ===================== TAB 2 ===================== -->
+  <section id="t2" class="col" hidden>
+    <p class="req" data-i18n-html="req2"></p>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" data-i18n="hint2"></p>
+        <canvas id="cv2" aria-label="lever classes"></canvas>
+        <div class="fld"><span><span data-i18n="liftLbl"></span>: <span class="val" id="liftTxt"></span></span>
+          <input type="range" id="rngLift" min="0" max="100" step="1" value="0"></div>
+        <div class="legend"><span><i style="background:var(--force)"></i><span data-i18n="lgP"></span></span><span><i style="background:var(--effort)"></i><span data-i18n="lgF"></span></span><span><i style="background:var(--arm)"></i><span data-i18n="lgPath"></span></span></div>
+      </div>
+      <aside class="col">
+        <div class="card">
+          <h2 data-i18n="cTypes"></h2>
+          <div class="types" id="types2">
+            <button class="btn" data-t="1"><span data-i18n="ty1"></span><span class="ord" data-i18n="ord1"></span></button>
+            <button class="btn" data-t="2"><span data-i18n="ty2"></span><span class="ord" data-i18n="ord2"></span></button>
+            <button class="btn" data-t="3"><span data-i18n="ty3"></span><span class="ord" data-i18n="ord3"></span></button>
+          </div>
+          <p id="tyDesc"></p>
+          <div class="fld"><span><span data-i18n="massLbl2"></span>: <span class="val" id="m2Txt"></span></span>
+            <input type="range" id="rngM2" min="5" max="100" step="1" value="20"></div>
+        </div>
+        <div class="card predict">
+          <h2 data-i18n="cObs2"></h2>
+          <div class="obs" id="obs2"></div>
+        </div>
+      </aside>
+    </div>
+    <div class="card sort">
+      <h2 data-i18n="sortTitle"></h2>
+      <p class="hint" data-i18n="sortHint"></p>
+      <div class="zones">
+        <div class="zone" data-z="1" tabindex="0"><h3><span data-i18n="ty1"></span><span data-i18n="ord1"></span></h3></div>
+        <div class="zone" data-z="2" tabindex="0"><h3><span data-i18n="ty2"></span><span data-i18n="ord2"></span></h3></div>
+        <div class="zone" data-z="3" tabindex="0"><h3><span data-i18n="ty3"></span><span data-i18n="ord3"></span></h3></div>
+      </div>
+      <div class="pool" id="pool"></div>
+      <p class="fb" id="sortFb" hidden></p>
+      <div class="row"><span id="score" class="num"></span><button class="btn" id="sortReset" data-i18n="sortReset"></button></div>
+    </div>
+  </section>
+
+  <!-- ===================== TAB 3 ===================== -->
+  <section id="t3" class="col" hidden>
+    <p class="req" data-i18n-html="req3"></p>
+    <div class="lab3">
+      <aside class="card guide">
+        <div class="who">
+          <svg class="archi" viewBox="0 0 190 230" role="img" aria-label="Archimedes">
+            <path class="toga" d="M38 228 C40 170 54 134 95 126 C136 134 150 170 152 228 Z"/>
+            <path class="fold" d="M72 136 C86 166 104 192 132 228"/>
+            <path class="fold" d="M60 160 C68 184 74 204 78 228"/>
+            <path class="sash" d="M64 132 L132 214 L142 204 L80 128 Z"/>
+            <path class="skinln" d="M128 150 C146 136 158 116 170 98" stroke-width="13"/>
+            <circle class="skin" cx="172" cy="94" r="8"/>
+            <path class="skinln" d="M175 90 L184 80" stroke-width="5"/>
+            <path class="skinln" d="M64 156 C52 170 46 182 44 194" stroke-width="12"/>
+            <circle class="skin" cx="43" cy="198" r="7"/>
+            <path class="tool" d="M43 198 L28 226 M43 198 L52 228"/>
+            <rect class="skin" x="86" y="102" width="18" height="26" rx="7"/>
+            <ellipse class="skin" cx="95" cy="72" rx="27" ry="31"/>
+            <ellipse class="skin" cx="67" cy="76" rx="5" ry="8"/>
+            <ellipse class="skin" cx="123" cy="76" rx="5" ry="8"/>
+            <path class="hair" d="M66 74 C60 56 68 42 80 44 C74 54 73 64 75 76 Z"/>
+            <path class="hair" d="M124 74 C130 56 122 42 110 44 C116 54 117 64 115 76 Z"/>
+            <path class="hair" d="M69 82 C69 112 83 126 95 128 C107 126 121 112 121 82 C114 96 105 100 95 100 C85 100 76 96 69 82 Z"/>
+            <path class="hairln" d="M82 93 C88 89 102 89 108 93"/>
+            <circle class="eye" cx="85" cy="71" r="2.8"/><circle class="eye" cx="105" cy="71" r="2.8"/>
+            <path class="hairln" d="M78 63 Q85 59 91 62 M99 62 Q105 59 112 63"/>
+            <path class="hairln" d="M88 52 Q95 49 102 52" style="stroke-width:1.5;opacity:.5"/>
+          </svg>
+          <div class="bubble" id="bubble">
+            <span class="stepn" id="stepN"></span>
+            <div id="stepBody" style="display:flex;flex-direction:column;gap:8px"></div>
+            <div class="bnav"><button class="btn" id="stPrev">‹</button><button class="btn primary" id="stNext"></button></div>
+          </div>
+        </div>
+      </aside>
+      <div class="col">
+        <div class="stage">
+          <h2 data-i18n="schTitle"></h2>
+          <canvas id="cv3a" class="space" aria-label="Archimedes lever"></canvas>
+          <div class="grid2">
+            <div class="fld"><span><span data-i18n="personLbl"></span>: <span class="val" id="pmTxt"></span></span>
+              <input type="range" id="rngPm" min="30" max="120" step="1" value="60"></div>
+            <div class="fld"><span data-i18n="d1Lbl"></span><span class="val">1 m</span></div>
+          </div>
+          <div id="res3"></div>
+        </div>
+        <div class="stage">
+          <h2 data-i18n="zoomTitle"></h2>
+          <canvas id="cv3b" class="space" aria-label="zoom"></canvas>
+          <div class="controls">
+            <button class="btn primary" id="zPlay"></button>
+            <button class="btn" id="zHome" data-i18n="zHome"></button>
+            <input type="range" id="rngZ" min="0" max="1000" step="1" value="0" style="flex:1 1 200px" aria-label="zoom">
+          </div>
+        </div>
+        <div class="card">
+          <h2 data-i18n="ladTitle"></h2>
+          <p class="hint" data-i18n="ladHint"></p>
+          <div class="ladder" id="ladder"></div>
+        </div>
+        <div class="card">
+          <h2 data-i18n="liftTitle"></h2>
+          <div class="grid2">
+            <label class="fld"><span data-i18n="liftH"></span><select id="selH"></select></label>
+            <label class="fld"><span data-i18n="speedLbl"></span><select id="selV"></select></label>
+          </div>
+          <div id="liftRes" class="obs"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer id="foot"></footer>
+</div>
+
+<script>
+'use strict';
+/* ============ Ngôn ngữ ============ */
+const I18N = {
+vi:{
+  eyebrow:'KHTN 8 · Tác dụng làm quay của lực',
+  title:'Đòn bẩy và moment lực',
+  lvQual:'Định tính', lvQuant:'Định lượng',
+  tab1:'1. Cân bằng đòn bẩy', tab2:'2. Ba loại đòn bẩy', tab3:'3. Nâng Trái Đất',
+  req1:'<b>Yêu cầu cần đạt:</b> Thực hiện thí nghiệm để mô tả được tác dụng làm quay của lực. Nêu được: tác dụng làm quay của lực lên một vật quanh một điểm hoặc một trục được đặc trưng bằng moment lực.',
+  req2:'<b>Yêu cầu cần đạt:</b> Minh hoạ được đòn bẩy có thể làm thay đổi hướng tác dụng của lực. Lấy được ví dụ về một số loại đòn bẩy khác nhau trong thực tiễn. Liên hệ đòn bẩy với hệ vận động (Sinh học 8).',
+  req3:'<b>Yêu cầu cần đạt:</b> Sử dụng kiến thức, kĩ năng về đòn bẩy để giải quyết được một số vấn đề thực tiễn. Mở rộng: thí nghiệm tưởng tượng của Archimedes.',
+  hint1:'Kéo vật A, vật B hoặc điểm tựa (hình tam giác) dọc theo thanh. Vật chỉ đặt được ở các nấc, mỗi nấc cách nhau 0,2 m. Thanh đang được kê giữ nằm ngang.',
+  release:'Thả cho thanh quay', reset:'Đặt lại', showVec:'Hiện lực', challenge:'Thử thách',
+  lgWeight:'Trọng lượng P', lgArm:'Khoảng cách từ điểm tựa d',
+  cObjs:'Chọn vật', objA:'Vật A', objB:'Vật B',
+  cPivot:'Điểm tựa và thanh', ignBeam:'Bỏ qua khối lượng của thanh', beamMass:'Khối lượng thanh (dài 4 m)', gLbl:'g (m/s²):',
+  cPred:'Dự đoán trước khi thả', predQ:'Khi bỏ giá kê, thanh sẽ:',
+  pL:'Nghiêng sang trái', pB:'Nằm cân bằng', pR:'Nghiêng sang phải',
+  cData:'Số liệu',
+  thObj:'Vật', thM:'m (kg)', thP:'P (N)', thD:'d (m)', thMo:'M = P·d (N·m)', thSide:'Phía', thDn:'Cách điểm tựa',
+  sideL:'trái', sideR:'phải', sideO:'tại trục',
+  beamRow:'Thanh',
+  notches:n=>`${n} nấc`,
+  pvTxt:(k)=> k===0?'Điểm tựa ở giữa thanh':(k<0?`Điểm tựa lệch trái ${-k} nấc`:`Điểm tựa lệch phải ${k} nấc`),
+  hidden:'?',
+  hideNote:'Hãy dự đoán trước, rồi mới xem moment.',
+  cmpQuant:(l,r,rel)=>`Moment làm thanh quay sang trái: <b class="num">${l} N·m</b>. Moment làm thanh quay sang phải: <b class="num">${r} N·m</b>. ${rel}`,
+  relEq:'Hai moment bằng nhau.', relL:'Bên trái lớn hơn.', relR:'Bên phải lớn hơn.',
+  cmpQual:(a,b)=>`Vật A ${a}. Vật B ${b}.`,
+  heavier:'nặng hơn', lighter:'nhẹ hơn', same:'nặng bằng vật kia',
+  farther:'đặt xa điểm tựa hơn', nearer:'đặt gần điểm tựa hơn', sameD:'cách điểm tựa bằng vật kia',
+  st_hold:'Thanh đang được kê giữ nằm ngang. Dự đoán rồi bấm «Thả cho thanh quay».',
+  st_run:'Thanh đang quay nhanh dần…',
+  st_land:(side,t)=>`Đầu bên ${side} chạm đất sau ${t} s.`,
+  st_bal:'Thanh vẫn nằm cân bằng.',
+  st_stuck:'Thanh quay tới giới hạn.',
+  fbRight:'Dự đoán đúng!', fbWrong:'Chưa đúng. Hãy so sánh tác dụng làm quay ở hai bên điểm tựa.', fbNone:'Em chưa dự đoán. Bấm «Đặt lại», dự đoán rồi thả lại nhé.',
+  conclQuant:'Thanh cân bằng khi moment làm quay sang trái bằng moment làm quay sang phải: P<sub>A</sub>·d<sub>A</sub> = P<sub>B</sub>·d<sub>B</sub>. Tác dụng làm quay phụ thuộc cả độ lớn của lực và khoảng cách từ điểm tựa tới giá của lực.',
+  conclQual:'Tác dụng làm quay của lực phụ thuộc cả độ lớn của lực và khoảng cách tới điểm tựa. Muốn thanh cân bằng, vật nặng hơn phải đặt gần điểm tựa hơn, vật nhẹ hơn đặt xa hơn.',
+  chalText:(a,b)=>`Thử thách: giữ nguyên ${a} và điểm tựa. Kéo ${b} tới nấc làm thanh cân bằng, rồi thả cho thanh quay.`,
+  chalDone:'Hoàn thành thử thách! Thanh nằm cân bằng.',
+  chalFail:'Chưa cân bằng. Bấm «Đặt lại» và thử nấc khác.',
+  obj_apple:'Quả táo', obj_bag:'Cặp sách', obj_melon:'Quả dưa hấu', obj_bucket:'Xô nước đầy', obj_dog:'Chú chó',
+  obj_student:'Bạn học sinh', obj_adult:'Người lớn', obj_moto:'Xe máy', obj_elephant:'Voi con', obj_custom:'Thùng hàng (tự chọn)',
+  left:'trái', right:'phải',
+  /* tab 2 */
+  hint2:'Kéo nút F lên hoặc xuống để nâng vật. Kéo ngang O, P hoặc F để đổi vị trí của chúng trên thanh.',
+  liftLbl:'Nâng vật', lgP:'Trọng lượng vật P', lgF:'Lực của tay F', lgPath:'Quãng đường đi (nét đứt)',
+  cTypes:'Chọn loại đòn bẩy', ty1:'Đòn bẩy loại 1', ty2:'Đòn bẩy loại 2', ty3:'Đòn bẩy loại 3',
+  ord1:'P – O – F', ord2:'O – P – F', ord3:'O – F – P',
+  desc1:'Điểm tựa O nằm giữa điểm đặt của trọng lượng vật P và điểm đặt của lực tác dụng F.',
+  desc2:'Điểm đặt của trọng lượng vật P nằm giữa điểm tựa O và điểm đặt của lực tác dụng F.',
+  desc3:'Điểm đặt của lực tác dụng F nằm giữa điểm tựa O và điểm đặt của trọng lượng vật P.',
+  massLbl2:'Khối lượng vật', cObs2:'Quan sát',
+  oForce:(F,P)=>`Lực tay cần dùng: <b class="num">F = ${F} N</b>. Trọng lượng vật: <b class="num">P = ${P} N</b>.`,
+  oGain:(kf,k)=>`<span class="tag" style="color:var(--ok)">Lợi về lực</span>F nhỏ hơn P ${kf} lần, nhưng tay phải đi quãng đường dài gấp ${k} lần quãng đường của vật.`,
+  oLoss:(kf,k)=>`<span class="tag" style="color:var(--warn)">Thiệt về lực</span>F lớn hơn P ${kf} lần, nhưng tay chỉ đi quãng đường bằng 1/${k} quãng đường của vật (lợi về đường đi).`,
+  oPerp:'Lực tay F luôn <b>vuông góc với thanh</b>. Khi thanh nghiêng, khoảng cách từ O tới phương của F vẫn là d<sub>F</sub>, còn khoảng cách từ O tới phương thẳng đứng của P ngắn lại (nét đứt đỏ), nên lực F cần dùng nhỏ dần.',
+  oEven:'<span class="tag" style="color:var(--muted)">Không lợi, không thiệt</span>F bằng P, hai quãng đường bằng nhau.',
+  oGainQ:'<span class="tag" style="color:var(--ok)">Lợi về lực</span>Lực tay nhỏ hơn trọng lượng vật, nhưng tay phải đi quãng đường dài hơn vật.',
+  oLossQ:'<span class="tag" style="color:var(--warn)">Thiệt về lực</span>Lực tay lớn hơn trọng lượng vật, nhưng tay đi quãng đường ngắn hơn vật.',
+  oDir1:'Tay ấn <b>xuống</b>, vật đi <b>lên</b>: đòn bẩy loại 1 làm <b>đổi hướng</b> tác dụng của lực.',
+  oDir23:'Tay kéo <b>lên</b>, vật cũng đi <b>lên</b>: lực tác dụng không đổi hướng.',
+  oPath:(sF,sP,h)=>`Quãng đường theo cung tròn (nét đứt): tay đi <b class="num">${sF} cm</b>, vật đi <b class="num">${sP} cm</b> và được nâng cao thêm <b class="num">${h} cm</b>.`,
+  oPathQ:'Kéo thanh trượt «Nâng vật» để thấy quãng đường tay và vật đi được (nét đứt).',
+  oWork:(a,b)=>`Công của tay (F nhỏ dần nên cộng dần trên cả cung đường) = <span class="num">${a} J</span>; công nâng vật P·h = <span class="num">${b} J</span>. Không có đòn bẩy nào cho lợi về công.`,
+  dists:(dF,dP)=>`Khoảng cách từ O: tới F là <span class="num">${dF} m</span>, tới P là <span class="num">${dP} m</span>.`,
+  sortTitle:'Phân loại đòn bẩy trong đời sống',
+  sortHint:'Kéo mỗi thẻ vào đúng loại đòn bẩy, hoặc chạm vào thẻ rồi chạm vào ô. Mẹo: tìm điểm tựa trước, đó là chỗ đứng yên khi đòn bẩy quay.',
+  sortReset:'Xếp lại từ đầu', score:(n,N)=>`Đã xếp đúng ${n}/${N}`, sortAll:'Tuyệt vời! Em đã phân loại đúng tất cả.',
+  sortWrong:(n,h)=>`Chưa đúng với «${n}». Gợi ý: ${h}`, sortRight:(n,d)=>`Đúng! ${n}: ${d}`,
+  ex_scissors:'Cái kéo', ex_hammer:'Búa nhổ đinh', ex_balance:'Cân đòn hai đĩa', ex_nod:'Ngẩng đầu, gật đầu',
+  ex_barrow:'Xe cút kít', ex_opener:'Cái mở nắp chai', ex_nut:'Kẹp hạt dẻ', ex_tiptoe:'Kiễng chân',
+  ex_tongs:'Kẹp gắp đá', ex_rod:'Cần câu cá', ex_arm:'Cẳng tay cầm vật', ex_broom:'Cái chổi quét nhà',
+  hi_scissors:'Trục quay của kéo ở đâu so với chỗ tay bóp và chỗ cắt?', hi_hammer:'Khi nhổ đinh, đầu búa tì vào đâu?', hi_balance:'Trục của cân nằm ở đâu?', hi_nod:'Đầu quay quanh khớp cổ; cơ gáy kéo ở phía sau.',
+  hi_barrow:'Xe quay quanh trục bánh xe; hàng nằm ở đâu?', hi_opener:'Đầu cái mở tì lên đỉnh nắp; mép nắp bị móc nằm giữa.', hi_nut:'Bản lề ở một đầu, hạt nằm ở giữa.', hi_tiptoe:'Bàn chân quay quanh đầu ngón chân; trọng lượng cơ thể đặt ở cổ chân.',
+  hi_tongs:'Bản lề ở một đầu, tay bóp ở giữa, đá ở đầu kia.', hi_rod:'Một tay giữ cuối cần đứng yên, tay kia nhấc ở giữa.', hi_arm:'Cẳng tay quay quanh khuỷu; bắp tay bám gần khuỷu.', hi_broom:'Tay trên giữ đầu cán gần như đứng yên.',
+  de_scissors:'O là đinh nối hai lưỡi; F ở cán; P ở chỗ cắt.', de_hammer:'O là chỗ đầu búa tì lên mặt gỗ; F ở cán; P ở đinh.', de_balance:'O là trục giữa; hai đĩa ở hai bên.', de_nod:'O là khớp đầu – cột sống cổ; P là trọng lượng phần trước của đầu; F là lực cơ gáy.',
+  de_barrow:'O là trục bánh xe; P là hàng trong thùng; F ở tay cầm.', de_opener:'O là chỗ tì trên đỉnh nắp; P là mép nắp; F ở tay cầm.', de_nut:'O là bản lề; P là hạt; F ở đầu tay bóp.', de_tiptoe:'O là đầu ngón chân; P là trọng lượng cơ thể ở cổ chân; F là cơ bắp chân kéo gót.',
+  de_tongs:'O là bản lề; F là tay bóp ở giữa; P là viên đá ở đầu kẹp.', de_rod:'O là tay giữ cuối cần; F là tay nhấc ở giữa; P là con cá.', de_arm:'O là khớp khuỷu; F là cơ hai đầu (bắp tay trước); P là vật trong bàn tay.', de_broom:'O là tay trên; F là tay dưới; P là lực cản của rác ở đầu chổi.',
+  /* tab 3 */
+  schTitle:'Đòn bẩy của Archimedes (hình minh hoạ, không theo tỉ lệ)',
+  personLbl:'Khối lượng của em', d1Lbl:'Trái Đất cách điểm tựa d₁',
+  zoomTitle:'Hành trình phóng to: từ chỗ em đứng ra vũ trụ',
+  zPlay:'Phóng to dần ▶', zPause:'Tạm dừng ❚❚', zHome:'Về chỗ em đứng',
+  ladTitle:'Thang logarit: d₂ dài cỡ nào?',
+  ladHint:'Mỗi vạch dài thêm bằng nhau nghĩa là gấp lên 10 lần. Chạm vào một dòng để phóng tới cỡ đó.',
+  liftTitle:'Muốn nâng Trái Đất thì phải đẩy bao xa, bao lâu?',
+  liftH:'Nâng Trái Đất lên', speedLbl:'Đầu thanh phía em đi với tốc độ',
+  ly:'năm ánh sáng', yr:'năm',
+  meLabel:'Cánh tay đòn của em d₂', ratioMore:r=>`d₂ gấp ${r} lần`, ratioLess:r=>`gấp ${r} lần d₂`,
+  lm_bus:'Xe buýt (chiều dài)', lm_field:'Sân bóng đá (chiều dài)', lm_plane:'Độ cao bay của máy bay', lm_iss:'Trạm vũ trụ ISS cách mặt đất', lm_sund:'Đường kính Mặt Trời',
+  lm_vega:'Sao Chức Nữ (Vega)', lm_polaris:'Sao Bắc Cực (Polaris)', lm_orion:'Tinh vân Lạp Hộ (Orion)', lm_gc:'Mặt Trời – tâm Ngân Hà', lm_virgo:'Cụm thiên hà Xử Nữ (Virgo)',
+  lm_lm81:'Tháp Landmark 81 (chiều cao)', lm_fan:'Đỉnh Fansipan (độ cao)', lm_vn:'Chiều dài Việt Nam (Bắc – Nam)', lm_earth:'Đường kính Trái Đất', lm_moon:'Trái Đất – Mặt Trăng',
+  lm_sun:'Trái Đất – Mặt Trời', lm_nep:'Mặt Trời – Sao Hải Vương', lm_voy:'Tàu Voyager 1 cách Mặt Trời (2026)', lm_ly:'Một năm ánh sáng', lm_prox:'Ngôi sao gần nhất (Proxima Centauri)',
+  lm_mw:'Đường kính Ngân Hà', lm_and:'Khoảng cách tới thiên hà Andromeda', lm_lg:'Đường kính Nhóm Địa phương (các thiên hà gần ta)', lm_lan:'Đường kính siêu đám Laniakea', lm_uni:'Đường kính vũ trụ quan sát được',
+  viewW:w=>`Khung nhìn rộng ≈ ${w}`,
+  farLeft:'← Điểm tựa và Trái Đất còn ở rất xa bên trái',
+  you:m=>`Em (${m} kg)`, earthPivot:'Trái Đất + điểm tựa', pivotLbl:'Điểm tựa', earthLbl:'Trái Đất', milky:'Ngân Hà',
+  d2q:'d₂ = ?',
+  res3:(d2s,lyv,mw,and)=>`<dl class="kv"><dt>d₂ (mét)</dt><dd>${d2s} m</dd><dt>d₂ (năm ánh sáng)</dt><dd>≈ ${lyv}</dd><dt>So với Ngân Hà</dt><dd>≈ ${mw} lần đường kính</dd><dt>So với Andromeda</dt><dd>≈ ${and} lần khoảng cách</dd></dl>`,
+  res3Hidden:'<p class="hint">Hãy trả lời câu đố của Archimedes (bước 2) để xem d₂.</p>',
+  sp_walk:'Đi bộ (5 km/h)', sp_car:'Ô tô (100 km/h)', sp_plane:'Máy bay (900 km/h)', sp_probe:'Tàu Parker Solar Probe (≈ 690 000 km/h), nhanh nhất do con người chế tạo', sp_light:'Ánh sáng (300 000 km/s), không vật nào có khối lượng đạt được',
+  liftS:(h,s,ly,mw)=>`Đầu thanh phía em phải đi: <b class="num">s = h·d₂/d₁ ≈ ${s}</b> ≈ <b>${ly}</b> (≈ ${mw} lần đường kính Ngân Hà).`,
+  liftSQ:(h,ly,mw)=>`Để nâng Trái Đất lên ${h}, đầu thanh phía em phải đi xuống khoảng <b>${ly}</b> (≈ ${mw} lần đường kính Ngân Hà).`,
+  liftT:(t,age)=>`Thời gian: <b>≈ ${t} năm</b>${age?`, lâu gấp ${age} lần tuổi của vũ trụ (13,8 tỉ năm)`:''}.`,
+  liftW:(a)=>`Công em bỏ ra đúng bằng công nâng Trái Đất: A = P·h ≈ <span class="num">${a} J</span>. Đòn bẩy không cho lợi về công.`,
+  stepN:(k,n)=>`Archimedes hướng dẫn · bước ${k}/${n}`, next:'Tiếp ›', again:'Xem lại từ đầu',
+  st3_1:'<p>Xin chào! Ta là <b>Archimedes</b>, nhà bác học ở thành Syracuse (khoảng 287–212 TCN). Ta đã tìm ra quy tắc đòn bẩy và từng tuyên bố:</p><blockquote>«Hãy cho ta một điểm tựa, ta sẽ nâng bổng cả Trái Đất!»</blockquote><p class="hint">Câu nói được Pappus thành Alexandria (thế kỉ IV) chép lại; Plutarch kể một câu tương tự.</p><p>Hôm nay ta cùng tính xem muốn làm thế thì cần một đòn bẩy dài bao nhiêu.</p>',
+  st3_2:m=>`<p>Đặt Trái Đất (5,97 × 10²⁴ kg) cách điểm tựa <b>d₁ = 1 m</b>. Em nặng <b>${m} kg</b>, đứng ở đầu kia của thanh.</p><p>Để thanh cân bằng, em phải đứng cách điểm tựa bao xa? Đoán trước nhé:</p>`,
+  q3:['Bằng chiều dài nước Việt Nam (≈ 1 650 km)','Bằng khoảng cách Trái Đất – Mặt Trời','Dài hơn cả đường kính Ngân Hà','Dài hơn cả vũ trụ quan sát được'],
+  q3Right:(ly,mw)=>`Chính xác! d₂ ≈ ${ly}, gấp khoảng ${mw} lần đường kính Ngân Hà.`,
+  q3Low:(ly,k)=>`Còn xa lắm! Thực tế d₂ ≈ ${ly}, lớn hơn đáp án em chọn ${k} lần.`,
+  q3High:(ly,k)=>`Chưa đến mức ấy. d₂ ≈ ${ly}, chỉ bằng khoảng 1/${k} đường kính vũ trụ quan sát được.`,
+  st3_3q:(d2,ly)=>`<p>Quy tắc đòn bẩy: moment hai bên bằng nhau.</p><p class="formula">P<sub>TĐ</sub>·d₁ = P<sub>em</sub>·d₂ ⇒ d₂ = m<sub>TĐ</sub>·d₁ / m<sub>em</sub></p><p>d₂ = <b class="num">${d2} m</b> ≈ <b>${ly}</b>.</p><p>Ánh sáng đi từ điểm tựa tới chỗ em đứng cũng mất chừng ấy năm!</p>`,
+  st3_3l:(r,ly)=>`<p>Trái Đất nặng gấp em khoảng ${r} lần, nên em phải đứng xa điểm tựa gấp chừng ấy lần so với Trái Đất: khoảng <b>${ly}</b>.</p><p>Ánh sáng đi từ điểm tựa tới chỗ em đứng cũng mất chừng ấy năm!</p>`,
+  st3_4:'<p>Giờ hãy bấm <b>Phóng to dần</b>. Ta bắt đầu từ chỗ em đứng rồi lùi ra xa: qua tháp Landmark 81, nước Việt Nam, Trái Đất, Mặt Trời, rồi ra ngoài Ngân Hà.</p><p>Để ý xem đến lúc nào mới nhìn thấy điểm tựa và Trái Đất.</p>',
+  st3_4btn:'Bắt đầu phóng to',
+  st3_5:(h,s,mw,t,age)=>`<p>Đòn bẩy cho ta lợi về lực nhưng thiệt về đường đi. Muốn nâng Trái Đất lên <b>${h}</b>, em phải ấn đầu thanh đi xuống <b>${s}</b>, gần bằng ${mw} lần đường kính Ngân Hà.</p><p>Đi bộ thì mất khoảng <b>${t} năm</b>, lâu gấp ${age} lần tuổi của vũ trụ.</p>`,
+  st3_6:(g,rod,snd,sage)=>`<p>Ta phải thú nhận: đây chỉ là <b>thí nghiệm tưởng tượng</b>. Vì sao không làm thật được?</p><ul><li>Trọng lượng là lực hút của một hành tinh. Muốn Trái Đất «nặng» ${g} N thì phải tưởng tượng có trọng trường đều g = 9,8 m/s² ở khắp nơi.</li><li>Không có chỗ đứng hay điểm tựa nào ngoài Trái Đất. Tâm Trái Đất cách điểm tựa 1 m nghĩa là điểm tựa nằm sâu trong lòng đất (bán kính Trái Đất 6 371 km).</li><li>Không có vật liệu đủ cứng. Một thanh thép tiết diện 1 m² dài như vậy nặng gấp khoảng ${rod} lần Trái Đất và sẽ cong, gãy.</li><li>Cú ấn của em truyền dọc thanh với tốc độ âm thanh trong thép (≈ 5 km/s), mất khoảng ${snd} năm mới tới điểm tựa, gấp ${sage} lần tuổi vũ trụ.</li><li>Không gì đi nhanh hơn ánh sáng, nên nâng 1 cm cũng mất hơn một trăm nghìn năm.</li></ul><p><b>Điều ta muốn nói:</b> chỉ cần cánh tay đòn đủ dài, một lực nhỏ có thể cân bằng một vật rất nặng. Nhưng không bao giờ được lợi về công.</p>`,
+  foot1:'Giả thiết mô phỏng: vật coi như chất điểm gắn chặt trên thanh, đặt đúng vị trí nấc; thanh cứng, không ma sát ở trục; bỏ qua sức cản không khí. Khi bỏ qua khối lượng thanh, chỉ trọng lượng hai vật làm thanh quay. Trục quay nằm trên trục của thanh.',
+  foot2:'Giả thiết mô phỏng: thanh cứng, nhẹ; lực của tay luôn vuông góc với thanh, trọng lượng vật luôn theo phương thẳng đứng; nâng chậm đều nên coi như thanh luôn cân bằng. Quãng đường tính theo cung tròn mà điểm đặt lực vạch ra.',
+  foot3:'Thí nghiệm tưởng tượng: trọng trường đều g = 9,8 m/s² ở mọi nơi, thanh cứng tuyệt đối và không có khối lượng. Số liệu: khối lượng Trái Đất 5,972 × 10²⁴ kg; 1 năm ánh sáng = 9,461 × 10¹⁵ m; 1 AU = 1,496 × 10¹¹ m; Ngân Hà ≈ 100 000 năm ánh sáng; Andromeda ≈ 2,5 triệu năm ánh sáng; vũ trụ quan sát được ≈ 93 tỉ năm ánh sáng.',
+  bigU:[[1e12,'nghìn tỉ'],[1e9,'tỉ'],[1e6,'triệu'],[1e3,'nghìn']]
+},
+en:{
+  eyebrow:'Science 8 · Turning effect of a force',
+  title:'Levers and moment of a force',
+  lvQual:'Qualitative', lvQuant:'Quantitative',
+  tab1:'1. Balancing a lever', tab2:'2. Three classes of lever', tab3:'3. Lifting the Earth',
+  req1:'<b>Learning outcome:</b> Carry out an experiment to describe the turning effect of a force. State that the turning effect of a force about a point or an axis is characterised by the moment of the force.',
+  req2:'<b>Learning outcome:</b> Show that a lever can change the direction of a force. Give examples of different classes of lever in everyday life. Link levers to the musculoskeletal system (Biology 8).',
+  req3:'<b>Learning outcome:</b> Use knowledge of levers to solve practical problems. Extension: Archimedes\' thought experiment.',
+  hint1:'Drag object A, object B or the pivot (triangle) along the beam. Objects snap to notches 0.2 m apart. The beam is propped up horizontally.',
+  release:'Let the beam turn', reset:'Reset', showVec:'Show forces', challenge:'Challenge',
+  lgWeight:'Weight P', lgArm:'Distance from pivot d',
+  cObjs:'Choose objects', objA:'Object A', objB:'Object B',
+  cPivot:'Pivot and beam', ignBeam:'Ignore the mass of the beam', beamMass:'Beam mass (4 m long)', gLbl:'g (m/s²):',
+  cPred:'Predict before releasing', predQ:'When the props are removed, the beam will:',
+  pL:'Tip to the left', pB:'Stay balanced', pR:'Tip to the right',
+  cData:'Data',
+  thObj:'Object', thM:'m (kg)', thP:'P (N)', thD:'d (m)', thMo:'M = P·d (N·m)', thSide:'Side', thDn:'From pivot',
+  sideL:'left', sideR:'right', sideO:'at pivot',
+  beamRow:'Beam',
+  notches:n=>`${n} notch${n===1?'':'es'}`,
+  pvTxt:(k)=> k===0?'Pivot at the middle of the beam':(k<0?`Pivot ${-k} notch${k===-1?'':'es'} left of middle`:`Pivot ${k} notch${k===1?'':'es'} right of middle`),
+  hidden:'?',
+  hideNote:'Make a prediction first, then the moments are shown.',
+  cmpQuant:(l,r,rel)=>`Moment turning the beam to the left: <b class="num">${l} N·m</b>. Moment turning it to the right: <b class="num">${r} N·m</b>. ${rel}`,
+  relEq:'The two moments are equal.', relL:'The left side is larger.', relR:'The right side is larger.',
+  cmpQual:(a,b)=>`Object A ${a}. Object B ${b}.`,
+  heavier:'is heavier', lighter:'is lighter', same:'weighs the same as the other',
+  farther:'is farther from the pivot', nearer:'is nearer the pivot', sameD:'is as far from the pivot as the other',
+  st_hold:'The beam is propped up horizontally. Predict, then press «Let the beam turn».',
+  st_run:'The beam is turning faster and faster…',
+  st_land:(side,t)=>`The ${side} end hits the ground after ${t} s.`,
+  st_bal:'The beam stays balanced.',
+  st_stuck:'The beam reached its limit.',
+  fbRight:'Correct prediction!', fbWrong:'Not quite. Compare the turning effect on each side of the pivot.', fbNone:'You did not predict. Press «Reset», predict and release again.',
+  conclQuant:'The beam balances when the moment turning it left equals the moment turning it right: P<sub>A</sub>·d<sub>A</sub> = P<sub>B</sub>·d<sub>B</sub>. The turning effect depends on both the size of the force and its distance from the pivot.',
+  conclQual:'The turning effect of a force depends on both the size of the force and its distance from the pivot. To balance, the heavier object must be nearer the pivot and the lighter one farther away.',
+  chalText:(a,b)=>`Challenge: keep ${a} and the pivot where they are. Drag ${b} to the notch that balances the beam, then let it turn.`,
+  chalDone:'Challenge complete! The beam is balanced.',
+  chalFail:'Not balanced yet. Press «Reset» and try another notch.',
+  obj_apple:'Apple', obj_bag:'School bag', obj_melon:'Watermelon', obj_bucket:'Full bucket of water', obj_dog:'Dog',
+  obj_student:'Student', obj_adult:'Adult', obj_moto:'Motorbike', obj_elephant:'Baby elephant', obj_custom:'Crate (custom mass)',
+  left:'left', right:'right',
+  hint2:'Drag the F button up or down to lift the load. Drag O, P or F sideways to move them along the bar.',
+  liftLbl:'Lift the load', lgP:'Weight of load P', lgF:'Force of hand F', lgPath:'Distance moved (dashed)',
+  cTypes:'Choose a class of lever', ty1:'Class 1 lever', ty2:'Class 2 lever', ty3:'Class 3 lever',
+  ord1:'P – O – F', ord2:'O – P – F', ord3:'O – F – P',
+  desc1:'The pivot O lies between the point where the load\'s weight P acts and the point where the effort F acts.',
+  desc2:'The load\'s weight P acts between the pivot O and the effort F.',
+  desc3:'The effort F acts between the pivot O and the load\'s weight P.',
+  massLbl2:'Mass of load', cObs2:'Observations',
+  oForce:(F,P)=>`Effort needed: <b class="num">F = ${F} N</b>. Weight of load: <b class="num">P = ${P} N</b>.`,
+  oGain:(kf,k)=>`<span class="tag" style="color:var(--ok)">Force gained</span>F is ${kf} times smaller than P, but the hand must move ${k} times as far as the load.`,
+  oLoss:(kf,k)=>`<span class="tag" style="color:var(--warn)">Force lost</span>F is ${kf} times larger than P, but the hand moves only 1/${k} as far as the load (distance gained).`,
+  oPerp:'The effort F is always <b>perpendicular to the bar</b>. As the bar tilts, the distance from O to the line of F stays d<sub>F</sub>, while the distance from O to the vertical line of P gets shorter (red dashes), so the effort needed decreases.',
+  oEven:'<span class="tag" style="color:var(--muted)">No gain, no loss</span>F equals P and both move the same distance.',
+  oGainQ:'<span class="tag" style="color:var(--ok)">Force gained</span>The effort is smaller than the load, but the hand moves farther than the load.',
+  oLossQ:'<span class="tag" style="color:var(--warn)">Force lost</span>The effort is larger than the load, but the hand moves a shorter distance.',
+  oDir1:'The hand pushes <b>down</b> and the load goes <b>up</b>: a class 1 lever <b>changes the direction</b> of the force.',
+  oDir23:'The hand pulls <b>up</b> and the load also goes <b>up</b>: the direction of the force does not change.',
+  oPath:(sF,sP,h)=>`Distance along the arcs (dashed): the hand moves <b class="num">${sF} cm</b>, the load moves <b class="num">${sP} cm</b> and rises <b class="num">${h} cm</b>.`,
+  oPathQ:'Move the «Lift the load» slider to see how far the hand and the load move (dashed).',
+  oWork:(a,b)=>`Work by the hand (F decreases, so it is added up along the whole arc) = <span class="num">${a} J</span>; work lifting the load P·h = <span class="num">${b} J</span>. No lever gives a gain in work.`,
+  dists:(dF,dP)=>`Distance from O: to F is <span class="num">${dF} m</span>, to P is <span class="num">${dP} m</span>.`,
+  sortTitle:'Classify everyday levers',
+  sortHint:'Drag each card to the right class, or tap a card and then tap a box. Tip: find the pivot first; it is the point that stays still when the lever turns.',
+  sortReset:'Start again', score:(n,N)=>`Correct: ${n}/${N}`, sortAll:'Excellent! You classified them all correctly.',
+  sortWrong:(n,h)=>`Not right for «${n}». Hint: ${h}`, sortRight:(n,d)=>`Correct! ${n}: ${d}`,
+  ex_scissors:'Scissors', ex_hammer:'Claw hammer pulling a nail', ex_balance:'Two-pan balance', ex_nod:'Nodding the head',
+  ex_barrow:'Wheelbarrow', ex_opener:'Bottle opener', ex_nut:'Nutcracker', ex_tiptoe:'Standing on tiptoe',
+  ex_tongs:'Ice tongs', ex_rod:'Fishing rod', ex_arm:'Forearm holding an object', ex_broom:'Broom',
+  hi_scissors:'Where is the pivot compared with your fingers and the cutting point?', hi_hammer:'When pulling a nail, where does the hammer head rest?', hi_balance:'Where is the balance\'s pivot?', hi_nod:'The head turns about the neck joint; the neck muscles pull at the back.',
+  hi_barrow:'It turns about the wheel axle; where is the load?', hi_opener:'The tip rests on top of the cap; the cap edge is in between.', hi_nut:'The hinge is at one end and the nut in the middle.', hi_tiptoe:'The foot turns about the toes; body weight acts at the ankle.',
+  hi_tongs:'The hinge is at one end, the fingers squeeze in the middle, the ice is at the other end.', hi_rod:'One hand holds the end still; the other lifts in the middle.', hi_arm:'The forearm turns about the elbow; the biceps attaches near the elbow.', hi_broom:'The top hand stays almost still.',
+  de_scissors:'O is the rivet; F at the handles; P at the cut.', de_hammer:'O is where the head rests on the wood; F at the handle; P at the nail.', de_balance:'O is the central pivot; the pans are on either side.', de_nod:'O is the skull–spine joint; P is the weight of the front of the head; F is the neck muscles.',
+  de_barrow:'O is the wheel axle; P is the load; F at the handles.', de_opener:'O is the tip on top of the cap; P is the cap edge; F at the handle.', de_nut:'O is the hinge; P is the nut; F at the handles.', de_tiptoe:'O is the toes; P is body weight at the ankle; F is the calf muscle pulling the heel.',
+  de_tongs:'O is the hinge; F is the squeeze in the middle; P is the ice.', de_rod:'O is the hand at the end; F is the lifting hand; P is the fish.', de_arm:'O is the elbow; F is the biceps; P is the object in the hand.', de_broom:'O is the top hand; F is the lower hand; P is the resistance of the dirt.',
+  schTitle:'Archimedes\' lever (illustration, not to scale)',
+  personLbl:'Your mass', d1Lbl:'Earth to pivot d₁',
+  zoomTitle:'Zoom journey: from where you stand out to the universe',
+  zPlay:'Zoom out ▶', zPause:'Pause ❚❚', zHome:'Back to you',
+  ladTitle:'Logarithmic scale: how long is d₂?',
+  ladHint:'Each equal step along the bar means ten times longer. Tap a row to zoom to that size.',
+  liftTitle:'How far and how long to lift the Earth?',
+  liftH:'Lift the Earth by', speedLbl:'Your end of the beam moves at',
+  ly:'light-years', yr:'years',
+  meLabel:'Your lever arm d₂', ratioMore:r=>`d₂ is ${r}×`, ratioLess:r=>`${r}× d₂`,
+  lm_bus:'Bus (length)', lm_field:'Football pitch (length)', lm_plane:'Cruising altitude of an airliner', lm_iss:'ISS above the ground', lm_sund:'Diameter of the Sun',
+  lm_vega:'The star Vega', lm_polaris:'Polaris, the Pole Star', lm_orion:'Orion Nebula', lm_gc:'Sun – centre of the Milky Way', lm_virgo:'Virgo Cluster of galaxies',
+  lm_lm81:'Landmark 81 tower (height)', lm_fan:'Fansipan peak (altitude)', lm_vn:'Length of Viet Nam (north–south)', lm_earth:'Diameter of the Earth', lm_moon:'Earth – Moon',
+  lm_sun:'Earth – Sun', lm_nep:'Sun – Neptune', lm_voy:'Voyager 1 from the Sun (2026)', lm_ly:'One light-year', lm_prox:'Nearest star (Proxima Centauri)',
+  lm_mw:'Diameter of the Milky Way', lm_and:'Distance to the Andromeda galaxy', lm_lg:'Diameter of the Local Group of galaxies', lm_lan:'Diameter of the Laniakea supercluster', lm_uni:'Diameter of the observable universe',
+  viewW:w=>`View width ≈ ${w}`,
+  farLeft:'← The pivot and the Earth are still far away to the left',
+  you:m=>`You (${m} kg)`, earthPivot:'Earth + pivot', pivotLbl:'Pivot', earthLbl:'Earth', milky:'Milky Way',
+  d2q:'d₂ = ?',
+  res3:(d2s,lyv,mw,and)=>`<dl class="kv"><dt>d₂ (metres)</dt><dd>${d2s} m</dd><dt>d₂ (light-years)</dt><dd>≈ ${lyv}</dd><dt>Milky Way</dt><dd>≈ ${mw} diameters</dd><dt>Andromeda</dt><dd>≈ ${and} times its distance</dd></dl>`,
+  res3Hidden:'<p class="hint">Answer Archimedes\' puzzle (step 2) to see d₂.</p>',
+  sp_walk:'Walking (5 km/h)', sp_car:'Car (100 km/h)', sp_plane:'Airliner (900 km/h)', sp_probe:'Parker Solar Probe (≈ 690,000 km/h), fastest human-made object', sp_light:'Light (300,000 km/s), unreachable for anything with mass',
+  liftS:(h,s,ly,mw)=>`Your end of the beam must move: <b class="num">s = h·d₂/d₁ ≈ ${s}</b> ≈ <b>${ly}</b> (≈ ${mw} Milky Way diameters).`,
+  liftSQ:(h,ly,mw)=>`To lift the Earth by ${h}, your end of the beam must move down about <b>${ly}</b> (≈ ${mw} Milky Way diameters).`,
+  liftT:(t,age)=>`Time: <b>≈ ${t} years</b>${age?`, ${age} times the age of the universe (13.8 billion years)`:''}.`,
+  liftW:(a)=>`The work you do equals the work done lifting the Earth: W = P·h ≈ <span class="num">${a} J</span>. A lever gives no gain in work.`,
+  stepN:(k,n)=>`Archimedes guides you · step ${k}/${n}`, next:'Next ›', again:'Start again',
+  st3_1:'<p>Greetings! I am <b>Archimedes</b> of Syracuse (about 287–212 BC). I discovered the law of the lever and once declared:</p><blockquote>“Give me a place to stand, and I will move the Earth!”</blockquote><p class="hint">The saying was recorded by Pappus of Alexandria (4th century); Plutarch tells a similar story.</p><p>Let us work out how long a lever that would need.</p>',
+  st3_2:m=>`<p>Put the Earth (5.97 × 10²⁴ kg) <b>d₁ = 1 m</b> from the pivot. You weigh <b>${m} kg</b> and stand at the other end.</p><p>To balance, how far from the pivot must you stand? Guess first:</p>`,
+  q3:['As long as Viet Nam (≈ 1,650 km)','The Earth – Sun distance','Longer than the Milky Way is wide','Longer than the observable universe'],
+  q3Right:(ly,mw)=>`Exactly! d₂ ≈ ${ly}, about ${mw} times the diameter of the Milky Way.`,
+  q3Low:(ly,k)=>`Far too short! In fact d₂ ≈ ${ly}, ${k} times your answer.`,
+  q3High:(ly,k)=>`Not that far. d₂ ≈ ${ly}, only about 1/${k} of the observable universe.`,
+  st3_3q:(d2,ly)=>`<p>Law of the lever: the moments on both sides are equal.</p><p class="formula">P<sub>E</sub>·d₁ = P<sub>you</sub>·d₂ ⇒ d₂ = m<sub>E</sub>·d₁ / m<sub>you</sub></p><p>d₂ = <b class="num">${d2} m</b> ≈ <b>${ly}</b>.</p><p>Even light takes that many years to travel from the pivot to you!</p>`,
+  st3_3l:(r,ly)=>`<p>The Earth is about ${r} times heavier than you, so you must stand that many times farther from the pivot than the Earth: about <b>${ly}</b>.</p><p>Even light takes that many years to travel from the pivot to you!</p>`,
+  st3_4:'<p>Now press <b>Zoom out</b>. We start where you stand and move away: past Landmark 81, Viet Nam, the Earth, the Sun and out of the Milky Way.</p><p>Watch for the moment the pivot and the Earth come into view.</p>',
+  st3_4btn:'Start zooming',
+  st3_5:(h,s,mw,t,age)=>`<p>A lever gains force but loses distance. To lift the Earth by <b>${h}</b>, you must push your end down <b>${s}</b>, about ${mw} Milky Way diameters.</p><p>On foot that takes about <b>${t} years</b>, ${age} times the age of the universe.</p>`,
+  st3_6:(g,rod,snd,sage)=>`<p>I must confess: this is only a <b>thought experiment</b>. Why can it not be done?</p><ul><li>Weight is the pull of a planet. For the Earth to “weigh” ${g} N we must imagine a uniform field g = 9.8 m/s² everywhere.</li><li>There is no place to stand and no pivot outside the Earth. And the Earth's centre 1 m from the pivot puts the pivot deep underground (Earth's radius is 6,371 km).</li><li>No material is stiff enough. A steel beam of 1 m² cross-section that long would weigh about ${rod} times the Earth and would bend and break.</li><li>Your push travels along the beam at the speed of sound in steel (≈ 5 km/s), taking about ${snd} years to reach the pivot, ${sage} times the age of the universe.</li><li>Nothing moves faster than light, so even a 1 cm lift takes over a hundred thousand years.</li></ul><p><b>My real point:</b> with a long enough lever arm, a small force can balance a huge weight. But you never gain work.</p>`,
+  foot1:'Model assumptions: objects are point masses fixed to the beam at the notches; the beam is rigid with a frictionless pivot; air resistance is ignored. When the beam\'s mass is ignored, only the two weights turn the beam. The pivot lies on the beam\'s axis.',
+  foot2:'Model assumptions: rigid, light bar; the effort is always perpendicular to the bar and the weight always acts vertically; lifting is slow, so the bar is always in balance. Distances are the arcs traced by the points where the forces act.',
+  foot3:'Thought experiment: uniform gravitational field g = 9.8 m/s² everywhere; perfectly rigid, massless beam. Data: Earth mass 5.972 × 10²⁴ kg; 1 light-year = 9.461 × 10¹⁵ m; 1 AU = 1.496 × 10¹¹ m; Milky Way ≈ 100,000 light-years; Andromeda ≈ 2.5 million light-years; observable universe ≈ 93 billion light-years.',
+  bigU:[[1e12,'trillion'],[1e9,'billion'],[1e6,'million'],[1e3,'thousand']]
+}};
+
+/* ============ Tiện ích ============ */
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => [...r.querySelectorAll(s)];
+let lang='vi', level='quant', tab=1;
+try{ const sv=JSON.parse(localStorage.getItem('donbay-ui')||'{}'); if(sv.lang) lang=sv.lang; if(sv.level) level=sv.level; if(sv.tab) tab=sv.tab; }catch(e){}
+const HASH={'can-bang':1,'ba-loai':2,'archimedes':3};
+if (HASH[location.hash.slice(1)]) tab = HASH[location.hash.slice(1)];
+function save(){ try{ localStorage.setItem('donbay-ui', JSON.stringify({lang,level,tab})); }catch(e){} }
+function t(k, ...a){ let v = I18N[lang][k]; if (v===undefined) v = I18N.vi[k]; if (v===undefined) return k; return typeof v==='function' ? v(...a) : v; }
+function nf(x, d=2, min=0){ return new Intl.NumberFormat(lang==='vi'?'vi-VN':'en-US',{maximumFractionDigits:d,minimumFractionDigits:min}).format(x); }
+const SUP={'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};
+function sci(x, d=2){
+  if (!isFinite(x)) return '∞'; if (x===0) return '0';
+  let e=Math.floor(Math.log10(Math.abs(x)));
+  if (e>=-2 && e<5) return nf(x, d);
+  let m=Number((x/10**e).toFixed(d)); if (Math.abs(m)>=10){ m/=10; e+=1; }
+  return nf(m,d)+' × 10'+String(e).split('').map(c=>SUP[c]).join('');
+}
+function words(x){ // số lớn đọc bằng chữ: nghìn, triệu, tỉ, nghìn tỉ
+  if (x>=1e15) return sci(x,1);
+  for (const [u,n] of t('bigU')) if (x>=u){ const v=x/u; return nf(v, v<100?1:0)+' '+n; }
+  return nf(x, x<10?1:0);
+}
+const LY=9.4607e15, AU=1.495978707e11, ME=5.972e24, YEAR=3.15576e7, AGE=13.8e9, MW_D=100000*LY;
+function fmtLen(m){
+  if (m<1) return nf(m*100, m<0.01?1:0)+' cm';
+  if (m<1e3) return nf(m, m<10?1:0)+' m';
+  if (m<1e9) return nf(m/1e3, 0)+' km';
+  if (m<1e12) return words(m/1e3)+' km';
+  if (m<0.2*LY) return nf(m/AU, m/AU<10?1:0)+' AU';
+  return words(m/LY)+' '+t('ly');
+}
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const smooth=x=>{ x=clamp(x,0,1); return x*x*(3-2*x); };
+let C={};
+function readColors(){
+  const cs=getComputedStyle(document.documentElement);
+  for (const k of ['bg','panel','lane','ink','muted','line','accent','ok','warn','force','effort','arm','wood','wood-dark','pivot','ground','space','space-ink','space-muted','star','skin'])
+    C[k]=cs.getPropertyValue('--'+k).trim();
+}
+function fit(cv, aspect, minH, maxH){
+  const w=cv.clientWidth||300; const h=Math.round(clamp(w*aspect,minH,maxH));
+  cv.style.height=h+'px'; const dpr=window.devicePixelRatio||1;
+  cv.width=Math.round(w*dpr); cv.height=Math.round(h*dpr);
+  const ctx=cv.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0);
+  return {cv,ctx,w,h};
+}
+function arrow(ctx,x1,y1,x2,y2,col,lw=3){
+  const dx=x2-x1, dy=y2-y1, L=Math.hypot(dx,dy); if (L<2) return;
+  const ux=dx/L, uy=dy/L, hs=Math.min(12, L*0.45);
+  ctx.strokeStyle=col; ctx.fillStyle=col; ctx.lineWidth=lw; ctx.lineCap='round';
+  ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2-ux*hs*0.8,y2-uy*hs*0.8); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x2,y2); ctx.lineTo(x2-ux*hs-uy*hs*0.5, y2-uy*hs+ux*hs*0.5); ctx.lineTo(x2-ux*hs+uy*hs*0.5, y2-uy*hs-ux*hs*0.5); ctx.closePath(); ctx.fill();
+}
+function label(ctx,txt,x,y,col,align='center',size=13,weight=600,bg){
+  ctx.font=`${weight} ${size}px "Be Vietnam Pro",system-ui,sans-serif`; ctx.textAlign=align; ctx.textBaseline='middle';
+  if (bg){ const w=ctx.measureText(txt).width+8; const x0= align==='center'? x-w/2 : align==='right'? x-w+4 : x-4; ctx.fillStyle=bg; ctx.globalAlpha=.85; ctx.fillRect(x0,y-size*0.7,w,size*1.4); ctx.globalAlpha=1; }
+  ctx.fillStyle=col; ctx.fillText(txt,x,y);
+}
+function emoji(ctx,e,x,y,size,rot=0){
+  ctx.save(); ctx.translate(x,y); ctx.rotate(rot);
+  ctx.font=`${size}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(e,0,size*0.06); ctx.restore();
+}
+function ptr(cv,e){ const r=cv.getBoundingClientRect(); return {x:e.clientX-r.left, y:e.clientY-r.top}; }
+
+/* ============ TAB 1: cân bằng đòn bẩy ============ */
+const OBJS=[
+  {id:'apple',e:'🍎',m:0.2},{id:'bag',e:'🎒',m:3},{id:'melon',e:'🍉',m:5},{id:'bucket',e:'🪣',m:10},{id:'dog',e:'🐕',m:15},
+  {id:'student',e:'🧑‍🎓',m:40,hm:{hf:1.55,shirt:'#ffffff',pants:'#1f3a6b',scarf:true}},{id:'adult',e:'🧍',m:60,hm:{hf:1.8,shirt:'#2f7d6d',pants:'#3a3f47',scarf:false}},{id:'moto',e:'🏍️',m:100},{id:'elephant',e:'🐘',m:250},{id:'custom',e:'📦',m:null}
+];
+const NN=21, STEP=0.2, LB=4.0, HP=0.6, MID=10;
+const s1={ pivot:MID, A:{obj:'student',cm:20,idx:7}, B:{obj:'bucket',cm:20,idx:18}, ign:true, mb:10, g:9.8,
+  th:0, om:0, state:'hold', t:0, pred:null, speed:1, vec:true, chal:null, landSide:null };
+let D1g=null;
+const objOf=k=>OBJS.find(o=>o.id===s1[k].obj);
+const massOf=k=>{ const o=objOf(k); return o.m===null ? s1[k].cm : o.m; };
+function sumInt(){ // dấu của tổng moment, tính bằng số nguyên để xét cân bằng chính xác
+  let s=Math.round(massOf('A')*1000)*(s1.A.idx-s1.pivot)+Math.round(massOf('B')*1000)*(s1.B.idx-s1.pivot);
+  if (!s1.ign) s+=s1.mb*1000*(MID-s1.pivot);
+  return s;
+}
+function dyn1(th){
+  let tau=0, I=0; const c=Math.cos(th);
+  for (const k of ['A','B']){ const m=massOf(k), r=(s1[k].idx-s1.pivot)*STEP; tau+=-m*s1.g*r*c; I+=m*r*r; }
+  if (!s1.ign){ const rc=(MID-s1.pivot)*STEP; tau+=-s1.mb*s1.g*rc*c; I+=s1.mb*(LB*LB/12+rc*rc); }
+  return {tau,I};
+}
+function limits1(){
+  const rR=(NN-1-s1.pivot)*STEP, rL=s1.pivot*STEP;
+  return { min: rR>HP ? -Math.asin(HP/rR) : -Math.PI/3, max: rL>HP ? Math.asin(HP/rL) : Math.PI/3 };
+}
+function step1(dt){
+  const {tau,I}=dyn1(s1.th); if (I<1e-9) { s1.state='balanced'; return; }
+  s1.om+= tau/I*dt; s1.th+=s1.om*dt; s1.t+=dt;
+  const lim=limits1();
+  if (s1.th<=lim.min){ s1.th=lim.min; s1.om=0; s1.state='landed'; s1.landSide='R'; onLanded(); }
+  else if (s1.th>=lim.max){ s1.th=lim.max; s1.om=0; s1.state='landed'; s1.landSide='L'; onLanded(); }
+}
+function outcome1(){ const s=sumInt(); return s>0?'R':(s<0?'L':'B'); }
+function release1(){
+  if (s1.state!=='hold') return;
+  s1.t=0; s1.om=0;
+  s1.state = outcome1()==='B' ? 'balanced' : 'run';
+  ui1(); if (s1.state==='balanced') onLanded();
+}
+function reset1(){ s1.th=0; s1.om=0; s1.t=0; s1.state='hold'; s1.landSide=null; ui1(); }
+function onLanded(){ ui1(); }
+function g1(){
+  const {w,h}=D1g; const sc=Math.min((w-36)/(LB+0.3),200);
+  const ground=h-26, py=ground-HP*sc, cx=w/2;
+  const pxs=cx+(s1.pivot*STEP-LB/2)*sc;
+  const thick=clamp(sc*0.085,8,14);
+  const base=clamp(sc*0.3,22,46);
+  return {w,h,sc,ground,py,cx,pxs,thick,base};
+}
+function beamPt(G,i){ const r=(i-s1.pivot)*STEP*G.sc; return {x:G.pxs+r*Math.cos(s1.th), y:G.py-r*Math.sin(s1.th)}; }
+function objSize(G,m){ return G.base*(0.85+0.22*Math.log10(Math.max(m,0.2)/0.2)); }
+function objCenter(G,k){
+  const p=beamPt(G,s1[k].idx), sz=objSize(G,massOf(k)); const nx=-Math.sin(s1.th), ny=-Math.cos(s1.th);
+  const o=objOf(k), hf=o.hm?o.hm.hf:1;
+  const off=G.thick/2+sz*hf*0.5; return {x:p.x+nx*off, y:p.y+ny*off, sz, hf};
+}
+function rr(ctx,x,y,w,h,r){ ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(x,y,w,h,r); else ctx.rect(x,y,w,h); ctx.fill(); ctx.stroke(); }
+function human(ctx,x,y,H,rot,hm){ // hình người đứng, chân chạm thanh; tâm hình tại (x,y)
+  ctx.save(); ctx.translate(x,y); ctx.rotate(rot);
+  const W=H*0.36; ctx.lineJoin='round'; ctx.strokeStyle=C.ink; ctx.lineWidth=Math.max(1,H*0.012);
+  ctx.fillStyle=hm.pants; rr(ctx,-W*0.36,H*0.02,W*0.32,H*0.46,W*0.1); rr(ctx,W*0.04,H*0.02,W*0.32,H*0.46,W*0.1);
+  ctx.fillStyle='#2b2b2b'; rr(ctx,-W*0.44,H*0.44,W*0.42,H*0.06,H*0.02); rr(ctx,W*0.02,H*0.44,W*0.42,H*0.06,H*0.02);
+  ctx.fillStyle=hm.shirt; rr(ctx,-W*0.62,-H*0.24,W*0.2,H*0.3,W*0.1); rr(ctx,W*0.42,-H*0.24,W*0.2,H*0.3,W*0.1);
+  rr(ctx,-W*0.45,-H*0.27,W*0.9,H*0.35,W*0.2);
+  ctx.fillStyle=C.skin; for (const sx of [-1,1]){ ctx.beginPath(); ctx.arc(sx*W*0.52,H*0.09,W*0.1,0,Math.PI*2); ctx.fill(); ctx.stroke(); }
+  if (hm.scarf){ ctx.fillStyle='#d62828'; ctx.beginPath(); ctx.moveTo(-W*0.24,-H*0.27); ctx.lineTo(W*0.24,-H*0.27); ctx.lineTo(0,-H*0.11); ctx.closePath(); ctx.fill(); ctx.stroke(); }
+  ctx.fillStyle=C.skin; ctx.beginPath(); ctx.arc(0,-H*0.38,H*0.11,0,Math.PI*2); ctx.fill(); ctx.stroke();
+  ctx.fillStyle='#2a1d14'; ctx.beginPath(); ctx.arc(0,-H*0.385,H*0.118,Math.PI*1.05,Math.PI*1.95); ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+function draw1(){
+  const {ctx,w,h}=D1g; const G=g1(); ctx.clearRect(0,0,w,h);
+  // mặt đất
+  ctx.strokeStyle=C.ground; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(0,G.ground); ctx.lineTo(w,G.ground); ctx.stroke();
+  ctx.lineWidth=1; for (let x=-10;x<w;x+=14){ ctx.beginPath(); ctx.moveTo(x,G.ground+14); ctx.lineTo(x+10,G.ground+2); ctx.stroke(); }
+  // giá kê khi đang giữ
+  if (s1.state==='hold'){
+    ctx.fillStyle=C.ground; ctx.globalAlpha=.55;
+    for (const i of [0,NN-1]){ const p=beamPt(G,i); ctx.fillRect(p.x-(i===0?0:10), p.y+G.thick/2, 10, G.ground-p.y-G.thick/2); }
+    ctx.globalAlpha=1;
+  }
+  // điểm tựa
+  const tw=Math.max(HP*G.sc*0.5,18);
+  ctx.fillStyle=C.pivot; ctx.beginPath(); ctx.moveTo(G.pxs,G.py); ctx.lineTo(G.pxs-tw,G.ground); ctx.lineTo(G.pxs+tw,G.ground); ctx.closePath(); ctx.fill();
+  // thanh
+  const a=beamPt(G,0), b=beamPt(G,NN-1);
+  ctx.save(); ctx.translate(G.pxs,G.py); ctx.rotate(-s1.th);
+  const x0=(0-s1.pivot)*STEP*G.sc, x1=(NN-1-s1.pivot)*STEP*G.sc;
+  ctx.fillStyle=C.wood; ctx.strokeStyle=C['wood-dark']; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x0-4,-G.thick/2,x1-x0+8,G.thick,3) : ctx.rect(x0-4,-G.thick/2,x1-x0+8,G.thick); ctx.fill(); ctx.stroke();
+  ctx.strokeStyle=C['wood-dark']; ctx.lineWidth=1.2;
+  for (let i=0;i<NN;i++){ const x=(i-s1.pivot)*STEP*G.sc; const big=(i-s1.pivot)%5===0; ctx.beginPath(); ctx.moveTo(x,-G.thick/2); ctx.lineTo(x,-G.thick/2+(big?G.thick*0.8:G.thick*0.45)); ctx.stroke(); }
+  ctx.fillStyle=C.panel; ctx.beginPath(); ctx.arc(0,0,3.5,0,Math.PI*2); ctx.fill();
+  ctx.restore();
+  // thanh có khối lượng: trọng lượng đặt ở giữa thanh
+  const PA=massOf('A')*s1.g, PB=massOf('B')*s1.g, Pb=s1.ign?0:s1.mb*s1.g;
+  const Pmax=Math.max(PA,PB,Pb);
+  const maxLen=Math.max(42, HP*G.sc+24);
+  // khoảng cách d
+  const dlab=(k,off)=>{
+    const n=Math.abs(s1[k].idx-s1.pivot); if (n===0) return;
+    const p0=beamPt(G,s1.pivot), p1=beamPt(G,s1[k].idx); const nx=Math.sin(s1.th), ny=Math.cos(s1.th);
+    const ax=p0.x+nx*off, ay=p0.y+ny*off, bx=p1.x+nx*off, by=p1.y+ny*off;
+    ctx.strokeStyle=C.arm; ctx.lineWidth=2; ctx.setLineDash([]);
+    ctx.beginPath(); ctx.moveTo(ax,ay); ctx.lineTo(bx,by); ctx.stroke();
+    for (const [x,y] of [[ax,ay],[bx,by]]){ ctx.beginPath(); ctx.moveTo(x-nx*5,y-ny*5); ctx.lineTo(x+nx*5,y+ny*5); ctx.stroke(); }
+    label(ctx, level==='quant'?`d_${k} = ${nf(n*STEP,1)} m`:`${k}: ${t('notches',n)}`, (ax+bx)/2+nx*12, (ay+by)/2+ny*12, C.arm,'center',12,700,C.lane);
+  };
+  const sameSide = Math.sign(s1.A.idx-s1.pivot)===Math.sign(s1.B.idx-s1.pivot);
+  dlab('A', G.thick/2+10); dlab('B', G.thick/2+(sameSide?30:10));
+  // vật
+  for (const k of ['A','B']){
+    const o=objOf(k), c=objCenter(G,k);
+    if (o.hm) human(ctx,c.x,c.y,c.sz*c.hf,-s1.th,o.hm); else emoji(ctx,o.e,c.x,c.y,c.sz,-s1.th);
+    const nx=-Math.sin(s1.th), ny=-Math.cos(s1.th);
+    const bx=c.x+nx*(c.sz*c.hf*0.5+14), by=c.y+ny*(c.sz*c.hf*0.5+14);
+    ctx.fillStyle= k==='A'?C.accent:C.effort; ctx.beginPath(); ctx.arc(bx,by,10,0,Math.PI*2); ctx.fill();
+    label(ctx,k,bx,by+0.5,C.panel,'center',12,800);
+    if (s1.vec){
+      const P = k==='A'?PA:PB; const len=Math.max(10, Math.min(maxLen*P/Pmax, h-24-c.y));
+      arrow(ctx,c.x,c.y,c.x,c.y+len,C.force,3);
+      label(ctx, level==='quant'?`P_${k} = ${nf(P,P<10?1:0)} N`:`P_${k}`, clamp(c.x,46,w-46), Math.min(c.y+len+11,h-10), C.force,'center',12,700,C.lane);
+    }
+  }
+  if (!s1.ign && s1.vec){
+    const p=beamPt(G,MID); const len=Math.max(10,maxLen*Pb/Pmax);
+    ctx.fillStyle=C.force; ctx.beginPath(); ctx.arc(p.x,p.y,4,0,Math.PI*2); ctx.fill();
+    arrow(ctx,p.x,p.y,p.x,p.y+len,C.force,2.5);
+    label(ctx, level==='quant'?`P_${t('beamRow')} = ${nf(Pb,0)} N`:`P_${t('beamRow')}`, clamp(p.x,56,w-56), p.y+len+11, C.force,'center',11,700,C.lane);
+  }
+  // nhãn điểm tựa
+  label(ctx,'O',G.pxs,G.ground-HP*G.sc*0.35,C.panel,'center',12,800);
+}
+function hit1(p){
+  const G=g1();
+  for (const k of ['B','A']){ const c=objCenter(G,k); if (Math.hypot(p.x-c.x,p.y-c.y)<c.sz*c.hf*0.55+10) return k; }
+  if (Math.abs(p.x-G.pxs)<Math.max(HP*G.sc*0.5,18)+6 && p.y>G.py-6 && p.y<G.ground+6) return 'O';
+  return null;
+}
+let drag1=null;
+function idxFromX(x){ const G=g1(); return clamp(Math.round(((x-G.cx)/G.sc+LB/2)/STEP),0,NN-1); }
+function setup1(){
+  const cv=$('#cv1');
+  cv.addEventListener('pointerdown',e=>{ const p=ptr(cv,e); const k=hit1(p); if(!k) return;
+    if (s1.state!=='hold') reset1();
+    drag1=k; cv.setPointerCapture(e.pointerId); e.preventDefault(); });
+  cv.addEventListener('pointermove',e=>{ const p=ptr(cv,e);
+    if (!drag1){ cv.style.cursor = hit1(p)?'grab':'default'; return; }
+    const i=idxFromX(p.x);
+    if (drag1==='O'){ if (i!==s1.pivot){ s1.pivot=i; afterChange1(); } }
+    else { const other=drag1==='A'?'B':'A'; if (i!==s1[drag1].idx && i!==s1[other].idx){ s1[drag1].idx=i; afterChange1(); } }
+  });
+  const end=()=>{ drag1=null; };
+  cv.addEventListener('pointerup',end); cv.addEventListener('pointercancel',end);
+  for (const k of ['A','B']){
+    const sel=$('#sel'+k);
+    sel.addEventListener('change',()=>{ s1[k].obj=sel.value; s1.chal=null; afterChange1(); });
+    $('#rng'+k).addEventListener('input',e=>{ s1[k].cm=+e.target.value; afterChange1(); });
+  }
+  $('#pvL').onclick=()=>{ if(s1.pivot>0){ s1.pivot--; afterChange1(); } };
+  $('#pvR').onclick=()=>{ if(s1.pivot<NN-1){ s1.pivot++; afterChange1(); } };
+  $('#ign1').onchange=e=>{ s1.ign=e.target.checked; afterChange1(); };
+  $('#rngMb').oninput=e=>{ s1.mb=+e.target.value; afterChange1(); };
+  $$('#gSeg .btn').forEach(b=>b.onclick=()=>{ s1.g=+b.dataset.g; afterChange1(); });
+  $$('#spd1 .btn').forEach(b=>b.onclick=()=>{ s1.speed=+b.dataset.s; ui1(); });
+  $('#vec1').onchange=e=>{ s1.vec=e.target.checked; };
+  $$('#pred1 .btn').forEach(b=>b.onclick=()=>{ if (s1.state!=='hold') return; s1.pred=b.dataset.p; ui1(); });
+  $('#rel1').onclick=release1;
+  $('#rst1').onclick=()=>{ reset1(); };
+  $('#chal1').onclick=challenge1;
+}
+function afterChange1(){ if (s1.state!=='hold') reset1(); s1.pred=null; ui1(); }
+function challenge1(){
+  const list=[]; const objs=OBJS.filter(o=>o.m!==null);
+  for (const a of objs) for (const b of objs){ if (a===b) continue;
+    for (let ia=0; ia<MID; ia++){ const num=Math.round(a.m*1000)*(MID-ia); const den=Math.round(b.m*1000);
+      if (num%den===0){ const ib=MID+num/den; if (ib>MID && ib<NN && ib!==ia) list.push({a:a.id,b:b.id,ia,ib}); } } }
+  const c=list[Math.floor(Math.random()*list.length)];
+  s1.pivot=MID; s1.ign=true; $('#ign1').checked=true;
+  s1.A.obj=c.a; s1.B.obj=c.b; s1.A.idx=c.ia;
+  let wrong=c.ib; while (wrong===c.ib) wrong=MID+1+Math.floor(Math.random()*(NN-MID-1));
+  s1.B.idx=wrong; s1.chal=c; reset1(); s1.pred=null; ui1();
+}
+function ui1(){
+  // vật
+  for (const k of ['A','B']){
+    const sel=$('#sel'+k); if (sel.value!==s1[k].obj) sel.value=s1[k].obj;
+    const cus=objOf(k).m===null; $('#cus'+k).hidden=!cus;
+    $('#m'+k).textContent=`${nf(massOf(k),2)} kg`;
+  }
+  $('#pvTxt').textContent=t('pvTxt',s1.pivot-MID);
+  $('#beamBox').hidden=s1.ign; $('#mbTxt').textContent=`${s1.mb} kg`;
+  $$('#gSeg .btn').forEach(b=>b.setAttribute('aria-pressed', String(+b.dataset.g===s1.g)));
+  $('#gRow').hidden = level!=='quant';
+  $$('#spd1 .btn').forEach(b=>b.setAttribute('aria-pressed', String(+b.dataset.s===s1.speed)));
+  $('#rel1').disabled = s1.state!=='hold';
+  // dự đoán
+  const out=outcome1(); const done = s1.state==='landed'||s1.state==='balanced';
+  $$('#pred1 .btn').forEach(b=>{ b.setAttribute('aria-pressed', String(b.dataset.p===s1.pred && !done));
+    b.classList.toggle('right', done && b.dataset.p===out); b.classList.toggle('wrong', done && b.dataset.p===s1.pred && s1.pred!==out); b.disabled = s1.state!=='hold' && !done; });
+  const fb=$('#fb1');
+  if (done){ fb.hidden=false; fb.className='fb '+(s1.pred===out?'good':'bad'); fb.textContent = s1.pred===null ? t('fbNone') : (s1.pred===out?t('fbRight'):t('fbWrong'));
+    if (s1.chal){ fb.textContent += ' ' + (out==='B'?t('chalDone'):t('chalFail')); if(out==='B') fb.className='fb good'; } }
+  else if (s1.chal){ fb.hidden=false; fb.className='fb'; fb.textContent=t('chalText', t('objA')+' ('+t('obj_'+s1.A.obj).toLowerCase()+')', t('objB')+' ('+t('obj_'+s1.B.obj).toLowerCase()+')'); }
+  else fb.hidden=true;
+  // trạng thái
+  const st=$('#st1');
+  if (s1.state==='hold') st.textContent=t('st_hold');
+  else if (s1.state==='run') st.textContent=t('st_run');
+  else if (s1.state==='balanced') st.textContent=t('st_bal');
+  else st.textContent=t('st_land', s1.landSide==='L'?t('left'):t('right'), nf(s1.t,2,2));
+  // bảng số liệu
+  const show = s1.pred!==null || done;
+  const rows=[]; const side=i=> i<s1.pivot?t('sideL'):(i>s1.pivot?t('sideR'):t('sideO'));
+  const items=[['A',massOf('A'),s1.A.idx,C.accent],['B',massOf('B'),s1.B.idx,C.effort]];
+  if (!s1.ign) items.push([t('beamRow'),s1.mb,MID,C.force]);
+  let Ml=0, Mr=0;
+  if (level==='quant'){
+    rows.push(`<tr><th>${t('thObj')}</th><th>${t('thSide')}</th><th>${t('thM')}</th><th>${t('thP')}</th><th>${t('thD')}</th><th>${t('thMo')}</th></tr>`);
+    for (const [n,m,i,col] of items){ const P=m*s1.g, d=Math.abs(i-s1.pivot)*STEP, M=P*d; if (i<s1.pivot) Ml+=M; else if (i>s1.pivot) Mr+=M;
+      rows.push(`<tr><td><span class="sw" style="background:${col}"></span>${n}</td><td>${side(i)}</td><td class="n">${nf(m,2)}</td><td class="n">${nf(P,1)}</td><td class="n">${nf(d,1)}</td><td class="n">${show?nf(M,1):t('hidden')}</td></tr>`); }
+    $('#cmp1').innerHTML = show ? t('cmpQuant', nf(Ml,1), nf(Mr,1), out==='B'?t('relEq'):(out==='L'?t('relL'):t('relR'))) : `<span class="hint">${t('hideNote')}</span>`;
+  } else {
+    rows.push(`<tr><th>${t('thObj')}</th><th>${t('thSide')}</th><th>${t('thM')}</th><th>${t('thDn')}</th></tr>`);
+    for (const [n,m,i,col] of items) rows.push(`<tr><td><span class="sw" style="background:${col}"></span>${n}</td><td>${side(i)}</td><td class="n">${nf(m,2)}</td><td class="n">${t('notches',Math.abs(i-s1.pivot))}</td></tr>`);
+    const mA=massOf('A'), mB=massOf('B'), dA=Math.abs(s1.A.idx-s1.pivot), dB=Math.abs(s1.B.idx-s1.pivot);
+    $('#cmp1').innerHTML = t('cmpQual', `${mA>mB?t('heavier'):mA<mB?t('lighter'):t('same')}, ${dA>dB?t('farther'):dA<dB?t('nearer'):t('sameD')}`, `${mB>mA?t('heavier'):mB<mA?t('lighter'):t('same')}, ${dB>dA?t('farther'):dB<dA?t('nearer'):t('sameD')}`);
+  }
+  $('#tbl1').innerHTML=rows.join('');
+  const cc=$('#concl1'); cc.hidden=!done; cc.innerHTML = level==='quant'?t('conclQuant'):t('conclQual');
+}
+function fillSelects1(){
+  for (const k of ['A','B']){ const sel=$('#sel'+k);
+    sel.innerHTML=OBJS.map(o=>`<option value="${o.id}">${o.e} ${t('obj_'+o.id)}${o.m!==null?` (${nf(o.m,1)} kg)`:''}</option>`).join(''); sel.value=s1[k].obj; }
+}
+
+/* ============ TAB 2: ba loại đòn bẩy ============ */
+const LB2=1.6, ORD={1:['P','O','F'],2:['O','P','F'],3:['O','F','P']};
+const s2={ type:1, pos:{1:{P:0.15,O:0.55,F:1.5},2:{O:0.1,P:0.55,F:1.5},3:{O:0.1,F:0.55,P:1.5}}, phi:0, m:20, drag:null };
+const PHIMAX=22*Math.PI/180;
+let D2g=null;
+function geo2(){
+  const {w,h}=D2g; const p=s2.pos[s2.type]; const up=s2.type!==1; const sinM=Math.sin(PHIMAX);
+  // loại 2, 3: cả thanh đi lên nên đặt trục thấp; tỉ lệ chọn để đầu thanh không ra khỏi khung
+  const Oy = up ? h-86 : h*0.5;
+  const sc = Math.min((w-70)/LB2, up ? (Oy-110)/(LB2*sinM) : (h-Oy-24)/(LB2*sinM));
+  const x0=(w-LB2*sc)/2; const Ox=x0+p.O*sc;
+  const rP=p.P-p.O, rF=p.F-p.O; const th=Math.sign(rP)*s2.phi;
+  const at=u=>{ const r=(u-p.O)*sc; return {x:Ox+r*Math.cos(th), y:Oy-r*Math.sin(th)}; };
+  return {w,h,sc,x0,p,Ox,Oy,rP,rF,th,at};
+}
+function forces2(){
+  // F luôn vuông góc với thanh: cánh tay đòn của F là dF; P thẳng đứng: cánh tay đòn của P là dP·cosφ
+  const p=s2.pos[s2.type]; const dP=Math.abs(p.P-p.O), dF=Math.abs(p.F-p.O); const P=s2.m*9.8;
+  const Fat=phi=>P*dP*Math.cos(phi)/dF; const F=Fat(s2.phi);
+  let WF=0; const n=200; for (let i=0;i<n;i++){ const ph=(i+0.5)/n*s2.phi; WF+=Fat(ph)*dF*s2.phi/n; } // cộng dần công của F dọc cung đường
+  return {dP,dF,P,F,sP:dP*s2.phi,sF:dF*s2.phi,hP:dP*Math.sin(s2.phi),WF,WP:P*dP*Math.sin(s2.phi)};
+}
+function draw2(){
+  const {ctx,w,h}=D2g; const G=geo2(); ctx.clearRect(0,0,w,h);
+  const {P,F}=forces2();
+  const thick=10;
+  // vị trí ban đầu (nét đứt)
+  if (s2.phi>0.002){
+    ctx.save(); ctx.setLineDash([6,5]); ctx.strokeStyle=C.muted; ctx.lineWidth=1.5;
+    ctx.strokeRect(G.x0-4, G.Oy-thick/2, LB2*G.sc+8, thick); ctx.restore();
+    // cung quãng đường
+    for (const [key,col] of [['P',C.arm],['F',C.arm]]){
+      const r=(G.p[key]-G.p.O)*G.sc; if (Math.abs(r)<2) continue;
+      const a0 = r>0?0:Math.PI; const a1 = r>0? -G.th : Math.PI-G.th;
+      ctx.save(); ctx.setLineDash([5,4]); ctx.strokeStyle=col; ctx.lineWidth=2.5;
+      ctx.beginPath(); ctx.arc(G.Ox,G.Oy,Math.abs(r),Math.min(a0,a1),Math.max(a0,a1)); ctx.stroke(); ctx.restore();
+      const x=G.Ox+r*1, y=G.Oy; ctx.fillStyle=C.muted; ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2); ctx.fill();
+      const am=(a0+a1)/2; label(ctx, key==='P'?'s_P':'s_F', G.Ox+Math.cos(am)*(Math.abs(r)+16), G.Oy+Math.sin(am)*(Math.abs(r)+16), C.arm,'center',12,700);
+    }
+  }
+  // điểm tựa
+  const O=G.at(G.p.O);
+  ctx.fillStyle=C.pivot; ctx.beginPath(); ctx.moveTo(O.x,O.y+thick/2); ctx.lineTo(O.x-18,O.y+thick/2+34); ctx.lineTo(O.x+18,O.y+thick/2+34); ctx.closePath(); ctx.fill();
+  ctx.fillStyle=C.ground; ctx.fillRect(O.x-30,O.y+thick/2+34,60,4);
+  // thanh
+  ctx.save(); ctx.translate(G.Ox,G.Oy); ctx.rotate(-G.th);
+  const a=(0-G.p.O)*G.sc, b=(LB2-G.p.O)*G.sc;
+  ctx.fillStyle=C.wood; ctx.strokeStyle=C['wood-dark']; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.roundRect ? ctx.roundRect(a-4,-thick/2,b-a+8,thick,3) : ctx.rect(a-4,-thick/2,b-a+8,thick); ctx.fill(); ctx.stroke();
+  ctx.restore();
+  label(ctx,'O',O.x,O.y+thick/2+22,C.panel,'center',12,800);
+  // vật P (thùng hàng) đặt trên thanh
+  const Pp=G.at(G.p.P); const box=clamp(G.sc*0.16,26,48);
+  ctx.save(); ctx.translate(Pp.x,Pp.y); ctx.rotate(-G.th);
+  ctx.fillStyle=C.wood; ctx.strokeStyle=C['wood-dark']; ctx.lineWidth=2;
+  ctx.fillRect(-box/2,-thick/2-box,box,box); ctx.strokeRect(-box/2,-thick/2-box,box,box);
+  ctx.beginPath(); ctx.moveTo(-box/2,-thick/2-box); ctx.lineTo(box/2,-thick/2); ctx.moveTo(box/2,-thick/2-box); ctx.lineTo(-box/2,-thick/2); ctx.stroke();
+  ctx.restore();
+  const nx=-Math.sin(G.th), ny=-Math.cos(G.th);
+  const pc={x:Pp.x+nx*(thick/2+box/2), y:Pp.y+ny*(thick/2+box/2)};
+  const maxL=Math.min(90,h*0.3); const k=maxL/Math.max(P,F);
+  // trọng lượng vật đặt tại chỗ thùng tì lên thanh, luôn thẳng đứng
+  arrow(ctx,Pp.x,Pp.y,Pp.x,Pp.y+Math.max(12,P*k),C.force,3);
+  label(ctx, level==='quant'?`P = ${nf(P,0)} N`:'P', pc.x+box/2+6, pc.y-box/2-4, C.force,'left',13,700,C.panel);
+  if (s2.phi>0.002){ // khoảng cách từ O tới phương thẳng đứng của P
+    ctx.save(); ctx.setLineDash([4,4]); ctx.strokeStyle=C.force; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(G.Ox,G.Oy); ctx.lineTo(Pp.x,G.Oy); ctx.lineTo(Pp.x,Pp.y); ctx.stroke(); ctx.restore();
+  }
+  // tay F: luôn vuông góc với thanh
+  const Fp=G.at(G.p.F); const up = s2.type!==1;
+  const ux=Math.cos(G.th), uy=-Math.sin(G.th);          // hướng dọc thanh (ra xa O)
+  const fx=(up?-1:1)*Math.sin(G.th), fy=(up?-1:1)*Math.cos(G.th); // pháp tuyến của thanh
+  const fl=Math.max(12,F*k)+15;
+  arrow(ctx,Fp.x,Fp.y,Fp.x+fx*fl,Fp.y+fy*fl,C.effort,3.5);
+  const ra=22; ctx.strokeStyle=C.effort; ctx.lineWidth=1.5; ctx.beginPath();
+  ctx.moveTo(Fp.x+ux*ra,Fp.y+uy*ra); ctx.lineTo(Fp.x+ux*ra+fx*ra,Fp.y+uy*ra+fy*ra); ctx.lineTo(Fp.x+fx*ra,Fp.y+fy*ra); ctx.stroke();
+  ctx.fillStyle=C.effort; ctx.beginPath(); ctx.arc(Fp.x,Fp.y,15,0,Math.PI*2); ctx.fill();
+  label(ctx,'F',Fp.x,Fp.y+0.5,C.panel,'center',14,800);
+  label(ctx, level==='quant'?`F = ${nf(F,F<10?1:0)} N`:'F', Fp.x+fx*fl*0.6-ux*22, Fp.y+fy*fl*0.6-uy*22, C.effort,'right',13,700,C.panel);
+  // nhãn khoảng cách
+  if (s2.phi<0.002){
+    const y=G.Oy+thick/2+50;
+    for (const key of ['P','F']){ const x1=G.Ox, x2=G.at(G.p[key]).x; const yy= key==='P'? y : y+18;
+      ctx.strokeStyle=key==='P'?C.force:C.effort; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(x1,yy); ctx.lineTo(x2,yy); ctx.moveTo(x1,yy-4); ctx.lineTo(x1,yy+4); ctx.moveTo(x2,yy-4); ctx.lineTo(x2,yy+4); ctx.stroke();
+      label(ctx, level==='quant'?`d_${key} = ${nf(Math.abs(G.p[key]-G.p.O),2)} m`:`d_${key}`, (x1+x2)/2, yy-8, key==='P'?C.force:C.effort,'center',12,700,C.lane); }
+  }
+}
+function hit2(p){
+  const G=geo2();
+  const F=G.at(G.p.F); if (Math.hypot(p.x-F.x,p.y-F.y)<26) return 'F';
+  const P=G.at(G.p.P); const box=clamp(G.sc*0.16,26,48); if (Math.abs(p.x-P.x)<box/2+10 && p.y<P.y+10 && p.y>P.y-box-20) return 'P';
+  const O=G.at(G.p.O); if (Math.abs(p.x-O.x)<26 && p.y>O.y-10 && p.y<O.y+50) return 'O';
+  return null;
+}
+function slide2(key,u){
+  const ord=ORD[s2.type], i=ord.indexOf(key), p=s2.pos[s2.type], gap=0.12;
+  const lo = i>0 ? p[ord[i-1]]+gap : 0.05; const hi = i<2 ? p[ord[i+1]]-gap : LB2-0.05;
+  p[key]=clamp(u,lo,hi);
+}
+function setup2(){
+  const cv=$('#cv2');
+  cv.addEventListener('pointerdown',e=>{ const p=ptr(cv,e); const k=hit2(p); if(!k) return; s2.drag={k,x0:p.x,y0:p.y,mode:k==='F'?null:'slide'}; cv.setPointerCapture(e.pointerId); e.preventDefault(); });
+  cv.addEventListener('pointermove',e=>{ const p=ptr(cv,e);
+    if (!s2.drag){ cv.style.cursor=hit2(p)?'grab':'default'; return; }
+    const d=s2.drag, G=geo2();
+    if (!d.mode){ if (Math.hypot(p.x-d.x0,p.y-d.y0)<6) return; d.mode = Math.abs(p.x-d.x0)>Math.abs(p.y-d.y0)?'slide':'lift'; }
+    if (d.mode==='slide'){ const r=((p.x-G.Ox)*Math.cos(G.th)-(p.y-G.Oy)*Math.sin(G.th))/G.sc; slide2(d.k, G.p.O+r); }
+    else { const rF=G.rF*G.sc; const s=clamp((G.Oy-p.y)/rF,-1,1); const th=Math.asin(s); s2.phi=clamp(th*Math.sign(G.rP),0,PHIMAX); $('#rngLift').value=Math.round(s2.phi/PHIMAX*100); }
+    ui2();
+  });
+  const end=()=>{ s2.drag=null; }; cv.addEventListener('pointerup',end); cv.addEventListener('pointercancel',end);
+  $$('#types2 .btn').forEach(b=>b.onclick=()=>{ s2.type=+b.dataset.t; ui2(); });
+  $('#rngM2').oninput=e=>{ s2.m=+e.target.value; ui2(); };
+  $('#rngLift').oninput=e=>{ s2.phi=PHIMAX*e.target.value/100; ui2(); };
+}
+function ui2(){
+  $$('#types2 .btn').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.t===s2.type)));
+  $('#tyDesc').textContent=t('desc'+s2.type);
+  $('#m2Txt').textContent=`${s2.m} kg`;
+  const f=forces2();
+  $('#liftTxt').textContent = level==='quant' ? `${nf(f.hP*100,1)} cm` : `${Math.round(s2.phi/PHIMAX*100)}%`;
+  const k=f.dF/f.dP; const ks=nf(k>=1?k:1/k,1); const kf=f.P/f.F; const kfs=nf(kf>=1?kf:1/kf,1);
+  const out=[];
+  if (level==='quant'){ out.push(`<p>${t('oForce',nf(f.F,1),nf(f.P,0))}</p>`); out.push(`<p>${t('dists',nf(f.dF,2),nf(f.dP,2))}</p>`); }
+  out.push(`<p>${Math.abs(k-1)<0.02 ? t('oEven') : (level==='quant' ? (kf>1?t('oGain',kfs,ks):t('oLoss',kfs,ks)) : (kf>1?t('oGainQ'):t('oLossQ')))}</p>`);
+  out.push(`<p>${s2.type===1?t('oDir1'):t('oDir23')}</p>`);
+  if (s2.phi>0.002) out.push(`<p>${t('oPerp')}</p>`);
+  if (s2.phi>0.002 && level==='quant'){ out.push(`<p>${t('oPath',nf(f.sF*100,1),nf(f.sP*100,1),nf(f.hP*100,1))}</p>`); out.push(`<p>${t('oWork',nf(f.WF,1),nf(f.WP,1))}</p>`); }
+  else if (s2.phi<=0.002) out.push(`<p class="hint">${t('oPathQ')}</p>`);
+  $('#obs2').innerHTML=out.join('');
+}
+/* Trò chơi phân loại */
+const EX=[
+  {id:'scissors',e:'✂️',t:1},{id:'hammer',e:'🔨',t:1},{id:'balance',e:'⚖️',t:1},{id:'nod',e:'🙇',t:1},
+  {id:'barrow',e:'🛞',t:2},{id:'opener',e:'🍾',t:2},{id:'nut',e:'🌰',t:2},{id:'tiptoe',e:'🦶',t:2},
+  {id:'tongs',e:'🧊',t:3},{id:'rod',e:'🎣',t:3},{id:'arm',e:'💪',t:3},{id:'broom',e:'🧹',t:3}
+];
+let sortState={placed:{},order:[],sel:null};
+function shuffleSort(){ sortState.placed={}; sortState.sel=null; sortState.order=EX.map(x=>x.id).sort(()=>Math.random()-0.5); renderSort(); $('#sortFb').hidden=true; }
+function cardHTML(x,done){ return `<div class="chipcard${done?' done':''}" data-id="${x.id}" tabindex="${done?-1:0}" role="button"><span class="em">${x.e}</span><span class="txt"><span>${t('ex_'+x.id)}</span>${done?`<span class="det">${t('de_'+x.id)}</span>`:''}</span></div>`; }
+function renderSort(){
+  const pool=$('#pool'); pool.innerHTML=sortState.order.filter(id=>!sortState.placed[id]).map(id=>cardHTML(EX.find(x=>x.id===id),false)).join('');
+  $$('.zone').forEach(z=>{ const ty=+z.dataset.z; $$('.chipcard',z).forEach(c=>c.remove());
+    z.insertAdjacentHTML('beforeend', EX.filter(x=>sortState.placed[x.id] && x.t===ty).map(x=>cardHTML(x,true)).join('')); z.classList.toggle('armed', !!sortState.sel); });
+  if (sortState.sel){ const c=$(`#pool .chipcard[data-id="${sortState.sel}"]`); if (c) c.classList.add('sel'); }
+  const n=Object.keys(sortState.placed).length; $('#score').textContent=t('score',n,EX.length);
+}
+function tryPlace(id,ty){
+  const x=EX.find(e=>e.id===id); const fb=$('#sortFb'); fb.hidden=false; sortState.sel=null;
+  if (x.t===ty){ sortState.placed[id]=true; fb.className='fb good'; fb.textContent = Object.keys(sortState.placed).length===EX.length ? t('sortAll') : t('sortRight',t('ex_'+id),t('de_'+id)); renderSort(); }
+  else { fb.className='fb bad'; fb.textContent=t('sortWrong',t('ex_'+id),t('hi_'+id)); renderSort(); const c=$(`#pool .chipcard[data-id="${id}"]`); if (c){ c.classList.add('shake'); setTimeout(()=>c.classList.remove('shake'),450);} }
+}
+function setupSort(){
+  const pool=$('#pool'); let dr=null;
+  pool.addEventListener('pointerdown',e=>{ const c=e.target.closest('.chipcard'); if(!c) return; dr={c,id:c.dataset.id,x0:e.clientX,y0:e.clientY,moved:false,g:null}; try{c.setPointerCapture(e.pointerId);}catch(_){} });
+  pool.addEventListener('pointermove',e=>{ if(!dr) return;
+    if (!dr.moved && Math.hypot(e.clientX-dr.x0,e.clientY-dr.y0)>8){ dr.moved=true; dr.g=dr.c.cloneNode(true); dr.g.classList.add('ghost'); document.body.appendChild(dr.g); dr.c.style.opacity=.35; }
+    if (dr.g){ dr.g.style.left=e.clientX+'px'; dr.g.style.top=e.clientY+'px'; const el=document.elementFromPoint(e.clientX,e.clientY); $$('.zone').forEach(z=>z.classList.toggle('hover', !!el && z.contains(el))); e.preventDefault(); }
+  });
+  const finish=(e,cancel)=>{ if(!dr) return; const d=dr; dr=null; $$('.zone').forEach(z=>z.classList.remove('hover'));
+    if (d.g){ d.g.remove(); d.c.style.opacity=''; if (!cancel){ const el=document.elementFromPoint(e.clientX,e.clientY); const z=el && el.closest('.zone'); if (z) tryPlace(d.id,+z.dataset.z); } }
+    else if (!cancel){ sortState.sel = sortState.sel===d.id?null:d.id; renderSort(); }
+  };
+  pool.addEventListener('pointerup',e=>finish(e,false)); pool.addEventListener('pointercancel',e=>finish(e,true));
+  pool.addEventListener('keydown',e=>{ const c=e.target.closest('.chipcard'); if (c && (e.key==='Enter'||e.key===' ')){ e.preventDefault(); sortState.sel=c.dataset.id; renderSort(); const z=$('.zone'); z&&z.focus(); } });
+  $$('.zone').forEach(z=>{ const go=()=>{ if (sortState.sel) tryPlace(sortState.sel,+z.dataset.z); };
+    z.addEventListener('click',go); z.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); go(); } }); });
+  $('#sortReset').onclick=shuffleSort;
+}
+
+/* ============ TAB 3: Archimedes ============ */
+const D1=1;
+const LM=[
+  {id:'bus',e:'🚌',L:12},{id:'field',e:'⚽',L:105},{id:'lm81',e:'🏙️',L:461},{id:'fan',e:'🏔️',L:3147},{id:'plane',e:'✈️',L:1e4},{id:'iss',e:'🛰️',L:4.2e5},
+  {id:'vn',e:'🗺️',L:1.65e6},{id:'earth',e:'🌍',L:1.2742e7},{id:'moon',e:'🌕',L:3.844e8},{id:'sund',e:'🌞',L:1.3927e9},
+  {id:'sun',e:'☀️',L:AU},{id:'nep',e:'🪐',L:30.07*AU},{id:'voy',e:'🚀',L:170*AU},{id:'ly',e:'✨',L:LY},{id:'prox',e:'⭐',L:4.24*LY},{id:'vega',e:'💫',L:25*LY},
+  {id:'polaris',e:'🧭',L:433*LY},{id:'orion',e:'☁️',L:1344*LY},{id:'gc',e:'🎯',L:26000*LY},{id:'mw',e:'🌌',L:MW_D},{id:'and',e:'🌀',L:2.537e6*LY},
+  {id:'lg',e:'🔵',L:1e7*LY},{id:'virgo',e:'🟣',L:5.4e7*LY},{id:'lan',e:'🕸️',L:5.2e8*LY},{id:'uni',e:'🔭',L:9.3e10*LY}
+];
+const SPEEDS=[{id:'walk',v:5/3.6},{id:'car',v:100/3.6},{id:'plane',v:900/3.6},{id:'probe',v:191.7e3},{id:'light',v:299792458}];
+const LIFTS=[0.001,0.01,0.1,1];
+const LOGW0=Math.log10(6), LOGW1=Math.log10(3e27);
+const s3={ m:60, step:1, pred:null, revealed:false, v:0, playing:false, target:null, lift:0.01, sp:'walk' };
+const NSTEP=6;
+let D3a=null, D3b=null;
+const STARS=Array.from({length:170},(_,i)=>({x:Math.random(),y:Math.random(),r:Math.random()*1.2+0.3,a:Math.random()*0.6+0.3}));
+function v3(){
+  const d2=ME*D1/s3.m; const s=s3.lift*d2/D1;
+  return {d2, lyv:d2/LY, mw:d2/MW_D, and:d2/(2.537e6*LY), uni:9.3e10*LY/d2, s, sLy:s/LY, smw:s/MW_D,
+    tYr:s/(SPEEDS.find(x=>x.id===s3.sp).v)/YEAR, tWalk:s/(5/3.6)/YEAR, rod:7850*d2/ME, snd:d2/5000/YEAR};
+}
+function drawStars(ctx,w,h,n=170){ for (let i=0;i<n;i++){ const s=STARS[i]; ctx.globalAlpha=s.a; ctx.fillStyle=C.star; ctx.fillRect(s.x*w,s.y*h,s.r,s.r); } ctx.globalAlpha=1; }
+function person(ctx,x,yFoot,hpx,col){ // người que đứng trên thanh, hai tay ấn xuống
+  const hd=hpx*0.13; ctx.strokeStyle=col; ctx.fillStyle=col; ctx.lineWidth=Math.max(2,hpx*0.05); ctx.lineCap='round';
+  const hip=yFoot-hpx*0.48, neck=yFoot-hpx*0.8;
+  ctx.beginPath(); ctx.arc(x,yFoot-hpx+hd,hd,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(x,neck); ctx.lineTo(x,hip); ctx.moveTo(x,hip); ctx.lineTo(x-hpx*0.12,yFoot); ctx.moveTo(x,hip); ctx.lineTo(x+hpx*0.12,yFoot);
+  ctx.moveTo(x,neck+hpx*0.05); ctx.lineTo(x-hpx*0.18,hip+hpx*0.05); ctx.moveTo(x,neck+hpx*0.05); ctx.lineTo(x+hpx*0.18,hip+hpx*0.05); ctx.stroke();
+}
+function earth(ctx,x,y,r){
+  const g=ctx.createRadialGradient(x-r*0.35,y-r*0.35,r*0.1,x,y,r); g.addColorStop(0,'#7cc4ff'); g.addColorStop(1,'#1f5fa8');
+  ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
+  if (r>10){ ctx.fillStyle='#3f9b5a'; ctx.beginPath(); ctx.ellipse(x-r*0.25,y-r*0.1,r*0.32,r*0.22,0.6,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(x+r*0.35,y+r*0.3,r*0.22,r*0.16,-0.4,0,Math.PI*2); ctx.fill(); }
+}
+function draw3a(){
+  const {ctx,w,h}=D3a; ctx.clearRect(0,0,w,h); ctx.fillStyle=C.space; ctx.fillRect(0,0,w,h); drawStars(ctx,w,h,70);
+  const V=v3(); const by=h*0.6, xL=w*0.04, xR=w*0.96; const r=Math.min(h*0.22,w*0.085);
+  const xE=xL+r*1.05, xP=xE+Math.max(r*1.6,w*0.1), xM=w*0.9;
+  ctx.fillStyle=C.wood; ctx.fillRect(xL,by-4,xR-xL,8);
+  // dấu ngắt: hình không theo tỉ lệ
+  const bx=(xP+xM)/2; ctx.fillStyle=C.space; ctx.fillRect(bx-7,by-9,14,18);
+  ctx.strokeStyle=C['space-ink']; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(bx-9,by+9); ctx.lineTo(bx-3,by-9); ctx.moveTo(bx+3,by+9); ctx.lineTo(bx+9,by-9); ctx.stroke();
+  ctx.fillStyle='#8c98a8'; ctx.beginPath(); ctx.moveTo(xP,by+4); ctx.lineTo(xP-14,by+30); ctx.lineTo(xP+14,by+30); ctx.closePath(); ctx.fill();
+  label(ctx,t('pivotLbl'),xP+18,by+22,C['space-muted'],'left',12,600);
+  earth(ctx,xE,by-4-r,r);
+  label(ctx,t('earthLbl'),xE,Math.max(12,by-8-2*r-10),C['space-ink'],'center',13,700);
+  arrow(ctx,xE,by-4-r,xE,by+26,C.force,3);
+  const hp=Math.min(h*0.4,64); person(ctx,xM,by-4,hp,C['space-ink']);
+  label(ctx,t('you',s3.m),clamp(xM,50,w-50),Math.max(12,by-hp-14),C['space-ink'],'center',13,700);
+  arrow(ctx,xM+14,by-hp*0.5,xM+14,by+24,C.force,2.5);
+  const dy=by+44;
+  ctx.strokeStyle=C.arm; ctx.lineWidth=2;
+  const dim=(x1,x2)=>{ ctx.beginPath(); ctx.moveTo(x1,dy); ctx.lineTo(x2,dy); ctx.moveTo(x1,dy-5); ctx.lineTo(x1,dy+5); ctx.moveTo(x2,dy-5); ctx.lineTo(x2,dy+5); ctx.stroke(); };
+  dim(xE,xP); dim(xP,xM);
+  label(ctx,'d₁ = 1 m',(xE+xP)/2,dy+15,C.arm,'center',12,700);
+  const d2txt = s3.revealed ? `d₂ ≈ ${words(V.lyv)} ${t('ly')}` : t('d2q');
+  label(ctx,d2txt,(xP+xM)/2,dy+15,C.arm,'center',13,700);
+}
+function camera3(W,d2){
+  const ld2=Math.log10(d2); const s=smooth((Math.log10(W)-(ld2-0.2))/0.8);
+  return -0.35*W*(1-s) + (-d2/2)*s;
+}
+function niceBar(Wpx_per_m, target){ // thước tỉ lệ 1-2-5
+  const m=target/Wpx_per_m; const e=Math.floor(Math.log10(m)); const b=10**e; let v=b; for (const f of [1,2,5]) if (f*b<=m) v=f*b; return v;
+}
+function draw3b(){
+  const {ctx,w,h}=D3b; ctx.clearRect(0,0,w,h); ctx.fillStyle=C.space; ctx.fillRect(0,0,w,h); drawStars(ctx,w,h);
+  const V=v3(); const d2=V.d2;
+  const logW=LOGW0+(LOGW1-LOGW0)*s3.v/1000; const W=10**logW; const k=w/W;
+  const cw=camera3(W,d2); const X=x=>w/2+(x-cw)*k;
+  const yb=h*0.7; const x0=X(0), xp=X(-d2), xe=X(-d2-D1);
+  // vũ trụ quan sát được, tâm ở Trái Đất
+  const ru=4.65e10*LY*k; if (ru>30 && ru<w*3){ ctx.strokeStyle=C['space-muted']; ctx.globalAlpha=.5; ctx.setLineDash([4,6]); ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(xe,yb,ru,0,Math.PI*2); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha=1; }
+  // Ngân Hà quanh Trái Đất
+  const rmw=MW_D/2*k; if (rmw>5 && rmw<w*2 && xe>-rmw && xe<w+rmw){
+    const g=ctx.createRadialGradient(xe,yb,0,xe,yb,rmw); g.addColorStop(0,'rgba(255,240,210,.85)'); g.addColorStop(.25,'rgba(200,190,255,.35)'); g.addColorStop(1,'rgba(120,120,220,0)');
+    ctx.save(); ctx.translate(xe,yb); ctx.scale(1,0.35); ctx.translate(-xe,-yb); ctx.fillStyle=g; ctx.beginPath(); ctx.arc(xe,yb,rmw,0,Math.PI*2); ctx.fill(); ctx.restore();
+    if (rmw>18) label(ctx,t('milky'),xe,yb-rmw*0.35-12,C['space-ink'],'center',12,600);
+  }
+  // thanh
+  const bl=Math.max(xe,-20), br=Math.min(x0,w+20);
+  if (br>bl){ ctx.strokeStyle=C.wood; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(bl,yb); ctx.lineTo(br,yb); ctx.stroke(); }
+  // điểm tựa + Trái Đất
+  if (xp>-30 && xp<w+30){
+    ctx.fillStyle='#8c98a8'; ctx.beginPath(); ctx.moveTo(xp,yb+2); ctx.lineTo(xp-8,yb+16); ctx.lineTo(xp+8,yb+16); ctx.closePath(); ctx.fill();
+    earth(ctx,xe,yb-6,5);
+    label(ctx,t('earthPivot'),xp,yb+30,C['space-ink'],'center',12,700);
+  } else if (xp<-30 && x0>0){
+    label(ctx,t('farLeft'),12,36,C['space-muted'],'left',12,600);
+  }
+  // người
+  if (x0>-20 && x0<w+20){
+    const hp=1.7*k;
+    if (hp>14){ person(ctx,x0,yb-2,Math.min(hp,yb-20),C['space-ink']); }
+    else { ctx.fillStyle=C['space-ink']; ctx.beginPath(); ctx.arc(x0,yb-4,4,0,Math.PI*2); ctx.fill(); }
+    label(ctx,t('you',s3.m),clamp(x0,44,w-44),yb+ (xp>-30&&xp<w+30?48:30),C['space-ink'],'center',12,700);
+  }
+  // các mốc so sánh: thanh đo bắt đầu từ chỗ em đứng
+  const vis=LM.filter(l=>{ const px=l.L*k; return px>w*0.012 && px<w*1.3; }).sort((a,b)=>b.L-a.L);
+  vis.forEach((l,i)=>{ const px=l.L*k; const y=yb-48-i*34 - (1.7*k>14?Math.min(1.7*k,yb-20):0)*0; const xa=x0-px;
+    const yy=Math.max(26, y);
+    ctx.strokeStyle=C.arm; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(Math.max(xa,-5),yy); ctx.lineTo(x0,yy); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x0,yy-5); ctx.lineTo(x0,yy+5); if (xa>-5){ ctx.moveTo(xa,yy-5); ctx.lineTo(xa,yy+5);} ctx.stroke();
+    let txt=`${l.e} ${t('lm_'+l.id)}: ${fmtLen(l.L)}`;
+    ctx.font='600 12px "Be Vietnam Pro",system-ui,sans-serif';
+    if (ctx.measureText(txt).width>w-24) txt=`${l.e} ${fmtLen(l.L)}`;
+    const half=ctx.measureText(txt).width/2+8;
+    const tx=clamp((Math.max(xa,0)+Math.min(x0,w))/2, half, w-half);
+    label(ctx,txt,tx,yy-11,C['space-ink'],'center',12,600,C.space);
+  });
+  // nhãn d₂ trên thanh khi thấy cả thanh
+  if (xp>-30 && xp<w && s3.revealed){ label(ctx,`d₂ ≈ ${words(V.lyv)} ${t('ly')}`,(xp+x0)/2,yb-14,C.arm,'center',13,700,C.space); }
+  // thước tỉ lệ + bề rộng khung nhìn
+  const bar=niceBar(k,w*0.22); const bpx=bar*k;
+  ctx.strokeStyle=C['space-ink']; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(12,h-16); ctx.lineTo(12+bpx,h-16); ctx.moveTo(12,h-21); ctx.lineTo(12,h-11); ctx.moveTo(12+bpx,h-21); ctx.lineTo(12+bpx,h-11); ctx.stroke();
+  label(ctx,fmtLen(bar),12+bpx+8,h-16,C['space-ink'],'left',12,600);
+  label(ctx,t('viewW',fmtLen(W)),12,16,C['space-muted'],'left',12,600);
+  // đánh dấu dòng đang xem trong thang
+  const cur=LM.reduce((best,l)=>Math.abs(Math.log10(l.L)-(logW-0.4))<Math.abs(Math.log10(best.L)-(logW-0.4))?l:best, LM[0]);
+  if (cur.id!==s3.cur){ s3.cur=cur.id; $$('.lrow').forEach(r=>r.classList.toggle('cur', r.dataset.id===cur.id)); }
+}
+function renderLadder(){
+  const V=v3(); const rows=[...LM.map(l=>({...l,me:false})), {id:'me',e:'🧍',L:V.d2,me:true}].sort((a,b)=>a.L-b.L);
+  const lo=Math.log10(100), hi=Math.log10(2e27);
+  $('#ladder').innerHTML=rows.map(r=>{
+    const pct=clamp((Math.log10(r.L)-lo)/(hi-lo)*100,1,100);
+    const ratio = r.me ? '' : (V.d2>=r.L ? t('ratioMore', words(V.d2/r.L)) : t('ratioLess', words(r.L/V.d2)));
+    const name = r.me ? t('meLabel') : t('lm_'+r.id);
+    const val = (r.me && !s3.revealed) ? '?' : fmtLen(r.L);
+    return `<div class="lrow${r.me?' me':''}${r.id===s3.cur?' cur':''}" data-id="${r.id}" data-l="${r.L}" tabindex="0" role="button"><span class="e">${r.e}</span><span class="nm">${name}<small>${val}</small></span><span class="rt">${(r.me||!s3.revealed)?'':ratio}</span><span class="bar"><i style="width:${(r.me&&!s3.revealed)?0:pct}%"></i></span></div>`;
+  }).join('');
+}
+function zoomTo(L){ const lw=Math.log10(L*1.5); s3.target=clamp((lw-LOGW0)/(LOGW1-LOGW0)*1000,0,1000); s3.playing=false; ui3zoom(); }
+function ui3zoom(){ $('#zPlay').textContent = s3.playing?t('zPause'):t('zPlay'); }
+function renderStep(){
+  const V=v3(); const body=$('#stepBody'); let html='';
+  const lyTxt=`${words(V.lyv)} ${t('ly')}`;
+  switch(s3.step){
+    case 1: html=t('st3_1'); break;
+    case 2: {
+      html=t('st3_2',s3.m)+`<div class="choices" id="q3">${t('q3').map((q,i)=>`<button class="btn" data-i="${i}">${String.fromCharCode(65+i)}. ${q}</button>`).join('')}</div><p class="fb" id="q3fb" hidden></p>`; break; }
+    case 3: html = level==='quant' ? t('st3_3q', sci(V.d2,2), lyTxt) : t('st3_3l', sci(ME/s3.m,1), lyTxt); break;
+    case 4: html=t('st3_4')+`<button class="btn primary" id="goZoom">${t('st3_4btn')}</button>`; break;
+    case 5: html=t('st3_5', fmtLen(s3.lift), `${words(V.sLy)} ${t('ly')}`, nf(V.smw,1), words(V.tWalk), words(V.tWalk/AGE)); break;
+    case 6: html=t('st3_6', sci(ME*9.8,2), nf(V.rod,0), words(V.snd), nf(V.snd/AGE,0)); break;
+  }
+  body.innerHTML=html;
+  $('#stepN').textContent=t('stepN',s3.step,NSTEP);
+  $('#stPrev').disabled=s3.step===1;
+  $('#stNext').textContent= s3.step===NSTEP ? t('again') : t('next');
+  if (s3.step===2){
+    const ans=[1.65e6,AU,MW_D,9.3e10*LY]; const correct=2;
+    const showFb=()=>{ const fb=$('#q3fb'); const i=s3.pred; if (i===null) return; fb.hidden=false;
+      $$('#q3 .btn').forEach(b=>{ b.classList.toggle('right', +b.dataset.i===correct); b.classList.toggle('wrong', +b.dataset.i===i && i!==correct); });
+      if (i===correct){ fb.className='fb good'; fb.textContent=t('q3Right',lyTxt,nf(V.mw,0)); }
+      else if (i<correct){ fb.className='fb bad'; fb.textContent=t('q3Low',lyTxt,words(V.d2/ans[i])); }
+      else { fb.className='fb bad'; fb.textContent=t('q3High',lyTxt,words(V.uni)); } };
+    $$('#q3 .btn').forEach(b=>b.onclick=()=>{ s3.pred=+b.dataset.i; s3.revealed=true; showFb(); renderRes3(); renderLadder(); });
+    showFb();
+  }
+  if (s3.step===4){ $('#goZoom').onclick=()=>{ s3.target=null; if (s3.v>=999) s3.v=0; s3.playing=true; ui3zoom(); $('#cv3b').scrollIntoView({behavior:'smooth',block:'center'}); }; }
+}
+function renderRes3(){
+  const V=v3();
+  $('#res3').innerHTML = s3.revealed ? t('res3', sci(V.d2,2), `${words(V.lyv)} ${t('ly')}`, nf(V.mw,0), nf(V.and,1)) : t('res3Hidden');
+  $('#pmTxt').textContent=`${s3.m} kg`;
+}
+function renderLift(){
+  const V=v3(); const out=[];
+  const age=V.tYr/AGE;
+  if (level==='quant') out.push(`<p>${t('liftS', fmtLen(s3.lift), sci(V.s,2)+' m', `${words(V.sLy)} ${t('ly')}`, nf(V.smw,1))}</p>`);
+  else out.push(`<p>${t('liftSQ', fmtLen(s3.lift), `${words(V.sLy)} ${t('ly')}`, nf(V.smw,1))}</p>`);
+  out.push(`<p>${t('liftT', words(V.tYr), age>=1?words(age):'')}</p>`);
+  if (level==='quant') out.push(`<p class="hint">${t('liftW', sci(ME*9.8*s3.lift,2))}</p>`);
+  $('#liftRes').innerHTML=out.join('');
+}
+function fillSelects3(){
+  $('#selH').innerHTML=LIFTS.map(h=>`<option value="${h}">${fmtLen(h)}</option>`).join(''); $('#selH').value=String(s3.lift);
+  $('#selV').innerHTML=SPEEDS.map(s=>`<option value="${s.id}">${t('sp_'+s.id)}</option>`).join(''); $('#selV').value=s3.sp;
+}
+function setup3(){
+  $('#stPrev').onclick=()=>{ if (s3.step>1){ s3.step--; renderStep(); } };
+  $('#stNext').onclick=()=>{ if (s3.step<NSTEP){ s3.step++; if (s3.step>=3) s3.revealed=true; } else s3.step=1; renderStep(); renderRes3(); renderLadder(); };
+  $('#rngPm').oninput=e=>{ s3.m=+e.target.value; renderStep(); renderRes3(); renderLadder(); renderLift(); };
+  $('#zPlay').onclick=()=>{ s3.target=null; if (!s3.playing && s3.v>=999) s3.v=0; s3.playing=!s3.playing; ui3zoom(); };
+  $('#zHome').onclick=()=>{ s3.playing=false; s3.target=0; ui3zoom(); };
+  $('#rngZ').oninput=e=>{ s3.v=+e.target.value; s3.playing=false; s3.target=null; ui3zoom(); };
+  $('#ladder').addEventListener('click',e=>{ const r=e.target.closest('.lrow'); if (r) zoomTo(+r.dataset.l); });
+  $('#ladder').addEventListener('keydown',e=>{ const r=e.target.closest('.lrow'); if (r && (e.key==='Enter'||e.key===' ')){ e.preventDefault(); zoomTo(+r.dataset.l); } });
+  $('#selH').onchange=e=>{ s3.lift=+e.target.value; renderLift(); if (s3.step===5) renderStep(); };
+  $('#selV').onchange=e=>{ s3.sp=e.target.value; renderLift(); };
+}
+
+/* ============ Chung ============ */
+function applyLang(){
+  document.documentElement.lang=lang;
+  $$('[data-i18n]').forEach(el=>el.textContent=t(el.dataset.i18n));
+  $$('[data-i18n-html]').forEach(el=>el.innerHTML=t(el.dataset.i18nHtml));
+  $('#langBtn').textContent= lang==='vi'?'EN':'VI';
+  $$('#spd1 .btn').forEach(b=>b.textContent='×'+nf(+b.dataset.s,2));
+  $$('#gSeg .btn').forEach(b=>b.textContent=nf(+b.dataset.g,1));
+  fillSelects1(); fillSelects3(); renderAll();
+}
+function renderAll(){
+  $('#lvQual').setAttribute('aria-pressed',String(level==='qual')); $('#lvQuant').setAttribute('aria-pressed',String(level==='quant'));
+  $$('nav.tabs button').forEach(b=>{ const on=+b.dataset.tab===tab; b.classList.toggle('on',on); b.setAttribute('aria-selected',String(on)); });
+  for (const i of [1,2,3]) $('#t'+i).hidden = i!==tab;
+  $('#foot').innerHTML=`<p>${t('foot'+tab)}</p>`;
+  ui1(); ui2(); renderSort(); renderStep(); renderRes3(); renderLadder(); renderLift(); ui3zoom();
+  resize();
+}
+function resize(){
+  if (tab===1) D1g=fit($('#cv1'),0.52,240,460);
+  if (tab===2) D2g=fit($('#cv2'),0.5,300,420);
+  if (tab===3){ D3a=fit($('#cv3a'),0.32,215,270); D3b=fit($('#cv3b'),0.56,280,440); }
+}
+let last=performance.now(), acc=0; const DT=1/240;
+function loop(now){
+  const dt=Math.min((now-last)/1000,0.1); last=now;
+  if (tab===1 && D1g){
+    if (s1.state==='run'){ acc+=dt*s1.speed; while(acc>=DT && s1.state==='run'){ step1(DT); acc-=DT; } }
+    else acc=0;
+    draw1();
+  }
+  if (tab===2 && D2g) draw2();
+  if (tab===3 && D3a && D3b){
+    if (s3.playing){ s3.v=Math.min(1000, s3.v+dt*1000/28); if (s3.v>=1000) { s3.playing=false; ui3zoom(); } $('#rngZ').value=s3.v; }
+    else if (s3.target!==null){ s3.v+= (s3.target-s3.v)*Math.min(1,dt*4); if (Math.abs(s3.target-s3.v)<0.5){ s3.v=s3.target; s3.target=null; } $('#rngZ').value=s3.v; }
+    draw3a(); draw3b();
+  }
+  requestAnimationFrame(loop);
+}
+function init(){
+  readColors();
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change',readColors);
+  new MutationObserver(readColors).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+  setup1(); setup2(); setupSort(); setup3();
+  $('#langBtn').onclick=()=>{ lang= lang==='vi'?'en':'vi'; save(); applyLang(); };
+  $('#lvQual').onclick=()=>{ level='qual'; save(); renderAll(); };
+  $('#lvQuant').onclick=()=>{ level='quant'; save(); renderAll(); };
+  $$('nav.tabs button').forEach(b=>b.onclick=()=>{ tab=+b.dataset.tab; save(); renderAll(); });
+  window.addEventListener('resize',resize);
+  shuffleSort();
+  applyLang();
+  requestAnimationFrame(loop);
+}
+init();
+</script>

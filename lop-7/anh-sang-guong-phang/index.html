@@ -1,0 +1,979 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Ánh sáng và gương phẳng</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Ánh sáng (KHTN 7): vùng tối, định luật phản xạ, phản xạ khuếch tán, ảnh qua gương phẳng, vận dụng.
+   Cùng hệ màu, phông với bộ mô phỏng KHTN 6–9. Sân khấu canvas bên trái, sổ ghi chép bên phải; điện thoại xếp một cột. */
+:root{
+  --bg:#edf0f3; --panel:#ffffff; --lane:#f4f6f9; --ink:#141c26; --muted:#556170; --line:#c9d1db;
+  --accent:#1d5fa8; --accent-ink:#ffffff; --ok:#1d8a4b; --warn:#c2410c;
+  --laser:#e0262f; --ray:#f2b632; --ray2:#e57a12; --mirror:#6fa8d6; --img:#7a3fc2; --obj:#1d5fa8;
+  --room:#10151e; --space:#0d1626; --star:#e9eef7; --gold:#c99a2e; --wood:#8a6a4a;
+  --font-ui:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-num:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Consolas,monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0e131a; --panel:#161e28; --lane:#111821; --ink:#e3e9f0; --muted:#97a3b2; --line:#2a3644;
+  --accent:#5ea6ec; --accent-ink:#04182c; --ok:#47c47d; --warn:#f08a4b;
+  --laser:#ff4d55; --ray:#ffc94a; --ray2:#ff9a3d; --mirror:#7fb8e6; --img:#b28cff; --obj:#5ea6ec;
+  --room:#0a0e15; --space:#060a12; --star:#cfd8e6; --gold:#e0b24a; --wood:#9a7a58;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e131a; --panel:#161e28; --lane:#111821; --ink:#e3e9f0; --muted:#97a3b2; --line:#2a3644;
+  --accent:#5ea6ec; --accent-ink:#04182c; --ok:#47c47d; --warn:#f08a4b;
+  --laser:#ff4d55; --ray:#ffc94a; --ray2:#ff9a3d; --mirror:#7fb8e6; --img:#b28cff; --obj:#5ea6ec;
+  --room:#0a0e15; --space:#060a12; --star:#cfd8e6; --gold:#e0b24a; --wood:#9a7a58;
+  color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-ui);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px 40px}
+.wrap{max-width:1320px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.hbtns{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.eyebrow{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{margin:0;font-size:clamp(25px,3.4vw,36px);line-height:1.15;font-weight:800;text-wrap:balance;letter-spacing:-.01em}
+h2{margin:0;font-size:17px;font-weight:700;text-wrap:balance}
+.btn{font:inherit;font-weight:600;font-size:15px;min-height:44px;padding:8px 14px;border-radius:8px;border:1px solid var(--line);
+  background:var(--panel);color:var(--ink);cursor:pointer;touch-action:manipulation;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+.btn:hover{border-color:var(--accent)}
+.btn:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible,a:focus-visible,.vcard:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
+.seg .btn{border:0;border-radius:0}
+nav.tabs{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line)}
+nav.tabs button{font:inherit;font-size:15px;font-weight:600;white-space:nowrap;min-height:46px;padding:8px 14px;border:0;border-bottom:3px solid transparent;
+  background:none;color:var(--muted);cursor:pointer;margin-bottom:-1px}
+nav.tabs button.on{color:var(--ink);border-bottom-color:var(--accent)}
+.req{margin:0;font-size:14px;color:var(--muted);max-width:110ch}
+.req b{color:var(--ink);font-weight:600}
+.lab{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:14px;align-items:start}
+@media (max-width:1020px){.lab{grid-template-columns:minmax(0,1fr)}}
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.col{display:flex;flex-direction:column;gap:12px;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card p{margin:0}
+canvas{display:block;width:100%;border-radius:8px;background:var(--lane);touch-action:none;user-select:none;-webkit-user-select:none}
+.hint{margin:0;font-size:14px;color:var(--muted)}
+.status{margin:0;font-weight:600;min-height:1.5em}
+.status.ok{color:var(--ok)} .status.no{color:var(--warn)}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chk{display:inline-flex;align-items:center;gap:8px;min-height:44px;font-size:15px;cursor:pointer}
+.chk input{width:22px;height:22px;accent-color:var(--accent)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:14px;color:var(--muted)}
+.legend i{display:inline-block;width:18px;height:5px;border-radius:3px;margin-right:6px;vertical-align:middle}
+.sl{display:flex;flex-direction:column;gap:4px}
+.sl .top{display:flex;justify-content:space-between;gap:8px;font-size:15px}
+.sl .val{font-family:var(--font-num);font-weight:600;text-align:right}
+input[type=range]{width:100%;height:44px;accent-color:var(--accent);margin:0}
+.kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;font-size:15px;margin:0}
+.kv dt{color:var(--muted)} .kv dd{margin:0;font-family:var(--font-num);font-variant-numeric:tabular-nums;text-align:right;overflow-wrap:anywhere}
+.big{font-family:var(--font-num);font-size:clamp(22px,2.6vw,30px);font-weight:600;line-height:1.2}
+.opts{display:flex;flex-direction:column;gap:6px}
+.opts .btn{text-align:left;font-size:14px;justify-content:flex-start}
+.opts .btn.picked{border:2px solid var(--accent)}
+.opts .btn.right{background:color-mix(in srgb,var(--ok) 18%,var(--panel));border-color:var(--ok)}
+.ans{background:var(--lane);border-left:4px solid var(--ok);padding:8px 12px;border-radius:6px;font-size:15px}
+.muted{color:var(--muted);font-size:14px}
+details{border:1px solid var(--line);border-radius:var(--r);background:var(--panel);padding:0 14px}
+details[open]{padding-bottom:12px}
+summary{cursor:pointer;font-weight:700;min-height:44px;display:flex;align-items:center;font-size:15px}
+details p,details ul{margin:6px 0;font-size:15px;max-width:95ch}
+details ul{padding-left:20px}
+.fine{font-size:13px;color:var(--muted);margin:0}
+.tblwrap{overflow-x:auto}
+table.log{border-collapse:collapse;width:100%;font-size:14px}
+table.log th,table.log td{padding:4px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+table.log th:first-child,table.log td:first-child{text-align:left}
+table.log td{font-family:var(--font-num);font-variant-numeric:tabular-nums}
+table.log th{color:var(--muted);font-weight:600}
+table.log.wide td{font-family:var(--font-ui);white-space:normal;text-align:left}
+table.log.wide th{text-align:left}
+table.log a{color:var(--accent)}
+.quiz{display:flex;flex-direction:column;gap:12px}
+.qz{display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--line);padding-top:10px}
+.qz:first-child{border-top:0;padding-top:0}
+.qz .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.qz input{font:inherit;font-family:var(--font-num);font-size:16px;width:110px;min-height:44px;padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+.qz .unit{font-family:var(--font-num);color:var(--muted)}
+.qz .res{font-weight:700}
+.qz .res.ok{color:var(--ok)} .qz .res.no{color:var(--warn)}
+/* Video thực tế: thẻ có ảnh thu nhỏ, bấm là phát trong trang */
+.vsec{display:flex;flex-direction:column;gap:8px}
+.vsec h2{font-size:15px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.vids{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.vcard{display:flex;flex-direction:column;background:var(--space);color:var(--star);border-radius:var(--r);overflow:hidden;border:0;padding:0;text-align:left;cursor:pointer;font:inherit}
+.vthumb{position:relative;aspect-ratio:16/9;background:linear-gradient(135deg,#1d2a44,#4a3418)}
+.vthumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.vthumb .pl{position:absolute;inset:0;margin:auto;width:56px;height:56px;border-radius:50%;background:rgba(209,40,48,.92);display:grid;place-items:center}
+.vthumb .pl::before{content:"";border-style:solid;border-width:11px 0 11px 18px;border-color:transparent transparent transparent #fff;margin-left:5px}
+.vthumb .tag,.vthumb .dur{position:absolute;font-size:12px;font-weight:700;padding:2px 8px;border-radius:5px;background:rgba(0,0,0,.72);color:#fff}
+.vthumb .tag{left:8px;top:8px} .vthumb .dur{right:8px;bottom:8px;font-family:var(--font-num)}
+.vthumb .dur.unk{background:#9a3412}
+.vbody{padding:10px 12px;display:flex;flex-direction:column;gap:4px}
+.vbody .ttl{font-weight:700;font-size:15px;line-height:1.3}
+.vbody .ch{font-size:13px;opacity:.75}
+.vbody .look{font-size:14px;opacity:.92}
+.vbody .look b{color:var(--ray)}
+.vmodal{position:fixed;inset:0;background:rgba(5,8,14,.82);z-index:50;display:grid;place-items:center;padding:16px}
+.vbox{background:var(--panel);color:var(--ink);border-radius:var(--r);width:min(960px,100%);max-height:100%;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+.vhead{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.vstage{position:relative;aspect-ratio:16/9;background:#000;border-radius:8px;overflow:hidden;display:grid;place-items:center;color:#fff}
+.vstage video,.vstage iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.vstage .msg{padding:18px;text-align:center;max-width:56ch;font-size:15px}
+body.hideNums .num{filter:blur(7px);user-select:none}
+body.hideNums .num:hover{filter:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow" data-i18n="eyebrow"></div>
+      <h1 data-i18n="title"></h1>
+    </div>
+    <div class="hbtns">
+      <button class="btn" id="gvBtn" aria-pressed="false" data-i18n="gvBtn"></button>
+      <button class="btn" id="langBtn">EN</button>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="1" data-i18n="tab1"></button>
+    <button role="tab" data-tab="2" data-i18n="tab2"></button>
+    <button role="tab" data-tab="3" data-i18n="tab3"></button>
+    <button role="tab" data-tab="4" data-i18n="tab4"></button>
+    <button role="tab" data-tab="5" data-i18n="tab5"></button>
+  </nav>
+
+  <!-- ===================== TAB 1: VÙNG TỐI ===================== -->
+  <section id="t1" class="col">
+    <p class="req" data-i18n-html="req1"></p>
+    <div class="vsec"><h2 data-i18n="vHead"></h2><div class="vids" id="v1"></div></div>
+    <div class="lab">
+      <div class="stage">
+        <div class="controls" id="pre1"></div>
+        <p class="hint" data-i18n="hint1"></p>
+        <canvas id="cv1" aria-label="light source, opaque object and screen seen from the side"></canvas>
+        <div class="controls">
+          <label class="chk"><input type="checkbox" id="edge1" checked> <span data-i18n="edge1"></span></label>
+          <label class="chk"><input type="checkbox" id="sight1" checked> <span data-i18n="sight1"></span></label>
+        </div>
+        <div class="legend">
+          <span><i style="background:var(--ray)"></i><span data-i18n="lgUmb"></span></span>
+          <span><i style="background:repeating-linear-gradient(90deg,var(--ray2) 0 5px,transparent 5px 9px)"></i><span data-i18n="lgPen"></span></span>
+        </div>
+        <p class="fine" data-i18n="assume1"></p>
+      </div>
+      <div class="col">
+        <div class="card">
+          <h2 data-i18n="setT"></h2>
+          <div class="sl"><div class="top"><span data-i18n="srcW"></span><span class="val" id="aV"></span></div>
+            <input type="range" id="a1" min="0" max="30" step="1" value="0"></div>
+          <div class="sl"><div class="top"><span data-i18n="objW"></span><span class="val" id="bV"></span></div>
+            <input type="range" id="b1" min="4" max="36" step="1" value="16"></div>
+        </div>
+        <div class="card">
+          <h2 data-i18n="obs"></h2>
+          <dl class="kv" id="o1"></dl>
+          <p class="hint" data-i18n="fromM"></p>
+          <canvas id="cv1m" aria-label="what point M sees when looking at the source"></canvas>
+          <p class="status" id="st1"></p>
+        </div>
+        <div class="card" id="p1"></div>
+        <div class="card" id="p1b"></div>
+      </div>
+    </div>
+    <details open><summary data-i18n="concT"></summary><div data-i18n-html="conc1"></div></details>
+    <details><summary data-i18n="mechT"></summary><div data-i18n-html="mech1"></div></details>
+    <details><summary data-i18n="misT"></summary><div data-i18n-html="mis1"></div></details>
+    <details><summary data-i18n="wordT"></summary><div data-i18n-html="word1"></div></details>
+  </section>
+
+  <!-- ===================== TAB 2: ĐỊNH LUẬT PHẢN XẠ ===================== -->
+  <section id="t2" class="col" hidden>
+    <p class="req" data-i18n-html="req2"></p>
+    <div class="vsec"><h2 data-i18n="vHead"></h2><div class="vids" id="v2"></div></div>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" data-i18n="hint2"></p>
+        <canvas id="cv2" aria-label="laser, protractor disc and plane mirror"></canvas>
+        <div class="controls">
+          <button class="btn primary" id="rec2" data-i18n="rec2"></button>
+          <button class="btn" id="clr2" data-i18n="clr2"></button>
+          <button class="btn" id="zero2" data-i18n="zero2"></button>
+        </div>
+        <div class="controls">
+          <label class="chk"><input type="checkbox" id="fold2"> <span data-i18n="fold2"></span></label>
+          <label class="chk"><input type="checkbox" id="mang2"> <span data-i18n="mang2"></span></label>
+        </div>
+        <p class="status" id="st2"></p>
+        <p class="fine" data-i18n="assume2"></p>
+      </div>
+      <div class="col">
+        <div class="card">
+          <h2 data-i18n="obs"></h2>
+          <dl class="kv" id="o2"></dl>
+          <div class="tblwrap"><table class="log" id="tb2"></table></div>
+        </div>
+        <div class="card" id="p2"></div>
+        <div class="card" id="p2b"></div>
+      </div>
+    </div>
+    <details open><summary data-i18n="concT"></summary><div data-i18n-html="conc2"></div></details>
+    <details><summary data-i18n="mechT"></summary><div data-i18n-html="mech2"></div></details>
+    <details><summary data-i18n="misT"></summary><div data-i18n-html="mis2"></div></details>
+    <details><summary data-i18n="wordT"></summary><div data-i18n-html="word2"></div></details>
+  </section>
+
+  <!-- ===================== TAB 3: GƯƠNG VÀ KHUẾCH TÁN ===================== -->
+  <section id="t3" class="col" hidden>
+    <p class="req" data-i18n-html="req3"></p>
+    <div class="vsec"><h2 data-i18n="vHead"></h2><div class="vids" id="v3"></div></div>
+    <div class="lab">
+      <div class="stage">
+        <div class="controls" id="pre3"></div>
+        <p class="hint" data-i18n="hint3"></p>
+        <canvas id="cv3" aria-label="parallel beam reflecting from a smooth or rough surface"></canvas>
+        <div class="controls">
+          <label class="chk"><input type="checkbox" id="zoom3"> <span data-i18n="zoom3"></span></label>
+        </div>
+        <p class="fine" data-i18n="assume3"></p>
+      </div>
+      <div class="col">
+        <div class="card">
+          <h2 data-i18n="setT"></h2>
+          <div class="sl"><div class="top"><span data-i18n="rough3"></span><span class="val" id="rV"></span></div>
+            <input type="range" id="r3" min="0" max="100" step="1" value="0"></div>
+          <div class="sl"><div class="top"><span data-i18n="ang3"></span><span class="val" id="thV"></span></div>
+            <input type="range" id="th3" min="10" max="70" step="1" value="40"></div>
+        </div>
+        <div class="card">
+          <h2 data-i18n="obs"></h2>
+          <dl class="kv" id="o3"></dl>
+          <p class="status" id="st3"></p>
+        </div>
+        <div class="card" id="p3"></div>
+        <div class="card" id="p3b"></div>
+      </div>
+    </div>
+    <details open><summary data-i18n="concT"></summary><div data-i18n-html="conc3"></div></details>
+    <details><summary data-i18n="mechT"></summary><div data-i18n-html="mech3"></div></details>
+    <details><summary data-i18n="misT"></summary><div data-i18n-html="mis3"></div></details>
+    <details><summary data-i18n="wordT"></summary><div data-i18n-html="word3"></div></details>
+  </section>
+
+  <!-- ===================== TAB 4: ẢNH QUA GƯƠNG PHẲNG ===================== -->
+  <section id="t4" class="col" hidden>
+    <p class="req" data-i18n-html="req4"></p>
+    <div class="vsec"><h2 data-i18n="vHead"></h2><div class="vids" id="v4"></div></div>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" data-i18n="hint4"></p>
+        <canvas id="cv4" aria-label="object, plane mirror, image and eye seen from above"></canvas>
+        <div class="controls">
+          <button class="btn primary" id="step4"></button>
+          <button class="btn" id="all4" data-i18n="all4"></button>
+        </div>
+        <p class="status" id="st4"></p>
+        <div class="controls">
+          <label class="chk"><input type="checkbox" id="eye4" checked> <span data-i18n="eye4"></span></label>
+          <label class="chk"><input type="checkbox" id="beam4"> <span data-i18n="beam4"></span></label>
+          <label class="chk"><input type="checkbox" id="scr4"> <span data-i18n="scr4"></span></label>
+          <label class="chk"><input type="checkbox" id="grid4" checked> <span data-i18n="grid4"></span></label>
+        </div>
+        <div class="legend">
+          <span><i style="background:var(--obj)"></i><span data-i18n="lgObj"></span></span>
+          <span><i style="background:repeating-linear-gradient(90deg,var(--img) 0 5px,transparent 5px 9px)"></i><span data-i18n="lgImg"></span></span>
+          <span><i style="background:var(--ray)"></i><span data-i18n="lgRay"></span></span>
+        </div>
+        <p class="fine" data-i18n="assume4"></p>
+      </div>
+      <div class="col">
+        <div class="card">
+          <h2 data-i18n="obs"></h2>
+          <dl class="kv" id="o4"></dl>
+        </div>
+        <div class="card" id="p4"></div>
+        <div class="card" id="p4b"></div>
+      </div>
+    </div>
+    <details open><summary data-i18n="concT"></summary><div data-i18n-html="conc4"></div></details>
+    <details><summary data-i18n="mechT"></summary><div data-i18n-html="mech4"></div></details>
+    <details><summary data-i18n="misT"></summary><div data-i18n-html="mis4"></div></details>
+    <details><summary data-i18n="wordT"></summary><div data-i18n-html="word4"></div></details>
+  </section>
+
+  <!-- ===================== TAB 5: VẬN DỤNG ===================== -->
+  <section id="t5" class="col" hidden>
+    <p class="req" data-i18n-html="req5"></p>
+    <div class="vsec"><h2 data-i18n="vHead"></h2><div class="vids" id="v5"></div></div>
+    <div class="lab">
+      <div class="stage">
+        <div class="controls" id="lv5"></div>
+        <p class="hint" id="desc5"></p>
+        <canvas id="cv5" aria-label="laser puzzle with movable mirrors"></canvas>
+        <p class="status" id="st5"></p>
+        <div class="controls"><button class="btn" id="rst5" data-i18n="reset"></button></div>
+        <p class="fine" data-i18n="assume5"></p>
+      </div>
+      <div class="col">
+        <div class="card">
+          <h2 data-i18n="quizT"></h2>
+          <div class="quiz" id="quiz5"></div>
+        </div>
+        <div class="card" id="p5"></div>
+      </div>
+    </div>
+    <details><summary data-i18n="mechT"></summary><div data-i18n-html="mech5"></div></details>
+    <details><summary data-i18n="wordT"></summary><div data-i18n-html="word5"></div></details>
+  </section>
+
+  <details><summary data-i18n="offT"></summary><div id="offline"></div></details>
+  <details><summary data-i18n="currT"></summary><div data-i18n-html="curr"></div></details>
+</div>
+
+<div class="vmodal" id="vmodal" hidden role="dialog" aria-modal="true">
+  <div class="vbox">
+    <div class="vhead"><b id="vmT"></b><button class="btn" id="vmX" aria-label="close">✕</button></div>
+    <div class="vstage" id="vmS"></div>
+    <p class="hint" id="vmL"></p>
+    <div class="controls"><a class="btn" id="vmYT" target="_blank" rel="noopener"></a><span class="fine" id="vmN"></span></div>
+  </div>
+</div>
+
+<script>
+/* ================= Ngôn ngữ: mỗi khoá là [tiếng Việt, English] ================= */
+const L={
+title:['Ánh sáng: bóng tối, phản xạ và gương phẳng','Light: shadows, reflection and plane mirrors'],
+eyebrow:['KHTN 7 · Chủ đề Ánh sáng · Mô phỏng tương tác','Science 7 · Light · Interactive simulation'],
+gvBtn:['Chế độ GV: che số liệu','Teacher mode: hide numbers'],
+tab1:['1. Vùng tối','1. Shadows'],tab2:['2. Định luật phản xạ','2. Law of reflection'],tab3:['3. Phản xạ khuếch tán','3. Diffuse reflection'],
+tab4:['4. Ảnh qua gương phẳng','4. Plane-mirror image'],tab5:['5. Vận dụng','5. Applying it'],
+vHead:['Video thực tế (tiếng Anh)','Real-world videos'],
+setT:['Điều chỉnh','Settings'],obs:['Quan sát','Observations'],
+concT:['Kết luận','Conclusion'],mechT:['Vì sao? (cơ chế khoa học)','Why? (the science)'],misT:['Học sinh hay hiểu sai','Common misconceptions'],wordT:['Nguồn gốc thuật ngữ','Where the words come from'],
+predTitle:['Dự đoán trước','Predict first'],predThen:['Giờ hãy thử trên mô phỏng rồi mở đáp án.','Now try it in the simulation, then reveal the answer.'],
+showAns:['Xem đáp án','Show answer'],hideAns:['Ẩn đáp án','Hide answer'],reset:['Đặt lại','Reset'],
+yes:['có','yes'],no:['không','no'],
+
+/* ---------- Tab 1 ---------- */
+req1:['<b>Yêu cầu cần đạt:</b> Vẽ được hình biểu diễn vùng tối do nguồn sáng rộng và vùng tối do nguồn sáng hẹp.','<b>Learning goal:</b> Draw the shadow regions made by a wide light source and by a narrow (point) light source.'],
+hint1:['Kéo nguồn sáng, vật chắn sáng, màn chắn. Kéo điểm M trên màn để xem từ M nhìn về nguồn thấy gì.','Drag the light source, the opaque object and the screen. Drag point M on the screen to see what M “sees” of the source.'],
+edge1:['Vẽ tia sáng giới hạn','Draw boundary rays'],sight1:['Đường nhìn từ M','Lines of sight from M'],
+lgUmb:['Tia giới hạn vùng tối','Rays bounding the umbra'],lgPen:['Tia giới hạn vùng nửa tối','Rays bounding the penumbra'],
+assume1:['Giả thiết mô phỏng: hình nhìn ngang (mặt cắt), ánh sáng truyền thẳng; độ sáng trên màn chỉ tính phần nguồn sáng không bị che, bỏ qua việc ánh sáng yếu dần theo khoảng cách. Đơn vị cm.','Model: side view (cross-section), light travels in straight lines; brightness on the screen counts only the part of the source not blocked, ignoring dimming with distance. Units: cm.'],
+srcW:['Bề rộng nguồn sáng','Width of the light source'],objW:['Bề rộng vật chắn sáng','Width of the opaque object'],
+pNarrow:['Nguồn hẹp (đèn pin nhỏ)','Narrow source (small torch)'],pWide:['Nguồn rộng (đèn ống)','Wide source (tube lamp)'],pEcl:['Liên hệ: nhật thực','Link: solar eclipse'],
+point:['nguồn hẹp','narrow source'],
+oUmb:['Vùng tối trên màn','Umbra on screen'],oPen:['Vùng nửa tối trên màn','Penumbra on screen'],oM:['Độ sáng tại M','Brightness at M'],oSeen:['M nhìn thấy','M sees'],ofSrc:['nguồn sáng','of the source'],
+fromM:['Đứng ở M nhìn về nguồn sáng (phần bị vật che tô đen):','Standing at M, looking at the source (the blocked part is black):'],
+stDark:['M nằm trong vùng tối: vật che kín toàn bộ nguồn sáng.','M is in the umbra: the object hides the whole source.'],
+stHalf:['M nằm trong vùng nửa tối: chỉ một phần nguồn sáng chiếu tới M.','M is in the penumbra: only part of the source reaches M.'],
+stLit:['M được chiếu sáng: nhìn thấy toàn bộ nguồn sáng.','M is lit: it sees the whole source.'],
+noUmb:['Trên màn không còn vùng tối, chỉ còn vùng nửa tối (vật nhỏ, ở xa màn).','No umbra on the screen any more, only penumbra (small object, far from the screen).'],
+eclNote:['Mô hình không đúng tỉ lệ: nguồn rộng = Mặt Trời, vật = Mặt Trăng, màn = Trái Đất.','Not to scale: wide source = Sun, object = Moon, screen = Earth.'],
+lSrc:['Nguồn sáng','Light source'],lObj:['Vật chắn sáng','Opaque object'],lScr:['Màn chắn','Screen'],lUmb:['Vùng tối','Umbra'],lPen:['Nửa tối','Penumbra'],
+p1q:['Thay bóng đèn pin nhỏ bằng một đèn ống dài (nguồn sáng rộng). Bóng của vật trên màn sẽ thế nào?','Replace the small torch bulb with a long tube lamp (wide source). What happens to the shadow on the screen?'],
+p1a:['Vẫn là một mảng đen đều, chỉ to hơn.','Still one evenly black patch, just bigger.'],
+p1b:['Ở giữa tối hẳn, xung quanh có viền mờ sáng dần ra ngoài.','Fully dark in the middle, with a fuzzy border that gets brighter outwards.'],
+p1c:['Bóng biến mất vì nguồn sáng to hơn vật.','The shadow disappears because the source is bigger than the object.'],
+p1e:['Đúng là phương án 2. Mỗi điểm của nguồn rộng tạo một bóng riêng, các bóng lệch nhau một chút. Chỗ bị mọi điểm che là <b>vùng tối</b>; chỗ chỉ bị một phần che là <b>vùng nửa tối</b>. Kéo thanh “Bề rộng nguồn sáng” từ 0 lên để thấy viền mờ xuất hiện.','Option 2. Each point of a wide source casts its own slightly shifted shadow. Where every point is hidden we get the <b>umbra</b>; where only some are hidden, the <b>penumbra</b>. Drag the source width up from 0 to watch the fuzzy border appear.'],
+p1bq:['Với nguồn rộng, đưa vật chắn sáng lại gần màn hơn. Vùng nửa tối trên màn sẽ…','With a wide source, move the object closer to the screen. The penumbra on the screen will…'],
+p1ba:['rộng ra','get wider'],p1bb:['hẹp lại, bóng sắc nét hơn','get narrower; the shadow becomes sharper'],p1bc:['không đổi','stay the same'],
+p1be:['Hẹp lại. Các tia giới hạn cắt nhau ở mép vật rồi toả ra; màn càng gần vật thì chúng càng ít kịp toả ra. Vì vậy bóng bàn tay sát mặt bàn rất rõ nét, còn giơ tay cao thì bóng mờ viền.','Narrower. The boundary rays cross at the edge of the object and then spread; the closer the screen, the less they spread. That is why your hand’s shadow is sharp near the desk and fuzzy when you lift it.'],
+conc1:['<ul><li><b>Nguồn sáng hẹp</b> (gần như một điểm): sau vật chắn sáng chỉ có <b>vùng tối</b>, ranh giới rõ nét.</li><li><b>Nguồn sáng rộng</b>: sau vật có <b>vùng tối</b> ở giữa (không nhận được ánh sáng từ nguồn) và <b>vùng nửa tối</b> bao quanh (nhận được ánh sáng từ một phần của nguồn).</li><li>Cách vẽ: từ hai mép nguồn kẻ các tia sáng đi qua hai mép vật đến màn. Hai tia “cùng phía” giới hạn vùng tối, hai tia “chéo nhau” giới hạn vùng nửa tối.</li></ul>','<ul><li><b>Narrow source</b> (almost a point): behind the object there is only an <b>umbra</b>, with a sharp edge.</li><li><b>Wide source</b>: an <b>umbra</b> in the middle (no light from the source) surrounded by a <b>penumbra</b> (light from part of the source).</li><li>To draw it: from both edges of the source draw rays past both edges of the object to the screen. The “same-side” rays bound the umbra, the “crossed” rays bound the penumbra.</li></ul>'],
+mech1:['<p><b>Nguyên lí:</b> trong môi trường trong suốt và đồng tính, ánh sáng truyền theo đường thẳng. Vật chắn sáng chặn các tia đi vào nó.</p><p>Một nguồn rộng gồm rất nhiều điểm sáng. Mỗi điểm sáng chiếu qua vật tạo một vùng bóng riêng; các vùng bóng này lệch nhau. Điểm M trên màn tối hay sáng tuỳ việc <b>từ M nhìn về nguồn, vật che mất bao nhiêu phần nguồn</b>: che hết thì M ở vùng tối, che một phần thì M ở vùng nửa tối (càng ra ngoài thấy càng nhiều nguồn nên càng sáng), không che thì M được chiếu sáng.</p><p><b>Nói với học sinh:</b> “Hãy tưởng tượng em là con kiến đứng trên màn, ngước nhìn về phía đèn. Nếu vật che kín cả cái đèn thì chỗ em đứng tối hẳn. Nếu vật chỉ che mất một nửa cái đèn thì chỗ em đứng mờ mờ.”</p><p><b>Liên hệ:</b> khi nhật thực, Mặt Trời là nguồn sáng rộng, Mặt Trăng là vật chắn sáng. Người đứng trong vùng tối thấy nhật thực toàn phần, người trong vùng nửa tối thấy nhật thực một phần.</p>','<p><b>Principle:</b> in a clear, uniform medium light travels in straight lines, and an opaque object stops the rays that hit it.</p><p>A wide source is made of many point sources, each casting its own shifted shadow. Whether a point M is dark depends on <b>how much of the source the object hides as seen from M</b>: all of it, umbra; part of it, penumbra (brighter further out); none, fully lit.</p><p><b>For students:</b> “Imagine you are an ant on the screen looking up at the lamp. If the object hides the whole lamp, you are in full darkness; if it hides half the lamp, it is dim.”</p><p><b>Link:</b> in a solar eclipse the Sun is a wide source and the Moon the object. People in the umbra see a total eclipse, those in the penumbra a partial one.</p>'],
+mis1:['<ul><li><b>“Bóng chỉ là một mảng đen đều.”</b> Với nguồn rộng, bóng có phần tối hẳn và viền nửa tối.</li><li><b>“Viền mờ là do ánh sáng uốn cong quanh vật.”</b> Ở lớp 7, viền mờ được giải thích bằng nguồn sáng rộng: các điểm khác nhau của nguồn tạo các bóng lệch nhau.</li><li><b>“Nguồn sáng càng to thì vùng tối càng to.”</b> Ngược lại: nguồn càng rộng thì vùng tối càng hẹp, vùng nửa tối càng rộng.</li><li><b>“Bóng là thứ gì đó toả ra từ vật.”</b> Bóng chỉ là chỗ ánh sáng không tới được.</li></ul>','<ul><li><b>“A shadow is one evenly black patch.”</b> With a wide source it has a dark core and a penumbra.</li><li><b>“The fuzzy edge is light bending round the object.”</b> At this level it is explained by the wide source: different points cast shifted shadows.</li><li><b>“A bigger source makes a bigger umbra.”</b> The opposite: a wider source gives a narrower umbra and a wider penumbra.</li><li><b>“A shadow is something coming out of the object.”</b> It is just where light cannot reach.</li></ul>'],
+word1:['<ul><li><b>Vùng tối</b>: tiếng Anh <i>umbra</i>, từ tiếng Latinh <i>umbra</i> = bóng râm (cùng gốc với <i>umbrella</i>, cái ô “che bóng”). Tiếng Trung, Nhật: 本影 (bản ảnh, “bóng chính”). Tiếng Đức: <i>Kernschatten</i> = “bóng lõi”.</li><li><b>Vùng nửa tối</b>: <i>penumbra</i> = Latinh <i>paene</i> (gần như) + <i>umbra</i>, tức “gần như bóng”. Tiếng Trung, Nhật: 半影 (bán ảnh, “nửa bóng”; Hán Việt “bán” = nửa). Tiếng Đức <i>Halbschatten</i>, tiếng Pháp <i>pénombre</i>.</li><li><b>Vật chắn sáng</b>: tiếng Anh <i>opaque</i>, Latinh <i>opacus</i> = râm mát, tối.</li></ul>','<ul><li><b>Umbra</b>: Latin <i>umbra</i>, shade (same root as <i>umbrella</i>). Chinese/Japanese 本影 “main shadow”; German <i>Kernschatten</i> “core shadow”.</li><li><b>Penumbra</b>: Latin <i>paene</i> “almost” + <i>umbra</i>. Chinese/Japanese 半影 “half shadow”; German <i>Halbschatten</i>; French <i>pénombre</i>.</li><li><b>Opaque</b>: Latin <i>opacus</i>, shady, dark.</li></ul>'],
+
+/* ---------- Tab 2 ---------- */
+req2:['<b>Yêu cầu cần đạt:</b> Vẽ hình và nêu các khái niệm tia tới, tia phản xạ, pháp tuyến, góc tới, góc phản xạ, mặt phẳng tới. Thực hiện thí nghiệm rút ra và phát biểu định luật phản xạ ánh sáng.','<b>Learning goal:</b> Draw and name the incident ray, reflected ray, normal, angle of incidence, angle of reflection and plane of incidence. Do the experiment and state the law of reflection.'],
+hint2:['Kéo đèn laser S quanh đĩa chia độ. Đọc góc tới i và góc phản xạ i\' rồi bấm “Ghi số đo”.','Drag the laser S around the protractor disc. Read the angle of incidence i and of reflection i\', then press “Record”.'],
+rec2:['Ghi số đo','Record'],clr2:['Xoá bảng','Clear table'],zero2:['Chiếu vuông góc gương','Shine along the normal'],
+fold2:['Gập nửa tấm bìa ra sau','Fold back half of the card'],mang2:['Hiện góc hợp với mặt gương','Show angle with the mirror surface'],
+assume2:['Giả thiết mô phỏng: gương phẳng lí tưởng, tia laser rất hẹp coi như một tia sáng; góc đọc chính xác đến 1°.','Model: ideal plane mirror; the narrow laser beam is treated as one ray; angles read to 1°.'],
+oI:['Góc tới i (SIN)','Angle of incidence i (SIN)'],oR:['Góc phản xạ i\' (NIR)','Angle of reflection i\' (NIR)'],oSIR:['Góc giữa tia tới và tia phản xạ','Angle between the two rays'],oMir:['Góc giữa tia tới và mặt gương','Angle between ray and mirror'],
+thN:['Lần','Trial'],
+st2Fold:['Nửa bìa đã gập: không còn thấy tia phản xạ trên bìa. Tia phản xạ chỉ nằm trên mặt phẳng chứa tia tới và pháp tuyến (mặt phẳng tới).','Half the card is folded: the reflected ray no longer shows on it. The reflected ray lies only in the plane containing the incident ray and the normal (plane of incidence).'],
+st2Zero:['i = 0°: tia tới trùng pháp tuyến, tia phản xạ quay ngược lại theo đường cũ.','i = 0°: the ray travels along the normal and reflects straight back.'],
+st2Rows:['Em đã ghi {n} lần đo. So sánh cột i và cột i\'.','You have {n} readings. Compare column i with column i\'.'],
+st2Rule:['Mọi lần đo đều có i\' = i. Đây chính là định luật phản xạ.','In every reading i\' = i. This is the law of reflection.'],
+lMir:['Gương phẳng','Plane mirror'],lNormal:['N (pháp tuyến)','N (normal)'],lFold:['phần bìa đã gập','folded part'],lAir:['tia phản xạ đi ra ngoài bìa','reflected ray leaves the card'],
+p2q:['Tăng góc tới từ 30° lên 60°. Góc phản xạ sẽ thế nào?','Increase the angle of incidence from 30° to 60°. What happens to the angle of reflection?'],
+p2a:['Giảm đi, vì tia tới càng xiên thì tia phản xạ càng dựng đứng.','It decreases: the more slanted the incident ray, the steeper the reflected ray.'],
+p2b:['Tăng lên đúng bằng 60°.','It increases to exactly 60°.'],p2c:['Không đổi.','It does not change.'],
+p2e:['Góc phản xạ luôn bằng góc tới: i\' = i. Tia tới và tia phản xạ đối xứng nhau qua pháp tuyến.','The angle of reflection always equals the angle of incidence: i\' = i. The two rays are symmetric about the normal.'],
+p2bq:['Gập nửa tấm bìa bên phía tia phản xạ ra sau. Trên nửa bìa đó còn thấy tia phản xạ không?','Fold back the half of the card on the reflected side. Can you still see the reflected ray on it?'],
+p2ba:['Vẫn thấy, chỉ mờ hơn.','Yes, just fainter.'],p2bb:['Không thấy nữa.','No.'],p2bc:['Thấy ở chỗ khác trên bìa.','Yes, somewhere else on the card.'],
+p2be:['Không thấy. Tia phản xạ vẫn tồn tại nhưng nằm trong mặt phẳng tới (mặt phẳng chứa tia tới và pháp tuyến), không nằm trên nửa bìa đã gập.','No. The reflected ray still exists, but in the plane of incidence (containing the incident ray and the normal), not on the folded half.'],
+conc2:['<p><b>Định luật phản xạ ánh sáng:</b></p><ul><li>Tia phản xạ nằm trong mặt phẳng chứa tia tới và pháp tuyến của gương tại điểm tới (mặt phẳng tới).</li><li>Góc phản xạ bằng góc tới: <b>i\' = i</b>.</li></ul><p>Các khái niệm: SI là <b>tia tới</b>, IR là <b>tia phản xạ</b>, I là <b>điểm tới</b>, IN vuông góc với mặt gương tại I là <b>pháp tuyến</b>; góc SIN = i là <b>góc tới</b>, góc NIR = i\' là <b>góc phản xạ</b>. Các góc đo <b>từ pháp tuyến</b>, không đo từ mặt gương.</p>','<p><b>Law of reflection:</b></p><ul><li>The reflected ray lies in the plane containing the incident ray and the normal at the point of incidence (plane of incidence).</li><li>The angle of reflection equals the angle of incidence: <b>i\' = i</b>.</li></ul><p>SI is the <b>incident ray</b>, IR the <b>reflected ray</b>, I the <b>point of incidence</b>, IN (perpendicular to the mirror at I) the <b>normal</b>; angle SIN = i is the <b>angle of incidence</b>, angle NIR = i\' the <b>angle of reflection</b>. Angles are measured <b>from the normal</b>, not from the mirror.</p>'],
+mech2:['<p><b>Nguyên lí:</b> khi ánh sáng gặp mặt nhẵn bóng, nó bị hắt trở lại môi trường cũ. Có thể hình dung giống quả bóng nảy trên sàn nhẵn: phần chuyển động song song với sàn giữ nguyên, phần chuyển động vuông góc với sàn đổi chiều. Vì vậy tia đi ra đối xứng với tia đi tới qua pháp tuyến, nên i\' = i.</p><p><b>Nói với học sinh:</b> “Ném quả bóng xiên xuống sàn: ném xiên bao nhiêu thì nó nảy lên xiên bấy nhiêu về phía bên kia. Ánh sáng gặp gương cũng vậy, chỉ khác là ta đo góc so với đường vuông góc với gương.”</p><p>Thí nghiệm thật trên lớp: đèn tạo tia sáng hẹp, gương phẳng đặt trên tấm bìa có vạch chia độ (đĩa chia độ). Bìa giúp ta “nhìn thấy” đường đi của tia sáng.</p>','<p><b>Principle:</b> light meeting a smooth shiny surface is sent back into the same medium. Picture a ball bouncing on a smooth floor: the motion along the floor is unchanged, the motion perpendicular to it reverses. So the outgoing ray mirrors the incoming one about the normal: i\' = i.</p><p><b>For students:</b> “Throw a ball at a slant onto the floor: it bounces up at the same slant on the other side. Light does the same at a mirror; we just measure angles from the line perpendicular to the mirror.”</p><p>Real classroom version: a narrow beam from a ray box and a plane mirror standing on a card marked in degrees. The card makes the path of the beam visible.</p>'],
+mis2:['<ul><li><b>Đo góc từ mặt gương.</b> Góc tới và góc phản xạ đo từ pháp tuyến. Bật “Hiện góc hợp với mặt gương” để thấy hai góc này khác nhau (cộng lại bằng 90°).</li><li><b>“Tia tới càng xiên thì tia phản xạ càng dựng đứng.”</b> Không, hai tia luôn đối xứng qua pháp tuyến.</li><li><b>“Chiếu vuông góc thì không có tia phản xạ.”</b> Có, nó quay ngược lại đúng đường cũ.</li><li><b>Nhầm góc tới với góc giữa tia tới và tia phản xạ.</b> Góc SIR = 2i.</li></ul>','<ul><li><b>Measuring from the mirror surface.</b> Angles are measured from the normal. Tick “Show angle with the mirror surface” to see the difference (they add to 90°).</li><li><b>“A more slanted ray reflects more steeply.”</b> No, the rays are always symmetric about the normal.</li><li><b>“Along the normal there is no reflected ray.”</b> There is: it goes straight back.</li><li><b>Confusing i with the angle between the rays.</b> Angle SIR = 2i.</li></ul>'],
+word2:['<ul><li><b>Phản xạ</b> 反射: Hán Việt “phản” = quay ngược lại, “xạ” = bắn, chiếu ra. Tiếng Anh <i>reflection</i> từ Latinh <i>reflectere</i> = <i>re</i> (trở lại) + <i>flectere</i> (uốn, bẻ cong). Tiếng Trung 反射 (fǎnshè), tiếng Nhật 反射 (hansha), tiếng Đức <i>Reflexion</i> hoặc <i>Spiegelung</i> (từ <i>Spiegel</i> = gương).</li><li><b>Pháp tuyến</b> 法線: “pháp” = phép, chuẩn mực; “tuyến” = đường. Tiếng Anh <i>normal</i> từ Latinh <i>norma</i> = cái êke của thợ mộc, nên “normal” nghĩa gốc là “vuông góc”.</li><li><b>Tia tới</b>: <i>incident ray</i>, Latinh <i>incidere</i> = rơi vào.</li></ul>','<ul><li><b>Reflection</b>: Latin <i>reflectere</i> = <i>re</i> (back) + <i>flectere</i> (to bend). Chinese/Japanese 反射 “turn back + shoot”; German <i>Spiegelung</i> (from <i>Spiegel</i>, mirror).</li><li><b>Normal</b>: Latin <i>norma</i>, a carpenter’s square, so “normal” first meant “at right angles”. Chinese/Japanese 法線 “standard line”.</li><li><b>Incident</b>: Latin <i>incidere</i>, to fall upon.</li></ul>'],
+
+/* ---------- Tab 3 ---------- */
+req3:['<b>Yêu cầu cần đạt:</b> Phân biệt được phản xạ (phản xạ gương) và phản xạ khuếch tán.','<b>Learning goal:</b> Tell apart regular (mirror) reflection and diffuse reflection.'],
+hint3:['Chọn bề mặt hoặc kéo thanh “Độ gồ ghề”. Kéo con mắt để xem mắt nhận được bao nhiêu tia phản xạ.','Pick a surface or drag the roughness slider. Drag the eye to see how many reflected rays it receives.'],
+zoom3:['Phóng to một điểm tới','Zoom in on one point'],
+rough3:['Độ gồ ghề của bề mặt','Surface roughness'],ang3:['Góc tới của chùm sáng','Angle of incidence of the beam'],
+sMirror:['Gương','Mirror'],sWater:['Mặt nước lặng','Still water'],sFoil:['Giấy bạc nhàu','Crumpled foil'],sPaper:['Giấy trắng','White paper'],sWall:['Tường vôi','Painted wall'],
+assume3:['Giả thiết mô phỏng: chỗ gồ ghề của bề mặt được phóng to rất nhiều để nhìn thấy (thật ra rất nhỏ). Mỗi tia vẫn phản xạ đúng định luật tại điểm nó chạm.','Model: the bumps of the surface are hugely magnified so you can see them (really they are tiny). Each ray still obeys the law of reflection where it lands.'],
+oKind:['Kiểu phản xạ','Type of reflection'],oEye:['Số tia vào mắt','Rays reaching the eye'],oDir:['Hướng các tia phản xạ','Directions of reflected rays'],
+kReg:['phản xạ gương','regular (mirror)'],kMix:['gần như gương','nearly regular'],kDif:['phản xạ khuếch tán','diffuse'],
+dSame:['song song, cùng một hướng','parallel, one direction'],dSome:['hơi toả ra','spreading a little'],dMany:['toả ra nhiều hướng','scattered in many directions'],
+st3Glare:['Mắt nằm đúng hướng của chùm phản xạ: thấy chói (giống ánh đèn hắt từ gương).','The eye is right in the reflected beam: glare, like a lamp seen in a mirror.'],
+st3None:['Mắt không nhận được tia nào: từ chỗ này không thấy chùm sáng phản xạ.','No rays reach the eye: from here you do not see the reflected light.'],
+st3Some:['Mắt nhận được một vài tia từ những chỗ khác nhau: đứng ở nhiều chỗ đều nhìn thấy bề mặt.','The eye gets a few rays from different spots: the surface can be seen from many places.'],
+lLocalN:['pháp tuyến tại điểm này','normal at this point'],lZoomed:['bề mặt được phóng to','surface magnified'],
+p3q:['Chiếu một chùm tia sáng song song vào tờ giấy trắng. Các tia phản xạ sẽ…','Shine a parallel beam onto white paper. The reflected rays will…'],
+p3a:['vẫn song song như với gương','stay parallel, as with a mirror'],p3b:['hắt ra theo nhiều hướng khác nhau','go off in many different directions'],p3c:['không có, giấy giữ lại hết ánh sáng','not exist: the paper keeps all the light'],
+p3e:['Hắt ra nhiều hướng. Mặt giấy nhìn thì phẳng nhưng có vô số chỗ gồ ghề nhỏ, mỗi chỗ nghiêng một kiểu. Nhờ vậy em ngồi ở góc nào trong lớp cũng đọc được chữ trên giấy.','Many directions. The paper looks flat but has countless tiny bumps tilted every which way. That is why you can read it from anywhere in the room.'],
+p3bq:['Với phản xạ khuếch tán, định luật phản xạ có còn đúng không?','In diffuse reflection, does the law of reflection still hold?'],
+p3ba:['Không, các tia đi lung tung.','No, the rays go anywhere.'],p3bb:['Vẫn đúng tại từng điểm, nhưng pháp tuyến mỗi chỗ một hướng.','Yes, at each point, but the normal points a different way at each spot.'],p3bc:['Chỉ đúng khi góc tới nhỏ.','Only for small angles.'],
+p3be:['Vẫn đúng tại từng điểm. Bật “Phóng to một điểm tới” để thấy góc tới bằng góc phản xạ so với pháp tuyến tại đúng chỗ đó.','Yes, at each point. Tick “Zoom in on one point” to see i = i\' measured from the local normal.'],
+conc3:['<ul><li><b>Phản xạ gương</b>: xảy ra ở mặt nhẵn bóng (gương, kim loại đánh bóng, mặt nước lặng). Chùm tới song song thì chùm phản xạ cũng song song, đi theo một hướng. Ta thấy được ảnh trong mặt đó, và có thể bị chói.</li><li><b>Phản xạ khuếch tán</b>: xảy ra ở mặt gồ ghề, sần sùi (giấy, vải, tường, mặt đường). Chùm tới song song bị hắt ra theo mọi hướng. Không thấy ảnh, nhưng nhìn thấy chính bề mặt đó từ nhiều phía.</li><li>Cả hai đều tuân theo định luật phản xạ tại từng điểm tới.</li></ul>','<ul><li><b>Regular reflection</b>: from smooth shiny surfaces (mirrors, polished metal, still water). A parallel beam stays parallel, going one way. You see images and can get glare.</li><li><b>Diffuse reflection</b>: from rough surfaces (paper, cloth, walls, roads). A parallel beam is sent in all directions. No image, but you can see the surface itself from anywhere.</li><li>Both obey the law of reflection at every point.</li></ul>'],
+mech3:['<p><b>Nguyên lí:</b> định luật phản xạ áp dụng tại từng điểm tới, với pháp tuyến tại đúng điểm đó. Mặt nhẵn bóng có pháp tuyến ở mọi chỗ cùng một hướng, nên các tia song song phản xạ vẫn song song. Mặt gồ ghề có pháp tuyến mỗi chỗ một hướng, nên các tia phản xạ toả đi khắp nơi.</p><p><b>Nói với học sinh:</b> “Thả một nắm bi xuống nền gạch men phẳng, các viên nảy lên giống hệt nhau. Thả xuống bãi sỏi lởm chởm, chúng nảy tứ tung, dù viên nào cũng nảy đúng luật ở chỗ nó chạm.”</p><p><b>Ứng dụng:</b> phần lớn đồ vật quanh ta được nhìn thấy nhờ phản xạ khuếch tán. Màn chiếu và bảng chống lóa làm sần để cả lớp đều nhìn rõ. Ban đêm, mặt đường ướt có lớp nước phẳng lấp chỗ gồ ghề, nên phản xạ gần như gương: đèn xe ngược chiều hắt lên làm chói mắt, còn vạch kẻ đường khó thấy.</p>','<p><b>Principle:</b> the law of reflection applies at each point, using the normal at that point. On a smooth surface the normals all point the same way, so parallel rays stay parallel. On a rough surface the normals point every which way, so the reflected rays scatter.</p><p><b>For students:</b> “Drop a handful of marbles on smooth tiles and they bounce alike; drop them on gravel and they fly everywhere, yet each bounces by the same rule where it lands.”</p><p><b>Uses:</b> we see most objects by diffuse reflection. Projector screens and anti-glare boards are matte so the whole class can see. At night a wet road is covered by a smooth layer of water, so it reflects almost like a mirror: oncoming headlights glare and lane markings are hard to see.</p>'],
+mis3:['<ul><li><b>“Phản xạ khuếch tán không tuân theo định luật phản xạ.”</b> Vẫn tuân theo, tại từng điểm.</li><li><b>“Giấy trắng, tường không phản xạ ánh sáng.”</b> Có, chúng phản xạ rất nhiều, chỉ là theo mọi hướng nên không tạo ảnh.</li><li><b>“Ta nhìn thấy vật vì mắt phát ra tia sáng.”</b> Ta nhìn thấy vật khi có ánh sáng từ vật truyền vào mắt.</li></ul>','<ul><li><b>“Diffuse reflection breaks the law of reflection.”</b> It obeys it, point by point.</li><li><b>“White paper or walls do not reflect light.”</b> They reflect a lot, just in all directions, so there is no image.</li><li><b>“We see because our eyes send out rays.”</b> We see an object when light from it enters our eyes.</li></ul>'],
+word3:['<ul><li><b>Khuếch tán</b> 擴散: “khuếch” = mở rộng ra, “tán” = rải ra, tản ra. Tiếng Anh <i>diffuse</i> từ Latinh <i>diffundere</i> = <i>dis</i> (ra mọi phía) + <i>fundere</i> (rót, đổ). Tiếng Trung gọi là 漫反射 (mạn phản xạ, “mạn” = tràn lan).</li><li><b>Phản xạ gương</b>: tiếng Anh <i>specular reflection</i> hoặc <i>regular reflection</i>; <i>specular</i> từ Latinh <i>speculum</i> = gương (từ <i>specere</i> = nhìn). Tiếng Trung 镜面反射 (kính diện phản xạ, “mặt gương”). Tiếng Pháp <i>réflexion spéculaire / diffuse</i>.</li></ul>','<ul><li><b>Diffuse</b>: Latin <i>diffundere</i> = <i>dis</i> (in all directions) + <i>fundere</i> (to pour). Chinese 漫反射 “overflowing reflection”.</li><li><b>Specular</b>: Latin <i>speculum</i>, mirror (from <i>specere</i>, to look). Chinese 镜面反射 “mirror-surface reflection”.</li></ul>'],
+
+/* ---------- Tab 4 ---------- */
+req4:['<b>Yêu cầu cần đạt:</b> Nêu được tính chất ảnh của vật qua gương phẳng và dựng được ảnh của một vật tạo bởi gương phẳng.','<b>Learning goal:</b> State the properties of the image in a plane mirror and construct the image of an object.'],
+hint4:['Hình nhìn từ trên xuống. Kéo hai đầu A, B của vật và kéo con mắt. Bấm “Dựng ảnh từng bước” để dựng như trên giấy.','Seen from above. Drag the ends A and B of the object and the eye. Press “Construct step by step” to draw it as on paper.'],
+all4:['Hiện tất cả','Show everything'],
+stepStart:['Dựng ảnh từng bước','Construct step by step'],stepNext:['Bước tiếp','Next step'],
+eye4:['Tia sáng tới mắt','Rays to the eye'],beam4:['Chùm tia từ A','Bundle of rays from A'],scr4:['Đặt màn chắn sau gương','Put a screen behind the mirror'],grid4:['Lưới ô vuông 5 cm','5 cm grid'],
+lgObj:['Vật AB','Object AB'],lgImg:['Ảnh ảo A\'B\'','Virtual image A\'B\''],lgRay:['Tia sáng','Light ray'],
+assume4:['Giả thiết mô phỏng: gương phẳng đủ rộng, nhìn từ trên xuống; vật là một mũi tên nằm trên mặt bàn. Đơn vị cm.','Model: a wide enough plane mirror, seen from above; the object is an arrow lying on the table. Units: cm.'],
+oAH:['Khoảng cách A đến gương','A to mirror'],oAH2:['Khoảng cách A\' đến gương','A\' to mirror'],oAB:['Độ dài vật AB','Length of AB'],oAB2:['Độ dài ảnh A\'B\'','Length of A\'B\''],oEA:['Mắt đến ảnh A\'','Eye to image A\''],
+s4_0:['Đang hiện đầy đủ: vật, ảnh và tia sáng tới mắt.','Showing everything: object, image and rays to the eye.'],
+s4_1:['Bước 1: Từ A kẻ đường vuông góc với gương, cắt gương tại H.','Step 1: From A draw a line perpendicular to the mirror, meeting it at H.'],
+s4_2:['Bước 2: Kéo dài về phía sau gương, lấy A\' sao cho HA\' = HA. A\' là ảnh của A.','Step 2: Extend it behind the mirror and mark A\' so that HA\' = HA. A\' is the image of A.'],
+s4_3:['Bước 3: Làm tương tự với B, được B\'.','Step 3: Do the same for B to get B\'.'],
+s4_4:['Bước 4: Nối A\'B\' bằng nét đứt (ảnh ảo). A\'B\' là ảnh của AB.','Step 4: Join A\'B\' with a dashed line (virtual image). A\'B\' is the image of AB.'],
+s4_5:['Bước 5: Vẽ tia tới mắt: nối mắt với A\', cắt gương tại I; tia tới AI, tia phản xạ IE. Kéo dài tia phản xạ ra sau gương thì đi qua A\'.','Step 5: Draw the ray to the eye: join the eye to A\', crossing the mirror at I; incident ray AI, reflected ray IE. Extended back, the reflected ray passes through A\'.'],
+s4scr:['Màn chắn đặt ở chỗ ảnh nhưng không hứng được gì: không có ánh sáng nào thật sự đi ra sau gương. Ảnh của gương phẳng là ảnh ảo.','The screen at the image position catches nothing: no light actually goes behind the mirror. A plane-mirror image is virtual.'],
+s4far:['Đặt vật sát gương hơn để thấy tia sáng tới mắt rõ hơn.','Move the object closer to the mirror to see the rays to the eye better.'],
+lBack:['phía sau gương','behind the mirror'],lScrN:['màn: không hứng được ảnh','screen: no image on it'],lEye:['Mắt','Eye'],
+p4q:['Em đứng trước gương rồi lùi ra xa thêm 1 m. Ảnh của em sẽ…','You stand in front of a mirror and step back 1 m. Your image will…'],
+p4a:['nhỏ đi','get smaller'],p4b:['lùi ra sau gương thêm 1 m và vẫn lớn bằng em','move 1 m further behind the mirror and stay your size'],p4c:['vẫn nằm trên mặt gương','stay on the mirror surface'],
+p4e:['Ảnh lớn bằng vật và cách gương đúng bằng vật cách gương. Kéo A, B ra xa gương rồi xem bảng số liệu. Ảnh trông “nhỏ đi” chỉ vì nó ở xa mắt hơn, giống một người thật đi ra xa.','The image is the same size as the object and as far behind the mirror as the object is in front. Drag A and B away and watch the readings. It only looks smaller because it is further from your eye, like a real person walking away.'],
+p4bq:['Đặt một tờ giấy ở đúng chỗ ảnh, phía sau gương. Trên giấy có hiện ảnh không?','Put a sheet of paper exactly where the image is, behind the mirror. Does the image appear on it?'],
+p4ba:['Có, rõ nét','Yes, sharply'],p4bb:['Không','No'],p4bc:['Có nhưng mờ','Yes, but faint'],
+p4be:['Không. Ánh sáng không đi ra sau gương; mắt chỉ “tưởng” ánh sáng đến từ A\' vì nó lần ngược theo đường thẳng. Bật “Đặt màn chắn sau gương” để kiểm tra.','No. Light does not go behind the mirror; the eye just traces the rays back in straight lines and “thinks” they come from A\'. Tick “Put a screen behind the mirror” to check.'],
+conc4:['<p><b>Tính chất ảnh của vật tạo bởi gương phẳng:</b></p><ul><li>Là <b>ảnh ảo</b>, không hứng được trên màn chắn.</li><li>Có <b>độ lớn bằng vật</b>.</li><li>Khoảng cách từ ảnh đến gương <b>bằng</b> khoảng cách từ vật đến gương: ảnh và vật <b>đối xứng</b> qua mặt gương.</li></ul><p><b>Cách dựng ảnh:</b> lấy điểm đối xứng của từng điểm trên vật qua mặt gương, rồi nối lại bằng nét đứt.</p>','<p><b>The image in a plane mirror is:</b></p><ul><li><b>virtual</b>: it cannot be caught on a screen;</li><li><b>the same size</b> as the object;</li><li><b>as far behind</b> the mirror as the object is in front: object and image are <b>symmetric</b> about the mirror.</li></ul><p><b>To construct it:</b> reflect each point of the object across the mirror and join them with a dashed line.</p>'],
+mech4:['<p><b>Nguyên lí:</b> mỗi điểm A của vật hắt ánh sáng đi theo mọi hướng. Các tia tới gương phản xạ theo định luật phản xạ. Đường kéo dài của các tia phản xạ đều gặp nhau tại một điểm A\' phía sau gương, đối xứng với A (bật “Chùm tia từ A” để thấy). Mắt luôn hiểu ánh sáng đi theo đường thẳng, nên thấy như ánh sáng phát ra từ A\'.</p><p>Không có tia sáng thật nào đi qua A\' nên ảnh là <b>ảnh ảo</b>.</p><p><b>Nói với học sinh:</b> “Gương giống như một ô cửa sổ. Phía sau là một căn phòng giống hệt phòng thật, mọi thứ cách cửa sổ đúng bằng khoảng cách của đồ vật thật. Nhưng em không thể bước vào căn phòng đó, và nó không in được lên tờ giấy.”</p>','<p><b>Principle:</b> each point A of an object sends light in all directions. Rays hitting the mirror reflect by the law of reflection, and their backward extensions all meet at one point A\' behind the mirror, symmetric to A (tick “Bundle of rays from A”). The eye assumes light travels straight, so the light seems to come from A\'.</p><p>No real ray passes through A\', so the image is <b>virtual</b>.</p><p><b>For students:</b> “A mirror is like a window onto a room identical to ours, each thing as far behind the glass as the real one is in front. But you cannot walk into that room, and it will not print on a sheet of paper.”</p>'],
+mis4:['<ul><li><b>“Ảnh nằm trên mặt gương.”</b> Ảnh ở phía sau gương, cách gương bằng vật cách gương.</li><li><b>“Đứng xa gương thì ảnh nhỏ đi.”</b> Ảnh luôn lớn bằng vật; chỉ trông nhỏ hơn vì ở xa mắt hơn.</li><li><b>“Có thể hứng ảnh của gương phẳng lên màn.”</b> Không, đó là ảnh ảo.</li><li><b>“Mỗi người đứng ở chỗ khác nhau thấy ảnh ở chỗ khác nhau.”</b> Mọi người đều thấy ảnh ở cùng một chỗ A\'.</li></ul>','<ul><li><b>“The image is on the mirror surface.”</b> It is behind the mirror, as far as the object is in front.</li><li><b>“Further away, the image gets smaller.”</b> It is always object-sized; it only looks smaller from further away.</li><li><b>“You can project a plane-mirror image on a screen.”</b> No, it is virtual.</li><li><b>“People in different places see the image in different places.”</b> Everyone sees it at the same point A\'.</li></ul>'],
+word4:['<ul><li><b>Gương</b>: Hán Việt là <b>kính</b> 鏡. Tiếng Anh <i>mirror</i> qua tiếng Pháp cổ <i>mireor</i>, từ Latinh <i>mirari</i> = ngắm nhìn, kinh ngạc (cùng gốc với <i>miracle</i>, phép màu). Tiếng Đức <i>Spiegel</i> từ Latinh <i>speculum</i>. Gương phẳng: tiếng Trung 平面镜 (bình diện kính).</li><li><b>Ảnh</b> 影: nghĩa gốc là bóng hình. Tiếng Anh <i>image</i> từ Latinh <i>imago</i> = hình, bản sao (cùng gốc với <i>imitate</i>, bắt chước).</li><li><b>Ảo</b> 幻: không có thật. Tiếng Anh <i>virtual</i> từ Latinh <i>virtus</i> = năng lực; “virtual” nghĩa là “có tác dụng như thật nhưng không phải thật”. Tiếng Trung 虚像 (hư tượng).</li></ul>','<ul><li><b>Mirror</b>: Old French <i>mireor</i>, from Latin <i>mirari</i>, to look at with wonder (same root as <i>miracle</i>). German <i>Spiegel</i> from Latin <i>speculum</i>. Chinese 平面镜 “flat mirror”.</li><li><b>Image</b>: Latin <i>imago</i>, likeness, copy (related to <i>imitate</i>).</li><li><b>Virtual</b>: Latin <i>virtus</i>, power; “having the effect of the real thing without being it”. Chinese 虚像 “empty image”.</li></ul>'],
+
+/* ---------- Tab 5 ---------- */
+req5:['<b>Yêu cầu cần đạt:</b> Vận dụng được định luật phản xạ ánh sáng trong một số trường hợp đơn giản.','<b>Learning goal:</b> Apply the law of reflection in simple situations.'],
+lv1:['Màn 1: Chiếu qua tường','Level 1: Over the wall'],lv2:['Màn 2: Kính tiềm vọng','Level 2: Periscope'],
+d5_1:['Tia laser không chiếu thẳng tới đích được vì có bức tường. Kéo tay cầm của đèn để đổi hướng chiếu, kéo và xoay gương (chấm tròn ở đầu gương) để tia phản xạ trúng đích.','The wall blocks the direct path. Drag the laser’s handle to aim it; drag the mirror and turn it by its end dot so the reflected ray hits the target.'],
+d5_2:['Người lính trong chiến hào muốn nhìn thấy vật ở phía trên. Xoay hai gương (kéo chấm tròn ở đầu gương) để ánh sáng từ vật đi vào mắt.','A soldier in a trench wants to see over the top. Turn the two mirrors (drag their end dots) so light from the object reaches the eye.'],
+hit5:['Trúng đích! Ở mỗi gương góc tới bằng góc phản xạ.','On target! At each mirror the angle of incidence equals the angle of reflection.'],
+hit5b:['Trúng đích! Hai gương song song, mỗi gương nghiêng 45°, mỗi lần phản xạ tia sáng đổi hướng 90°.','On target! The two mirrors are parallel at 45°; each reflection turns the ray through 90°.'],
+miss5:['Chưa trúng. Nhìn góc tới i ghi ở mỗi gương rồi chỉnh tiếp.','Not yet. Look at the angle i at each mirror and adjust.'],
+lTarget:['Đích','Target'],lWall:['Tường','Wall'],lObj5:['Vật','Object'],
+assume5:['Giả thiết mô phỏng: gương phẳng phản xạ cả hai mặt, tường hấp thụ hết ánh sáng; hình không đúng tỉ lệ.','Model: plane mirrors reflect on both faces, walls absorb light; not to scale.'],
+quizT:['Bài tập vận dụng','Practice problems'],check:['Kiểm tra','Check'],right:['Đúng!','Correct!'],wrong:['Chưa đúng, thử lại.','Not yet, try again.'],
+q1:['Tia tới hợp với mặt gương một góc 30°. Góc phản xạ bằng bao nhiêu?','An incident ray makes 30° with the mirror surface. What is the angle of reflection?'],
+q1h:['Góc tới đo từ pháp tuyến: i = 90° − 30° = 60°, nên i\' = 60°.','The angle of incidence is measured from the normal: i = 90° − 30° = 60°, so i\' = 60°.'],
+q2:['Góc giữa tia tới và tia phản xạ là 80°. Góc tới bằng bao nhiêu?','The angle between the incident and reflected rays is 80°. What is the angle of incidence?'],
+q2h:['Pháp tuyến chia đôi góc giữa hai tia: i = 80° : 2 = 40°.','The normal bisects the angle between the rays: i = 80° ÷ 2 = 40°.'],
+q3:['Em đứng cách gương phẳng 1,5 m. Khoảng cách từ em đến ảnh của em là bao nhiêu?','You stand 1.5 m from a plane mirror. How far are you from your image?'],
+q3h:['Ảnh cách gương 1,5 m ở phía sau, nên em cách ảnh 1,5 + 1,5 = 3 m.','The image is 1.5 m behind the mirror, so you are 1.5 + 1.5 = 3 m from it.'],
+q4:['Chiếu tia tới vuông góc với mặt gương. Góc phản xạ bằng bao nhiêu?','A ray strikes a mirror along the normal. What is the angle of reflection?'],
+q4h:['Tia tới trùng pháp tuyến nên i = 0°, i\' = 0°: tia phản xạ quay ngược lại.','The ray is along the normal: i = 0°, so i\' = 0° and it goes straight back.'],
+showHint:['Lời giải','Solution'],
+p5q:['Trong kính tiềm vọng, hai gương phẳng cần đặt thế nào?','How must the two mirrors in a periscope be placed?'],
+p5a:['Vuông góc với nhau','Perpendicular to each other'],p5b:['Song song với nhau, mỗi gương nghiêng 45° so với ống','Parallel, each at 45° to the tube'],p5c:['Nằm ngang','Horizontal'],
+p5e:['Song song và nghiêng 45°. Mỗi gương làm tia sáng đổi hướng 90° (i = i\' = 45°), hai lần đổi hướng đưa tia sáng về hướng ban đầu nhưng ở thấp hơn. Thử ở Màn 2.','Parallel at 45°. Each mirror turns the ray through 90° (i = i\' = 45°); two turns bring it back to the original direction, only lower. Try it in Level 2.'],
+mech5:['<p><b>Kính tiềm vọng</b> gồm một ống có hai gương phẳng song song, nghiêng 45°. Ánh sáng từ vật gặp gương trên, phản xạ với i = i\' = 45° nên đổi hướng 90° đi xuống; tới gương dưới lại đổi hướng 90° đi vào mắt. Tàu ngầm, xe tăng, chiến hào dùng kính tiềm vọng để quan sát mà không lộ người.</p><p><b>Chiếu sáng nhờ gương:</b> đặt gương đúng góc có thể hắt ánh nắng vào chỗ tối (đáy giếng, góc nhà). Muốn biết đặt gương thế nào: vẽ tia tới và tia phản xạ mong muốn, kẻ đường phân giác của góc tạo bởi hai tia (đó là pháp tuyến), rồi đặt gương vuông góc với pháp tuyến.</p>','<p><b>A periscope</b> is a tube with two parallel plane mirrors at 45°. Light from the object reflects off the top mirror with i = i\' = 45°, turning 90° downwards, then turns 90° again at the bottom mirror into the eye. Submarines, tanks and trenches use them to look out without being seen.</p><p><b>Lighting with a mirror:</b> a mirror at the right angle can send sunlight into a dark place. To find the angle: draw the incident ray and the wanted reflected ray, bisect the angle between them (that is the normal) and set the mirror perpendicular to it.</p>'],
+word5:['<ul><li><b>Kính tiềm vọng</b> 潛望鏡: “tiềm” = lặn, ẩn dưới; “vọng” = nhìn ra xa; “kính” = gương, kính. Nghĩa là “kính để nhìn khi đang ẩn mình”. Tiếng Anh <i>periscope</i> từ Hy Lạp <i>peri</i> (xung quanh) + <i>skopein</i> (nhìn). Tiếng Trung 潜望镜, tiếng Nhật 潜望鏡 (senbōkyō).</li></ul>','<ul><li><b>Periscope</b>: Greek <i>peri</i> (around) + <i>skopein</i> (to look). Chinese/Japanese 潜望镜 “hidden-watching glass”.</li></ul>'],
+
+/* ---------- Video & phụ lục ---------- */
+kexp:['Thí nghiệm','Experiment'],kphen:['Hiện tượng','Phenomenon'],kapp:['Ứng dụng','Application'],kexpl:['Giải thích','Explainer'],
+unk:['chưa rõ thời lượng','length unchecked'],lookLbl:['Để ý:','Watch for:'],
+vYT:['Mở trên YouTube ↗','Open on YouTube ↗'],
+vClaude:['Trang này đang mở trên claude.ai nên chưa phát YouTube ngay tại chỗ được. Bấm nút bên dưới để xem ở thẻ mới. Khi trang được đưa lên web riêng, hoặc có file video trong thư mục media/, video sẽ phát ngay tại đây.','This page is open on claude.ai, where YouTube cannot play inline. Use the button below to watch in a new tab. On its own website, or with the file in the media/ folder, the video plays right here.'],
+vLocal:['Đang phát file trong thư mục media/.','Playing the file from the media/ folder.'],vOnline:['Đang phát từ YouTube (cần mạng).','Playing from YouTube (needs internet).'],
+offT:['Danh sách video và cách dùng bản offline','Video list and offline use'],
+offIntro:['<p>Mỗi video có tên file riêng. Để dùng khi mất mạng: tạo thư mục <b>media</b> cạnh file index.html, tải video về và đặt đúng tên file như bảng. Khi bấm vào thẻ video, trang tìm file trong media/ trước; không có thì phát từ YouTube.</p><p>Video đánh dấu “chưa rõ thời lượng” là video mình chưa kiểm tra được độ dài và nội dung chi tiết; thầy cô nên xem trước.</p>','<p>Each video has its own file name. For offline use, create a <b>media</b> folder next to index.html and save each video under the name in the table. Clicking a card tries media/ first, then YouTube.</p><p>Videos marked “length unchecked” could not be fully checked; please preview them.</p>'],
+thTab:['Tab','Tab'],thType:['Loại','Type'],thVid:['Video','Video'],thDur:['Thời lượng','Length'],thFile:['Tên file trong media/','File name in media/'],
+currT:['Yêu cầu cần đạt trong chương trình KHTN 7 (2018)','Curriculum goals (Vietnam Science 7, 2018)'],
+curr:['<p>Chủ đề <b>Ánh sáng</b>, nội dung “Sự phản xạ ánh sáng” và “Ảnh của vật tạo bởi gương phẳng”. Mô phỏng này phủ các yêu cầu:</p><ul><li>Vẽ được hình biểu diễn vùng tối do nguồn sáng rộng và vùng tối do nguồn sáng hẹp (tab 1).</li><li>Vẽ được hình biểu diễn và nêu được các khái niệm: tia sáng tới, tia sáng phản xạ, pháp tuyến, góc tới, góc phản xạ, mặt phẳng tới, ảnh (tab 2, tab 4).</li><li>Thực hiện được thí nghiệm rút ra định luật và phát biểu được nội dung của định luật phản xạ ánh sáng (tab 2).</li><li>Phân biệt được phản xạ và phản xạ khuếch tán (tab 3).</li><li>Nêu được tính chất ảnh của vật qua gương phẳng và dựng được ảnh của một vật tạo bởi gương phẳng (tab 4).</li><li>Vận dụng được định luật phản xạ ánh sáng trong một số trường hợp đơn giản (tab 5).</li></ul><p>Không đưa vào: gương cầu, khúc xạ (lớp 9), công thức tính độ rộng vùng tối.</p>','<p>Topic <b>Light</b>: reflection and plane-mirror images. Goals covered: shadow regions for wide and narrow sources (tab 1); naming incident ray, reflected ray, normal, angles, plane of incidence, image (tabs 2 and 4); the reflection experiment and law (tab 2); regular vs diffuse reflection (tab 3); plane-mirror image properties and construction (tab 4); simple applications (tab 5). Not included: curved mirrors, refraction (grade 9), formulas for shadow width.</p>']
+};
+
+let lang='vi';
+const $=id=>document.getElementById(id);
+const store={get(k){try{return localStorage.getItem(k);}catch(e){return null;}},set(k,v){try{localStorage.setItem(k,v);}catch(e){}}};
+const T=k=>{const e=L[k];return e?e[lang==='vi'?0:1]:k;};
+const Tf=(k,o)=>T(k).replace(/\{(\w+)\}/g,(m,n)=>o[n]);
+const nf=(x,d=1,mn=0)=>new Intl.NumberFormat(lang==='vi'?'vi-VN':'en-US',{maximumFractionDigits:d,minimumFractionDigits:mn}).format(Math.abs(x)<1e-9?0:x);
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const DEG=Math.PI/180;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const FONT='"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif',MONO='"IBM Plex Mono",ui-monospace,Consolas,monospace';
+const C={};
+function readColors(){const cs=getComputedStyle(document.documentElement);
+  ['bg','panel','lane','ink','muted','line','accent','ok','warn','laser','ray','ray2','mirror','img','obj','room','space','star','gold','wood']
+  .forEach(k=>C[k]=cs.getPropertyValue('--'+k).trim());S1&&(S1.dirty=true);draw();}
+
+/* ================= Hàm vẽ chung ================= */
+function size(cv,ratio,maxH,minH=160){
+  const w=cv.clientWidth||300; let h=Math.round(w*ratio); if(maxH)h=Math.min(h,maxH); h=Math.max(h,minH);
+  if(cv._h!==h){cv.style.height=h+'px';cv._h=h;}
+  const d=window.devicePixelRatio||1,W=Math.round(w*d),H=Math.round(h*d);
+  if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H;}
+  const ctx=cv.getContext('2d');ctx.setTransform(d,0,0,d,0,0);ctx.clearRect(0,0,w,h);return {ctx,w,h};
+}
+function txt(ctx,s,x,y,col,sz=14,wt=600,al='left',bl='middle',font=FONT){ctx.fillStyle=col;ctx.font=`${wt} ${sz}px ${font}`;ctx.textAlign=al;ctx.textBaseline=bl;ctx.fillText(s,x,y);}
+function pill(ctx,s,x,y,col,sz=13,al='center',bg){ctx.font=`700 ${sz}px ${FONT}`;const tw=ctx.measureText(s).width;let x0=al==='center'?x-tw/2:al==='right'?x-tw:x;
+  ctx.fillStyle=bg||C.panel;ctx.globalAlpha=.9;ctx.beginPath();ctx.roundRect(x0-5,y-sz*.75,tw+10,sz*1.5,5);ctx.fill();ctx.globalAlpha=1;txt(ctx,s,x0,y,col,sz,700,'left');}
+function line(ctx,pts,col,lw=3,dash){if(pts.length<2)return;ctx.strokeStyle=col;ctx.lineWidth=lw;ctx.lineJoin='round';ctx.lineCap='round';ctx.setLineDash(dash||[]);
+  ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.stroke();ctx.setLineDash([]);}
+function dot(ctx,x,y,r,fill,stroke,lw=2){ctx.beginPath();ctx.arc(x,y,r,0,7);if(fill){ctx.fillStyle=fill;ctx.fill();}if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=lw;ctx.stroke();}}
+function arrowMid(ctx,x1,y1,x2,y2,col,s=9,f=.55){const x=x1+(x2-x1)*f,y=y1+(y2-y1)*f,a=Math.atan2(y2-y1,x2-x1);
+  ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(x+s*Math.cos(a),y+s*Math.sin(a));ctx.lineTo(x+s*Math.cos(a+2.5),y+s*Math.sin(a+2.5));ctx.lineTo(x+s*Math.cos(a-2.5),y+s*Math.sin(a-2.5));ctx.fill();}
+function arrowHead(ctx,x1,y1,x2,y2,col,s=12){const a=Math.atan2(y2-y1,x2-x1);ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(x2,y2);
+  ctx.lineTo(x2-s*Math.cos(a-.42),y2-s*Math.sin(a-.42));ctx.lineTo(x2-s*Math.cos(a+.42),y2-s*Math.sin(a+.42));ctx.fill();}
+function eyeIcon(ctx,x,y,dir,col,s=16){ctx.save();ctx.translate(x,y);ctx.rotate(dir);ctx.strokeStyle=col;ctx.lineWidth=2.5;ctx.fillStyle=C.panel;
+  ctx.beginPath();ctx.moveTo(-s,0);ctx.quadraticCurveTo(0,-s*.95,s,0);ctx.quadraticCurveTo(0,s*.95,-s,0);ctx.fill();ctx.stroke();
+  dot(ctx,s*.25,0,s*.36,col);ctx.restore();}
+function pos(cv,e){const r=cv.getBoundingClientRect();return {x:e.clientX-r.left,y:e.clientY-r.top};}
+function onDrag(cv,down,move,up){
+  cv.addEventListener('pointerdown',e=>{const p=pos(cv,e);if(down(p,e)){cv.setPointerCapture(e.pointerId);cv._d=true;e.preventDefault();}});
+  cv.addEventListener('pointermove',e=>{const p=pos(cv,e);if(cv._d){move(p,e);draw();}else if(cv._hover)cv.style.cursor=cv._hover(p)?'grab':'default';});
+  const end=e=>{if(cv._d){cv._d=false;up&&up(pos(cv,e),e);draw();}};
+  cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);}
+function seg(id,items,cur,pick){const el=$(id);el.innerHTML='';items.forEach(it=>{const b=document.createElement('button');b.className='btn';b.textContent=it.label;
+  b.setAttribute('aria-pressed',String(it.k===cur));b.onclick=()=>pick(it.k);el.appendChild(b);});}
+const kv=rows=>rows.map(([k,v,cls])=>`<dt>${k}</dt><dd class="${cls||'num'}">${v}</dd>`).join('');
+let raf=0;function draw(){if(raf)return;raf=requestAnimationFrame(()=>{raf=0;try{[0,render1,render2,render3,render4,render5][tab]();}catch(err){console.error(err);}});}
+
+/* ================= Tab ================= */
+let tab=1;
+function setTab(n){tab=n;document.querySelectorAll('nav.tabs button').forEach(b=>{const on=+b.dataset.tab===n;b.classList.toggle('on',on);b.setAttribute('aria-selected',on);});
+  [1,2,3,4,5].forEach(i=>$('t'+i).hidden=i!==n);store.set('as-tab',n);draw();}
+document.querySelectorAll('nav.tabs button').forEach(b=>b.onclick=()=>setTab(+b.dataset.tab));
+$('gvBtn').onclick=()=>{const on=!document.body.classList.contains('hideNums');document.body.classList.toggle('hideNums',on);$('gvBtn').setAttribute('aria-pressed',on);};
+
+/* ================= Video thực tế ================= */
+const VIDS={
+1:[{id:'YTrPvLLyr3o',k:'kexp',d:'1:37',ch:'Daniel Paull',t:'Umbra and penumbra demonstration – shrinking shadows',f:'tab1-thi-nghiem.mp4',
+    look:['Vật nhỏ hơn nguồn sáng. Khi đưa vật ra xa màn, phần tối hẳn ở giữa thu nhỏ dần, phần nửa tối rộng ra. Thử làm y như vậy trong mô phỏng.','The object is smaller than the source. As it moves away from the screen the dark core shrinks and the penumbra grows. Try the same in the simulation.']},
+   {id:'pm7tfLvHmXA',k:'kphen',d:'0:28',ch:'NASA Goddard',t:'NASA’s EPIC View of 2017 Eclipse Across America',f:'tab1-hien-tuong.mp4',
+    look:['Ảnh chụp Trái Đất từ vệ tinh trong lần nhật thực năm 2017: đốm tối nhỏ ở giữa là vùng tối của Mặt Trăng, quầng mờ quanh nó là vùng nửa tối.','Earth from a satellite during the 2017 eclipse: the small dark spot is the Moon’s umbra, the dim halo around it the penumbra.']},
+   {id:'Ticmypf8z8s',k:'kexp',d:null,ch:'KClassScienceChannel',t:'Light rays, opaque objects, umbra and penumbra regions',f:'tab1-thi-nghiem-2.mp4',
+    look:['So sánh bóng do bóng đèn nhỏ (nguồn hẹp, bóng sắc nét) và đèn compact (nguồn rộng, có vùng nửa tối).','Compares the shadow from a small bulb (narrow source, sharp) with a CFL lamp (wide source, with penumbra).']}],
+2:[{id:'XGCvljrKruo',k:'kexp',d:'3:14',ch:'Chris Gozzard (That Physics Guy)',t:'Reflection Experiment – IGCSE Physics',f:'tab2-thi-nghiem.mp4',
+    look:['Tia sáng hẹp chiếu vào gương phẳng trên tờ giấy; đo góc tới và góc phản xạ <b>từ pháp tuyến</b> bằng thước đo góc, giống bảng số đo ở tab này.','A narrow ray hits a plane mirror on paper; both angles are measured <b>from the normal</b> with a protractor, like the table in this tab.']},
+   {id:'IAm3rSNNFrc',k:'kexp',d:null,ch:'ATAR Chemistry for the QCE',t:'Law of reflection',f:'tab2-thi-nghiem-2.mp4',
+    look:['Dùng hộp đèn tạo tia sáng, vẽ tia tới và tia phản xạ lên giấy rồi lập bảng số liệu.','A light box makes the rays; the incident and reflected rays are traced on paper and tabulated.']}],
+3:[{id:'OtwdEacLck0',k:'kexpl',d:null,ch:'The Physics Classroom',t:'Specular vs. Diffuse Reflection',f:'tab3-giai-thich.mp4',
+    look:['Vì sao mặt nhẵn tạo ảnh còn mặt nhám thì không, dù cả hai đều tuân theo định luật phản xạ.','Why smooth surfaces form images and rough ones do not, though both obey the law of reflection.']},
+   {id:'KuhJYQ85V-0',k:'kexpl',d:null,ch:'SciencePrimer',t:'Specular vs Diffuse Reflection Illustration',f:'tab3-minh-hoa.mp4',
+    look:['Hình minh hoạ chùm tia song song gặp mặt nhẵn và mặt gồ ghề.','An animation of a parallel beam meeting a smooth and a rough surface.']}],
+4:[{id:'IYV599eZRq4',k:'kexp',d:'1:00',ch:'perbosc008',t:'The 2 candles',f:'tab4-thi-nghiem.mp4',
+    look:['Đặt cây nến thứ hai phía sau tấm kính, dịch đến khi nó trùng với ảnh của nến thứ nhất: ảnh cách kính đúng bằng nến thật cách kính.','A second candle behind the glass is moved until it lines up with the image of the first: the image is as far behind as the candle is in front.']},
+   {id:'gEzkBgh2Utw',k:'kexp',d:null,ch:'vt.physics',t:'Pepper’s Ghost & Ray Diagrams for Plane Mirrors',f:'tab4-thi-nghiem-2.mp4',
+    look:['Ảo ảnh “bóng ma” bằng tấm kính, và cách vẽ tia sáng để tìm vị trí ảnh.','The “ghost” illusion with a sheet of glass, and ray diagrams to locate the image.']}],
+5:[{id:'yPO3KGgRXws',k:'kapp',d:'1:21',ch:'Examrace',t:'What is a Periscope? How does it work? (3D model)',f:'tab5-ung-dung.mp4',
+    look:['Hai gương song song nghiêng 45° trong kính tiềm vọng. Để ý mỗi gương làm tia sáng đổi hướng 90°.','Two parallel mirrors at 45° in a periscope. Notice each mirror turns the light through 90°.']},
+   {id:'dFqgkwqU_do',k:'kapp',d:null,ch:'Surrey Libraries UK',t:'STEM Science Club – Make a Periscope',f:'tab5-tu-lam.mp4',
+    look:['Tự làm kính tiềm vọng bằng bìa và giấy gương, có thể cho học sinh làm ở nhà.','Making a periscope from card and mirror card, a good home project.']}]
+};
+const ON_CLAUDE=/claude|anthropic/i.test(location.hostname)||(location.ancestorOrigins&&[...location.ancestorOrigins].some(o=>/claude|anthropic/i.test(o)));
+const ytUrl=id=>'https://www.youtube.com/watch?v='+id;
+function renderVids(n){$('v'+n).innerHTML=VIDS[n].map((v,i)=>`<button class="vcard" data-n="${n}" data-i="${i}">
+  <span class="vthumb"><img src="https://i.ytimg.com/vi/${v.id}/mqdefault.jpg" alt="" loading="lazy" onerror="this.remove()"><span class="pl"></span>
+  <span class="tag">${T(v.k)}</span><span class="dur ${v.d?'':'unk'}">${v.d||T('unk')}</span></span>
+  <span class="vbody"><span class="ttl">${esc(v.t)}</span><span class="ch">${esc(v.ch)}</span><span class="look"><b>${T('lookLbl')}</b> ${v.look[lang==='vi'?0:1]}</span></span></button>`).join('');}
+document.addEventListener('click',e=>{const c=e.target.closest('.vcard');if(c)openVid(VIDS[c.dataset.n][c.dataset.i]);});
+function openVid(v){const S=$('vmS');S.innerHTML='';$('vmT').textContent=v.t;$('vmYT').href=ytUrl(v.id);$('vmYT').textContent=T('vYT');$('vmN').textContent='';
+  $('vmL').innerHTML=`<b>${T('lookLbl')}</b> ${v.look[lang==='vi'?0:1]}`;$('vmodal').hidden=false;
+  const vid=document.createElement('video');vid.controls=true;vid.playsInline=true;vid.autoplay=true;vid.preload='auto';
+  let ok=false,gone=false;
+  const fallback=()=>{if(ok||gone)return;gone=true;vid.removeAttribute('src');vid.remove();
+    if(ON_CLAUDE){S.innerHTML=`<img src="https://i.ytimg.com/vi/${v.id}/hqdefault.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.35" onerror="this.remove()"><div class="msg" style="position:relative">${T('vClaude')}</div>`;}
+    else{const f=document.createElement('iframe');f.src=`https://www.youtube-nocookie.com/embed/${v.id}?autoplay=1&rel=0`;f.allow='autoplay; encrypted-media; picture-in-picture; fullscreen';f.allowFullscreen=true;S.appendChild(f);$('vmN').textContent=T('vOnline');}};
+  vid.addEventListener('loadeddata',()=>{ok=true;$('vmN').textContent=T('vLocal');});
+  vid.addEventListener('error',fallback);
+  vid.src='media/'+v.f;S.appendChild(vid);
+  setTimeout(()=>{if(!ok&&vid.readyState===0)fallback();},2500);}
+function closeVid(){const v=$('vmS').querySelector('video');if(v)v.pause();$('vmS').innerHTML='';$('vmodal').hidden=true;}
+$('vmX').onclick=closeVid;$('vmodal').addEventListener('click',e=>{if(e.target.id==='vmodal')closeVid();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('vmodal').hidden)closeVid();});
+function renderOffline(){let rows='';[1,2,3,4,5].forEach(n=>VIDS[n].forEach(v=>{rows+=`<tr><td>${n}</td><td>${T(v.k)}</td><td><a href="${ytUrl(v.id)}" target="_blank" rel="noopener">${esc(v.t)}</a><br><span class="muted">${esc(v.ch)}</span></td><td>${v.d||T('unk')}</td><td><code>${v.f}</code></td></tr>`;}));
+  $('offline').innerHTML=T('offIntro')+`<div class="tblwrap"><table class="log wide"><tr><th>${T('thTab')}</th><th>${T('thType')}</th><th>${T('thVid')}</th><th>${T('thDur')}</th><th>${T('thFile')}</th></tr>${rows}</table></div>`;}
+
+/* ================= Dự đoán ================= */
+const PRED={p1:{q:'p1q',o:['p1a','p1b','p1c'],c:1,e:'p1e'},p1b:{q:'p1bq',o:['p1ba','p1bb','p1bc'],c:1,e:'p1be'},
+  p2:{q:'p2q',o:['p2a','p2b','p2c'],c:1,e:'p2e'},p2b:{q:'p2bq',o:['p2ba','p2bb','p2bc'],c:1,e:'p2be'},
+  p3:{q:'p3q',o:['p3a','p3b','p3c'],c:1,e:'p3e'},p3b:{q:'p3bq',o:['p3ba','p3bb','p3bc'],c:1,e:'p3be'},
+  p4:{q:'p4q',o:['p4a','p4b','p4c'],c:1,e:'p4e'},p4b:{q:'p4bq',o:['p4ba','p4bb','p4bc'],c:1,e:'p4be'},
+  p5:{q:'p5q',o:['p5a','p5b','p5c'],c:1,e:'p5e'}};
+function renderPred(id){const P=PRED[id],el=$(id);
+  el.innerHTML=`<h2>${T('predTitle')}</h2><p>${T(P.q)}</p><div class="opts">${P.o.map((k,i)=>`<button class="btn ${P.pick===i?'picked':''} ${P.show&&i===P.c?'right':''}" data-i="${i}">${T(k)}</button>`).join('')}</div>`+
+  (P.pick==null?'':`<p class="muted">${T('predThen')}</p><div><button class="btn rv">${T(P.show?'hideAns':'showAns')}</button></div>`)+(P.show?`<div class="ans">${T(P.e)}</div>`:'');}
+Object.keys(PRED).forEach(id=>$(id).addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const P=PRED[id];
+  if(b.classList.contains('rv'))P.show=!P.show;else P.pick=+b.dataset.i;renderPred(id);}));
+
+/* ================= TAB 1: Vùng tối, vùng nửa tối =================
+   Mặt cắt, đơn vị cm. Độ sáng tại P = phần nguồn [−a, a] (ở x = xs) không bị vật [yo−b, yo+b] (ở x = xo) che, nhìn từ P.
+   Chiếu hai mép vật từ P lên mặt phẳng nguồn: y' = y + (e − y)(x − xs)/(x − xo). */
+const S1={xs:10,a:0,xo:48,b:8,yo:0,xp:104,m:3,drag:null,dirty:true,preset:'pNarrow'};
+const F1=document.createElement('canvas');
+function bright1(x,y){const {xs,a,xo,b,yo}=S1;if(x<=xo+1e-9)return 1;
+  const r=(x-xs)/(x-xo),lo=y+(yo-b-y)*r,hi=y+(yo+b-y)*r;
+  if(a<1e-6)return (lo<=0&&0<=hi)?0:1;
+  return 1-Math.max(0,Math.min(hi,a)-Math.max(lo,-a))/(2*a);}
+function view1(w,h){const k=Math.min(w/122,h/84),ox=(w-120*k)/2,oy=h/2;
+  return {k,X:x=>ox+x*k,Y:y=>oy-y*k,xw:px=>(px-ox)/k,yw:py=>(oy-py)/k};}
+const thr=(P,Q,X)=>P[1]+(Q[1]-P[1])*(X-P[0])/(Q[0]-P[0]);
+function shadow1(){const {xs,a,xo,b,yo,xp}=S1;
+  const uT=thr([xs,a],[xo,yo+b],xp),uB=thr([xs,-a],[xo,yo-b],xp),pT=thr([xs,-a],[xo,yo+b],xp),pB=thr([xs,a],[xo,yo-b],xp);
+  const um=Math.max(0,uT-uB),pen=Math.max(0,(pT-pB)-um);return {uT,uB,pT,pB,um,pen};}
+function buildField1(w,h,v){const s=3,W=Math.ceil(w/s),H=Math.ceil(h/s);F1.width=W;F1.height=H;
+  const g=F1.getContext('2d'),img=g.createImageData(W,H),d=img.data,dark=[14,18,26],lit=[255,214,130];
+  for(let j=0;j<H;j++){const y=v.yw((j+.5)*s);for(let i=0;i<W;i++){const x=v.xw((i+.5)*s);
+    const B=x>S1.xp?0:bright1(x,y),f=B*.5,o=(j*W+i)*4;
+    d[o]=dark[0]+(lit[0]-dark[0])*f;d[o+1]=dark[1]+(lit[1]-dark[1])*f;d[o+2]=dark[2]+(lit[2]-dark[2])*f;d[o+3]=255;}}
+  g.putImageData(img,0,0);}
+function render1(){const cv=$('cv1'),{ctx,w,h}=size(cv,.62,540,250),v=view1(w,h);S1.v=v;
+  if(S1.dirty||F1._w!==w||F1._h!==h){buildField1(w,h,v);F1._w=w;F1._h=h;S1.dirty=false;}
+  ctx.imageSmoothingEnabled=true;ctx.drawImage(F1,0,0,w,h);
+  const {xs,a,xo,b,yo,xp}=S1,k=v.k,sh=shadow1();
+  // Màn chắn: tô theo độ sáng từng điểm
+  const sx=v.X(xp),sw=Math.max(8,2.4*k);
+  for(let py=0;py<h;py+=2){const B=bright1(xp,v.yw(py+1)),c=Math.round(40+200*B);ctx.fillStyle=`rgb(${c},${c},${Math.round(c*.96)})`;ctx.fillRect(sx,py,sw,2);}
+  ctx.strokeStyle='#8893a3';ctx.lineWidth=1;ctx.strokeRect(sx,1,sw,h-2);
+  // Tia giới hạn
+  if($('edge1').checked){const X2=xp,seg2=(P,Q,col,dash)=>line(ctx,[[v.X(P[0]),v.Y(P[1])],[v.X(X2),v.Y(thr(P,Q,X2))]],col,2,dash);
+    seg2([xs,a],[xo,yo+b],C.ray);seg2([xs,-a],[xo,yo-b],C.ray);
+    if(a>0){seg2([xs,-a],[xo,yo+b],C.ray2,[7,5]);seg2([xs,a],[xo,yo-b],C.ray2,[7,5]);}}
+  // Đường nhìn từ M
+  const M=[xp,S1.m];
+  if($('sight1').checked){const tgt=a>0?[a,-a]:[0];tgt.forEach(ys=>line(ctx,[[v.X(xp),v.Y(M[1])],[v.X(xs),v.Y(ys)]],'rgba(160,200,255,.75)',1.5,[3,4]));}
+  // Nguồn sáng
+  const glow=ctx.createRadialGradient(v.X(xs),v.Y(0),2,v.X(xs),v.Y(0),Math.max(30,(a+6)*k));glow.addColorStop(0,'rgba(255,230,150,.55)');glow.addColorStop(1,'rgba(255,230,150,0)');
+  ctx.fillStyle=glow;ctx.fillRect(0,0,w,h);
+  if(a<1e-6)dot(ctx,v.X(xs),v.Y(0),7,'#fff3c4','#f2b632',3);
+  else{ctx.fillStyle='#fff3c4';ctx.strokeStyle='#f2b632';ctx.lineWidth=3;ctx.beginPath();ctx.roundRect(v.X(xs)-5,v.Y(a),10,2*a*k,4);ctx.fill();ctx.stroke();}
+  // Vật chắn sáng
+  ctx.fillStyle=C.wood;ctx.fillRect(v.X(xo)-.9*k,v.Y(yo+b),1.8*k,2*b*k);ctx.strokeStyle='#3a2a1a';ctx.lineWidth=1.5;ctx.strokeRect(v.X(xo)-.9*k,v.Y(yo+b),1.8*k,2*b*k);
+  // Điểm M
+  dot(ctx,sx-2,v.Y(M[1]),9,'#7fd0ff','#fff',2.5);txt(ctx,'M',sx-16,v.Y(M[1]),'#fff',15,800,'right');
+  // Nhãn
+  const fs=w<520?12:14;
+  pill(ctx,T('lSrc'),v.X(xs)+12,v.Y(Math.max(a,3))-16,'#fff3c4',fs,'left','rgba(0,0,0,.55)');
+  pill(ctx,T('lObj'),v.X(xo),v.Y(yo+b)-14,'#f3e2cc',fs,'center','rgba(0,0,0,.55)');
+  pill(ctx,T('lScr'),sx+sw,14,'#e9eef7',fs,'right','rgba(0,0,0,.55)');
+  if(sh.um>0.3)pill(ctx,T('lUmb'),sx-24,v.Y((sh.uT+sh.uB)/2),'#e9eef7',fs,'right','rgba(0,0,0,.7)');
+  if(sh.pen>1){const yP=(sh.pT+Math.max(sh.uT,sh.uB))/2;if(Math.abs(v.Y(yP)-v.Y(S1.m))>16)pill(ctx,T('lPen'),sx-24,v.Y(yP),'#e9eef7',fs,'right','rgba(0,0,0,.7)');}
+  if(S1.preset==='pEcl')txt(ctx,T('eclNote'),10,h-12,'#c9d4e4',w<520?11:13,500);
+  ui1(sh);renderM1();}
+function ui1(sh){const B=bright1(S1.xp,S1.m);
+  $('aV').textContent=S1.a<1e-6?`0 cm (${T('point')})`:nf(2*S1.a,0)+' cm';$('bV').textContent=nf(2*S1.b,0)+' cm';
+  $('o1').innerHTML=kv([[T('oUmb'),nf(sh.um,1)+' cm'],[T('oPen'),nf(sh.pen,1)+' cm'],[T('oM'),nf(B*100,0)+' %'],[T('oSeen'),nf(B*100,0)+' % '+T('ofSrc')]]);
+  const st=$('st1');st.textContent=(sh.um<=1e-6&&S1.a>0?T('noUmb')+' ':'')+(B<1e-6?T('stDark'):B>1-1e-6?T('stLit'):T('stHalf'));}
+function renderM1(){const cv=$('cv1m'),{ctx,w,h}=size(cv,.32,120,96);ctx.fillStyle='#34405a';ctx.fillRect(0,0,w,h);
+  const {xs,a,xo,b,yo,xp,m}=S1,r=(xp-xs)/(xp-xo),lo=m+(yo-b-m)*r,hi=m+(yo+b-m)*r;
+  const span=Math.max(a,2)*1.6,X=y=>w/2+(y/span)*(w/2-10),cy=h/2;
+  // Nguồn nhìn từ M: dải sáng (trục ngang = phương dọc của nguồn)
+  if(a<1e-6){const hid=lo<=0&&0<=hi;dot(ctx,w/2,cy,12,hid?'#222':'#fff3c4',hid?'#555':'#f2b632',3);}
+  else{ctx.fillStyle='#fff3c4';ctx.fillRect(X(-a),cy-14,X(a)-X(-a),28);
+    const l=Math.max(lo,-a),u=Math.min(hi,a);if(u>l){ctx.fillStyle='#1a1a1a';ctx.fillRect(X(l),cy-16,X(u)-X(l),32);}
+    ctx.strokeStyle='#f2b632';ctx.lineWidth=2;ctx.strokeRect(X(-a),cy-14,X(a)-X(-a),28);}
+  txt(ctx,'M →',8,14,'#c9d4e4',12,700);}
+function preset1(k){S1.preset=k;
+  if(k==='pNarrow')Object.assign(S1,{xs:10,a:0,xo:48,b:8,yo:0,xp:104,m:3});
+  if(k==='pWide')Object.assign(S1,{xs:10,a:12,xo:48,b:8,yo:0,xp:104,m:3});
+  if(k==='pEcl')Object.assign(S1,{xs:8,a:15,xo:80,b:6,yo:0,xp:112,m:4});
+  $('a1').value=Math.round(2*S1.a);$('b1').value=Math.round(2*S1.b);S1.dirty=true;pre1();draw();}
+function pre1(){seg('pre1',['pNarrow','pWide','pEcl'].map(k=>({k,label:T(k)})),S1.preset,preset1);}
+$('a1').oninput=e=>{S1.a=+e.target.value/2;S1.preset=null;pre1();S1.dirty=true;draw();};
+$('b1').oninput=e=>{S1.b=+e.target.value/2;S1.preset=null;pre1();S1.dirty=true;draw();};
+['edge1','sight1'].forEach(id=>$(id).onchange=draw);
+function pick1(p){const v=S1.v;if(!v)return null;const {xs,a,xo,b,yo,xp,m}=S1,x=v.xw(p.x),y=v.yw(p.y),tol=22/v.k;
+  if(Math.abs(x-(xp-1))<tol&&Math.abs(y-m)<tol)return 'm';
+  if(Math.abs(x-xs)<tol&&Math.abs(y)<a+tol)return 's';
+  if(Math.abs(x-xo)<tol&&y>yo-b-tol&&y<yo+b+tol)return 'o';
+  if(x>xp-tol*.6&&x<xp+3+tol*.6)return 'p';return null;}
+$('cv1')._hover=pick1;
+onDrag($('cv1'),p=>{S1.drag=pick1(p);if(S1.drag){S1.off=S1.v.yw(p.y)-S1.yo;}return !!S1.drag;},
+  p=>{const v=S1.v,x=v.xw(p.x),y=v.yw(p.y);
+    if(S1.drag==='m')S1.m=clamp(y,-38,38);
+    else if(S1.drag==='s')S1.xs=clamp(x,3,Math.min(40,S1.xo-8));
+    else if(S1.drag==='o'){S1.xo=clamp(x,S1.xs+8,S1.xp-8);S1.yo=clamp(y-S1.off,-24,24);}
+    else if(S1.drag==='p'){S1.xp=clamp(x,S1.xo+8,116);}
+    S1.preset=null;S1.dirty=true;},()=>{pre1();});
+
+/* ================= TAB 2: Định luật phản xạ ================= */
+const S2={i:40,side:-1,rows:[]};
+function geo2(w,h){const O={x:w/2,y:h-50},R=Math.min(w/2-28,h-80);return {O,R};}
+function render2(){const cv=$('cv2'),{ctx,w,h}=size(cv,.66,470,270),{O,R}=geo2(w,h);S2.g={O,R};
+  const fold=$('fold2').checked,refSide=-S2.side,fs=w<520?12:14;
+  // Đĩa chia độ (hai nửa); nửa phía tia phản xạ bị gập thì vẽ nén ngang
+  const half=(s,folded)=>{ctx.save();if(folded){ctx.translate(O.x,0);ctx.scale(.3,1);ctx.translate(-O.x,0);ctx.globalAlpha=.45;}
+    ctx.fillStyle=C.panel;ctx.strokeStyle=C.line;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(O.x,O.y);
+    s<0?ctx.arc(O.x,O.y,R,Math.PI,1.5*Math.PI):ctx.arc(O.x,O.y,R,1.5*Math.PI,2*Math.PI);ctx.closePath();ctx.fill();ctx.stroke();
+    for(let d=0;d<=90;d+=5){const a=d*DEG,ux=s*Math.sin(a),uy=-Math.cos(a),l=d%10?7:13;
+      line(ctx,[[O.x+ux*R,O.y+uy*R],[O.x+ux*(R-l),O.y+uy*(R-l)]],C.muted,1.2);
+      if(d%10===0&&d<90&&!folded)txt(ctx,String(d),O.x+ux*(R-26),O.y+uy*(R-26),C.muted,w<520?10:12,600,'center','middle',MONO);}
+    ctx.restore();};
+  half(-1,fold&&refSide<0);half(1,fold&&refSide>0);
+  // Gương
+  ctx.strokeStyle=C.mirror;ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(O.x-R-16,O.y);ctx.lineTo(O.x+R+16,O.y);ctx.stroke();
+  ctx.strokeStyle=C.muted;ctx.lineWidth=1.2;for(let x=O.x-R-12;x<O.x+R+16;x+=10){ctx.beginPath();ctx.moveTo(x,O.y+4);ctx.lineTo(x-8,O.y+13);ctx.stroke();}
+  txt(ctx,T('lMir'),O.x+R+14,O.y+26,C.muted,fs,600,'right');
+  // Pháp tuyến
+  line(ctx,[[O.x,O.y],[O.x,O.y-R-14]],C.ink,1.8,[6,5]);txt(ctx,T('lNormal'),O.x+8,O.y-R-12,C.ink,fs,700,'left');
+  const i=S2.i*DEG,S={x:O.x+S2.side*Math.sin(i)*R,y:O.y-Math.cos(i)*R},Rp={x:O.x+refSide*Math.sin(i)*R,y:O.y-Math.cos(i)*R};
+  // Tia tới
+  line(ctx,[[S.x,S.y],[O.x,O.y]],C.laser,3.5);arrowMid(ctx,S.x,S.y,O.x,O.y,C.laser,10);
+  // Tia phản xạ
+  if(fold){ // nằm ngoài bìa: vẽ mảnh, nét chấm
+    line(ctx,[[O.x,O.y],[Rp.x,Rp.y]],C.laser,1.2,[2,6]);pill(ctx,T('lAir'),(O.x+Rp.x)/2,(O.y+Rp.y)/2-14,C.muted,w<520?11:12);
+    txt(ctx,T('lFold'),O.x+refSide*R*.15,O.y-R*.5,C.muted,w<520?11:12,600,'center');}
+  else if(S2.i>0){line(ctx,[[O.x,O.y],[Rp.x,Rp.y]],C.laser,3.5);arrowMid(ctx,O.x,O.y,Rp.x,Rp.y,C.laser,10);}
+  // Cung góc
+  const ra=Math.min(56,R*.3),angS=Math.atan2(S.y-O.y,S.x-O.x),angR=Math.atan2(Rp.y-O.y,Rp.x-O.x),angN=-Math.PI/2;
+  const arc=(a1,a2,col)=>{ctx.strokeStyle=col;ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(O.x,O.y,ra,Math.min(a1,a2),Math.max(a1,a2));ctx.stroke();};
+  if(S2.i>0){arc(angS,angN,C.accent);const bm=(angS+angN)/2;pill(ctx,'i = '+S2.i+'°',O.x+Math.cos(bm)*(ra+30),O.y+Math.sin(bm)*(ra+22),C.accent,fs);
+    if(!fold){arc(angR,angN,C.ok);const bm2=(angR+angN)/2;pill(ctx,"i' = "+S2.i+'°',O.x+Math.cos(bm2)*(ra+30),O.y+Math.sin(bm2)*(ra+22),C.ok,fs);}}
+  if($('mang2').checked&&S2.i<88){const am=S2.side<0?-Math.PI:0;ctx.strokeStyle=C.warn;ctx.lineWidth=2;ctx.setLineDash([4,3]);ctx.beginPath();ctx.arc(O.x,O.y,ra*1.9,Math.min(am,angS),Math.max(am,angS));ctx.stroke();ctx.setLineDash([]);
+    const bm=(am+angS)/2;pill(ctx,(90-S2.i)+'°',O.x+Math.cos(bm)*(ra*1.9+20),O.y+Math.sin(bm)*(ra*1.9+14),C.warn,fs);}
+  // Đèn laser và chữ cái
+  ctx.save();ctx.translate(S.x,S.y);ctx.rotate(angS);ctx.fillStyle='#39424f';ctx.beginPath();ctx.roundRect(0,-8,34,16,4);ctx.fill();ctx.fillStyle=C.laser;ctx.fillRect(0,-3,4,6);ctx.restore();
+  dot(ctx,S.x,S.y,6,C.laser,'#fff',2);
+  {const ux=(O.x-S.x)/R,uy=(O.y-S.y)/R,sx=S.x+ux*30-uy*16*S2.side,sy=S.y+uy*30+ux*16*S2.side;txt(ctx,'S',sx,sy,C.ink,16,800,'center');}txt(ctx,'I',O.x-12,O.y+16,C.ink,16,800,'center');
+  if(!fold&&S2.i>0)txt(ctx,'R',Rp.x+(refSide<0?-12:12),Rp.y-12,C.ink,16,800,'center');
+  ui2();}
+function ui2(){const i=S2.i;
+  $('o2').innerHTML=kv([[T('oI'),i+'°'],[T('oR'),i+'°'],[T('oSIR'),2*i+'°'],...($('mang2').checked?[[T('oMir'),(90-i)+'°']]:[])]);
+  const st=$('st2');st.className='status';
+  if($('fold2').checked)st.textContent=T('st2Fold');
+  else if(i===0)st.textContent=T('st2Zero');
+  else if(S2.rows.length>=3&&new Set(S2.rows.map(r=>r)).size>=2){st.textContent=T('st2Rule');st.className='status ok';}
+  else st.textContent=S2.rows.length?Tf('st2Rows',{n:S2.rows.length}):'';}
+function table2(){const r=S2.rows;$('tb2').innerHTML=r.length?`<tr><th>${T('thN')}</th><th>i</th><th>i'</th></tr>`+r.map((v,k)=>`<tr><td>${k+1}</td><td class="num">${v}°</td><td class="num">${v}°</td></tr>`).join(''):'';}
+$('rec2').onclick=()=>{if($('fold2').checked)return;S2.rows.push(S2.i);if(S2.rows.length>8)S2.rows.shift();table2();ui2();};
+$('clr2').onclick=()=>{S2.rows=[];table2();ui2();};
+$('zero2').onclick=()=>{S2.i=0;draw();};
+['fold2','mang2'].forEach(id=>$(id).onchange=draw);
+onDrag($('cv2'),p=>{const g=S2.g;if(!g)return false;const d=Math.hypot(p.x-g.O.x,p.y-g.O.y);return d<g.R+40&&p.y<g.O.y+6;},
+  p=>{const g=S2.g,ang=Math.atan2(p.x-g.O.x,g.O.y-Math.min(p.y,g.O.y-1))/DEG;S2.i=Math.round(Math.min(88,Math.abs(ang)));if(S2.i>0)S2.side=ang<0?-1:1;});
+
+/* ================= TAB 3: Phản xạ gương và khuếch tán =================
+   Bề mặt z(x) = r·sc·w·Σ a_j sin(2π k_j x/w + φ_j); độ dốc z' = r·sc·Σ a_j·2πk_j cos(...). Pháp tuyến tại chỗ quyết định hướng tia phản xạ. */
+const RG=(()=>{let s=12345;const rnd=()=>{s=(s*16807)%2147483647;return s/2147483647;};const c=[];
+  for(let j=0;j<16;j++){const k=8+Math.floor(rnd()*80);c.push({k,a:1/k,p:rnd()*6.283});}
+  let ss=0;const n=4000;for(let i=0;i<n;i++){const x=i/n;let d=0;for(const q of c)d+=q.a*2*Math.PI*q.k*Math.cos(2*Math.PI*q.k*x+q.p);ss+=d*d;}
+  return {c,sc:.75/Math.sqrt(ss/n)};})();
+const zf=xn=>{let z=0;for(const q of RG.c)z+=q.a*Math.sin(2*Math.PI*q.k*xn+q.p);return z*RG.sc;};
+const zd=xn=>{let d=0;for(const q of RG.c)d+=q.a*2*Math.PI*q.k*Math.cos(2*Math.PI*q.k*xn+q.p);return d*RG.sc;};
+const S3={r:0,th:40,eye:{fx:.78,fy:.22},preset:'sMirror',drag:false};
+const PRE3={sMirror:0,sWater:4,sFoil:30,sPaper:70,sWall:100};
+function render3(){const cv=$('cv3'),{ctx,w,h}=size(cv,.6,460,250);const r=S3.r/100,th=S3.th*DEG,y0=h-48,fs=w<520?12:14;
+  ctx.fillStyle=C.room;ctx.fillRect(0,0,w,h);
+  const Z=x=>y0-r*zf(x/w)*w*.5,SL=x=>r*zd(x/w);
+  // Bề mặt
+  ctx.beginPath();ctx.moveTo(0,h);for(let x=0;x<=w;x+=2)ctx.lineTo(x,Z(x));ctx.lineTo(w,h);ctx.closePath();
+  ctx.fillStyle=r<.02?'#4a6f8f':'#8a8f98';ctx.fill();ctx.strokeStyle=r<.02?C.mirror:'#d6dae0';ctx.lineWidth=r<.02?4:2;
+  ctx.beginPath();for(let x=0;x<=w;x+=2)x?ctx.lineTo(x,Z(x)):ctx.moveTo(x,Z(x));ctx.stroke();
+  if(r>.02)txt(ctx,T('lZoomed'),w-10,h-14,'#f1f3f6',w<520?11:12,600,'right');
+  // Chùm tia
+  const N=13,x0=w*.3,x1=w*.62,d=[Math.sin(th),Math.cos(th)],E={x:S3.eye.fx*w,y:S3.eye.fy*h},er=Math.max(16,w*.022);
+  let hits=0,angs=[];const mid=(N-1)/2;let midInfo=null;
+  for(let k=0;k<N;k++){const hx=x0+(x1-x0)*k/(N-1),hy=Z(hx),s=SL(hx),nl=Math.hypot(s,1),n=[-s/nl,-1/nl];
+    const t0=Math.min((hy-6)/d[1],hx/d[0]);line(ctx,[[hx-d[0]*t0,hy-d[1]*t0],[hx,hy]],'rgba(255,201,74,.9)',2);
+    if(k%3===0)arrowMid(ctx,hx-d[0]*t0,hy-d[1]*t0,hx,hy,'#ffc94a',7,.5);
+    const dn=d[0]*n[0]+d[1]*n[1],rr=[d[0]-2*dn*n[0],d[1]-2*dn*n[1]];
+    if(rr[1]>-0.03){line(ctx,[[hx,hy],[hx+rr[0]*10,hy+rr[1]*10]],'rgba(255,154,61,.8)',2);continue;}
+    let t=(hy-4)/-rr[1];if(rr[0]>0)t=Math.min(t,(w-hx)/rr[0]);if(rr[0]<0)t=Math.min(t,hx/-rr[0]);
+    line(ctx,[[hx,hy],[hx+rr[0]*t,hy+rr[1]*t]],'rgba(255,154,61,.9)',2);
+    if(k%3===0)arrowMid(ctx,hx,hy,hx+rr[0]*t,hy+rr[1]*t,'#ff9a3d',7,.35);
+    angs.push(Math.atan2(rr[0],-rr[1]));
+    const ex=E.x-hx,ey=E.y-hy,tp=ex*rr[0]+ey*rr[1];if(tp>0&&Math.abs(ex*rr[1]-ey*rr[0])<er)hits++;
+    if(k===mid)midInfo={hx,hy,n,rr};}
+  // Phóng to một điểm: pháp tuyến tại chỗ, i = i'
+  if($('zoom3').checked&&midInfo){const {hx,hy,n,rr}=midInfo,L=Math.min(90,h*.3);
+    line(ctx,[[hx,hy],[hx+n[0]*L,hy+n[1]*L]],'#ffffff',2,[6,4]);pill(ctx,T('lLocalN'),hx+n[0]*L,hy+n[1]*L-14,'#ffffff',w<520?11:12,'center','rgba(0,0,0,.6)');
+    const ia=Math.acos(clamp(-(d[0]*n[0]+d[1]*n[1]),-1,1))/DEG;
+    const aN=Math.atan2(n[1],n[0]),aI=Math.atan2(-d[1],-d[0]),aR=Math.atan2(rr[1],rr[0]),ra=34;
+    const arc=(a1,a2,col)=>{let s=a1,e=a2;if(e-s>Math.PI)s+=2*Math.PI;if(s-e>Math.PI)e+=2*Math.PI;ctx.strokeStyle=col;ctx.lineWidth=3;ctx.beginPath();ctx.arc(hx,hy,ra,Math.min(s,e),Math.max(s,e));ctx.stroke();};
+    arc(aI,aN,'#7fd0ff');arc(aR,aN,'#7fe0a0');
+    pill(ctx,'i = '+nf(ia,0)+'°',hx+Math.cos((aI+aN)/2)*(ra+34),hy+Math.sin((aI+aN)/2)*(ra+18),'#7fd0ff',fs,'center','rgba(0,0,0,.6)');
+    pill(ctx,"i' = "+nf(ia,0)+'°',hx+Math.cos((aR+aN)/2)*(ra+34),hy+Math.sin((aR+aN)/2)*(ra+18),'#7fe0a0',fs,'center','rgba(0,0,0,.6)');
+    dot(ctx,hx,hy,5,'#fff');}
+  // Mắt
+  dot(ctx,E.x,E.y,er,hits?'rgba(255,201,74,.25)':'rgba(255,255,255,.06)');
+  eyeIcon(ctx,E.x,E.y,Math.atan2(y0-E.y,(x0+x1)/2-E.x),hits?'#ffc94a':'#cfd8e6',Math.max(14,er*.8));
+  txt(ctx,T('lEye'),E.x,E.y-er-12,'#e9eef7',fs,700,'center');
+  S3.g={E,er};
+  // Số liệu
+  let sd=0;if(angs.length>1){const m=angs.reduce((a,b)=>a+b,0)/angs.length;sd=Math.sqrt(angs.reduce((a,b)=>a+(b-m)*(b-m),0)/angs.length)/DEG;}
+  const kind=sd<1.5?'kReg':sd<12?'kMix':'kDif',dir=sd<1.5?'dSame':sd<12?'dSome':'dMany';
+  $('rV').textContent=S3.r+' %';$('thV').textContent=S3.th+'°';
+  $('o3').innerHTML=kv([[T('oKind'),T(kind),'t'],[T('oDir'),T(dir),'t'],[T('oEye'),hits+' / '+N]]);
+  $('st3').textContent=hits===0?T('st3None'):(kind==='kReg'&&hits>N/2)?T('st3Glare'):T('st3Some');}
+function pre3(){seg('pre3',Object.keys(PRE3).map(k=>({k,label:T(k)})),S3.preset,k=>{S3.preset=k;S3.r=PRE3[k];$('r3').value=S3.r;pre3();draw();});}
+$('r3').oninput=e=>{S3.r=+e.target.value;S3.preset=Object.keys(PRE3).find(k=>PRE3[k]===S3.r)||null;pre3();draw();};
+$('th3').oninput=e=>{S3.th=+e.target.value;draw();};
+$('zoom3').onchange=draw;
+$('cv3')._hover=p=>S3.g&&Math.hypot(p.x-S3.g.E.x,p.y-S3.g.E.y)<S3.g.er+14;
+onDrag($('cv3'),p=>$('cv3')._hover(p),p=>{const cv=$('cv3'),w=cv.clientWidth,h=cv._h;S3.eye.fx=clamp(p.x/w,.04,.96);S3.eye.fy=clamp(p.y/h,.06,.72);});
+
+/* ================= TAB 4: Ảnh qua gương phẳng =================
+   Nhìn từ trên, đơn vị cm. Gương là đường x = 0; ảnh của P(x, y) là P'(−x, y). */
+const S4={A:{x:-18,y:10},B:{x:-10,y:-4},E:{x:-38,y:-20},step:0,drag:null};
+function view4(w,h){const k=Math.min(w/104,h/66),ox=w/2+4*k,oy=h/2;return {k,X:x=>ox+x*k,Y:y=>oy-y*k,xw:px=>(px-ox)/k,yw:py=>(oy-py)/k};}
+const img=P=>({x:-P.x,y:P.y});
+function render4(){const cv=$('cv4'),{ctx,w,h}=size(cv,.62,500,260),v=view4(w,h);S4.v=v;const k=v.k,fs=w<520?12:14,st=S4.step,show=n=>st===0||st>=n;
+  ctx.fillStyle=C.panel;ctx.fillRect(0,0,w,h);
+  ctx.fillStyle=C.lane;ctx.fillRect(v.X(0),0,w-v.X(0),h);
+  if($('grid4').checked){ctx.strokeStyle=C.line;ctx.lineWidth=1;ctx.globalAlpha=.55;ctx.beginPath();
+    for(let x=-60;x<=60;x+=5){ctx.moveTo(v.X(x),0);ctx.lineTo(v.X(x),h);}for(let y=-35;y<=35;y+=5){ctx.moveTo(0,v.Y(y));ctx.lineTo(w,v.Y(y));}ctx.stroke();ctx.globalAlpha=1;}
+  txt(ctx,T('lBack'),v.X(0)+12,14,C.muted,fs,600,'left');
+  // Gương
+  const gx=v.X(0);ctx.strokeStyle=C.mirror;ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(gx,6);ctx.lineTo(gx,h-6);ctx.stroke();
+  ctx.strokeStyle=C.muted;ctx.lineWidth=1.2;for(let y=10;y<h;y+=11){ctx.beginPath();ctx.moveTo(gx+4,y);ctx.lineTo(gx+12,y-8);ctx.stroke();}
+  txt(ctx,T('lMir'),gx-8,h-14,C.muted,fs,600,'right');
+  const {A,B,E}=S4,A2=img(A),B2=img(B),P=q=>[v.X(q.x),v.Y(q.y)];
+  // Màn chắn sau gương
+  if($('scr4').checked){const xs=Math.min(A2.x,B2.x)+((A2.x+B2.x)/2-Math.min(A2.x,B2.x)),y1=Math.max(A2.y,B2.y)+4,y2=Math.min(A2.y,B2.y)-4;
+    ctx.fillStyle='rgba(255,255,255,.85)';ctx.strokeStyle=C.muted;ctx.lineWidth=1.5;ctx.fillRect(v.X(xs)-4,v.Y(y1),8,(y1-y2)*k);ctx.strokeRect(v.X(xs)-4,v.Y(y1),8,(y1-y2)*k);
+    pill(ctx,T('lScrN'),v.X(xs),v.Y(y1)-14,C.warn,w<520?11:12);}
+  // Chùm tia từ A
+  if($('beam4').checked&&show(2)){for(let j=-3;j<=3;j++){const yI=A.y+j*6+(E.y-A.y)*0;const I={x:0,y:yI};
+    const dx=I.x-A.x,dy=I.y-A.y,len=Math.hypot(dx,dy),ux=dx/len,uy=dy/len,L2=26;
+    line(ctx,[P(A),P(I)],'rgba(242,182,50,.75)',1.6);line(ctx,[P(I),[v.X(-ux*L2),v.Y(yI+uy*L2)]],'rgba(242,182,50,.75)',1.6);
+    arrowMid(ctx,v.X(0),v.Y(yI),v.X(-ux*L2),v.Y(yI+uy*L2),'#e0a020',7,.6);
+    line(ctx,[P(I),P(A2)],C.img,1.2,[3,4]);}}
+  // Dựng ảnh: đường vuông góc và đối xứng
+  const perp=(Q,Q2,lab,n)=>{if(!(st>=n||st===0))return;line(ctx,[P(Q),[gx,v.Y(Q.y)]],C.muted,1.5,[2,4]);
+    if(st===0||st>=n+1||n===3)line(ctx,[[gx,v.Y(Q.y)],P(Q2)],C.muted,1.5,[2,4]);
+    if(st>0){dot(ctx,gx,v.Y(Q.y),4,C.ink);txt(ctx,lab,gx-6,v.Y(Q.y)-12,C.ink,13,700,'right');
+      const tick=(x1,x2)=>{const xm=v.X((x1+x2)/2);line(ctx,[[xm-3,v.Y(Q.y)-6],[xm+3,v.Y(Q.y)+6]],C.ink,1.8);};tick(Q.x,0);if(st>=n+1||n===3)tick(0,Q2.x);}};
+  perp(A,A2,'H',1);perp(B,B2,'K',3);
+  // Tia tới mắt
+  const toEye=(Q,Q2)=>{const t=(0-E.x)/(Q2.x-E.x),yI=E.y+t*(Q2.y-E.y),I=[gx,v.Y(yI)];
+    line(ctx,[P(Q),I],C.ray,2.5);arrowMid(ctx,...P(Q),...I,C.ray,8);line(ctx,[I,P(E)],C.ray,2.5);arrowMid(ctx,...I,...P(E),C.ray,8);line(ctx,[I,P(Q2)],C.ray,1.5,[5,5]);return I;};
+  let I1=null;if($('eye4').checked&&(st===0||st>=5)){I1=toEye(A,A2);if(st===0)toEye(B,B2);txt(ctx,'I',I1[0]-8,I1[1]+14,C.ink,13,700,'right');}
+  // Vật
+  line(ctx,[P(A),P(B)],C.obj,4);arrowHead(ctx,...P(A),...P(B),C.obj,14);
+  dot(ctx,...P(A),7,C.obj,'#fff',2);dot(ctx,...P(B),5,C.obj);
+  txt(ctx,'A',v.X(A.x)-12,v.Y(A.y)-12,C.obj,16,800,'center');txt(ctx,'B',v.X(B.x)-12,v.Y(B.y)+14,C.obj,16,800,'center');
+  // Ảnh
+  if(show(2)){dot(ctx,...P(A2),5,C.img);txt(ctx,"A'",v.X(A2.x)+14,v.Y(A2.y)-12,C.img,16,800,'center');}
+  if(show(3)){dot(ctx,...P(B2),4,C.img);txt(ctx,"B'",v.X(B2.x)+14,v.Y(B2.y)+14,C.img,16,800,'center');}
+  if(show(4)){line(ctx,[P(A2),P(B2)],C.img,3.5,[8,6]);arrowHead(ctx,...P(A2),...P(B2),C.img,14);}
+  // Mắt
+  eyeIcon(ctx,...P(E),Math.atan2(-(A.y-E.y)*0,1),C.ink,16);txt(ctx,T('lEye'),v.X(E.x),v.Y(E.y)+26,C.ink,fs,700,'center');
+  ui4();}
+function ui4(){const {A,B,E}=S4,A2=img(A),ab=Math.hypot(A.x-B.x,A.y-B.y);
+  $('o4').innerHTML=kv([[T('oAH'),nf(-A.x,1)+' cm'],[T('oAH2'),nf(A2.x,1)+' cm'],[T('oAB'),nf(ab,1)+' cm'],[T('oAB2'),nf(ab,1)+' cm'],[T('oEA'),nf(Math.hypot(A2.x-E.x,A2.y-E.y),1)+' cm']]);
+  $('step4').textContent=S4.step===0?T('stepStart'):T('stepNext');
+  $('st4').textContent=$('scr4').checked?T('s4scr'):T('s4_'+S4.step);}
+$('step4').onclick=()=>{S4.step=S4.step>=5?1:S4.step+1;draw();};
+$('all4').onclick=()=>{S4.step=0;draw();};
+['eye4','beam4','scr4','grid4'].forEach(id=>$(id).onchange=draw);
+function pick4(p){const v=S4.v;if(!v)return null;let best=null,bd=26;for(const n of ['A','B','E']){const q=S4[n],d=Math.hypot(p.x-v.X(q.x),p.y-v.Y(q.y));if(d<bd){bd=d;best=n;}}return best;}
+$('cv4')._hover=pick4;
+onDrag($('cv4'),p=>{S4.drag=pick4(p);return !!S4.drag;},p=>{const v=S4.v,cv=$('cv4');const q=S4[S4.drag];
+  q.x=clamp(Math.round(v.xw(p.x)*2)/2,v.xw(14),-2);q.y=clamp(Math.round(v.yw(p.y)*2)/2,v.yw(cv._h-14),v.yw(14));});
+
+/* ================= TAB 5: Vận dụng — chiếu tia bằng gương ================= */
+const LV={
+ lv1:()=>({laser:{x:10,y:15,a:20,aim:true},mirrors:[{x:50,y:55,a:-20,len:18,move:true}],walls:[[50,0,50,40]],target:{x:85,y:20,r:3},trench:false}),
+ lv2:()=>({laser:{x:4,y:6,a:0,aim:false,obj:true},mirrors:[{x:40,y:6,a:-10,len:10,move:false},{x:40,y:52,a:20,len:10,move:false}],
+   walls:[[43,30,100,30],[36,12,36,62],[44,12,44,30],[0,62,100,62]],target:{x:85,y:52,r:3},trench:true})};
+let S5={lv:'lv1',...LV.lv1(),hit:false,path:[],drag:null};
+function view5(w,h){const k=Math.min(w/100,h/62),ox=(w-100*k)/2,oy=(h-62*k)/2;return {k,X:x=>ox+x*k,Y:y=>oy+y*k,xw:px=>(px-ox)/k,yw:py=>(py-oy)/k};}
+const mEnds=m=>{const c=Math.cos(m.a*DEG),s=Math.sin(m.a*DEG),l=m.len/2;return [[m.x-c*l,m.y-s*l],[m.x+c*l,m.y+s*l]];};
+function segHit(p,d,a,b){const ex=b[0]-a[0],ey=b[1]-a[1],den=d[0]*ey-d[1]*ex;if(Math.abs(den)<1e-12)return null;
+  const t=((a[0]-p[0])*ey-(a[1]-p[1])*ex)/den,u=((a[0]-p[0])*d[1]-(a[1]-p[1])*d[0])/den;return (t>1e-6&&u>=0&&u<=1)?t:null;}
+function trace5(){const L0=S5.laser;let p=[L0.x,L0.y],d=[Math.cos(L0.a*DEG),Math.sin(L0.a*DEG)];const path=[p.slice()],marks=[];let hit=false;
+  for(let n=0;n<12;n++){let best=1e9,kind=null,obj=null;
+    S5.mirrors.forEach(m=>{const [a,b]=mEnds(m),t=segHit(p,d,a,b);if(t!==null&&t<best){best=t;kind='m';obj=m;}});
+    S5.walls.forEach(wl=>{const t=segHit(p,d,[wl[0],wl[1]],[wl[2],wl[3]]);if(t!==null&&t<best){best=t;kind='w';}});
+    [[0,0,100,0],[100,0,100,62],[100,62,0,62],[0,62,0,0]].forEach(bd=>{const t=segHit(p,d,[bd[0],bd[1]],[bd[2],bd[3]]);if(t!==null&&t<best){best=t;kind='b';}});
+    const tg=S5.target,tx=tg.x-p[0],ty=tg.y-p[1],tp=tx*d[0]+ty*d[1];
+    if(tp>0&&tp<best&&Math.abs(tx*d[1]-ty*d[0])<tg.r){path.push([p[0]+d[0]*tp,p[1]+d[1]*tp]);hit=true;break;}
+    const q=[p[0]+d[0]*best,p[1]+d[1]*best];path.push(q);
+    if(kind!=='m')break;
+    const nx=-Math.sin(obj.a*DEG),ny=Math.cos(obj.a*DEG),dn=d[0]*nx+d[1]*ny;
+    marks.push({x:q[0],y:q[1],i:Math.acos(Math.min(1,Math.abs(dn)))/DEG});
+    d=[d[0]-2*dn*nx,d[1]-2*dn*ny];p=q;}
+  S5.hit=hit;S5.path=path;S5.marks=marks;}
+function render5(){const cv=$('cv5'),{ctx,w,h}=size(cv,.62,480,240),v=view5(w,h);S5.v=v;const k=v.k,fs=w<520?12:14;
+  trace5();ctx.fillStyle=C.lane;ctx.fillRect(0,0,w,h);
+    ctx.fillStyle=C.lane;ctx.fillRect(v.X(36),v.Y(12),v.X(44)-v.X(36),v.Y(62)-v.Y(12));ctx.fillRect(v.X(44),v.Y(40),v.X(100)-v.X(44),v.Y(62)-v.Y(40));}
+  S5.walls.forEach(wl=>line(ctx,[[v.X(wl[0]),v.Y(wl[1])],[v.X(wl[2]),v.Y(wl[3])]],C.muted,6));
+  if(!S5.trench)txt(ctx,T('lWall'),v.X(S5.walls[0][0])+8,v.Y(8),C.muted,fs,600,'left');
+  // Đích
+  const tg=S5.target;dot(ctx,v.X(tg.x),v.Y(tg.y),tg.r*k+6,S5.hit?'rgba(29,138,75,.25)':'rgba(224,38,47,.12)');
+  if(S5.trench){eyeIcon(ctx,v.X(tg.x)+6,v.Y(tg.y),Math.PI,S5.hit?C.ok:C.ink,14);txt(ctx,T('lEye'),v.X(tg.x),v.Y(tg.y)+24,C.ink,fs,700,'center');}
+  else{[1,.66,.33].forEach((f,i)=>dot(ctx,v.X(tg.x),v.Y(tg.y),tg.r*k*f,i%2?'#fff':(S5.hit?C.ok:C.laser)));txt(ctx,T('lTarget'),v.X(tg.x),v.Y(tg.y)-tg.r*k-14,C.ink,fs,700,'center');}
+  // Tia sáng
+  const pts=S5.path.map(q=>[v.X(q[0]),v.Y(q[1])]);line(ctx,pts,S5.trench?C.ray2:C.laser,3);
+  for(let i=0;i<pts.length-1;i++)arrowMid(ctx,...pts[i],...pts[i+1],S5.trench?C.ray2:C.laser,9,.5);
+  // Gương
+  S5.mirrors.forEach(m=>{const [a,b]=mEnds(m);line(ctx,[[v.X(a[0]),v.Y(a[1])],[v.X(b[0]),v.Y(b[1])]],C.mirror,6);
+    dot(ctx,v.X(b[0]),v.Y(b[1]),9,C.panel,C.accent,3);if(m.move)dot(ctx,v.X(m.x),v.Y(m.y),6,C.accent);});
+  S5.marks.forEach(mk=>pill(ctx,'i = '+nf(mk.i,0)+'°',v.X(mk.x),v.Y(mk.y)-20,C.accent,fs));
+  // Đèn laser / vật
+  const L0=S5.laser;
+  if(L0.obj){ctx.fillStyle=C.ray;ctx.beginPath();ctx.moveTo(v.X(L0.x)-10,v.Y(L0.y)+10);ctx.lineTo(v.X(L0.x),v.Y(L0.y)-12);ctx.lineTo(v.X(L0.x)+10,v.Y(L0.y)+10);ctx.fill();txt(ctx,T('lObj5'),v.X(L0.x),v.Y(L0.y)+24,C.ink,fs,700,'left');}
+  else{ctx.save();ctx.translate(v.X(L0.x),v.Y(L0.y));ctx.rotate(L0.a*DEG);ctx.fillStyle='#39424f';ctx.beginPath();ctx.roundRect(-30,-9,34,18,4);ctx.fill();ctx.restore();}
+  if(L0.aim){const hx=L0.x+Math.cos(L0.a*DEG)*9,hy=L0.y+Math.sin(L0.a*DEG)*9;dot(ctx,v.X(hx),v.Y(hy),9,C.panel,C.laser,3);}
+  const st=$('st5');st.textContent=S5.hit?T(S5.lv==='lv2'?'hit5b':'hit5'):T('miss5');st.className='status '+(S5.hit?'ok':'');}
+function setLv(k){S5={lv:k,...LV[k](),hit:false,path:[],drag:null};seg('lv5',['lv1','lv2'].map(x=>({k:x,label:T(x)})),k,setLv);$('desc5').textContent=T(k==='lv1'?'d5_1':'d5_2');draw();}
+$('rst5').onclick=()=>setLv(S5.lv);
+function pick5(p){const v=S5.v;if(!v)return null;const near=(x,y)=>Math.hypot(p.x-v.X(x),p.y-v.Y(y))<24;const L0=S5.laser;
+  if(L0.aim&&near(L0.x+Math.cos(L0.a*DEG)*9,L0.y+Math.sin(L0.a*DEG)*9))return {t:'aim'};
+  for(const m of S5.mirrors){const [,b]=mEnds(m);if(near(b[0],b[1]))return {t:'rot',m};}
+  for(const m of S5.mirrors){if(m.move){const [a,b]=mEnds(m);const ex=b[0]-a[0],ey=b[1]-a[1],x=v.xw(p.x),y=v.yw(p.y),u=clamp(((x-a[0])*ex+(y-a[1])*ey)/(ex*ex+ey*ey),0,1);
+    if(Math.hypot(x-(a[0]+ex*u),y-(a[1]+ey*u))*v.k<20)return {t:'mv',m,dx:x-m.x,dy:y-m.y};}}
+  return null;}
+$('cv5')._hover=p=>!!pick5(p);
+onDrag($('cv5'),p=>{S5.drag=pick5(p);return !!S5.drag;},p=>{const v=S5.v,x=v.xw(p.x),y=v.yw(p.y),D=S5.drag;
+  if(D.t==='aim'){S5.laser.a=Math.round(Math.atan2(y-S5.laser.y,x-S5.laser.x)/DEG);}
+  else if(D.t==='rot'){let a=Math.atan2(y-D.m.y,x-D.m.x)/DEG;a=Math.round(a);if(a>90)a-=180;if(a<-90)a+=180;D.m.a=a;}
+  else if(D.t==='mv'){D.m.x=clamp(x-D.dx,6,94);D.m.y=clamp(y-D.dy,44,58);}});
+/* Bài tập */
+const QZ=[{q:'q1',a:60,u:'°',hk:'q1h'},{q:'q2',a:40,u:'°',hk:'q2h'},{q:'q3',a:3,u:'m',hk:'q3h'},{q:'q4',a:0,u:'°',hk:'q4h'}];
+function quiz5(){$('quiz5').innerHTML=QZ.map((z,i)=>`<div class="qz"><p>${i+1}. ${T(z.q)}</p><div class="row"><input inputmode="decimal" data-i="${i}" value="${z.v||''}"><span class="unit">${z.u}</span>
+  <button class="btn" data-c="${i}">${T('check')}</button><span class="res ${z.ok===true?'ok':z.ok===false?'no':''}">${z.ok===true?T('right'):z.ok===false?T('wrong'):''}</span></div>
+  ${z.ok!=null?`<details><summary>${T('showHint')}</summary><p>${T(z.hk)}</p></details>`:''}</div>`).join('');}
+$('quiz5').addEventListener('click',e=>{const b=e.target.closest('button[data-c]');if(!b)return;const i=+b.dataset.c,z=QZ[i],inp=$('quiz5').querySelector(`input[data-i="${i}"]`);
+  z.v=inp.value;const x=parseFloat(String(inp.value).replace(',','.'));z.ok=isFinite(x)&&Math.abs(x-z.a)<.05;quiz5();});
+
+/* ================= Đổi ngôn ngữ, khởi động ================= */
+function applyLang(){document.documentElement.lang=lang;document.title=T('title');
+  document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=T(el.dataset.i18n));
+  document.querySelectorAll('[data-i18n-html]').forEach(el=>el.innerHTML=T(el.dataset.i18nHtml));
+  $('langBtn').textContent=lang==='vi'?'EN':'VI';
+  Object.keys(PRED).forEach(renderPred);[1,2,3,4,5].forEach(renderVids);renderOffline();
+  pre1();pre3();seg('lv5',['lv1','lv2'].map(x=>({k:x,label:T(x)})),S5.lv,setLv);$('desc5').textContent=T(S5.lv==='lv1'?'d5_1':'d5_2');
+  table2();quiz5();draw();}
+$('langBtn').onclick=()=>{lang=lang==='vi'?'en':'vi';applyLang();};
+readColors();
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',readColors);
+new MutationObserver(readColors).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+addEventListener('resize',draw);
+applyLang();
+{const t=+store.get('as-tab');setTab(t>=1&&t<=5?t:1);}
+</script>
+</body>
+</html>

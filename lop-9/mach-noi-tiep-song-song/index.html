@@ -1,0 +1,1385 @@
+<title>Mạch điện nối tiếp, song song</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Bàn thí nghiệm điện: sân khấu canvas bên trái (mạch, mô hình tương tự), sổ ghi chép bên phải; dây đồng và electron xanh là hai màu chủ đạo. Điện thoại xếp một cột. */
+:root{
+  --bg:#edf0f4; --panel:#ffffff; --lane:#f6f7fa; --ink:#141922; --muted:#586174; --line:#d2d8e2;
+  --accent:#a24a17; --accent-ink:#ffffff; --ok:#15803d; --warn:#c2410c;
+  --wire:#b4652f; --e:#1d5fd6; --q:#d4313b; --bulb:#ffc21a; --glass:#fbfaf3; --res:#e9e2d2; --heat:#ff5a1f;
+  --vlo:#3557d6; --vmid:#22a58f; --vhi:#ef5a0c; --meter:#ffffff; --pipe:#8b96aa; --water:#3d9be0;
+  --chain:#3a404c; --ball:#d9480f; --floor:#e3ded3; --person:#5b6b8c; --metal:#9aa3b3;
+  --font-ui:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-num:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Consolas,monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f131a; --panel:#171c25; --lane:#121720; --ink:#e6eaf2; --muted:#9aa4b7; --line:#2b3343;
+  --accent:#f09a5c; --accent-ink:#1d0e04; --ok:#4ade80; --warn:#fb923c;
+  --wire:#d38a55; --e:#6aa8ff; --q:#ff6b72; --bulb:#ffd043; --glass:#262a33; --res:#4a4538; --heat:#ff7a3d;
+  --vlo:#6f8cff; --vmid:#38c7ad; --vhi:#ff8a3d; --meter:#1f2530; --pipe:#5f6a7d; --water:#58b3f0;
+  --chain:#c3c9d4; --ball:#ff7a3d; --floor:#2e2b26; --person:#9fb0d4; --metal:#6c7587;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f131a; --panel:#171c25; --lane:#121720; --ink:#e6eaf2; --muted:#9aa4b7; --line:#2b3343;
+  --accent:#f09a5c; --accent-ink:#1d0e04; --ok:#4ade80; --warn:#fb923c;
+  --wire:#d38a55; --e:#6aa8ff; --q:#ff6b72; --bulb:#ffd043; --glass:#262a33; --res:#4a4538; --heat:#ff7a3d;
+  --vlo:#6f8cff; --vmid:#38c7ad; --vhi:#ff8a3d; --meter:#1f2530; --pipe:#5f6a7d; --water:#58b3f0;
+  --chain:#c3c9d4; --ball:#ff7a3d; --floor:#2e2b26; --person:#9fb0d4; --metal:#6c7587;
+  color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-ui);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px 40px}
+.wrap{max-width:1320px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.eyebrow{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{margin:0;font-size:clamp(25px,3.4vw,36px);line-height:1.15;font-weight:800;text-wrap:balance;letter-spacing:-.01em}
+h2{margin:0;font-size:17px;font-weight:700;text-wrap:balance}
+h3{margin:0;font-size:15px;font-weight:700}
+.hdr-ctl{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{font:inherit;font-weight:600;font-size:15px;min-height:44px;padding:8px 14px;border-radius:8px;border:1px solid var(--line);
+  background:var(--panel);color:var(--ink);cursor:pointer;touch-action:manipulation}
+.btn:hover{border-color:var(--accent)}
+.btn:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible,nav.tabs button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel);max-width:100%}
+.seg .btn{border:0;border-radius:0;min-width:48px;padding:8px 12px}
+.seg .btn+.btn{border-left:1px solid var(--line)}
+.seg.full{display:flex}
+.seg.full .btn{flex:1 1 0;min-width:0}
+.seg.wrap2{display:grid;grid-template-columns:1fr 1fr}
+.seg.wrap2 .btn{border-left:0!important;border-top:1px solid var(--line)}
+.seg.wrap2 .btn:nth-child(-n+2){border-top:0}
+.seg.wrap2 .btn:nth-child(2n){border-left:1px solid var(--line)!important}
+nav.tabs{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line)}
+nav.tabs button{font:inherit;font-size:15px;font-weight:600;white-space:nowrap;min-height:46px;padding:8px 14px;border:0;border-bottom:3px solid transparent;
+  background:none;color:var(--muted);cursor:pointer;margin-bottom:-1px}
+nav.tabs button.on{color:var(--ink);border-bottom-color:var(--accent)}
+.req{margin:0;font-size:14px;color:var(--muted);max-width:110ch}
+.req b{color:var(--ink);font-weight:600}
+.lab{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:14px;align-items:start}
+@media (max-width:1020px){.lab{grid-template-columns:minmax(0,1fr)}}
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.col{display:flex;flex-direction:column;gap:12px;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card p{margin:0}
+.card.predict{border-color:var(--accent);border-width:2px}
+canvas{display:block;width:100%;touch-action:none;border-radius:8px;background:var(--lane)}
+canvas.pany{touch-action:pan-y}
+.subhead{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.hint{font-size:14px;color:var(--muted);margin:0}
+.status{font-size:16px;font-weight:600;margin:0;min-height:24px}
+.status.warn{color:var(--warn)}
+.fld{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--muted);font-weight:600;min-width:0}
+.fld .val{color:var(--ink);font-family:var(--font-num);font-size:15px}
+input[type=range]{width:100%;min-width:0;height:32px;accent-color:var(--accent)}
+input[type=number]{font:inherit;font-family:var(--font-num);font-size:17px;min-height:44px;width:130px;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:var(--lane);color:var(--ink)}
+.chk{display:flex;align-items:center;gap:10px;font-size:15px;min-height:44px;cursor:pointer;color:var(--ink);font-weight:500}
+.chk input{width:22px;height:22px;accent-color:var(--accent);flex:none}
+.chkrow{display:flex;flex-wrap:wrap;gap:4px 16px}
+.num{font-family:var(--font-num);font-variant-numeric:tabular-nums}
+.choices{display:flex;flex-wrap:wrap;gap:6px}
+.choices .btn{flex:1 1 140px;font-size:14px;text-align:left}
+.choices .btn.right{border-color:var(--ok);box-shadow:inset 0 0 0 2px var(--ok)}
+.choices .btn.wrong{border-color:var(--warn);box-shadow:inset 0 0 0 2px var(--warn)}
+.pred{display:flex;flex-direction:column;gap:8px}
+.pred+.pred{border-top:1px solid var(--line);padding-top:10px}
+.q{font-size:15px;font-weight:600;margin:0}
+.fb{font-size:15px;padding:8px 10px;border-radius:8px;background:var(--lane);margin:0}
+.fb b.good{color:var(--ok)} .fb b.bad{color:var(--warn)}
+.tblwrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:6px 4px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.03em}
+td.n{font-family:var(--font-num);font-variant-numeric:tabular-nums;white-space:nowrap}
+table.map td:first-child{font-weight:600;white-space:nowrap}
+table.map th.on,table.map td.on{background:var(--lane);color:var(--ink)}
+.concl{font-size:15px;padding:10px 12px;border-radius:8px;border:1px dashed var(--accent);background:var(--lane);margin:0}
+.formula{font-family:var(--font-num);font-size:14px;background:var(--lane);padding:8px 10px;border-radius:8px;overflow-x:auto;line-height:1.7}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--muted);align-items:center}
+.legend .dot{display:inline-block;width:10px;height:10px;border-radius:50%;vertical-align:middle;margin-right:5px}
+.legend .ramp{display:inline-block;width:70px;height:8px;border-radius:4px;vertical-align:middle;margin:0 6px;background:linear-gradient(90deg,var(--vlo),var(--vmid),var(--vhi))}
+.obs{display:flex;flex-direction:column;gap:8px;font-size:15px}
+.obs p{margin:0;padding-left:12px;border-left:3px solid var(--line)}
+.obs p.hl{border-left-color:var(--ok)}
+.obs p.wn{border-left-color:var(--warn)}
+.rules{display:flex;flex-direction:column;gap:8px;margin:0;padding:0;list-style:none}
+.rules li{display:flex;gap:10px;align-items:flex-start;font-size:15px;padding:8px 10px;border-radius:8px;background:var(--lane)}
+.rules li .mk{flex:none;width:26px;height:26px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-weight:800;font-size:14px;color:var(--muted)}
+.rules li.done .mk{border-color:var(--ok);background:var(--ok);color:var(--panel)}
+.kv{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;font-size:15px;align-items:baseline;margin:0}
+.kv dt{color:var(--muted);font-size:14px}
+.kv dd{margin:0;font-family:var(--font-num);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.kv dd.big{font-size:18px;font-weight:600}
+.kv dt.sep,.kv dd.sep{border-top:1px solid var(--line);padding-top:6px}
+.map dl{margin:0}
+.maplist{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 10px;font-size:14px;margin:0}
+.maplist dt{font-weight:600}
+.maplist dd{margin:0;color:var(--ink)}
+.maplist dd::before{content:"↔ ";color:var(--accent);font-weight:700}
+ul.rw{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px;font-size:15px}
+ul.rw.good li::marker{content:"✓  ";color:var(--ok);font-weight:700}
+ul.rw.bad li::marker{content:"✗  ";color:var(--warn);font-weight:700}
+.pill{display:inline-block;font-size:13px;font-weight:700;padding:2px 10px;border-radius:99px;border:1px solid currentColor}
+.pill.good{color:var(--ok)} .pill.mid{color:var(--warn)}
+details{font-size:15px}
+summary{cursor:pointer;font-weight:600;color:var(--accent);min-height:32px}
+.nudge{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.nudge .btn{min-width:52px;padding:8px 10px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.prob{font-size:16px;line-height:1.55;padding:10px 12px;border-radius:8px;background:var(--lane);margin:0}
+.apps{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+footer{font-size:13px;color:var(--muted)}
+footer p{margin:0 0 4px;max-width:120ch}
+footer h3{color:var(--ink);margin-bottom:4px}
+@media (max-width:520px){ .seg .btn{padding:8px 8px;font-size:14px} nav.tabs button{padding:8px 10px;font-size:14px} }
+@media (prefers-reduced-motion:reduce){ *{scroll-behavior:auto!important} }
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow" data-i18n="eyebrow"></div>
+      <h1 data-i18n="title"></h1>
+    </div>
+    <div class="hdr-ctl">
+      <button class="btn" id="hideBtn" aria-pressed="false" data-i18n="hideNums"></button>
+      <button class="btn" id="langBtn">EN</button>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="1" data-i18n="tab1"></button>
+    <button role="tab" data-tab="2" data-i18n="tab2"></button>
+    <button role="tab" data-tab="3" data-i18n="tab3"></button>
+    <button role="tab" data-tab="4" data-i18n="tab4"></button>
+    <button role="tab" data-tab="5" data-i18n="tab5"></button>
+    <button role="tab" data-tab="6" data-i18n="tab6"></button>
+  </nav>
+
+  <!-- ============ TAB 1: Hình dung dòng điện ============ -->
+  <section id="t1" class="col" hidden>
+    <p class="req" data-i18n-html="req1"></p>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" data-i18n="hint1"></p>
+        <canvas id="cv1" aria-label="circuit"></canvas>
+        <div class="subhead"><h3 id="anaTitle"></h3><span class="hint" data-i18n="anaHint"></span></div>
+        <canvas id="an1" class="pany" aria-label="analogy"></canvas>
+        <p class="status" id="st1"></p>
+        <div class="controls" data-ctl></div>
+        <div class="legend" data-legend></div>
+      </div>
+      <aside class="col">
+        <div class="card">
+          <h2 data-i18n="cCirc"></h2>
+          <div class="seg full" id="mode1"><button class="btn" data-v="one" data-i18n="m1one"></button><button class="btn" data-v="ser" data-i18n="m1ser"></button><button class="btn" data-v="par" data-i18n="m1par"></button></div>
+          <div class="fld"><span><span data-i18n="sU"></span> <span class="val" id="vU1"></span></span><input type="range" id="rU1" min="0" max="12" step="0.5" value="6"></div>
+          <div class="fld"><span><span data-i18n="sRb"></span> <span class="val" id="vR1"></span></span><input type="range" id="rR1" min="4" max="30" step="1" value="12"></div>
+          <label class="chk"><input type="checkbox" id="k1" checked> <span data-i18n="closeK"></span></label>
+        </div>
+        <div class="card">
+          <h2 data-i18n="cAna"></h2>
+          <div class="seg wrap2" id="ana1"><button class="btn" data-v="water" data-i18n="anaWater"></button><button class="btn" data-v="bike" data-i18n="anaBike"></button><button class="btn" data-v="lift" data-i18n="anaLift"></button><button class="btn" data-v="crowd" data-i18n="anaCrowd"></button></div>
+          <dl class="maplist" id="map1"></dl>
+          <details><summary data-i18n="fullTable"></summary><div class="tblwrap"><table class="map" id="mapTbl"></table></div></details>
+        </div>
+        <div class="card">
+          <h2 data-i18n="cRW"></h2>
+          <h3 data-i18n="right"></h3><ul class="rw good" id="rw1r"></ul>
+          <h3 data-i18n="wrong"></h3><ul class="rw bad" id="rw1w"></ul>
+        </div>
+        <div class="card predict"><h2 data-i18n="cPred"></h2><div class="pred" data-q="q1a"></div><div class="pred" data-q="q1b"></div></div>
+        <div class="card"><h2 data-i18n="cObs"></h2><div class="obs" id="obs1"></div><p class="concl" id="concl1" data-i18n-html="concl1" hidden></p><button class="btn" data-concl="1" data-i18n="showConcl"></button></div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ============ TAB 2: Pin, điện trở, đo đạc ============ -->
+  <section id="t2" class="col" hidden>
+    <p class="req" data-i18n-html="req2"></p>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" data-i18n="hint2"></p>
+        <canvas id="cv2" aria-label="circuit with voltmeter"></canvas>
+        <p class="status" id="st2"></p>
+        <div class="subhead"><h3 data-i18n="cZoom"></h3><span class="hint" data-i18n="zoomHint"></span></div>
+        <canvas id="zm2" class="pany" aria-label="inside the resistor"></canvas>
+        <div class="controls" data-ctl></div>
+        <div class="legend" data-legend></div>
+      </div>
+      <aside class="col">
+        <div class="card">
+          <h2 data-i18n="cCirc"></h2>
+          <div class="fld"><span><span data-i18n="sU"></span> <span class="val" id="vU2"></span></span><input type="range" id="rU2" min="0" max="12" step="0.5" value="6"></div>
+          <div class="fld"><span><span data-i18n="sR"></span> <span class="val" id="vR2"></span></span><input type="range" id="rR2" min="2" max="40" step="1" value="12"></div>
+          <label class="chk"><input type="checkbox" id="k2" checked> <span data-i18n="closeK"></span></label>
+        </div>
+        <div class="card"><h2 data-i18n="cData"></h2><dl class="kv" id="kv2"></dl>
+          <div class="row"><button class="btn primary" id="rec2" data-i18n="record"></button><button class="btn" id="clr2" data-i18n="clear"></button></div>
+          <div class="tblwrap"><table id="tb2"></table></div>
+        </div>
+        <div class="card"><h2 data-i18n="cGraph"></h2><canvas id="gr2" class="pany" aria-label="I-U graph"></canvas><p class="hint" data-i18n="gHint"></p></div>
+        <div class="card"><h2 data-i18n="cMiss"></h2><ul class="rules" id="miss2"></ul></div>
+        <div class="card predict"><h2 data-i18n="cPred"></h2><div class="pred" data-q="q2a"></div><div class="pred" data-q="q2b"></div></div>
+        <div class="card"><h2 data-i18n="cObs"></h2><div class="obs" id="obs2"></div><p class="concl" id="concl2" data-i18n-html="concl2" hidden></p><button class="btn" data-concl="2" data-i18n="showConcl"></button></div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ============ TAB 3: Nối tiếp ============ -->
+  <section id="t3" class="col" hidden>
+    <p class="req" data-i18n-html="req3"></p>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" data-i18n="hint3"></p>
+        <canvas id="cv3" aria-label="series circuit"></canvas>
+        <p class="status" id="st3"></p>
+        <div class="controls" data-ctl></div>
+        <div class="legend" data-legend></div>
+      </div>
+      <aside class="col">
+        <div class="card">
+          <h2 data-i18n="cCirc"></h2>
+          <div class="seg full" id="n3"><button class="btn" data-v="2" data-i18n="n2"></button><button class="btn" data-v="3" data-i18n="n3"></button></div>
+          <div class="fld"><span><span data-i18n="sU"></span> <span class="val" id="vU3"></span></span><input type="range" id="rU3" min="0" max="12" step="0.5" value="6"></div>
+          <div class="fld"><span><span data-i18n="sR1"></span> <span class="val" id="vRa3"></span></span><input type="range" id="rRa3" min="2" max="30" step="1" value="12"></div>
+          <div class="fld"><span><span data-i18n="sR2"></span> <span class="val" id="vRb3"></span></span><input type="range" id="rRb3" min="2" max="30" step="1" value="12"></div>
+          <div class="fld" id="fRc3"><span><span data-i18n="sR3"></span> <span class="val" id="vRc3"></span></span><input type="range" id="rRc3" min="2" max="30" step="1" value="12"></div>
+          <div class="chkrow">
+            <label class="chk"><input type="checkbox" id="k3" checked> <span data-i18n="closeK"></span></label>
+            <label class="chk"><input type="checkbox" id="rm3a"> <span data-i18n="rmD1"></span></label>
+            <label class="chk"><input type="checkbox" id="rm3b"> <span data-i18n="rmD2"></span></label>
+            <label class="chk" id="lrm3c"><input type="checkbox" id="rm3c"> <span data-i18n="rmD3"></span></label>
+          </div>
+        </div>
+        <div class="card"><h2 data-i18n="cData"></h2><dl class="kv" id="kv3"></dl>
+          <div class="row"><button class="btn primary" id="rec3" data-i18n="record"></button><button class="btn" id="clr3" data-i18n="clear"></button></div>
+          <div class="tblwrap"><table id="tb3"></table></div>
+        </div>
+        <div class="card predict"><h2 data-i18n="cPred"></h2><div class="pred" data-q="q3a"></div><div class="pred" data-q="q3b"></div><div class="pred" data-q="q3c"></div></div>
+        <div class="card"><h2 data-i18n="cObs"></h2><div class="obs" id="obs3"></div><p class="concl" id="concl3" data-i18n-html="concl3" hidden></p><button class="btn" data-concl="3" data-i18n="showConcl"></button></div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ============ TAB 4: Song song ============ -->
+  <section id="t4" class="col" hidden>
+    <p class="req" data-i18n-html="req4"></p>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" data-i18n="hint4"></p>
+        <canvas id="cv4" aria-label="parallel circuit"></canvas>
+        <p class="status" id="st4"></p>
+        <div class="controls" data-ctl></div>
+        <div class="legend" data-legend></div>
+      </div>
+      <aside class="col">
+        <div class="card">
+          <h2 data-i18n="cCirc"></h2>
+          <div class="fld"><span><span data-i18n="sU"></span> <span class="val" id="vU4"></span></span><input type="range" id="rU4" min="0" max="12" step="0.5" value="6"></div>
+          <div class="fld"><span><span data-i18n="sR1"></span> <span class="val" id="vRa4"></span></span><input type="range" id="rRa4" min="2" max="30" step="1" value="12"></div>
+          <div class="fld"><span><span data-i18n="sR2"></span> <span class="val" id="vRb4"></span></span><input type="range" id="rRb4" min="2" max="30" step="1" value="12"></div>
+          <div class="fld"><span><span data-i18n="sR3"></span> <span class="val" id="vRc4"></span></span><input type="range" id="rRc4" min="2" max="30" step="1" value="12"></div>
+          <div class="chkrow">
+            <label class="chk"><input type="checkbox" id="k4" checked> <span data-i18n="closeK"></span></label>
+            <label class="chk"><input type="checkbox" id="k4a" checked> <span data-i18n="kb1"></span></label>
+            <label class="chk"><input type="checkbox" id="k4b" checked> <span data-i18n="kb2"></span></label>
+            <label class="chk"><input type="checkbox" id="k4c"> <span data-i18n="kb3"></span></label>
+          </div>
+          <label class="chk"><input type="checkbox" id="ri4"> <span data-i18n="rint"></span></label>
+        </div>
+        <div class="card"><h2 data-i18n="cData"></h2><dl class="kv" id="kv4"></dl>
+          <div class="row"><button class="btn primary" id="rec4" data-i18n="record"></button><button class="btn" id="clr4" data-i18n="clear"></button></div>
+          <div class="tblwrap"><table id="tb4"></table></div>
+        </div>
+        <div class="card predict"><h2 data-i18n="cPred"></h2><div class="pred" data-q="q4a"></div><div class="pred" data-q="q4b"></div><div class="pred" data-q="q4c"></div></div>
+        <div class="card"><h2 data-i18n="cObs"></h2><div class="obs" id="obs4"></div><p class="concl" id="concl4" data-i18n-html="concl4" hidden></p><button class="btn" data-concl="4" data-i18n="showConcl"></button></div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ============ TAB 5: Điện trở tương đương ============ -->
+  <section id="t5" class="col" hidden>
+    <p class="req" data-i18n-html="req5"></p>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" data-i18n="hint5"></p>
+        <canvas id="cv5" aria-label="black box"></canvas>
+        <p class="status" id="st5"></p>
+        <div class="controls" data-ctl></div>
+        <div class="legend" data-legend></div>
+      </div>
+      <aside class="col">
+        <div class="card">
+          <h2 data-i18n="cCirc"></h2>
+          <div class="seg full" id="mode5"><button class="btn" data-v="ser" data-i18n="ser"></button><button class="btn" data-v="par" data-i18n="par"></button></div>
+          <div class="fld"><span><span data-i18n="sU"></span> <span class="val" id="vU5"></span></span><input type="range" id="rU5" min="1.5" max="12" step="0.5" value="6"></div>
+          <div class="fld"><span><span data-i18n="sRr1"></span> <span class="val" id="vRa5"></span></span><input type="range" id="rRa5" min="1" max="40" step="1" value="10"></div>
+          <div class="fld"><span><span data-i18n="sRr2"></span> <span class="val" id="vRb5"></span></span><input type="range" id="rRb5" min="1" max="40" step="1" value="15"></div>
+          <button class="btn" id="new5" data-i18n="newProb"></button>
+        </div>
+        <div class="card predict">
+          <h2 data-i18n="cBox"></h2>
+          <div class="fld"><span><span data-i18n="sRbox"></span> <span class="val" id="vRx5"></span></span><input type="range" id="rRx5" min="0.5" max="80" step="0.1" value="40"></div>
+          <div class="nudge"><span data-i18n="fine"></span><button class="btn" data-nd="-1">−1</button><button class="btn" data-nd="-0.1">−0,1</button><button class="btn" data-nd="0.1">+0,1</button><button class="btn" data-nd="1">+1</button></div>
+          <dl class="kv" id="kv5"></dl>
+          <p class="fb" id="fb5"></p>
+          <div class="formula" id="fm5" hidden></div>
+        </div>
+        <div class="card predict"><h2 data-i18n="cPred"></h2><div class="pred" data-q="q5a"></div><div class="pred" data-q="q5b"></div></div>
+        <div class="card"><h2 data-i18n="cObs"></h2><div class="obs" id="obs5"></div><p class="concl" id="concl5" data-i18n-html="concl5" hidden></p><button class="btn" data-concl="5" data-i18n="showConcl"></button></div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ============ TAB 6: Thử thách và ứng dụng ============ -->
+  <section id="t6" class="col" hidden>
+    <p class="req" data-i18n-html="req6"></p>
+    <div class="seg full" id="sub6"><button class="btn" data-v="bright" data-i18n="subBright"></button><button class="btn" data-v="calc" data-i18n="subCalc"></button><button class="btn" data-v="house" data-i18n="subHouse"></button></div>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" id="hint6"></p>
+        <canvas id="cv6" aria-label="challenge circuit"></canvas>
+        <p class="status" id="st6"></p>
+        <div class="controls" data-ctl></div>
+        <div class="legend" data-legend></div>
+      </div>
+      <aside class="col">
+        <!-- 6A: độ sáng -->
+        <div class="card" data-sub="bright">
+          <h2 data-i18n="cCirc"></h2>
+          <div class="seg full" id="mode6"><button class="btn" data-v="ser" data-i18n="ser"></button><button class="btn" data-v="par" data-i18n="par"></button></div>
+          <div class="fld"><span><span data-i18n="sU6"></span> <span class="val" id="vU6"></span></span><input type="range" id="rU6" min="0" max="9" step="0.5" value="6"></div>
+          <label class="chk"><input type="checkbox" id="k6" checked> <span data-i18n="closeK"></span></label>
+          <dl class="kv" id="kv6a"></dl>
+        </div>
+        <div class="card predict" data-sub="bright"><h2 data-i18n="cPred"></h2><div class="pred" data-q="q6a"></div><div class="pred" data-q="q6b"></div></div>
+        <!-- 6B: tính toán -->
+        <div class="card predict" data-sub="calc">
+          <h2 data-i18n="cProb"></h2>
+          <div class="seg full" id="ptype6"><button class="btn" data-v="nt" data-i18n="ser"></button><button class="btn" data-v="ss" data-i18n="par"></button><button class="btn" data-v="hh" data-i18n="mix"></button></div>
+          <p class="prob" id="prob6"></p>
+          <div class="row"><label class="fld" for="ans6"><span data-i18n="ansLbl"></span></label><input type="number" id="ans6" step="any" inputmode="decimal"><span class="num">A</span></div>
+          <div class="row"><button class="btn primary" id="chk6" data-i18n="check"></button><button class="btn" id="newp6" data-i18n="newP"></button></div>
+          <p class="fb" id="fb6" hidden></p>
+          <details id="sol6" hidden><summary data-i18n="sol"></summary><div class="formula" id="solTxt6"></div></details>
+        </div>
+        <!-- 6C: điện trong nhà -->
+        <div class="card" data-sub="house">
+          <h2 data-i18n="cHouse"></h2>
+          <div class="seg full" id="hmode6"><button class="btn" data-v="par" data-i18n="hPar"></button><button class="btn" data-v="ser" data-i18n="hSer"></button></div>
+          <div class="chkrow" id="hk6">
+            <label class="chk"><input type="checkbox" id="h6a" checked> <span data-i18n="devLamp"></span></label>
+            <label class="chk"><input type="checkbox" id="h6b"> <span data-i18n="devFan"></span></label>
+            <label class="chk"><input type="checkbox" id="h6c"> <span data-i18n="devKettle"></span></label>
+          </div>
+          <dl class="kv" id="kv6c"></dl>
+          <p class="hint" data-i18n="fanNote"></p>
+        </div>
+        <div class="card"><h2 data-i18n="cObs"></h2><div class="obs" id="obs6"></div></div>
+      </aside>
+    </div>
+    <div class="apps" data-sub="house">
+      <div class="card"><h3 data-i18n="app1t"></h3><p data-i18n="app1"></p></div>
+      <div class="card"><h3 data-i18n="app2t"></h3><p data-i18n="app2"></p></div>
+      <div class="card"><h3 data-i18n="app3t"></h3><p data-i18n="app3"></p></div>
+    </div>
+  </section>
+
+  <footer>
+    <h3 data-i18n="assumeT"></h3>
+    <p data-i18n="as1"></p><p data-i18n="as2"></p><p data-i18n="as3"></p><p data-i18n="as4"></p><p data-i18n="as5"></p>
+  </footer>
+</div>
+<script>
+"use strict";
+/* ================= I18N ================= */
+const ANS={q1a:0,q1b:1,q2a:1,q2b:2,q3a:1,q3b:1,q3c:2,q4a:2,q4b:1,q4c:1,q5a:2,q5b:1,q6a:0,q6b:1};
+const I18N={
+vi:{
+  eyebrow:'KHTN 9 · Điện · Mô phỏng tương tác',
+  title:'Mạch điện nối tiếp, song song',
+  hideNums:'Ẩn số đo', showNums:'Hiện số đo',
+  tab1:'1. Hình dung dòng điện', tab2:'2. Pin, điện trở, đo đạc', tab3:'3. Mạch nối tiếp', tab4:'4. Mạch song song', tab5:'5. Điện trở tương đương', tab6:'6. Thử thách, ứng dụng',
+  req1:'<b>Nền tảng (KHTN 8):</b> dòng điện là dòng chuyển dời có hướng của các hạt mang điện; nguồn điện cung cấp năng lượng điện. Tab này giúp HS “nhìn thấy” dòng điện và hiệu điện thế qua bốn mô hình tương tự trước khi học đoạn mạch nối tiếp, song song (KHTN 9).',
+  req2:'<b>Yêu cầu cần đạt (KHTN 9):</b> thực hiện thí nghiệm đơn giản để nêu được điện trở có tác dụng cản trở dòng điện; xây dựng định luật Ohm. <b>Ôn KHTN 8:</b> đo được cường độ dòng điện và hiệu điện thế; khả năng sinh ra dòng điện của pin được đo bằng hiệu điện thế giữa hai cực.',
+  req3:'<b>Yêu cầu cần đạt (KHTN 9):</b> thực hiện thí nghiệm để rút ra được: trong đoạn mạch điện mắc nối tiếp, cường độ dòng điện là như nhau cho mọi điểm; lắp được mạch điện và đo được giá trị cường độ dòng điện trong đoạn mạch nối tiếp.',
+  req4:'<b>Yêu cầu cần đạt (KHTN 9):</b> thực hiện thí nghiệm để rút ra được: trong đoạn mạch điện mắc song song, tổng cường độ dòng điện trong các nhánh bằng cường độ dòng điện chạy trong mạch chính; lắp được mạch điện và đo được cường độ dòng điện trong đoạn mạch song song.',
+  req5:'<b>Yêu cầu cần đạt (KHTN 9):</b> nêu được công thức tính điện trở tương đương của đoạn mạch một chiều nối tiếp, song song; sử dụng công thức đã cho để tính được điện trở tương đương trong một số trường hợp đơn giản.',
+  req6:'<b>Yêu cầu cần đạt (KHTN 9):</b> tính được cường độ dòng điện trong đoạn mạch một chiều mắc nối tiếp, mắc song song trong một số trường hợp đơn giản; tính được công suất điện trong trường hợp đơn giản.',
+  hint1:'Chạm vào khoá K để đóng, mở. Kéo thanh trượt để đổi U và điện trở đèn: mạch và mô hình bên dưới thay đổi cùng lúc.',
+  anaHint:'Mô hình chạy theo đúng số liệu của mạch phía trên.',
+  hint2:'Kéo que đỏ và que đen của vôn kế tới hai điểm bất kì trên mạch. Chạm vào khoá K để đóng, mở.',
+  hint3:'Chạm vào một đèn để tháo hoặc lắp lại. Chạm vào khoá K để đóng, mở. Đồng hồ nào vừa đổi số chỉ sẽ nhấp nháy.',
+  hint4:'Chạm vào khoá K1, K2, K3 để đóng, mở từng nhánh; khoá K đóng, mở mạch chính. Đồng hồ nào vừa đổi số chỉ sẽ nhấp nháy.',
+  hint5:'Kéo thanh trượt “Điện trở trong hộp” cho tới khi ampe kế của hộp đen chỉ giống ampe kế của đoạn mạch thật.',
+  hint6bright:'Hai đèn cùng hiệu điện thế định mức 6 V nhưng công suất định mức khác nhau. Đổi cách mắc rồi so sánh độ sáng.',
+  hint6calc:'Đọc đề, tự tính rồi nhập kết quả. Bấm “Kiểm tra” để xem số chỉ ampe kế.',
+  hint6house:'Chạm vào khoá của từng thiết bị để bật, tắt. So sánh hai cách mắc.',
+  cCirc:'Mạch điện', cData:'Số liệu', cPred:'Dự đoán trước khi quan sát', cObs:'Em quan sát được',
+  showConcl:'Xem kết luận', record:'Ghi số liệu', clear:'Xoá bảng',
+  m1one:'1 đèn', m1ser:'2 đèn nối tiếp', m1par:'2 đèn song song',
+  sU:'Hiệu điện thế của pin U', sRb:'Điện trở mỗi đèn', sR:'Điện trở R', closeK:'Đóng khoá K',
+  sR1:'Điện trở đèn Đ1', sR2:'Điện trở đèn Đ2', sR3:'Điện trở đèn Đ3',
+  sRr1:'Điện trở R₁', sRr2:'Điện trở R₂',
+  rmD1:'Tháo Đ1', rmD2:'Tháo Đ2', rmD3:'Tháo Đ3', n2:'2 đèn', n3:'3 đèn',
+  kb1:'Khoá K1', kb2:'Khoá K2', kb3:'Khoá K3',
+  rint:'Pin có điện trở trong r = 1 Ω (giống pin thật)',
+  cAna:'Mô hình tương tự', anaWater:'Mạch nước kín', anaBike:'Xích xe đạp', anaLift:'Thang máy, máng trượt', anaCrowd:'Đám đông qua cửa',
+  fullTable:'Bảng đối chiếu cả bốn mô hình', cRW:'Mô hình này đúng ở đâu, sai ở đâu?', right:'Giống thật ở chỗ', wrong:'Khác thật ở chỗ',
+  mapHead:'Mạch điện',
+  mapRows:['Electron','Pin','Hiệu điện thế U','Cường độ dòng điện I','Đèn, điện trở','Năng lượng ở đèn','Khoá K mở','Mạch song song'],
+  ana:{
+    water:{rows:['Nước trong ống (ống luôn đầy)','Máy bơm','Chênh lệch áp suất','Lưu lượng nước (lít/giây)','Tua bin, đoạn ống hẹp','Làm quay tua bin','Đóng van','Ống chia nhiều nhánh'],
+      r:['Ống luôn đầy nước: bật bơm là cả vòng chảy ngay, giống electron có sẵn trong dây.','Lưu lượng như nhau ở mọi chỗ của một ống không rẽ nhánh (nối tiếp).','Ở chỗ chia ống, nước vào bằng tổng nước ra các nhánh (song song).','Bơm tạo chênh lệch áp suất, tua bin làm giảm áp suất: giống pin tạo hiệu điện thế, đèn làm giảm điện thế.'],
+      w:['Ống thủng thì nước chảy ra ngoài; dây điện bị cắt thì electron không bay ra mà dòng điện dừng lại.','HS dễ nghĩ dây điện là ống rỗng, electron phải chảy vào dần.','Nước có thể tự chảy nhờ trọng lực; electron trong dây cần nguồn điện.']},
+    bike:{rows:['Mắt xích','Người đạp, đĩa trước','Lực kéo (độ căng) của xích','Số mắt xích qua 1 điểm mỗi giây','Bánh xe có phanh','Làm quay bánh, phanh nóng lên','Tháo xích','Không diễn tả được'],
+      r:['Mắt xích có sẵn khắp vòng: đạp là cả vòng chạy cùng lúc.','Không mất mắt xích nào: thứ truyền sang bánh xe là năng lượng.','Phanh ở một chỗ thì cả vòng xích chậm lại, không chỉ phần phía sau.'],
+      w:['Không có chỗ rẽ nhánh nên không diễn tả được mạch song song.','Xích được kéo bằng lực căng; electron được điện trường trong dây đẩy đi.','Các mắt xích nối cứng với nhau; electron thì không.']},
+    lift:{rows:['Viên bi (điện tích dương)','Thang máy nâng bi','Chênh lệch độ cao','Số bi qua 1 điểm mỗi giây','Máng trượt có gờ','Bi mất độ cao, máng nóng lên','Chắn cổng','Nhiều máng cùng độ cao'],
+      r:['Độ cao giống điện thế, chênh lệch độ cao giống hiệu điện thế.','Thang máy nâng lên bao nhiêu thì các máng làm tụt xuống đúng bấy nhiêu: U = U₁ + U₂.','Các máng song song bắt đầu ở cùng độ cao và kết thúc ở cùng mặt đất: hiệu điện thế các nhánh bằng nhau.','Gờ trên máng làm bi không lăn nhanh dần, năng lượng thành nhiệt: giống va chạm trong dây tóc.'],
+      w:['Bi lăn nhờ trọng lực, từng viên một; electron được điện trường đẩy cả vòng cùng lúc.','Trên đoạn nằm ngang, bi cần băng chuyền đẩy; trong dây nối thật, electron vẫn chạy dù hai đầu dây gần như cùng điện thế.']},
+    crowd:{rows:['Người','Băng chuyền đẩy người','Sức ép của đám đông','Số người qua cửa mỗi giây','Cửa hẹp','Người tốn sức chen qua cửa','Đóng cửa','Nhiều cửa cạnh nhau'],
+      r:['Thêm cửa song song thì tổng số người qua mỗi giây tăng: mắc song song làm điện trở tương đương giảm.','Cửa hẹp (điện trở lớn) thì ít người qua mỗi giây.','Số người vào hành lang bằng số người ra: không ai biến mất.'],
+      w:['Người tự đi theo ý mình; electron chỉ chuyển động có hướng khi có điện trường.','Không có “cái bơm” rõ ràng nên khó thấy vai trò của pin và hiệu điện thế.','Người có thể chen chúc dồn ứ ở cửa; electron không dồn lại trong mạch.']}
+  },
+  lbPump:'Máy bơm (pin)', lbValve:'Van (khoá K)', lbTurb:'Tua bin (đèn)', lbFlow:'Đồng hồ lưu lượng',
+  lbRing:'Đĩa trước, bàn đạp (pin)', lbChainL:'Xích (electron)', lbWheel:'Bánh có phanh (đèn)', lbForce:'Lực đạp ↔ U', lbBroken:'Xích bị tháo ↔ khoá K mở',
+  bikeNoPar:'Xích xe đạp không có chỗ rẽ nhánh, nên không diễn tả được mạch song song. Hãy chọn mô hình khác.',
+  lbLift:'Thang máy (pin)', lbRamp:'Máng có gờ (đèn)', lbHeight:'Độ cao ↔ điện thế', lbGate:'Cổng chắn (khoá K mở)', lbBall:'Bi = điện tích dương, đi theo chiều quy ước',
+  lbBelt:'Băng chuyền (pin)', lbDoor:'Cửa hẹp (đèn)', lbCount:'Người đếm',
+  stWater:(I,U)=>`Lưu lượng nước ↔ I = ${I} · Chênh áp suất do bơm tạo ra ↔ U = ${U}`,
+  stBike:(I,U)=>`Tốc độ xích ↔ I = ${I} · Lực đạp ↔ U = ${U}`,
+  stLift:(I,U)=>`Số bi qua mỗi giây ↔ I = ${I} · Độ cao thang máy nâng lên ↔ U = ${U}`,
+  stCrowd:(I,U)=>`Số người qua mỗi giây ↔ I = ${I} · Sức đẩy của băng chuyền ↔ U = ${U}`,
+  stOpen:'Khoá K mở: mạch hở, mọi hạt dừng lại cùng lúc.',
+  stShort:'Ngắn mạch! Dòng điện rất lớn, dây và pin nóng lên nhanh, có thể gây cháy. Hãy mở khoá K.',
+  obs1same:(a,b)=>`A1 = ${a}, A2 = ${b}: dòng điện trước và sau đèn bằng nhau, không bị “dùng hết”.`,
+  obs1ser:(a,b,c)=>`A1 = ${a}, A2 = ${b}, A3 = ${c}: qua hai đèn, dòng điện vẫn như nhau.`,
+  obs1par:(a,b,c)=>`Mạch chính A = ${a}; hai nhánh A1 + A2 = ${b} + ${c}.`,
+  obs1cnt:(n,m)=>`Bộ đếm (mô phỏng): ${n} hạt đã đi qua chỗ đặt A1, ${m} hạt qua chỗ đặt A2.`,
+  obs1cntp:(n,m,k)=>`Bộ đếm (mô phỏng): ${n} hạt qua mạch chính = ${m} + ${k} hạt qua hai nhánh.`,
+  obs1en:(u)=>`Mỗi electron đi qua đèn nhường năng lượng e·U ≈ ${u} eV. Electron vẫn nguyên; chỉ năng lượng chuyển thành nhiệt và ánh sáng.`,
+  obs1open:'Khoá K mở: mọi hạt dừng lại cùng lúc, kể cả những hạt ở xa khoá.',
+  concl1:'<b>Kết luận:</b> Dòng điện là dòng các hạt mang điện (electron có sẵn trong dây kim loại) chuyển động có hướng. Pin tạo ra hiệu điện thế, đẩy cả vòng hạt chuyển động cùng lúc. Đi qua đèn, số hạt mỗi giây không đổi; thứ đèn nhận là năng lượng.',
+  cZoom:'Phóng to bên trong dây điện trở', zoomHint:'Electron bị điện trường kéo đi, liên tục va chạm với ion kim loại; ion dao động mạnh hơn nên dây nóng lên.',
+  zHi:'điện thế cao (+)', zLo:'điện thế thấp (−)', zE:'electron', zIon:'ion kim loại', zField:'điện trường',
+  zSpeed:(v)=>`Tốc độ trôi trung bình của electron tỉ lệ với I. Nếu đây là dây đồng tiết diện 1 mm², tốc độ trôi thật chỉ khoảng ${v} mm/s.`,
+  stOver:'Có đèn đang chịu hiệu điện thế lớn hơn định mức: đèn thật dễ bị cháy.',
+  cGraph:'Đồ thị I theo U', gHint:'Giữ nguyên R, ghi số liệu ở nhiều giá trị U để thấy I tỉ lệ thuận với U.',
+  lUbat:'U giữa hai cực pin', lRR:'Điện trở R', lAmm:'Số chỉ ampe kế I', lVolt:'Vôn kế (que đỏ − que đen)', lEe:'Năng lượng mỗi electron nhường cho R', lNe:'Số electron qua mỗi tiết diện trong 1 giây', lPR:'Công suất toả nhiệt trên R',
+  notConn:'chưa nối', perS:'/s',
+  cMiss:'Nhiệm vụ đo bằng vôn kế',
+  miss:['Đo hiệu điện thế giữa hai cực của pin.','Đặt cả hai que trên cùng một đoạn dây nối (không qua linh kiện nào).','Mở khoá K rồi đo hiệu điện thế giữa hai đầu khoá.','Đóng khoá K rồi đo hiệu điện thế giữa hai đầu điện trở.'],
+  missRes:[(v)=>`Hai cực pin: ${v}. Pin duy trì hiệu điện thế này giữa hai cực.`,(v)=>`Hai điểm trên cùng một dây nối: ${v}. Dây nối gần như không có điện trở nên mọi điểm trên nó cùng điện thế.`,(v)=>`Hai đầu khoá đang mở: ${v}, bằng hiệu điện thế của pin! Toàn bộ chênh lệch điện thế dồn vào chỗ hở.`,(v)=>`Hai đầu điện trở: ${v}, đúng bằng I·R.`],
+  obs2ohm:(u,r,i)=>`I = U/R = ${u} : ${r} = ${i}.`,
+  obs2neg:'Vôn kế chỉ số âm: que đỏ đang ở điểm có điện thế thấp hơn que đen. Đổi chỗ hai que.',
+  concl2:'<b>Kết luận:</b> Pin duy trì một hiệu điện thế (gần như) không đổi giữa hai cực. Cường độ dòng điện do cả mạch quyết định: I = U/R (định luật Ohm). Điện trở cản trở dòng điện và là nơi năng lượng điện chuyển thành nhiệt. Vôn kế luôn đo giữa <b>hai điểm</b>.',
+  th2:['U (V)','I (A)','U/I (Ω)'],
+  lA:(n)=>`Ampe kế ${n}`, lUi:(n)=>`Hiệu điện thế ${n}`, lUsum:'U₁ + U₂ (+ U₃)', lRtd:'R tđ đo được = U/I', lRsum:'R₁ + R₂ (+ R₃)', lUbat2:'U giữa hai cực pin',
+  th3:['U (V)','R tđ (Ω)','A1','A2','A3','A4 (A)'],
+  obs3eq:(v)=>`Mọi ampe kế chỉ cùng một giá trị: ${v}.`,
+  obs3u:(a,b)=>`U₁ + U₂ (+ U₃) = ${a}, bằng hiệu điện thế giữa hai cực pin ${b}.`,
+  obs3r:(a,b)=>`Điện trở tương đương U/I = ${a}, bằng tổng các điện trở ${b}.`,
+  obs3open:'Mạch hở ở một chỗ: mọi đèn tắt, mọi ampe kế chỉ 0.',
+  obs3big:'Đèn có điện trở lớn hơn thì hiệu điện thế giữa hai đầu đèn lớn hơn và sáng hơn (cùng I).',
+  concl3:'<b>Kết luận (mạch nối tiếp):</b> Cường độ dòng điện như nhau tại mọi điểm: I = I₁ = I₂ = I₃. Hiệu điện thế giữa hai đầu đoạn mạch bằng tổng hiệu điện thế trên từng đèn: U = U₁ + U₂ + U₃. Điện trở tương đương R<sub>tđ</sub> = R₁ + R₂ + R₃. Một đèn hỏng thì cả mạch hở.',
+  lI:'Mạch chính I', lIb:(n)=>`Nhánh ${n}`, lIsum:'I₁ + I₂ + I₃', lUb:'U giữa hai đầu các nhánh', lRpar:'Theo công thức 1/R tđ = Σ 1/R',
+  th4:['U (V)','I (A)','I₁','I₂','I₃','I₁+I₂+I₃'],
+  obs4sum:(a,b)=>`I₁ + I₂ + I₃ = ${a}, bằng số chỉ ampe kế mạch chính ${b}.`,
+  obs4u:(v)=>`Hiệu điện thế giữa hai đầu mỗi nhánh đều bằng ${v}.`,
+  obs4r:(a,b)=>`Điện trở tương đương U/I = ${a}, nhỏ hơn điện trở nhỏ nhất trong các nhánh đang đóng (${b}).`,
+  obs4ri:'Pin có điện trở trong: đóng thêm nhánh thì hiệu điện thế giữa hai cực pin giảm một chút, các đèn hơi tối đi.',
+  obs4none:'Không có nhánh nào đóng: mạch hở, ampe kế mạch chính chỉ 0.',
+  concl4:'<b>Kết luận (mạch song song):</b> Cường độ dòng điện trong mạch chính bằng tổng cường độ dòng điện trong các nhánh: I = I₁ + I₂ + I₃. Hiệu điện thế giữa hai đầu các nhánh bằng nhau. Điện trở tương đương: 1/R<sub>tđ</sub> = 1/R₁ + 1/R₂ + 1/R₃, luôn nhỏ hơn điện trở của mỗi nhánh. Các nhánh hoạt động độc lập.',
+  ser:'Nối tiếp', par:'Song song', mix:'Hỗn hợp',
+  newProb:'Đề ngẫu nhiên', cBox:'Hộp đen', sRbox:'Điện trở trong hộp', fine:'Chỉnh tinh:',
+  lReal:'Đoạn mạch thật', lBox:'Hộp đen', lIreal:'Ampe kế đoạn mạch thật', lIbox:'Ampe kế hộp đen', lRbox:'Điện trở trong hộp',
+  fb5match:'<b class="good">Khớp!</b> Hộp đen thay thế được đoạn mạch: đó chính là điện trở tương đương.',
+  fb5no:(d)=>`Chưa khớp: hai ampe kế còn chênh nhau ${d}.`,
+  fb5hidden:'Đang ẩn số đo: giáo viên bấm “Hiện số đo” để kiểm tra.',
+  fm5ser:(a,b,r)=>`R<sub>tđ</sub> = R₁ + R₂ = ${a} + ${b} = ${r} Ω`,
+  fm5par:(a,b,r)=>`1/R<sub>tđ</sub> = 1/R₁ + 1/R₂  ⇒  R<sub>tđ</sub> = R₁·R₂/(R₁ + R₂) = ${a}·${b}/(${a} + ${b}) ≈ ${r} Ω`,
+  obs5ser:'Nối tiếp: điện trở tương đương lớn hơn mỗi điện trở thành phần.',
+  obs5par:'Song song: điện trở tương đương nhỏ hơn điện trở nhỏ nhất.',
+  concl5:'<b>Kết luận:</b> Điện trở tương đương của một đoạn mạch là điện trở của một vật dẫn duy nhất có thể thay thế cả đoạn mạch mà cường độ dòng điện trong mạch không đổi (cùng U). Nối tiếp: R<sub>tđ</sub> = R₁ + R₂. Song song: 1/R<sub>tđ</sub> = 1/R₁ + 1/R₂.',
+  subBright:'Độ sáng hai đèn', subCalc:'Tính cường độ dòng điện', subHouse:'Điện trong nhà',
+  sU6:'Hiệu điện thế nguồn U',
+  lP:(n)=>`Công suất đèn ${n}`, lIn:(n)=>`Cường độ qua đèn ${n}`, lUn:(n)=>`Hiệu điện thế đèn ${n}`,
+  obs6ser:(a,b)=>`Nối tiếp: cùng cường độ dòng điện, nên đèn có điện trở lớn hơn (Đ1) có P = I²R lớn hơn: P₁ = ${a}, P₂ = ${b}.`,
+  obs6par:(a,b)=>`Song song: cùng hiệu điện thế, nên đèn có điện trở nhỏ hơn (Đ2) có P = U²/R lớn hơn: P₁ = ${a}, P₂ = ${b}.`,
+  obs6over:'Có đèn đang chịu công suất lớn hơn định mức: đèn thật có thể cháy.',
+  obs6calc:'Gợi ý: tìm điện trở tương đương của cả đoạn mạch trước, rồi dùng định luật Ohm I = U/R tđ. Với mạch song song có thể tính dòng qua từng nhánh rồi cộng lại.',
+  cProb:'Bài toán', ansLbl:'Cường độ dòng điện mạch chính I =', check:'Kiểm tra', newP:'Đề khác', sol:'Lời giải',
+  pNT:(u,a,b)=>`Cho R₁ = ${a} Ω mắc nối tiếp với R₂ = ${b} Ω. Hiệu điện thế giữa hai đầu đoạn mạch U = ${u} V. Tính cường độ dòng điện chạy trong mạch.`,
+  pSS:(u,a,b)=>`Cho R₁ = ${a} Ω mắc song song với R₂ = ${b} Ω. Hiệu điện thế giữa hai đầu đoạn mạch U = ${u} V. Tính cường độ dòng điện trong mạch chính.`,
+  pHH:(u,a,b,c)=>`Cho R₁ = ${a} Ω mắc nối tiếp với đoạn mạch gồm R₂ = ${b} Ω song song với R₃ = ${c} Ω. Hiệu điện thế giữa hai đầu đoạn mạch U = ${u} V. Tính cường độ dòng điện trong mạch chính.`,
+  good6:(v)=>`<b class="good">Chính xác!</b> Ampe kế chỉ I = ${v}.`,
+  bad6:(v)=>`<b class="bad">Chưa đúng.</b> Ampe kế chỉ I = ${v}. Xem lời giải bên dưới.`,
+  empty6:'Hãy nhập kết quả trước khi kiểm tra.',
+  cHouse:'Mạng điện trong nhà (220 V)', hPar:'Song song (đúng cách)', hSer:'Nối tiếp (sai cách)',
+  devLamp:'Đèn 220 V – 40 W', devFan:'Quạt 220 V – 60 W', devKettle:'Ấm điện 220 V – 1000 W',
+  dvLamp:'Đèn', dvFan:'Quạt', dvKettle:'Ấm',
+  lImain:'Cường độ mạch chính', lDev:(n)=>`${n}: U, % công suất định mức`,
+  fanNote:'Quạt thật có động cơ, không phải điện trở thuần; ở đây coi gần đúng như một điện trở.',
+  obs6hp:'Mắc song song: mỗi thiết bị đều nhận đủ 220 V và bật, tắt độc lập với nhau.',
+  obs6hi:(i)=>`Bật càng nhiều thiết bị, cường độ dòng điện mạch chính càng lớn (đang là ${i}). Vì vậy không nên cắm quá nhiều thiết bị công suất lớn vào cùng một ổ điện.`,
+  obs6hs:'Mắc nối tiếp: các thiết bị phải chia nhau 220 V nên không thiết bị nào hoạt động đúng công suất; tắt một thiết bị là tắt tất cả.',
+  app1t:'Vì sao điện trong nhà mắc song song?', app1:'Mỗi đồ dùng cần đúng 220 V. Mắc song song thì mọi nhánh có cùng hiệu điện thế 220 V, mỗi đồ dùng có công tắc riêng và hỏng một cái không ảnh hưởng cái khác.',
+  app2t:'Dây đèn trang trí', app2:'Nhiều dây đèn nháy rẻ tiền gồm các bóng nhỏ mắc nối tiếp: mỗi bóng chỉ cần một phần nhỏ của 220 V. Một bóng đứt là cả dây tắt (nhiều loại mới có linh kiện nối tắt bóng hỏng để khắc phục).',
+  app3t:'Ổ cắm quá tải', app3:'Cắm nhiều thiết bị vào một ổ là mắc song song thêm nhánh: điện trở tương đương giảm, dòng điện qua dây dẫn của ổ tăng, dây nóng lên. Cầu chì, cầu dao tự động (KHTN 8) ngắt mạch khi dòng điện quá lớn.',
+  pause:'Tạm dừng', play:'Chạy', reset:'Đặt lại', spd:'Tốc độ', parts:'Hạt:', partE:'Electron', partQ:'Chiều quy ước', potColor:'Màu điện thế',
+  lgE:'electron (mỗi chấm đại diện cho rất nhiều electron)', lgQ:'điện tích dương, đi theo chiều dòng điện quy ước', lgPotLo:'điện thế thấp', lgPotHi:'điện thế cao',
+  lgFlash:'vòng sáng quanh đồng hồ: số chỉ vừa thay đổi',
+  rmd:'đã tháo', shortW:'NGẮN MẠCH',
+  assumeT:'Giả thiết mô phỏng',
+  as1:'Dây nối coi như không có điện trở; pin lí tưởng (hiệu điện thế giữa hai cực không đổi), trừ khi bật “điện trở trong” ở tab Mạch song song. Ampe kế, vôn kế lí tưởng.',
+  as2:'Bóng đèn coi như có điện trở không đổi (tuân theo định luật Ohm); đèn thật có điện trở tăng khi dây tóc nóng lên. Độ sáng vẽ theo công suất của đèn.',
+  as3:'Tốc độ hạt trên màn hình chỉ tượng trưng và tỉ lệ với cường độ dòng điện. Tốc độ trôi thật của electron trong dây đồng chỉ cỡ 0,1 mm/s, nhưng điện trường lan khắp mạch gần như tức thời.',
+  as4:'Mỗi chấm trên màn hình đại diện cho rất nhiều electron: dòng điện 1 A ứng với khoảng 6,24 × 10¹⁸ electron đi qua mỗi tiết diện trong 1 giây.',
+  as5:'Kí hiệu sơ đồ theo SGK Việt Nam (chuẩn IEC). Các mô hình tương tự chỉ giúp hình dung, mỗi mô hình đều có chỗ khác với thật.',
+  Q:{
+    q1a:{q:'Đóng khoá K. Electron nằm sát bóng đèn bắt đầu chuyển động khi nào?',o:['Ngay lập tức, cùng lúc với mọi electron trong mạch','Khi electron từ pin chạy tới nơi','Sau khi đèn đã sáng'],
+      fb:'Electron có sẵn khắp dây. Đóng khoá, điện trường lan khắp mạch gần như tức thời nên mọi electron cùng bắt đầu chuyển động. Bản thân electron trôi rất chậm, chỉ cỡ 0,1 mm/s.'},
+    q1b:{q:'So với số electron đi vào bóng đèn mỗi giây, số electron đi ra khỏi đèn mỗi giây…',o:['Ít hơn, vì đèn đã dùng bớt','Bằng nhau','Nhiều hơn'],
+      fb:'Điện tích không mất đi, cũng không dồn lại trong đèn: A1 và A2 chỉ như nhau. Thứ đèn nhận là năng lượng: mỗi electron đi qua đèn nhường năng lượng e·U.'},
+    q2a:{q:'Khoá K đang mở. Đặt hai que vôn kế vào hai đầu khoá K. Vôn kế chỉ bao nhiêu?',o:['0 V, vì không có dòng điện','Bằng hiệu điện thế của pin','Không đo được'],
+      fb:'Một đầu khoá vẫn nối với cực dương, đầu kia nối với cực âm qua điện trở (không có dòng nên điện thế không giảm trên điện trở). Toàn bộ chênh lệch điện thế dồn vào chỗ hở. Hãy thử ở nhiệm vụ 3.'},
+    q2b:{q:'Giữ nguyên pin, tăng điện trở R lên gấp đôi. Cường độ dòng điện…',o:['Tăng gấp đôi','Không đổi, vì pin luôn cho cùng một dòng','Giảm còn một nửa'],
+      fb:'I = U/R. Pin giữ hiệu điện thế (gần như) không đổi; cường độ dòng điện do cả mạch quyết định chứ không do pin “phát” ra một lượng cố định.'},
+    q3a:{q:'Các ampe kế A1, A2, A3, A4 mắc ở các vị trí khác nhau trong mạch nối tiếp. Số chỉ của chúng…',o:['Giảm dần: A1 > A2 > A3 > A4','Bằng nhau','Tăng dần'],
+      fb:'Trong mạch nối tiếp chỉ có một đường cho các hạt đi, không hạt nào mất đi hay dồn lại, nên cường độ dòng điện như nhau tại mọi điểm.'},
+    q3b:{q:'Tăng điện trở của đèn cuối cùng. Số chỉ của A1 (ở đầu mạch, trước mọi đèn)…',o:['Không đổi, vì A1 ở phía trước đèn đó','Giảm','Tăng'],
+      fb:'Mạch là một vòng kín: tăng điện trở ở bất kì đâu thì điện trở cả mạch tăng, cường độ dòng điện giảm ở mọi điểm cùng lúc. Nghĩ rằng “chỉ phần phía sau bị ảnh hưởng” là cách nghĩ sai thường gặp.'},
+    q3c:{q:'Tháo đèn Đ2 ra khỏi mạch. Các đèn còn lại…',o:['Vẫn sáng như cũ','Chỉ các đèn phía sau Đ2 tắt','Tắt hết'],
+      fb:'Tháo một đèn là làm hở mạch nối tiếp ở một chỗ: không còn đường khép kín nên dòng điện dừng ở mọi điểm.'},
+    q4a:{q:'Đóng thêm khoá K3 để có thêm một nhánh đèn. Số chỉ ampe kế A ở mạch chính…',o:['Giảm, vì dòng điện phải chia cho nhiều nhánh hơn','Không đổi, vì pin chỉ cho một dòng cố định','Tăng'],
+      fb:'Thêm nhánh là thêm đường cho dòng điện đi; nhánh cũ vẫn giữ nguyên dòng, nhánh mới có thêm dòng, nên I = I₁ + I₂ + I₃ tăng.'},
+    q4b:{q:'Khi đóng thêm nhánh, đèn Đ1 (với pin lí tưởng)…',o:['Tối đi','Sáng như cũ','Sáng hơn'],
+      fb:'Hiệu điện thế giữa hai đầu mỗi nhánh vẫn bằng U của pin nên dòng qua Đ1 không đổi. Với pin thật có điện trở trong, Đ1 hơi tối đi: bật ô “Pin có điện trở trong” để xem.'},
+    q4c:{q:'Hiệu điện thế giữa hai đầu các nhánh có điện trở khác nhau thì…',o:['Nhánh điện trở lớn hơn có U lớn hơn','Bằng nhau','Nhánh điện trở lớn hơn có U nhỏ hơn'],
+      fb:'Hai đầu mọi nhánh đều nối vào cùng hai điểm (cùng hai điện thế), nên hiệu điện thế các nhánh bằng nhau. Khác nhau là cường độ: nhánh điện trở lớn có dòng nhỏ.'},
+    q5a:{q:'Hai điện trở 10 Ω mắc song song. Điện trở tương đương là…',o:['20 Ω','10 Ω','5 Ω'],
+      fb:'1/R = 1/10 + 1/10 = 2/10 nên R = 5 Ω. Hai đường giống nhau cho dòng điện đi thì “dễ đi” gấp đôi. Thử với R₁ = R₂ = 10 Ω ở chế độ Song song.'},
+    q5b:{q:'Mắc song song thêm một điện trở vào đoạn mạch. Điện trở tương đương…',o:['Tăng','Giảm','Không đổi'],
+      fb:'Thêm nhánh là thêm đường cho dòng điện đi (như mở thêm cửa), nên điện trở tương đương giảm và luôn nhỏ hơn điện trở nhỏ nhất.'},
+    q6a:{q:'Đ1 (6 V – 3 W) và Đ2 (6 V – 6 W) mắc nối tiếp. Đèn nào sáng hơn?',o:['Đ1','Đ2','Như nhau'],
+      fb:'Nối tiếp: cùng I, nên đèn có điện trở lớn hơn (Đ1, 12 Ω) có P = I²R lớn hơn và sáng hơn, dù công suất định mức của nó nhỏ hơn.'},
+    q6b:{q:'Hai đèn đó mắc song song. Đèn nào sáng hơn?',o:['Đ1','Đ2','Như nhau'],
+      fb:'Song song: cùng U, nên đèn có điện trở nhỏ hơn (Đ2, 6 Ω) có P = U²/R lớn hơn và sáng hơn.'}
+  },
+  okW:'Đúng.', noW:'Chưa đúng.'
+},
+en:{
+  eyebrow:'Grade 9 Science · Electricity · Interactive simulation',
+  title:'Series and parallel circuits',
+  hideNums:'Hide readings', showNums:'Show readings',
+  tab1:'1. Picturing current', tab2:'2. Cell, resistor, measuring', tab3:'3. Series circuit', tab4:'4. Parallel circuit', tab5:'5. Equivalent resistance', tab6:'6. Challenges, uses',
+  req1:'<b>Foundation (Grade 8):</b> an electric current is a directed flow of charged particles; a source supplies electrical energy. This tab helps students “see” current and voltage through four analogies before studying series and parallel circuits (Grade 9).',
+  req2:'<b>Learning outcomes (Grade 9):</b> show by a simple experiment that a resistor opposes current; build Ohm’s law. <b>Grade 8 review:</b> measure current and voltage; a cell’s ability to drive current is measured by the voltage between its terminals.',
+  req3:'<b>Learning outcome (Grade 9):</b> show by experiment that in a series circuit the current is the same at every point; build the circuit and measure the current.',
+  req4:'<b>Learning outcome (Grade 9):</b> show by experiment that in a parallel circuit the branch currents add up to the main current; build the circuit and measure the currents.',
+  req5:'<b>Learning outcome (Grade 9):</b> state and use the formulas for the equivalent resistance of series and parallel DC circuits in simple cases.',
+  req6:'<b>Learning outcome (Grade 9):</b> calculate the current in simple series and parallel DC circuits; calculate electrical power in simple cases.',
+  hint1:'Tap switch K to close or open it. Move the sliders to change U and the bulb resistance: the circuit and the analogy below change together.',
+  anaHint:'The analogy runs on the real numbers from the circuit above.',
+  hint2:'Drag the red and black voltmeter probes to any two points of the circuit. Tap switch K to close or open it.',
+  hint3:'Tap a bulb to remove or replace it. Tap switch K to close or open it. A meter whose reading just changed flashes.',
+  hint4:'Tap switches K1, K2, K3 to close or open each branch; K controls the main line. A meter whose reading just changed flashes.',
+  hint5:'Move the “Resistance in the box” slider until the black-box ammeter reads the same as the real circuit’s ammeter.',
+  hint6bright:'Both bulbs are rated 6 V but have different power ratings. Change the connection and compare their brightness.',
+  hint6calc:'Read the problem, work it out and enter your answer. Press “Check” to see the ammeter reading.',
+  hint6house:'Tap each appliance switch to turn it on or off. Compare the two ways of wiring.',
+  cCirc:'Circuit', cData:'Readings', cPred:'Predict before you look', cObs:'What you observe',
+  showConcl:'Show conclusion', record:'Record row', clear:'Clear table',
+  m1one:'1 bulb', m1ser:'2 bulbs in series', m1par:'2 bulbs in parallel',
+  sU:'Cell voltage U', sRb:'Resistance of each bulb', sR:'Resistance R', closeK:'Close switch K',
+  sR1:'Resistance of bulb B1', sR2:'Resistance of bulb B2', sR3:'Resistance of bulb B3',
+  sRr1:'Resistance R₁', sRr2:'Resistance R₂',
+  rmD1:'Remove B1', rmD2:'Remove B2', rmD3:'Remove B3', n2:'2 bulbs', n3:'3 bulbs',
+  kb1:'Switch K1', kb2:'Switch K2', kb3:'Switch K3',
+  rint:'Cell has internal resistance r = 1 Ω (like a real cell)',
+  cAna:'Analogy', anaWater:'Closed water circuit', anaBike:'Bicycle chain', anaLift:'Lift and slides', anaCrowd:'Crowd through doors',
+  fullTable:'Table comparing all four analogies', cRW:'Where is this analogy right or wrong?', right:'Like the real thing', wrong:'Unlike the real thing',
+  mapHead:'Circuit',
+  mapRows:['Electron','Cell','Voltage U','Current I','Bulb, resistor','Energy at the bulb','Switch K open','Parallel circuit'],
+  ana:{
+    water:{rows:['Water in the pipe (always full)','Pump','Pressure difference','Flow rate (litres per second)','Turbine, narrow pipe','Turns the turbine','Valve shut','Pipe splitting into branches'],
+      r:['The pipe is always full: switch on the pump and the whole loop flows at once, like electrons already in the wire.','The flow rate is the same everywhere in an unbranched pipe (series).','At a split, the water in equals the total water out of the branches (parallel).','The pump creates a pressure difference and the turbine lowers the pressure, like a cell creating a voltage and a bulb lowering the potential.'],
+      w:['A cut pipe leaks water; a cut wire does not spill electrons, the current simply stops.','Students may picture wires as empty pipes that electrons gradually fill.','Water can flow by gravity alone; electrons in a wire need a source.']},
+    bike:{rows:['Chain link','Rider, front chainring','Pull (tension) in the chain','Links passing a point per second','Wheel with a brake','Turns the wheel, heats the brake','Chain taken off','Cannot be shown'],
+      r:['The links are all around the loop already: pedal and the whole chain moves at once.','No link is lost: what reaches the wheel is energy.','Braking at one place slows the whole chain, not only the part “after” it.'],
+      w:['A chain cannot branch, so it cannot show a parallel circuit.','A chain is pulled by tension; electrons are pushed by the electric field in the wire.','Chain links are rigidly joined; electrons are not.']},
+    lift:{rows:['Ball (positive charge)','Lift raising the balls','Height difference','Balls passing a point per second','Slide with bumps','Ball loses height, slide warms up','Gate closed','Several slides from the same height'],
+      r:['Height is like potential; height difference is like voltage.','The slides drop the balls by exactly the height the lift raised them: U = U₁ + U₂.','Parallel slides start at the same height and end on the same floor: every branch has the same voltage.','Bumps stop the balls speeding up and turn energy into heat, like collisions in a filament.'],
+      w:['Balls roll one by one under gravity; the field pushes all electrons round the loop together.','On flat parts the balls need a conveyor; in a real wire electrons move although both ends are at almost the same potential.']},
+    crowd:{rows:['Person','Conveyor pushing people','Push of the crowd','People through a door per second','Narrow door','Effort of squeezing through','Door shut','Several doors side by side'],
+      r:['Adding a parallel door increases the total number of people per second: parallel connection lowers the equivalent resistance.','A narrow door (large resistance) lets fewer people through per second.','As many people leave the corridor as enter: nobody disappears.'],
+      w:['People walk where they like; electrons drift in one direction only when there is an electric field.','There is no clear “pump”, so the role of the cell and voltage is hard to see.','People can pile up at a door; electrons do not pile up in a circuit.']}
+  },
+  lbPump:'Pump (cell)', lbValve:'Valve (switch K)', lbTurb:'Turbine (bulb)', lbFlow:'Flow meter',
+  lbRing:'Chainring, pedals (cell)', lbChainL:'Chain (electrons)', lbWheel:'Braked wheel (bulb)', lbForce:'Pedal force ↔ U', lbBroken:'Chain off ↔ switch K open',
+  bikeNoPar:'A bicycle chain cannot branch, so it cannot show a parallel circuit. Choose another analogy.',
+  lbLift:'Lift (cell)', lbRamp:'Bumpy slide (bulb)', lbHeight:'Height ↔ potential', lbGate:'Gate (switch K open)', lbBall:'Ball = positive charge, moving in the conventional direction',
+  lbBelt:'Conveyor (cell)', lbDoor:'Narrow door (bulb)', lbCount:'Counter',
+  stWater:(I,U)=>`Water flow rate ↔ I = ${I} · Pump pressure difference ↔ U = ${U}`,
+  stBike:(I,U)=>`Chain speed ↔ I = ${I} · Pedal force ↔ U = ${U}`,
+  stLift:(I,U)=>`Balls per second ↔ I = ${I} · Lift height ↔ U = ${U}`,
+  stCrowd:(I,U)=>`People per second ↔ I = ${I} · Conveyor push ↔ U = ${U}`,
+  stOpen:'Switch K open: the circuit is broken and every particle stops at once.',
+  stShort:'Short circuit! The current is very large; the wires and cell heat up fast and may start a fire. Open switch K.',
+  obs1same:(a,b)=>`A1 = ${a}, A2 = ${b}: the current before and after the bulb is the same; it is not “used up”.`,
+  obs1ser:(a,b,c)=>`A1 = ${a}, A2 = ${b}, A3 = ${c}: after two bulbs the current is still the same.`,
+  obs1par:(a,b,c)=>`Main line A = ${a}; branches A1 + A2 = ${b} + ${c}.`,
+  obs1cnt:(n,m)=>`Counter (simulated): ${n} particles have passed A1, ${m} have passed A2.`,
+  obs1cntp:(n,m,k)=>`Counter (simulated): ${n} particles through the main line = ${m} + ${k} through the two branches.`,
+  obs1en:(u)=>`Each electron passing the bulb gives up energy e·U ≈ ${u} eV. The electron stays the same; only energy becomes heat and light.`,
+  obs1open:'Switch K open: every particle stops at the same moment, even far from the switch.',
+  concl1:'<b>Conclusion:</b> An electric current is a directed flow of charged particles (electrons already present in a metal wire). The cell creates a voltage that pushes the whole loop of particles at once. Through the bulb the number of particles per second stays the same; what the bulb receives is energy.',
+  cZoom:'Zoom inside the resistance wire', zoomHint:'Electrons are pulled by the electric field and keep colliding with metal ions; the ions vibrate harder, so the wire heats up.',
+  zHi:'higher potential (+)', zLo:'lower potential (−)', zE:'electron', zIon:'metal ion', zField:'electric field',
+  zSpeed:(v)=>`The average drift speed of the electrons is proportional to I. In a copper wire of 1 mm² cross-section the real drift speed would be only about ${v} mm/s.`,
+  stOver:'A bulb has more than its rated voltage across it: a real bulb could burn out.',
+  cGraph:'Graph of I against U', gHint:'Keep R fixed and record rows at several values of U to see that I is proportional to U.',
+  lUbat:'U across the cell', lRR:'Resistance R', lAmm:'Ammeter reading I', lVolt:'Voltmeter (red − black)', lEe:'Energy each electron gives to R', lNe:'Electrons through any cross-section per second', lPR:'Heating power in R',
+  notConn:'not connected', perS:'/s',
+  cMiss:'Voltmeter tasks',
+  miss:['Measure the voltage across the cell.','Put both probes on the same connecting wire (no component in between).','Open switch K and measure the voltage across it.','Close switch K and measure the voltage across the resistor.'],
+  missRes:[(v)=>`Across the cell: ${v}. The cell keeps this voltage between its terminals.`,(v)=>`Two points on one connecting wire: ${v}. The wire has almost no resistance, so all of it is at the same potential.`,(v)=>`Across the open switch: ${v}, equal to the cell voltage! The whole potential difference sits across the gap.`,(v)=>`Across the resistor: ${v}, exactly I·R.`],
+  obs2ohm:(u,r,i)=>`I = U/R = ${u} ÷ ${r} = ${i}.`,
+  obs2neg:'The voltmeter reads negative: the red probe is at a lower potential than the black one. Swap the probes.',
+  concl2:'<b>Conclusion:</b> A cell keeps an (almost) constant voltage between its terminals. The current is set by the whole circuit: I = U/R (Ohm’s law). A resistor opposes the current and is where electrical energy becomes heat. A voltmeter always measures between <b>two points</b>.',
+  th2:['U (V)','I (A)','U/I (Ω)'],
+  lA:(n)=>`Ammeter ${n}`, lUi:(n)=>`Voltage ${n}`, lUsum:'U₁ + U₂ (+ U₃)', lRtd:'Measured R eq = U/I', lRsum:'R₁ + R₂ (+ R₃)', lUbat2:'U across the cell',
+  th3:['U (V)','R eq (Ω)','A1','A2','A3','A4 (A)'],
+  obs3eq:(v)=>`Every ammeter shows the same value: ${v}.`,
+  obs3u:(a,b)=>`U₁ + U₂ (+ U₃) = ${a}, equal to the voltage across the cell ${b}.`,
+  obs3r:(a,b)=>`Equivalent resistance U/I = ${a}, equal to the sum of the resistances ${b}.`,
+  obs3open:'The circuit is broken in one place: every bulb goes out and every ammeter reads 0.',
+  obs3big:'The bulb with the larger resistance has the larger voltage across it and glows brighter (same I).',
+  concl3:'<b>Conclusion (series):</b> The current is the same at every point: I = I₁ = I₂ = I₃. The total voltage equals the sum of the voltages across the bulbs: U = U₁ + U₂ + U₃. Equivalent resistance R<sub>eq</sub> = R₁ + R₂ + R₃. One broken bulb breaks the whole circuit.',
+  lI:'Main line I', lIb:(n)=>`Branch ${n}`, lIsum:'I₁ + I₂ + I₃', lUb:'Voltage across the branches', lRpar:'From the formula 1/R eq = Σ 1/R',
+  th4:['U (V)','I (A)','I₁','I₂','I₃','I₁+I₂+I₃'],
+  obs4sum:(a,b)=>`I₁ + I₂ + I₃ = ${a}, equal to the main ammeter reading ${b}.`,
+  obs4u:(v)=>`The voltage across every branch is ${v}.`,
+  obs4r:(a,b)=>`Equivalent resistance U/I = ${a}, smaller than the smallest closed-branch resistance (${b}).`,
+  obs4ri:'Cell with internal resistance: closing another branch lowers the terminal voltage a little, so the bulbs dim slightly.',
+  obs4none:'No branch is closed: the circuit is open and the main ammeter reads 0.',
+  concl4:'<b>Conclusion (parallel):</b> The main current equals the sum of the branch currents: I = I₁ + I₂ + I₃. Every branch has the same voltage. Equivalent resistance: 1/R<sub>eq</sub> = 1/R₁ + 1/R₂ + 1/R₃, always smaller than any branch resistance. The branches work independently.',
+  ser:'Series', par:'Parallel', mix:'Mixed',
+  newProb:'Random values', cBox:'Black box', sRbox:'Resistance in the box', fine:'Fine tune:',
+  lReal:'Real circuit', lBox:'Black box', lIreal:'Real circuit ammeter', lIbox:'Black box ammeter', lRbox:'Resistance in the box',
+  fb5match:'<b class="good">Match!</b> The black box can replace the circuit: that is the equivalent resistance.',
+  fb5no:(d)=>`No match yet: the two ammeters differ by ${d}.`,
+  fb5hidden:'Readings are hidden: the teacher can press “Show readings” to check.',
+  fm5ser:(a,b,r)=>`R<sub>eq</sub> = R₁ + R₂ = ${a} + ${b} = ${r} Ω`,
+  fm5par:(a,b,r)=>`1/R<sub>eq</sub> = 1/R₁ + 1/R₂  ⇒  R<sub>eq</sub> = R₁·R₂/(R₁ + R₂) = ${a}·${b}/(${a} + ${b}) ≈ ${r} Ω`,
+  obs5ser:'Series: the equivalent resistance is larger than each resistor.',
+  obs5par:'Parallel: the equivalent resistance is smaller than the smallest resistor.',
+  concl5:'<b>Conclusion:</b> The equivalent resistance of a circuit is the resistance of a single conductor that could replace the whole circuit without changing the current (same U). Series: R<sub>eq</sub> = R₁ + R₂. Parallel: 1/R<sub>eq</sub> = 1/R₁ + 1/R₂.',
+  subBright:'Two bulbs’ brightness', subCalc:'Calculate the current', subHouse:'Home wiring',
+  sU6:'Source voltage U',
+  lP:(n)=>`Power of bulb ${n}`, lIn:(n)=>`Current in bulb ${n}`, lUn:(n)=>`Voltage across bulb ${n}`,
+  obs6ser:(a,b)=>`Series: same current, so the bulb with the larger resistance (B1) has the larger P = I²R: P₁ = ${a}, P₂ = ${b}.`,
+  obs6par:(a,b)=>`Parallel: same voltage, so the bulb with the smaller resistance (B2) has the larger P = U²/R: P₁ = ${a}, P₂ = ${b}.`,
+  obs6over:'A bulb is above its rated power: a real bulb could burn out.',
+  obs6calc:'Hint: find the equivalent resistance of the whole circuit first, then use Ohm’s law I = U/R eq. For a parallel circuit you can also find each branch current and add them.',
+  cProb:'Problem', ansLbl:'Main current I =', check:'Check', newP:'Another problem', sol:'Solution',
+  pNT:(u,a,b)=>`R₁ = ${a} Ω is in series with R₂ = ${b} Ω. The voltage across the circuit is U = ${u} V. Find the current in the circuit.`,
+  pSS:(u,a,b)=>`R₁ = ${a} Ω is in parallel with R₂ = ${b} Ω. The voltage across them is U = ${u} V. Find the main current.`,
+  pHH:(u,a,b,c)=>`R₁ = ${a} Ω is in series with a part made of R₂ = ${b} Ω in parallel with R₃ = ${c} Ω. The voltage across the whole circuit is U = ${u} V. Find the main current.`,
+  good6:(v)=>`<b class="good">Correct!</b> The ammeter reads I = ${v}.`,
+  bad6:(v)=>`<b class="bad">Not quite.</b> The ammeter reads I = ${v}. See the solution below.`,
+  empty6:'Enter your answer before checking.',
+  cHouse:'Home wiring (220 V)', hPar:'Parallel (correct)', hSer:'Series (wrong)',
+  devLamp:'Lamp 220 V – 40 W', devFan:'Fan 220 V – 60 W', devKettle:'Kettle 220 V – 1000 W',
+  dvLamp:'Lamp', dvFan:'Fan', dvKettle:'Kettle',
+  lImain:'Main current', lDev:(n)=>`${n}: U, % of rated power`,
+  fanNote:'A real fan has a motor and is not a pure resistor; here it is treated as one.',
+  obs6hp:'Parallel: every appliance gets the full 220 V and switches on and off independently.',
+  obs6hi:(i)=>`The more appliances are on, the larger the main current (now ${i}). That is why you should not plug many high-power appliances into one socket.`,
+  obs6hs:'Series: the appliances must share 220 V, so none works at its rated power, and switching one off switches them all off.',
+  app1t:'Why is home wiring parallel?', app1:'Each appliance needs exactly 220 V. In parallel every branch has the same 220 V, each appliance has its own switch, and one failing does not affect the others.',
+  app2t:'Fairy lights', app2:'Many cheap strings of fairy lights are small bulbs in series: each needs only a small share of 220 V. One broken bulb turns off the whole string (newer ones have a part that bypasses a failed bulb).',
+  app3t:'Overloaded socket', app3:'Plugging more appliances into one socket adds parallel branches: the equivalent resistance falls, the current in the socket wiring rises and the wires heat up. Fuses and circuit breakers (Grade 8) cut the circuit when the current is too large.',
+  pause:'Pause', play:'Play', reset:'Reset', spd:'Speed', parts:'Particles:', partE:'Electrons', partQ:'Conventional', potColor:'Potential colours',
+  lgE:'electron (each dot stands for a huge number of electrons)', lgQ:'positive charge moving in the conventional current direction', lgPotLo:'low potential', lgPotHi:'high potential',
+  lgFlash:'glowing ring round a meter: its reading just changed',
+  rmd:'removed', shortW:'SHORT CIRCUIT',
+  assumeT:'Model assumptions',
+  as1:'Connecting wires have no resistance; the cell is ideal (constant terminal voltage) unless “internal resistance” is switched on in the Parallel tab. Ammeters and voltmeters are ideal.',
+  as2:'Bulbs are treated as having constant resistance (obeying Ohm’s law); a real bulb’s resistance rises as the filament heats up. Brightness is drawn from the bulb’s power.',
+  as3:'Particle speed on screen is symbolic and proportional to the current. Real electron drift speed in copper is only about 0.1 mm/s, but the electric field spreads round the circuit almost instantly.',
+  as4:'Each dot stands for a huge number of electrons: 1 A means about 6.24 × 10¹⁸ electrons passing any cross-section per second.',
+  as5:'Circuit symbols follow the Vietnamese textbooks (IEC standard). The analogies only help us picture the circuit; each one differs from reality somewhere.',
+  Q:{
+    q1a:{q:'Close switch K. When does an electron right next to the bulb start to move?',o:['Immediately, together with every electron in the circuit','When electrons from the cell reach it','After the bulb lights up'],
+      fb:'Electrons are already everywhere in the wire. When the switch closes, the electric field spreads round the circuit almost instantly, so all the electrons start moving together. The electrons themselves drift very slowly, about 0.1 mm/s.'},
+    q1b:{q:'Compared with the number of electrons entering the bulb each second, the number leaving it each second is…',o:['Smaller, because the bulb used some up','The same','Larger'],
+      fb:'Charge is not lost and does not pile up inside the bulb: A1 and A2 read the same. What the bulb receives is energy: each electron passing through gives up energy e·U.'},
+    q2a:{q:'Switch K is open. Put the voltmeter probes on the two ends of K. What does it read?',o:['0 V, because there is no current','The cell voltage','It cannot be measured'],
+      fb:'One end of the switch is still joined to the positive terminal; the other is joined to the negative terminal through the resistor (no current, so no drop across it). The whole potential difference sits across the gap. Try task 3.'},
+    q2b:{q:'Keep the same cell and double the resistance R. The current…',o:['Doubles','Stays the same, because a cell always gives the same current','Halves'],
+      fb:'I = U/R. The cell keeps the voltage (almost) constant; the current is set by the whole circuit, not “produced” by the cell in a fixed amount.'},
+    q3a:{q:'Ammeters A1, A2, A3, A4 sit at different places in the series circuit. Their readings…',o:['Decrease: A1 > A2 > A3 > A4','Are equal','Increase'],
+      fb:'A series circuit has only one path; no particle is lost or piles up, so the current is the same at every point.'},
+    q3b:{q:'Increase the resistance of the last bulb. The reading of A1 (at the start, before every bulb)…',o:['Stays the same, because A1 is before that bulb','Decreases','Increases'],
+      fb:'The circuit is one closed loop: more resistance anywhere means more resistance for the whole loop, so the current falls everywhere at once. Thinking that only the part “after” the change is affected is a common mistake.'},
+    q3c:{q:'Remove bulb B2. The other bulbs…',o:['Stay as bright as before','Only the bulbs after B2 go out','All go out'],
+      fb:'Removing one bulb breaks the series loop in one place: there is no closed path, so the current stops everywhere.'},
+    q4a:{q:'Close K3 to add another branch. The main ammeter A…',o:['Decreases, because the current is shared among more branches','Stays the same, because a cell gives a fixed current','Increases'],
+      fb:'A new branch is a new path; the old branches keep their currents and the new one adds its own, so I = I₁ + I₂ + I₃ rises.'},
+    q4b:{q:'When another branch is closed, bulb B1 (ideal cell)…',o:['Dims','Stays the same','Gets brighter'],
+      fb:'The voltage across each branch is still the cell voltage, so the current through B1 does not change. With a real cell that has internal resistance B1 dims slightly: switch on “internal resistance” to see.'},
+    q4c:{q:'Branches with different resistances have voltages that are…',o:['Larger for the larger resistance','Equal','Smaller for the larger resistance'],
+      fb:'Both ends of every branch join the same two points (same two potentials), so the branch voltages are equal. What differs is the current: the larger resistance carries less.'},
+    q5a:{q:'Two 10 Ω resistors in parallel. The equivalent resistance is…',o:['20 Ω','10 Ω','5 Ω'],
+      fb:'1/R = 1/10 + 1/10 = 2/10, so R = 5 Ω. Two identical paths make it twice as easy for the current. Try R₁ = R₂ = 10 Ω in Parallel mode.'},
+    q5b:{q:'Add another resistor in parallel. The equivalent resistance…',o:['Increases','Decreases','Stays the same'],
+      fb:'Another branch is another path for the current (like opening another door), so the equivalent resistance falls and is always below the smallest resistance.'},
+    q6a:{q:'B1 (6 V – 3 W) and B2 (6 V – 6 W) are in series. Which is brighter?',o:['B1','B2','Equal'],
+      fb:'Series: same I, so the bulb with the larger resistance (B1, 12 Ω) has the larger P = I²R and is brighter, even though its rated power is smaller.'},
+    q6b:{q:'The same two bulbs in parallel. Which is brighter?',o:['B1','B2','Equal'],
+      fb:'Parallel: same U, so the bulb with the smaller resistance (B2, 6 Ω) has the larger P = U²/R and is brighter.'}
+  },
+  okW:'Correct.', noW:'Not quite.'
+}};
+
+/* ================= tiện ích ================= */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const QE=1.602176634e-19;            // điện tích nguyên tố (C)
+const N_CU=8.5e28, S_WIRE=1e-6;      // mật độ electron tự do của đồng (m⁻³), tiết diện dây 1 mm²
+const FUI='"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif', FNUM='"IBM Plex Mono",ui-monospace,Consolas,monospace';
+let lang='vi', tab=1, running=true, speed=1, hideNums=false, partMode='e', potOn=false;
+try{ const sv=JSON.parse(localStorage.getItem('mach-ui')||'{}'); if(sv.lang) lang=sv.lang; if(sv.tab) tab=sv.tab; if(sv.part) partMode=sv.part; if(sv.pot!=null) potOn=!!sv.pot; }catch(e){}
+const HASH={'hinh-dung':1,'do-dac':2,'noi-tiep':3,'song-song':4,'tuong-duong':5,'thu-thach':6};
+if(HASH[location.hash.slice(1)]) tab=HASH[location.hash.slice(1)];
+function save(){ try{ localStorage.setItem('mach-ui',JSON.stringify({lang,tab,part:partMode,pot:potOn})); }catch(e){} }
+function t(k,...a){ let v=I18N[lang][k]; if(v===undefined) v=I18N.vi[k]; if(v===undefined) return k; return typeof v==='function'?v(...a):v; }
+function nf(x,d=2,mn){ if(!isFinite(x)) x=0; if(Math.abs(x)<1e-12) x=0; return new Intl.NumberFormat(lang==='vi'?'vi-VN':'en-US',{maximumFractionDigits:d,minimumFractionDigits:mn==null?d:mn}).format(x); }
+const hid=s=>hideNums?'?':s;
+const fA=I=>{ I=Math.abs(I); return hid(I<0.0995?nf(I,3):nf(I,2))+' A'; };
+const fV=U=>hid(nf(U,2))+' V';
+const fR=R=>hid(nf(R,2,0))+' Ω';
+const fP=P=>hid(nf(P,2))+' W';
+const SUP={'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','-':'⁻'};
+function sci(x){ if(!(x>0)) return '0'; const e=Math.floor(Math.log10(x)); const m=x/Math.pow(10,e); return nf(m,2)+' × 10'+String(e).split('').map(c=>SUP[c]).join(''); }
+const bulbName=id=>(lang==='vi'?'Đ':'B')+id.slice(1);
+const DEVN={lamp:'dvLamp',fan:'dvFan',kettle:'dvKettle'};
+
+/* ================= màu từ token CSS ================= */
+const CK=['bg','panel','lane','ink','muted','line','accent','ok','warn','wire','e','q','bulb','glass','res','heat','vlo','vmid','vhi','meter','pipe','water','chain','ball','floor','person','metal'];
+let C={}; const HX={};
+function readC(){ const cs=getComputedStyle(document.documentElement); CK.forEach(k=>C[k]=cs.getPropertyValue('--'+k).trim()||'#888888'); }
+function hex(c){ if(HX[c]) return HX[c]; let h=c.replace('#',''); if(h.length===3) h=h.split('').map(x=>x+x).join(''); const v=[parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)]; HX[c]=v; return v; }
+function mix(a,b,f){ const A=hex(a),B=hex(b); f=clamp(f,0,1); return `rgb(${Math.round(A[0]+(B[0]-A[0])*f)},${Math.round(A[1]+(B[1]-A[1])*f)},${Math.round(A[2]+(B[2]-A[2])*f)})`; }
+function rgba(c,a){ const A=hex(c); return `rgba(${A[0]},${A[1]},${A[2]},${clamp(a,0,1)})`; }
+function potCol(f){ f=clamp(f,0,1); return f<0.5?mix(C.vlo,C.vmid,f*2):mix(C.vmid,C.vhi,(f-0.5)*2); }
+
+/* ================= canvas ================= */
+const VIEWS={};
+function view(id,H,W=1000){ const cv=$('#'+id); const v={id,cv,ctx:cv.getContext('2d'),H,W,sc:1,w:0,dpr:1}; VIEWS[id]=v; return v; }
+function fit(v){ const w=v.cv.clientWidth; if(!w) return false;
+  if(w!==v.w||v.dirty){ v.w=w; v.dirty=false; v.sc=w/v.W; v.dpr=Math.min(window.devicePixelRatio||1,2);
+    v.cv.style.height=Math.round(v.H*v.sc)+'px'; v.cv.width=Math.round(w*v.dpr); v.cv.height=Math.round(v.H*v.sc*v.dpr); }
+  v.ctx.setTransform(v.dpr*v.sc,0,0,v.dpr*v.sc,0,0); v.ctx.clearRect(0,0,v.W,v.H); return true; }
+const fs=(v,n)=>Math.max(n,11.5/v.sc);
+const kx=v=>fs(v,18)/18;
+function txt(v,s,x,y,o={}){ const c=v.ctx; c.font=`${o.w||600} ${fs(v,o.size||19)}px ${o.mono?FNUM:FUI}`; c.fillStyle=o.color||C.ink; c.textAlign=o.align||'center'; c.textBaseline=o.base||'middle'; c.fillText(s,x,y); }
+function rr(c,x,y,w,h,r){ c.beginPath(); c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r); c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath(); }
+function box(v,s,x,y,o={}){ const c=v.ctx; const size=fs(v,o.size||18); c.font=`600 ${size}px ${FNUM}`; const tw=c.measureText(s).width; const pw=tw+size*0.9, ph=size*1.5;
+  let bx=clamp(x-pw/2,2,v.W-pw-2); rr(c,bx,y-ph/2,pw,ph,6); c.fillStyle=C.meter; c.fill();
+  const f=o.flash||0; c.lineWidth=1.5+3.5*f; c.strokeStyle=f>0.02?mix(C.line,C.accent,Math.min(1,f*1.6)):C.line; c.stroke();
+  c.fillStyle=o.color||C.ink; c.textAlign='center'; c.textBaseline='middle'; c.fillText(s,bx+pw/2,y+1); }
+function polyStroke(c,pts){ c.beginPath(); c.moveTo(pts[0][0],pts[0][1]); for(let i=1;i<pts.length;i++) c.lineTo(pts[i][0],pts[i][1]); c.stroke(); }
+function arrow(c,x1,y1,x2,y2,col,w=4,h=14){ const a=Math.atan2(y2-y1,x2-x1); c.strokeStyle=col; c.fillStyle=col; c.lineWidth=w; c.beginPath(); c.moveTo(x1,y1); c.lineTo(x2-Math.cos(a)*h*0.8,y2-Math.sin(a)*h*0.8); c.stroke();
+  c.beginPath(); c.moveTo(x2,y2); c.lineTo(x2-Math.cos(a-0.45)*h,y2-Math.sin(a-0.45)*h); c.lineTo(x2-Math.cos(a+0.45)*h,y2-Math.sin(a+0.45)*h); c.closePath(); c.fill(); }
+function vpos(v,ev){ const r=v.cv.getBoundingClientRect(); return {x:(ev.clientX-r.left)/v.sc, y:(ev.clientY-r.top)/v.sc}; }
+
+/* ================= hình học đường gấp khúc ================= */
+function polyInfo(pts){ const seg=[]; let L=0; for(let i=0;i<pts.length-1;i++){ const [x1,y1]=pts[i],[x2,y2]=pts[i+1]; const l=Math.hypot(x2-x1,y2-y1); seg.push({x1,y1,x2,y2,l,s0:L}); L+=l; } return {seg,L,pts}; }
+function posAt(P,s){ const sg=P.seg; s=clamp(s,0,P.L); let g=sg[sg.length-1];
+  for(const q of sg){ if(q.l>0&&s<=q.s0+q.l){ g=q; break; } }
+  const f=g.l?(s-g.s0)/g.l:0; return {x:g.x1+(g.x2-g.x1)*f, y:g.y1+(g.y2-g.y1)*f, a:Math.atan2(g.y2-g.y1,g.x2-g.x1)}; }
+function project(P,x,y){ let best={d:1e9,s:0,x:0,y:0}; for(const g of P.seg){ if(!g.l) continue; const dx=g.x2-g.x1, dy=g.y2-g.y1; let f=((x-g.x1)*dx+(y-g.y1)*dy)/(g.l*g.l); f=clamp(f,0,1);
+  const px=g.x1+dx*f, py=g.y1+dy*f, d=Math.hypot(x-px,y-py); if(d<best.d) best={d,s:g.s0+g.l*f,x:px,y:py}; } return best; }
+
+/* ================= bộ giải mạch điện một chiều =================
+   Mạch = các "nhánh dây" (chain) nối giữa các nút. Mỗi chain gồm các linh kiện mắc nối tiếp:
+   pin (E, r), điện trở/đèn (R), khoá (đóng/mở), ampe kế (lí tưởng). Giải bằng phương pháp điện thế nút;
+   cường độ trong chain: I = (V_đầu − V_cuối + ΣE) / ΣR, chiều dương theo chiều vẽ chain. */
+const DEFLEN={bat:50,sw:64,amm:52,res:84,bulb:60,box:96,dev:104};
+const R_WIRE=1e-5, GMIN=1e-9;
+const isLoad=e=>e.t==='res'||e.t==='bulb'||e.t==='box'||e.t==='dev';
+const isBreak=e=>(e.t==='sw'&&!e.closed)||(e.t==='bulb'&&e.removed);
+function gauss(A,b,N){ const M=A.map((r,i)=>[...r,b[i]]);
+  for(let i=0;i<N;i++){ let p=i; for(let k=i+1;k<N;k++) if(Math.abs(M[k][i])>Math.abs(M[p][i])) p=k; [M[i],M[p]]=[M[p],M[i]];
+    const d=M[i][i]||1e-30; for(let k=i+1;k<N;k++){ const f=M[k][i]/d; if(!f) continue; for(let j=i;j<=N;j++) M[k][j]-=f*M[i][j]; } }
+  const x=new Array(N).fill(0); for(let i=N-1;i>=0;i--){ let s=M[i][N]; for(let j=i+1;j<N;j++) s-=M[i][j]*x[j]; x[i]=s/(M[i][i]||1e-30); } return x; }
+class Circuit{
+  constructor(d){ Object.assign(this,{kv:140,sp:24,volts:[],ground:'G',shortI:30},d); const ns=new Set();
+    for(const c of this.chains){ ns.add(c.from); ns.add(c.to); c.P=polyInfo(c.pts); c.ph=0; c.Q=0; c.I=0;
+      for(const e of c.els){ e.len=e.len||DEFLEN[e.t]; e.s=project(c.P,e.at[0],e.at[1]).s; const p=posAt(c.P,e.s); e.x=p.x; e.y=p.y; e.a=p.a; e.ch=c; e.flash=0; e.ang=0; e.I=0; e.U=0; e.P=0;
+        if(e.t==='sw'&&e.closed==null) e.closed=true; }
+      c.els.sort((a,b)=>a.s-b.s); }
+    this.nodes=[...ns]; this.el={};
+    for(const c of this.chains) for(const e of c.els) if(e.id) this.el[e.id]=e;
+    this.deg={}; for(const c of this.chains){ this.deg[c.from]=(this.deg[c.from]||0)+1; this.deg[c.to]=(this.deg[c.to]||0)+1; }
+    for(const m of this.volts){ m.pa=this.locate(m.a[0],m.a[1]); m.pb=this.locate(m.b[0],m.b[1]); m.flash=0; }
+    this.solve(); }
+  locate(x,y,maxd=1e9){ let best=null; for(const c of this.chains){ const r=project(c.P,x,y); if(r.d<=maxd&&(!best||r.d<best.d)) best={c,s:r.s,d:r.d,x:r.x,y:r.y}; } return best; }
+  after(e,V,I){ if(isLoad(e)) return V-I*e.R; if(e.t==='bat') return V+e.E*(e.dir||1)-I*(e.r||0); return V; }
+  before(e,V,I){ if(isLoad(e)) return V+I*e.R; if(e.t==='bat') return V-e.E*(e.dir||1)+I*(e.r||0); return V; }
+  solve(){ const idx={}; let N=0; for(const n of this.nodes) if(n!==this.ground) idx[n]=N++;
+    const A=Array.from({length:N},()=>new Array(N).fill(0)), b=new Array(N).fill(0); this.Emax=0;
+    for(const c of this.chains){ let R=R_WIRE,E=0,open=false;
+      for(const e of c.els){ if(isBreak(e)) open=true; if(isLoad(e)) R+=e.R; if(e.t==='bat'){ E+=e.E*(e.dir||1); R+=e.r||0; this.Emax=Math.max(this.Emax,e.E); } }
+      c.R=R; c.E=E; c.open=open; if(open||c.from===c.to) continue;
+      const G=1/R, i=idx[c.from], j=idx[c.to];
+      if(i!==undefined){ A[i][i]+=G; if(j!==undefined) A[i][j]-=G; b[i]-=G*E; }
+      if(j!==undefined){ A[j][j]+=G; if(i!==undefined) A[j][i]-=G; b[j]+=G*E; } }
+    for(let i=0;i<N;i++) A[i][i]+=GMIN;
+    const x=N?gauss(A,b,N):[]; this.V={}; this.V[this.ground]=0; for(const n in idx) this.V[n]=x[idx[n]];
+    let Imax=0;
+    for(const c of this.chains){ c.I=c.open?0:(this.V[c.from]-this.V[c.to]+c.E)/c.R; Imax=Math.max(Imax,Math.abs(c.I));
+      let Vp=this.V[c.from], br=-1; const els=c.els;
+      for(let k=0;k<els.length;k++){ const e=els[k]; e.Vin=Vp; if(isBreak(e)){ br=k; break; } Vp=this.after(e,Vp,c.I); e.Vout=Vp; }
+      if(br>=0){ Vp=this.V[c.to]; for(let k=els.length-1;k>br;k--){ const e=els[k]; e.Vout=Vp; Vp=this.before(e,Vp,c.I); e.Vin=Vp; } els[br].Vout=Vp; }
+      for(const e of els){ e.I=c.I; e.U=e.Vin-e.Vout; e.P=isLoad(e)?c.I*c.I*e.R:0; } }
+    this.Imax=Imax; this.short=Imax>this.shortI; }
+  VAt(c,s){ for(const e of c.els){ const a=e.s-e.len/2, b=e.s+e.len/2; if(s<a) return e.Vin;
+      if(s<=b){ const f=(s-a)/(b-a); return (e.t==='sw'||e.t==='bat'||e.t==='amm')?(f<0.5?e.Vin:e.Vout):e.Vin+(e.Vout-e.Vin)*f; } }
+    return c.els.length?c.els[c.els.length-1].Vout:this.V[c.from]; }
+  Vloc(p){ return p?this.VAt(p.c,p.s):null; }
+  step(dt){ for(const c of this.chains){ c.ph+=clamp(this.kv*c.I,-520,520)*dt; c.Q+=Math.abs(c.I)*dt; } }
+  resetFlow(){ for(const c of this.chains){ c.Q=0; } }
+  inEl(c,s,m=3){ for(const e of c.els) if(Math.abs(s-e.s)<e.len/2+m) return true; return false; }
+  hit(x,y,pred,r){ let best=null,bd=r; for(const c of this.chains) for(const e of c.els){ if(!pred(e)) continue; const d=Math.hypot(x-e.x,y-e.y); if(d<bd){ bd=d; best=e; } } return best; }
+}
+function loopDef(o){ const {x0,y0,x1,y1}=o; return Object.assign({ground:'G',chains:[{id:'L',from:'G',to:'G',pts:[[x0,y1],[x0,y0],[x1,y0],[x1,y1],[x0,y1]],els:o.els}]},o); }
+function parDef(o){ const {xL,yT,yB,xs}=o; const ch=[{id:'M',from:'B0',to:'T0',pts:[[xs[0],yB],[xL,yB],[xL,yT],[xs[0],yT]],els:o.main}];
+  xs.forEach((x,i)=>{ ch.push({id:'b'+i,from:'T'+i,to:'B'+i,pts:[[x,yT],[x,yB]],els:o.branch(i,x)});
+    if(i<xs.length-1){ ch.push({id:'t'+i,from:'T'+i,to:'T'+(i+1),pts:[[x,yT],[xs[i+1],yT]],els:[]}); ch.push({id:'u'+i,from:'B'+(i+1),to:'B'+i,pts:[[xs[i+1],yB],[x,yB]],els:[]}); } });
+  return Object.assign({ground:'B0',chains:ch},o); }
+const BAT=(at,o)=>Object.assign({t:'bat',id:'E',at,E:6,dir:1,r:0,lab:[72,0]},o);
+const SW=(id,at,lab)=>({t:'sw',id,name:id,at,closed:true,lab:lab||[0,-38]});
+const AMM=(id,at,lo)=>({t:'amm',id,name:id,at,lo:lo||[0,54]});
+const BULB=(id,at,lab,o)=>Object.assign({t:'bulb',id,at,R:12,Pref:3,Prated:3,lab:lab||[0,56]},o);
+const RES=(id,at,lab,o)=>Object.assign({t:'res',id,name:id,at,R:10,Pref:6,lab:lab||[0,-42],showR:true},o);
+const DEV=(id,at,R,Pd)=>({t:'dev',id,at,R,Pd,Pref:Pd});
+
+/* ================= vẽ mạch điện ================= */
+function brightOf(e){ return e.removed?0:(e.Pref?e.P/e.Pref:0); }
+function drawWires(v,K){ const c=v.ctx; c.lineCap='round'; c.lineJoin='round';
+  for(const ch of K.chains){
+    if(potOn){ const L=ch.P.L, st=10; c.lineWidth=7; for(let s=0;s<L;s+=st){ const s2=Math.min(L,s+st); const p1=posAt(ch.P,s), p2=posAt(ch.P,s2);
+        c.strokeStyle=potCol(K.VAt(ch,(s+s2)/2)/(K.Emax||1)); c.beginPath(); c.moveTo(p1.x,p1.y); c.lineTo(p2.x,p2.y); c.stroke(); } }
+    else { c.strokeStyle=C.wire; c.lineWidth=7; polyStroke(c,ch.pts); } }
+  for(const ch of K.chains){ for(const [n,p] of [[ch.from,ch.pts[0]],[ch.to,ch.pts[ch.pts.length-1]]]){ if((K.deg[n]||0)>=3){ c.fillStyle=C.ink; c.beginPath(); c.arc(p[0],p[1],8,0,7); c.fill(); } } } }
+function drawParticles(v,K){ const c=v.ctx, sp=K.sp, dir=partMode==='e'?-1:1; c.fillStyle=partMode==='e'?C.e:C.q;
+  for(const ch of K.chains){ const L=ch.P.L; const off=((dir*ch.ph)%sp+sp)%sp;
+    c.beginPath(); for(let s=off;s<L;s+=sp){ if(K.inEl(ch,s)) continue; const p=posAt(ch.P,s); c.moveTo(p.x+5,p.y); c.arc(p.x,p.y,5,0,7); } c.fill(); } }
+function stub(c,K,e,x1,x2,V){ c.strokeStyle=potOn?potCol(V/(K.Emax||1)):C.wire; c.lineWidth=7; c.beginPath(); c.moveTo(x1,0); c.lineTo(x2,0); c.stroke(); }
+function drawEl(v,K,e){ const c=v.ctx, h=e.len/2; c.save(); c.translate(e.x,e.y); c.rotate(e.a);
+  switch(e.t){
+    case 'bat':{ const sg=e.dir||1; c.fillStyle=C.lane; c.fillRect(-h,-34,e.len,68);
+      stub(c,K,e,-h,-8*sg,e.Vin); stub(c,K,e,8*sg,h,e.Vout);
+      c.strokeStyle=C.ink; c.lineCap='butt'; c.lineWidth=4; c.beginPath(); c.moveTo(8*sg,-30); c.lineTo(8*sg,30); c.stroke();
+      c.lineWidth=10; c.beginPath(); c.moveTo(-8*sg,-15); c.lineTo(-8*sg,15); c.stroke(); c.lineCap='round'; break; }
+    case 'sw':{ c.fillStyle=C.lane; c.fillRect(-h+2,-16,e.len-4,32); stub(c,K,e,-h,-24,e.Vin); stub(c,K,e,24,h,e.Vout);
+      c.strokeStyle=C.ink; c.lineWidth=5; c.beginPath(); c.moveTo(-24,0); if(e.closed) c.lineTo(24,0); else c.lineTo(-24+48*Math.cos(0.6),-48*Math.sin(0.6)); c.stroke();
+      c.fillStyle=C.ink; c.beginPath(); c.arc(-24,0,6,0,7); c.arc(24,0,6,0,7); c.fill(); break; }
+    case 'amm':{ c.beginPath(); c.arc(0,0,25,0,7); c.fillStyle=C.meter; c.fill(); c.lineWidth=3; c.strokeStyle=C.ink; c.stroke();
+      if(e.flash>0.02){ c.beginPath(); c.arc(0,0,31,0,7); c.lineWidth=4*e.flash+1; c.strokeStyle=rgba(C.accent,e.flash); c.stroke(); } break; }
+    case 'res':{ const b=clamp(e.P/(e.Pref||6),0,1); rr(c,-h+6,-15,e.len-12,30,4); c.fillStyle=C.res; c.fill(); if(b>0.01){ c.fillStyle=rgba(C.heat,0.75*b); c.fill(); } c.lineWidth=3; c.strokeStyle=C.ink; c.stroke(); stub(c,K,e,-h,-h+6,e.Vin); stub(c,K,e,h-6,h,e.Vout); break; }
+    case 'box':{ rr(c,-h+4,-24,e.len-8,48,6); c.fillStyle=C.ink; c.fill(); stub(c,K,e,-h,-h+4,e.Vin); stub(c,K,e,h-4,h,e.Vout); break; }
+    case 'bulb':{ const b=brightOf(e);
+      if(b>0.01){ const R=26+70*Math.min(b,1.3); const g=c.createRadialGradient(0,0,8,0,0,R); g.addColorStop(0,rgba(C.bulb,0.95*Math.min(1,b))); g.addColorStop(1,rgba(C.bulb,0)); c.fillStyle=g; c.beginPath(); c.arc(0,0,R,0,7); c.fill(); }
+      c.beginPath(); c.arc(0,0,24,0,7); c.fillStyle=e.removed?C.lane:mix(C.glass,C.bulb,Math.min(1,b)); c.fill();
+      c.lineWidth=3; c.strokeStyle=C.ink; if(e.removed) c.setLineDash([5,5]); c.stroke(); c.setLineDash([]);
+      if(!e.removed){ const k=17; c.lineWidth=2.5; c.beginPath(); c.moveTo(-k,-k); c.lineTo(k,k); c.moveTo(-k,k); c.lineTo(k,-k); c.stroke(); }
+      else { c.fillStyle=C.lane; c.fillRect(-h,-5,e.len,10); }
+      break; }
+    case 'dev':{ const b=clamp(e.P/(e.Pd||1),0,1.2);
+      if(b>0.01){ const g=c.createRadialGradient(0,0,10,0,0,90); g.addColorStop(0,rgba(e.id==='kettle'?C.heat:C.bulb,0.7*Math.min(1,b))); g.addColorStop(1,rgba(C.bulb,0)); c.fillStyle=g; c.beginPath(); c.arc(0,0,90,0,7); c.fill(); }
+      c.restore(); c.save(); c.translate(e.x,e.y);
+      rr(c,-56,-26,112,52,8); c.fillStyle=C.panel; c.fill(); c.lineWidth=3; c.strokeStyle=C.ink; c.stroke(); break; }
+  }
+  c.restore();
+  if(e.t==='amm') txt(v,v.sc<0.6?'A':e.name,e.x,e.y+1,{size:17,w:700});
+  if(e.t==='box') txt(v,'?',e.x,e.y+1,{size:26,w:800,color:C.panel});
+  if(e.t==='dev') txt(v,t(DEVN[e.id]),e.x,e.y+1,{size:18,w:700});
+  if(e.t==='bat'){ const ux=Math.cos(e.a), uy=Math.sin(e.a), nx=-uy, ny=ux, sg=e.dir||1;
+    txt(v,'+',e.x+ux*8*sg-nx*36,e.y+uy*8*sg-ny*36,{size:22,w:800}); txt(v,'−',e.x-ux*8*sg-nx*36,e.y-uy*8*sg-ny*36,{size:22,w:800}); } }
+function elLabel(v,e){ if(!e.lab) return; let s;
+  if(e.t==='bulb') s=bulbName(e.id); else if(e.t==='res') s=e.id; else if(e.t==='box') s=t('lBox');
+  else if(e.t==='bat') s='U = '+nf(e.E,1,0)+' V'; else s=e.name||e.id;
+  if(e.t==='box') s=nf(e.R,1,1)+' Ω';
+  const left=e.t==='bat'&&e.lab[0]>0; const x=left?e.x+44:e.x+e.lab[0], y=e.y+e.lab[1], lh=fs(v,19)*1.15; txt(v,s,x,y,{size:19,align:left?'left':'center'});
+  let s2=null; if(e.t==='bat'&&e.r) s2='r = '+nf(e.r,1,0)+' Ω'; if(e.t==='bulb'&&e.removed) s2=t('rmd'); else if(e.sub) s2=e.sub;
+  if(e.t==='res'&&e.showR) s2=nf(e.R,1,0)+' Ω';
+  if(s2) txt(v,s2,x,y+lh,{size:16,w:500,color:C.muted,mono:e.t!=='bulb',align:left?'left':'center'}); }
+function meterFlash(o,key,dtr){ if(o._k!==undefined&&o._k!==key) o.flash=1; o._k=key; o.flash=Math.max(0,(o.flash||0)-dtr*1.1); }
+function drawVolt(v,K,m,dtr){ const c=v.ctx, [bx,by]=m.body; c.setLineDash([7,6]); c.lineWidth=2; c.strokeStyle=C.muted;
+  for(const p of [m.pa,m.pb]){ if(!p) continue; c.beginPath(); c.moveTo(bx,by); c.lineTo(p.x,p.y); c.stroke(); } c.setLineDash([]);
+  c.fillStyle=C.ink; for(const p of [m.pa,m.pb]){ if(p){ c.beginPath(); c.arc(p.x,p.y,5.5,0,7); c.fill(); } }
+  c.beginPath(); c.arc(bx,by,23,0,7); c.fillStyle=C.meter; c.fill(); c.lineWidth=2.5; c.strokeStyle=C.ink; c.stroke();
+  const val=Math.abs(K.Vloc(m.pa)-K.Vloc(m.pb)); const s=fV(val); meterFlash(m,val.toFixed(2),dtr);
+  if(m.flash>0.02){ c.beginPath(); c.arc(bx,by,29,0,7); c.lineWidth=4*m.flash+1; c.strokeStyle=rgba(C.accent,m.flash); c.stroke(); }
+  txt(v,v.sc<0.6?'V':m.name,bx,by+1,{size:16,w:700}); box(v,s,bx+(m.lo?m.lo[0]*kx(v):0),by+(m.lo?m.lo[1]:46),{flash:m.flash}); m.val=val; }
+function drawCircuit(v,K,dtr,o={}){
+  drawWires(v,K); drawParticles(v,K);
+  for(const ch of K.chains) for(const e of ch.els) drawEl(v,K,e);
+  for(const m of K.volts) drawVolt(v,K,m,dtr);
+  for(const ch of K.chains) for(const e of ch.els){ elLabel(v,e);
+    if(e.t==='amm'){ const s=o.hideA?'? A':fA(e.I); meterFlash(e,Math.abs(e.I).toFixed(3),dtr); box(v,s,e.x+e.lo[0]*kx(v),e.y+e.lo[1],{flash:e.flash}); } } }
+
+/* ================= trạng thái các tab ================= */
+const DEF={
+  1:{mode:'one',U:6,R:12,K:true,ana:'water'},
+  2:{U:6,R:12,K:true},
+  3:{n:3,U:6,R:[12,12,12],K:true,rm:[false,false,false]},
+  4:{U:6,R:[12,12,12],K:true,Kb:[true,true,false],ri:false},
+  5:{mode:'ser',U:6,R1:10,R2:15,Rx:40},
+  6:{sub:'bright',mode:'ser',U:6,K:true,ptype:'nt',house:'par',Kh:[true,false,false]}
+};
+const cp=o=>JSON.parse(JSON.stringify(o));
+const S1=cp(DEF[1]), S2=cp(DEF[2]), S3=cp(DEF[3]), S4=cp(DEF[4]), S5=cp(DEF[5]), S6=cp(DEF[6]);
+S1.lph=[]; S1.bike={ph:0,aF:0,aR:0,aM:0};
+S2.pr={r:{x:880,y:150},k:{x:880,y:370}}; S2.drag=null; S2.rec=[]; S2.miss=[null,null,null,null];
+S3.rec=[]; S4.rec=[];
+S6.prob=null; S6.checked=false;
+const TABQ={1:['q1a','q1b'],2:['q2a','q2b'],3:['q3a','q3b','q3c'],4:['q4a','q4b','q4c'],5:['q5a','q5b'],6:['q6a','q6b']};
+const PA={};
+let K1,K2,K3,K4,K5a,K5b,K6;
+let frameN=0;
+
+/* ---------- TAB 1: hình dung ---------- */
+const V1c=view('cv1',470), V1a=view('an1',500);
+function build1(){ const m=S1.mode; let d;
+  if(m==='one') d=loopDef({x0:120,y0:100,x1:880,y1:420,els:[BAT([120,260]),SW('K',[260,100]),AMM('A1',[420,100]),BULB('D1',[600,100]),AMM('A2',[780,100])]});
+  else if(m==='ser') d=loopDef({x0:120,y0:100,x1:880,y1:420,els:[BAT([120,260]),SW('K',[220,100]),AMM('A1',[350,100]),BULB('D1',[490,100]),AMM('A2',[630,100]),BULB('D2',[770,100]),AMM('A3',[880,260],[-80,0])]});
+  else d=parDef({xL:120,yT:100,yB:420,xs:[500,760],main:[BAT([120,260]),SW('K',[210,100]),AMM('A',[350,100])],branch:(i,x)=>[AMM('A'+(i+1),[x,190],[80,0]),BULB('D'+(i+1),[x,320],[-58,0])]});
+  K1=new Circuit(d); S1.lph=[]; }
+function sync1(){ for(const ch of K1.chains) for(const e of ch.els){ if(e.t==='bat') e.E=S1.U; if(e.t==='bulb'){ e.R=S1.R; e.Pref=36/S1.R; } if(e.id==='K') e.closed=S1.K; } K1.solve(); }
+function frame1(dt,dtr){ sync1(); K1.step(dt);
+  if(fit(V1c)) drawCircuit(V1c,K1,dtr);
+  if(fit(V1a)) drawAna(V1a,dt);
+  if(frameN%5===0){ const I=K1.chains[0].I, k='st'+S1.ana[0].toUpperCase()+S1.ana.slice(1);
+    setStatus('st1', !S1.K?t('stOpen'):t(k,fA(I),fV(S1.U)), false); setObs('obs1',obs1()); } }
+function counts1(){ const f=K1.kv/K1.sp; const n=c=>Math.floor(c.Q*f+1e-9); if(S1.mode==='par'){ const a=n(K1.chains.find(c=>c.id==='b0')), b=n(K1.chains.find(c=>c.id==='b1')); return [a+b,a,b]; } const m=n(K1.chains[0]); return [m,m]; }
+function obs1(){ if(!S1.K) return [['wn',t('obs1open')]]; const E=K1.el, out=[];
+  if(S1.mode==='one') out.push(['hl',t('obs1same',fA(E.A1.I),fA(E.A2.I))]);
+  else if(S1.mode==='ser') out.push(['hl',t('obs1ser',fA(E.A1.I),fA(E.A2.I),fA(E.A3.I))]);
+  else out.push(['hl',t('obs1par',fA(E.A.I),fA(E.A1.I),fA(E.A2.I))]);
+  const c=counts1(); out.push(['',S1.mode==='par'?t('obs1cntp',c[0],c[1],c[2]):t('obs1cnt',c[0],c[1])]);
+  out.push(['',t('obs1en',hid(nf(Math.abs(E.D1.U),2)))]); return out; }
+
+/* ----- mô hình tương tự ----- */
+function drawAna(v,dt){ const a=S1.ana; if(a==='water') drawWater(v,dt); else if(a==='crowd') drawCrowd(v,dt); else if(a==='bike') drawBike(v,dt); else drawLift(v,dt); }
+function wrapTxt(v,s,x,y,maxW,o={}){ const c=v.ctx; const size=fs(v,o.size||19); c.font=`${o.w||600} ${size}px ${FUI}`; const words=s.split(' '); const lines=[]; let cur='';
+  for(const w of words){ const tt=cur?cur+' '+w:w; if(c.measureText(tt).width>maxW&&cur){ lines.push(cur); cur=w; } else cur=tt; } if(cur) lines.push(cur);
+  const lh=size*1.3, y0=y-(lines.length-1)*lh/2; lines.forEach((l,i)=>txt(v,l,x,y0+i*lh,o)); return lines.length*lh; }
+function drawWater(v,dt){ const c=v.ctx, K=K1, dir=partMode==='e'?-1:1; c.lineCap='round'; c.lineJoin='round';
+  for(const ch of K.chains){ c.strokeStyle=C.pipe; c.lineWidth=34; polyStroke(c,ch.pts); }
+  for(const ch of K.chains){ if(potOn){ const L=ch.P.L; c.lineWidth=22; for(let s=0;s<L;s+=10){ const s2=Math.min(L,s+10), p1=posAt(ch.P,s), p2=posAt(ch.P,s2); c.strokeStyle=potCol(K.VAt(ch,(s+s2)/2)/(K.Emax||1)); c.beginPath(); c.moveTo(p1.x,p1.y); c.lineTo(p2.x,p2.y); c.stroke(); } }
+    else { c.strokeStyle=C.water; c.lineWidth=22; polyStroke(c,ch.pts); } }
+  c.fillStyle=rgba(C.panel,0.92); const sp=22;
+  for(const ch of K.chains){ const off=((dir*ch.ph)%sp+sp)%sp; c.beginPath(); for(let s=off;s<ch.P.L;s+=sp){ if(K.inEl(ch,s,-6)) continue; const p=posAt(ch.P,s); c.moveTo(p.x+4.5,p.y); c.arc(p.x,p.y,4.5,0,7); } c.fill(); }
+  for(const ch of K.chains) for(const e of ch.els){ const w=clamp(K.kv*e.I,-520,520);
+    if(e.t==='bat'){ e.ang+=dir*w*dt/44; c.beginPath(); c.arc(e.x,e.y,44,0,7); c.fillStyle=C.panel; c.fill(); c.lineWidth=3; c.strokeStyle=C.ink; c.stroke();
+      c.lineWidth=6; c.strokeStyle=C.water; for(let k=0;k<4;k++){ const a=e.ang+k*Math.PI/2; c.beginPath(); c.moveTo(e.x,e.y); c.quadraticCurveTo(e.x+20*Math.cos(a+0.6),e.y+20*Math.sin(a+0.6),e.x+34*Math.cos(a),e.y+34*Math.sin(a)); c.stroke(); }
+      c.fillStyle=C.ink; c.beginPath(); c.arc(e.x,e.y,7,0,7); c.fill(); txt(V1a,t('lbPump'),e.x+64,e.y,{size:17,align:'left'}); }
+    else if(e.t==='sw'){ c.beginPath(); c.arc(e.x,e.y,17,0,7); c.fillStyle=C.panel; c.fill(); c.lineWidth=3; c.strokeStyle=C.ink; c.stroke();
+      c.save(); c.translate(e.x,e.y); c.rotate(e.a+(e.closed?0:Math.PI/2)); c.lineWidth=7; c.strokeStyle=C.ink; c.beginPath(); c.moveTo(-26,-26); c.lineTo(26,-26); c.stroke(); c.restore();
+      if(!e.closed){ c.save(); c.translate(e.x,e.y); c.rotate(e.a); c.fillStyle=C.warn; c.fillRect(-5,-17,10,34); c.restore(); }
+      txt(V1a,t('lbValve'),e.x,e.y-58,{size:16,w:500,color:C.muted}); }
+    else if(e.t==='amm'){ c.beginPath(); c.arc(e.x,e.y,18,0,7); c.fillStyle=C.panel; c.fill(); c.lineWidth=2.5; c.strokeStyle=C.ink; c.stroke();
+      const g=-2.4+2.8*Math.min(1,Math.abs(e.I)/1.5); c.lineWidth=3; c.strokeStyle=C.warn; c.beginPath(); c.moveTo(e.x,e.y); c.lineTo(e.x+13*Math.cos(g),e.y+13*Math.sin(g)); c.stroke(); }
+    else if(e.t==='bulb'){ e.ang+=w*dt/34; const b=brightOf(e);
+      if(b>0.01){ c.beginPath(); c.arc(e.x,e.y,50,0,7); c.fillStyle=rgba(C.bulb,0.45*Math.min(1,b)); c.fill(); }
+      c.beginPath(); c.arc(e.x,e.y,34,0,7); c.fillStyle=C.panel; c.fill(); c.lineWidth=3; c.strokeStyle=C.ink; c.stroke();
+      c.lineWidth=5; c.strokeStyle=C.metal; for(let k=0;k<6;k++){ const a=e.ang+k*Math.PI/3; c.beginPath(); c.moveTo(e.x+6*Math.cos(a),e.y+6*Math.sin(a)); c.lineTo(e.x+29*Math.cos(a+0.3),e.y+29*Math.sin(a+0.3)); c.stroke(); }
+      if(e.lab){ if(S1.mode==='par') txt(V1a,t('lbTurb'),e.x-46,e.y,{size:16,w:500,color:C.muted,align:'right'}); else txt(V1a,t('lbTurb'),e.x,e.y+e.lab[1]+4,{size:16,w:500,color:C.muted}); } } } }
+function drawCrowd(v,dt){ const c=v.ctx, K=K1, dir=partMode==='e'?-1:1; c.lineCap='round'; c.lineJoin='round';
+  for(const ch of K.chains){ c.strokeStyle=C.line; c.lineWidth=48; polyStroke(c,ch.pts); } for(const ch of K.chains){ c.strokeStyle=C.floor; c.lineWidth=42; polyStroke(c,ch.pts); }
+  const doors=[]; for(const ch of K.chains) for(const e of ch.els) if(e.t==='bulb') doors.push(e);
+  const sp=34; c.fillStyle=C.person;
+  for(const ch of K.chains){ const sh=dir*ch.ph, off=((sh%sp)+sp)%sp, base=Math.floor(sh/sp);
+    for(let s=off,n=0;s<ch.P.L;s+=sp,n++){ const id=n-base; let lat=((((id*7919)%13)+13)%13-6)*2.2; const p=posAt(ch.P,s);
+      for(const d of doors){ if(d.ch===ch&&Math.abs(s-d.s)<36){ const g=doorGap(d); lat*=g/34; } }
+      const blocked=ch.els.some(e=>e.t==='sw'&&!e.closed&&Math.abs(s-e.s)<8); if(blocked) continue;
+      const nx=-Math.sin(p.a), ny=Math.cos(p.a); c.beginPath(); c.arc(p.x+nx*lat,p.y+ny*lat,7.5,0,7); c.fill(); } }
+  for(const ch of K.chains) for(const e of ch.els){ c.save(); c.translate(e.x,e.y); c.rotate(e.a);
+    if(e.t==='bat'){ rr(c,-55,-24,110,48,6); c.fillStyle=C.panel; c.fill(); c.lineWidth=3; c.strokeStyle=C.ink; c.stroke();
+      const off=((dir*e.ch.ph)%26+26)%26; c.strokeStyle=C.accent; c.lineWidth=4; for(let x=-52+off;x<52;x+=26){ c.beginPath(); c.moveTo(x-6*dir,-12); c.lineTo(x+6*dir,0); c.lineTo(x-6*dir,12); c.stroke(); } }
+    else if(e.t==='sw'&&!e.closed){ c.fillStyle=C.warn; c.fillRect(-6,-28,12,56); }
+    else if(e.t==='bulb'){ const g=doorGap(e); c.fillStyle=C.ink; c.fillRect(-9,-28,18,28-g/2); c.fillRect(-9,g/2,18,28-g/2);
+      const b=brightOf(e); if(b>0.01){ c.fillStyle=rgba(C.heat,0.55*Math.min(1,b)); c.fillRect(-9,-28,18,28-g/2); c.fillRect(-9,g/2,18,28-g/2); } }
+    c.restore(); }
+  const bt=K.el.E; txt(v,t('lbBelt'),bt.x+70,bt.y,{size:17,align:'left'});
+  const d1=K.el.D1; txt(v,t('lbDoor'),d1.x+d1.lab[0]*(S1.mode==='par'?1.6:1),d1.y+d1.lab[1],{size:16,w:500,color:C.muted});
+  const k=K.el.K; if(!k.closed) txt(v,t('lbGate').replace(/\(.*\)/,'').trim()||'',k.x,k.y-50,{size:16,w:500,color:C.warn}); }
+function doorGap(e){ return clamp(260/(e.R+6),9,34); }
+function bikePath(){ const F=[230,270], rF=95, Rr=[790,270], rR=42, pts=[[F[0],F[1]-rF]];
+  for(let a=-90;a<=90;a+=10){ const r=a*Math.PI/180; pts.push([Rr[0]+rR*Math.cos(r),Rr[1]+rR*Math.sin(r)]); }
+  for(let a=90;a<=270;a+=10){ const r=a*Math.PI/180; pts.push([F[0]+rF*Math.cos(r),F[1]+rF*Math.sin(r)]); } return polyInfo(pts); }
+const BIKE=bikePath();
+function wheel(c,x,y,r,ang,sp,col,w){ c.beginPath(); c.arc(x,y,r,0,7); c.lineWidth=w; c.strokeStyle=col; c.stroke(); c.lineWidth=2; for(let k=0;k<sp;k++){ const a=ang+k*2*Math.PI/sp; c.beginPath(); c.moveTo(x,y); c.lineTo(x+r*Math.cos(a),y+r*Math.sin(a)); c.stroke(); } }
+function pad(c,x,y,b){ if(b>0.01){ const g=c.createRadialGradient(x,y,4,x,y,48); g.addColorStop(0,rgba(C.heat,0.85*Math.min(1,b))); g.addColorStop(1,rgba(C.heat,0)); c.fillStyle=g; c.beginPath(); c.arc(x,y,48,0,7); c.fill(); }
+  rr(c,x-17,y-8,34,16,4); c.fillStyle=mix(C.metal,C.heat,Math.min(1,b)); c.fill(); c.lineWidth=2; c.strokeStyle=C.ink; c.stroke(); }
+function drawBike(v,dt){ const c=v.ctx, B=S1.bike, par=S1.mode==='par', ser=S1.mode==='ser';
+  const I=par?0:K1.chains[0].I, w=clamp(K1.kv*I,-520,520); B.ph+=w*dt; B.aF-=w*dt/95; B.aR-=w*dt/42; B.aM-=w*dt/30;
+  c.save(); if(par) c.globalAlpha=0.28;
+  const D1=K1.el.D1, D2=K1.el.D2; const bR=ser?brightOf(D2):brightOf(D1), bM=ser?brightOf(D1):0;
+  wheel(c,790,270,150,B.aR,10,C.metal,6); pad(c,790,112,bR);
+  if(ser){ wheel(c,520,172,62,B.aM,6,C.metal,5); pad(c,520,102,bM); c.beginPath(); c.arc(520,172,30,0,7); c.fillStyle=C.panel; c.fill(); c.lineWidth=4; c.strokeStyle=C.chain; c.stroke(); }
+  c.beginPath(); c.arc(790,270,42,0,7); c.fillStyle=C.panel; c.fill(); c.lineWidth=4; c.strokeStyle=C.chain; c.stroke();
+  c.beginPath(); c.arc(230,270,95,0,7); c.fillStyle=C.panel; c.fill(); c.lineWidth=5; c.strokeStyle=C.chain; c.stroke();
+  c.lineWidth=3; for(let k=0;k<5;k++){ const a=B.aF+k*2*Math.PI/5; c.beginPath(); c.moveTo(230,270); c.lineTo(230+90*Math.cos(a),270+90*Math.sin(a)); c.stroke(); }
+  const sp=20, off=((-B.ph)%sp+sp)%sp, topLen=Math.hypot(560,53); c.fillStyle=C.chain;
+  for(let s=off;s<BIKE.L;s+=sp){ const p=posAt(BIKE,s); if(!S1.K&&s<topLen&&p.x>385&&p.x<440) continue; c.save(); c.translate(p.x,p.y); c.rotate(p.a); rr(c,-8,-4.5,16,9,3); c.fill(); c.restore(); }
+  const pa=B.aF+0.3, px=230+80*Math.cos(pa), py=270+80*Math.sin(pa); c.lineWidth=9; c.strokeStyle=C.ink; c.beginPath(); c.moveTo(230,270); c.lineTo(px,py); c.stroke();
+  rr(c,px-20,py-7,40,14,4); c.fillStyle=C.ink; c.fill();
+  if(S1.U>0&&!par) arrow(c,px,py+10,px,py+22+7*S1.U,C.q,5,16);
+  c.restore();
+  if(par){ rr(c,170,180,660,140,12); c.fillStyle=C.panel; c.fill(); c.lineWidth=2; c.strokeStyle=C.warn; c.stroke(); wrapTxt(v,t('bikeNoPar'),500,250,600,{size:20,color:C.ink}); return; }
+  txt(v,t('lbRing'),230,395,{size:17}); txt(v,t('lbForce'),40,40,{size:16,w:500,color:C.q,align:'left'});
+  txt(v,t('lbChainL'),510,380,{size:16,w:500,color:C.muted});
+  txt(v,t('lbWheel')+(ser?' '+bulbName('D2'):''),790,450,{size:17});
+  if(ser) txt(v,t('lbWheel')+' '+bulbName('D1'),520,74,{size:16,w:500,color:C.muted});
+  if(!S1.K) txt(v,t('lbBroken'),412,150,{size:16,color:C.warn}); }
+function drawLift(v,dt){ const c=v.ctx, G=440, k=25, E=S1.U, top=G-E*k, El=K1.el, m=S1.mode; let paths;
+  const Im=K1.chains[0].I;
+  if(m==='one') paths=[{pts:[[110,G],[110,top],[300,top],[860,G],[110,G]],I:Im,ramps:[[2,'D1']]}];
+  else if(m==='ser'){ const y1=top+Math.abs(El.D1.U)*k; paths=[{pts:[[110,G],[110,top],[260,top],[520,y1],[600,y1],[860,G],[110,G]],I:Im,ramps:[[2,'D1'],[4,'D2']]}]; }
+  else { const I1=K1.chains.find(q=>q.id==='b0').I, I2=K1.chains.find(q=>q.id==='b1').I;
+    paths=[{pts:[[520,G],[110,G],[110,top],[300,top]],I:Im},{pts:[[300,top],[520,G]],I:I1,ramps:[[0,'D1']]},{pts:[[300,top],[640,top]],I:I2},{pts:[[640,top],[880,G]],I:I2,ramps:[[0,'D2']]},{pts:[[880,G],[520,G]],I:I2}]; }
+  // trục độ cao
+  c.strokeStyle=C.muted; c.lineWidth=2; c.beginPath(); c.moveTo(40,G); c.lineTo(40,G-300); c.stroke();
+  for(let u=0;u<=12;u+=3){ const y=G-u*k; c.beginPath(); c.moveTo(34,y); c.lineTo(46,y); c.stroke(); txt(v,nf(u,0)+' V',50,y,{size:14,w:500,color:C.muted,align:'left',mono:true}); }
+  txt(v,t('lbHeight'),20,G-330,{size:16,w:500,color:C.muted,align:'left'});
+  rr(c,88,G-312,44,324,6); c.fillStyle=C.lane; c.fill(); c.lineWidth=2; c.strokeStyle=C.line; c.stroke();
+  // đường ray, máng
+  c.lineCap='round';
+  paths.forEach(p=>{ for(let i=0;i<p.pts.length-1;i++){ const [x1,y1]=p.pts[i],[x2,y2]=p.pts[i+1]; if(x1===110&&x2===110) continue;
+      const rp=(p.ramps||[]).find(r=>r[0]===i);
+      if(rp){ const e=El[rp[1]], b=brightOf(e); c.strokeStyle=mix(C.metal,C.heat,0.65*Math.min(1,b)); c.lineWidth=8; c.beginPath(); c.moveTo(x1,y1); c.lineTo(x2,y2); c.stroke();
+        const L=Math.hypot(x2-x1,y2-y1), a=Math.atan2(y2-y1,x2-x1); c.fillStyle=c.strokeStyle; for(let s=24;s<L-10;s+=32){ const bx=x1+(x2-x1)*s/L, by=y1+(y2-y1)*s/L; c.beginPath(); c.arc(bx+Math.sin(a)*5,by-Math.cos(a)*5,6,Math.PI+a,a); c.fill(); }
+        const xm=Math.max(x1,x2)+16; c.strokeStyle=C.muted; c.lineWidth=1.5; c.setLineDash([4,4]); c.beginPath(); c.moveTo(x2-6,y1); c.lineTo(xm+6,y1); c.moveTo(xm,y1); c.lineTo(xm,y2); c.stroke(); c.setLineDash([]);
+        if(Math.abs(y2-y1)>14) txt(v,(m==='one'?'U':'U'+rp[1].slice(1).replace('1','₁').replace('2','₂'))+' = '+hid(nf(Math.abs(e.U),1))+' V',xm-8,(y1+y2)/2,{size:15,align:'right',mono:true}); }
+      else { c.strokeStyle=C.metal; c.lineWidth=8; c.beginPath(); c.moveTo(x1,y1); c.lineTo(x2,y2); c.stroke(); } } });
+  // bi
+  const sp=26; c.fillStyle=C.q;
+  paths.forEach((p,i)=>{ const P=polyInfo(p.pts); S1.lph[i]=(S1.lph[i]||0)+clamp(K1.kv*p.I,-520,520)*dt; const off=((S1.lph[i]%sp)+sp)%sp;
+    c.beginPath(); for(let s=off;s<P.L;s+=sp){ const q=posAt(P,s); const vert=Math.abs(Math.cos(q.a))<0.05; const x=q.x, y=q.y-(vert?0:15); if(!S1.K&&!vert&&y<top&&x>150&&x<175) continue; c.moveTo(x+9,y); c.arc(x,y,9,0,7); } c.fill(); });
+  if(!S1.K){ c.fillStyle=C.warn; c.fillRect(156,top-44,10,44); txt(v,t('lbGate'),170,top-62,{size:16,color:C.warn,align:'left'}); }
+  const small=v.sc<0.6; txt(v,t('lbLift'),small?20:110,G+34,{size:17,align:small?'left':'center'}); txt(v,'U = '+nf(E,1,0)+' V',140,top-46,{size:16,align:'left',mono:true});
+  if(small) return; const rd=El.D1; txt(v,t('lbRamp'),m==='par'?410:560,m==='par'?G+34:G-120+(m==='ser'?-60:0),{size:16,w:500,color:C.muted});
+  txt(v,t('lbBall'),985,G+34,{size:14,w:500,color:C.muted,align:'right'}); }
+
+/* ---------- TAB 2: pin, điện trở, đo đạc ---------- */
+const V2=view('cv2',600), Z2=view('zm2',250), G2=view('gr2',400,600);
+function build2(){ K2=new Circuit(loopDef({x0:120,y0:90,x1:880,y1:420,els:[BAT([120,255]),SW('K',[300,90]),AMM('A',[520,90]),RES('R',[880,255],[-80,0],{len:110,Pref:6})]})); }
+function sync2(){ const e=K2.el; e.E.E=S2.U; e.R.R=S2.R; e.K.closed=S2.K; K2.solve(); }
+const VBODY=[500,512];
+function probeLoc(p){ return K2.locate(p.x,p.y,14); }
+function region2(p){ if(!p) return null; const els=p.c.els; for(const e of els) if(Math.abs(p.s-e.s)<e.len/2) return 'in'; let n=0; for(const e of els) if(e.s<p.s) n++; return n===els.length?0:n; }
+function vread2(){ const a=probeLoc(S2.pr.r), b=probeLoc(S2.pr.k); if(!a||!b) return null; return K2.Vloc(a)-K2.Vloc(b); }
+function checkMiss2(){ const a=probeLoc(S2.pr.r), b=probeLoc(S2.pr.k); if(!a||!b) return; const ra=region2(a), rb=region2(b); if(ra==='in'||rb==='in') return;
+  const v=K2.Vloc(a)-K2.Vloc(b), pair=(x,y)=>(ra===x&&rb===y)||(ra===y&&rb===x);
+  const ok=[pair(0,1), ra===rb&&Math.hypot(a.x-b.x,a.y-b.y)>60, !S2.K&&pair(1,2), S2.K&&pair(3,0)];
+  ok.forEach((o,i)=>{ if(o&&S2.miss[i]==null){ S2.miss[i]=Math.abs(v); renderMiss2(); } }); }
+function drawProbes(v){ const c=v.ctx, [bx,by]=VBODY;
+  for(const [p,col,dx] of [[S2.pr.r,C.q,-16],[S2.pr.k,C.ink,16]]){ const L=probeLoc(p), x=L?L.x:p.x, y=L?L.y:p.y;
+    c.strokeStyle=col; c.lineWidth=3.5; c.beginPath(); c.moveTo(bx+dx,by+20); c.quadraticCurveTo((bx+dx+x)/2,Math.max(by,y)+70,x,y); c.stroke();
+    c.beginPath(); c.arc(x,y,12,0,7); c.fillStyle=col; c.fill(); c.lineWidth=3; c.strokeStyle=C.panel; c.stroke(); }
+  c.beginPath(); c.arc(bx,by,34,0,7); c.fillStyle=C.meter; c.fill(); c.lineWidth=3; c.strokeStyle=C.ink; c.stroke(); txt(v,'V',bx,by+1,{size:24,w:800});
+  const r=vread2(); box(v,r==null?t('notConn'):hid(nf(r,2))+' V',bx,by+64,{size:19}); }
+function frame2(dt,dtr){ sync2(); K2.step(dt); checkMiss2();
+  if(fit(V2)){ drawCircuit(V2,K2,dtr); drawProbes(V2); }
+  stepZoom(dt); if(fit(Z2)) drawZoom(Z2);
+  if(frameN%5===0){ if(fit(G2)) drawGraph(G2); setStatus('st2',S2.K?'':t('stOpen'),false); panel2(); setObs('obs2',obs2()); } }
+function panel2(){ const I=K2.el.A.I, UR=Math.abs(K2.el.R.U), r=vread2();
+  kvSet('kv2','u',fV(S2.U)); kvSet('kv2','r',nf(S2.R,0)+' Ω'); kvSet('kv2','i',fA(I)); kvSet('kv2','v',r==null?t('notConn'):hid(nf(r,2))+' V');
+  kvSet('kv2','ee',hid(nf(UR,2))+' eV ≈ '+hid(sci(UR*QE))+' J'); kvSet('kv2','ne',hid(sci(Math.abs(I)/QE))+t('perS')); kvSet('kv2','p',fP(K2.el.R.P));
+  const zs=$('#zsp2'); if(zs){ const s=t('zSpeed',hid(nf(Math.abs(I)/(N_CU*QE*S_WIRE)*1000,3))); if(zs.textContent!==s) zs.textContent=s; } }
+function obs2(){ const out=[]; S2.miss.forEach((m,i)=>{ if(m!=null) out.push(['hl',I18N[lang].missRes[i](fV(m))]); });
+  const r=vread2(); if(r!=null&&r<-0.01) out.push(['wn',t('obs2neg')]);
+  if(S2.K) out.push(['',t('obs2ohm',fV(S2.U),nf(S2.R,0)+' Ω',fA(K2.el.A.I))]); return out; }
+function renderMiss2(){ $('#miss2').innerHTML=I18N[lang].miss.map((m,i)=>`<li class="${S2.miss[i]!=null?'done':''}"><span class="mk">${S2.miss[i]!=null?'✓':i+1}</span><span>${m}</span></li>`).join(''); }
+/* phóng to dây điện trở */
+const ZM={ions:[],els:[],t:0};
+(function(){ for(let j=0;j<4;j++) for(let i=0;i<17;i++) ZM.ions.push({x:70+i*54+(j%2)*27,y:62+j*44,p1:Math.random()*7,p2:Math.random()*7,fl:0});
+  for(let k=0;k<30;k++){ const a=Math.random()*7; ZM.els.push({x:30+Math.random()*940,y:45+Math.random()*150,vx:50*Math.cos(a),vy:50*Math.sin(a),tt:Math.random()*0.35}); } })();
+function stepZoom(dt){ if(!dt) return; ZM.t+=dt; const I=K2?Math.abs(K2.el.A.I):0, tau=0.35, vd=clamp(60*I,0,320), acc=2*vd/tau;
+  for(const e of ZM.els){ e.vx-=acc*dt; e.x+=e.vx*dt; e.y+=e.vy*dt; e.tt-=dt;
+    if(e.tt<=0){ const a=Math.random()*7; e.vx=50*Math.cos(a); e.vy=50*Math.sin(a); e.tt=tau*(0.4+Math.random()*1.2);
+      let best=null,bd=1e9; for(const q of ZM.ions){ const d=Math.hypot(q.x-e.x,q.y-e.y); if(d<bd){ bd=d; best=q; } } if(best&&I>0.001) best.fl=Math.min(1,best.fl+0.5); }
+    if(e.x<10) e.x+=980; if(e.x>990) e.x-=980; if(e.y<40){ e.y=40; e.vy=Math.abs(e.vy); } if(e.y>200){ e.y=200; e.vy=-Math.abs(e.vy); } }
+  for(const q of ZM.ions) q.fl=Math.max(0,q.fl-dt*3); }
+function drawZoom(v){ const c=v.ctx, P=K2.el.R.P, f=clamp(P/6,0,1.5), A=1.2+7*Math.sqrt(f);
+  rr(c,6,30,988,190,10); c.fillStyle=C.panel; c.fill(); c.lineWidth=2; c.strokeStyle=C.line; c.stroke();
+  for(const q of ZM.ions){ const x=q.x+A*Math.sin(ZM.t*31+q.p1), y=q.y+A*Math.cos(ZM.t*27+q.p2);
+    c.beginPath(); c.arc(x,y,13,0,7); c.fillStyle=mix(C.metal,C.heat,Math.min(1,f)); c.fill();
+    if(q.fl>0.02){ c.lineWidth=3; c.strokeStyle=rgba(C.heat,q.fl); c.beginPath(); c.arc(x,y,18,0,7); c.stroke(); }
+    txt(v,'+',x,y+1,{size:15,w:800,color:C.panel}); }
+  c.fillStyle=C.e; c.beginPath(); for(const e of ZM.els){ c.moveTo(e.x+5.5,e.y); c.arc(e.x,e.y,5.5,0,7); } c.fill();
+  txt(v,t('zHi'),14,15,{size:15,align:'left',color:C.muted}); txt(v,t('zLo'),986,15,{size:15,align:'right',color:C.muted});
+  arrow(c,400,236,600,236,C.ink,3,14); txt(v,t('zField'),620,236,{size:15,align:'left',color:C.muted});
+  c.fillStyle=C.e; c.beginPath(); c.arc(30,236,6,0,7); c.fill(); txt(v,t('zE'),42,236,{size:14,w:500,align:'left',color:C.muted});
+  c.fillStyle=mix(C.metal,C.heat,Math.min(1,f)); c.beginPath(); c.arc(200,236,9,0,7); c.fill(); txt(v,t('zIon'),214,236,{size:14,w:500,align:'left',color:C.muted}); }
+function niceMax(x){ const p=Math.pow(10,Math.floor(Math.log10(x))); for(const m of [1,2,4,8,10]) if(m*p>=x-1e-12) return m*p; return 10*p; }
+function drawGraph(v){ const c=v.ctx, L=80, B=340, T=24, Rt=580, Xm=12;
+  let Ym=niceMax(Math.max(0.1,12/S2.R,...S2.rec.map(r=>r.I))*1.02);
+  const X=u=>L+(Rt-L)*u/Xm, Y=i=>B-(B-T)*i/Ym;
+  c.strokeStyle=C.line; c.lineWidth=1; for(let u=0;u<=Xm;u+=2){ c.beginPath(); c.moveTo(X(u),T); c.lineTo(X(u),B); c.stroke(); txt(v,nf(u,0),X(u),B+20,{size:15,w:500,color:C.muted,mono:true}); }
+  for(let k=0;k<=4;k++){ const i=Ym*k/4; c.beginPath(); c.moveTo(L,Y(i)); c.lineTo(Rt,Y(i)); c.stroke(); txt(v,nf(i,2,0),L-10,Y(i),{size:15,w:500,color:C.muted,align:'right',mono:true}); }
+  c.strokeStyle=C.ink; c.lineWidth=2; c.beginPath(); c.moveTo(L,T); c.lineTo(L,B); c.lineTo(Rt,B); c.stroke();
+  txt(v,'U (V)',Rt,B+46,{size:16,align:'right'}); txt(v,'I (A)',L,T-8,{size:16,align:'left',base:'bottom'});
+  if(hideNums) return;
+  c.setLineDash([7,6]); c.strokeStyle=C.accent; c.lineWidth=2.5; c.beginPath(); c.moveTo(X(0),Y(0)); const ue=Math.min(Xm,Ym*S2.R); c.lineTo(X(ue),Y(ue/S2.R)); c.stroke(); c.setLineDash([]);
+  c.fillStyle=C.ink; for(const r of S2.rec){ c.beginPath(); c.arc(X(r.U),Y(r.I),7,0,7); c.fill(); }
+  if(S2.K){ const I=Math.abs(K2.el.A.I); c.lineWidth=3.5; c.strokeStyle=C.accent; c.beginPath(); c.arc(X(S2.U),Y(I),10,0,7); c.stroke(); } }
+
+/* ---------- TAB 3: nối tiếp ---------- */
+const V3=view('cv3',540);
+function build3(){ const n=S3.n;
+  const els=[BAT([100,290]),SW('K',[170,110]),AMM('A1',[280,110]),BULB('D1',[420,110]),AMM('A2',[560,110]),BULB('D2',[700,110]),AMM('A3',[830,110]),AMM('A4',[700,470],[0,-54])];
+  if(n===3) els.push(BULB('D3',[900,290],[-60,0]));
+  const volts=[{name:'V1',body:[420,42],a:[360,110],b:[480,110],lo:[74,0]},{name:'V2',body:[700,42],a:[640,110],b:[760,110],lo:[74,0]},{name:'V',body:[30,290],a:[100,200],b:[100,380],lo:[0,-48]}];
+  if(n===3) volts.push({name:'V3',body:[962,290],a:[900,215],b:[900,365],lo:[-14,-48]});
+  K3=new Circuit(loopDef({x0:100,y0:110,x1:900,y1:470,els,volts})); }
+function sync3(){ const e=K3.el; e.E.E=S3.U; e.K.closed=S3.K; ['D1','D2','D3'].forEach((id,i)=>{ const b=e[id]; if(!b) return; b.R=S3.R[i]; b.Pref=9/S3.R[i]; b.removed=S3.rm[i]; }); K3.solve(); }
+function frame3(dt,dtr){ sync3(); K3.step(dt);
+  if(fit(V3)) drawCircuit(V3,K3,dtr);
+  if(frameN%5===0){ const over=['D1','D2','D3'].some(id=>K3.el[id]&&brightOf(K3.el[id])>1.44);
+    const open=!S3.K||S3.rm.slice(0,S3.n).some(x=>x); setStatus('st3',open?t('stOpen'):over?t('stOver'):'',over&&!open); panel3(); setObs('obs3',obs3()); } }
+function vm3(name){ const m=K3.volts.find(q=>q.name===name); return m?Math.abs(K3.Vloc(m.pa)-K3.Vloc(m.pb)):0; }
+function sums3(){ const n=S3.n; let su=0, sr=0; for(let i=1;i<=n;i++){ su+=vm3('V'+i); sr+=S3.R[i-1]; } const I=Math.abs(K3.el.A1.I); return {su,sr,I,U:vm3('V'),Rt:I>1e-6?vm3('V')/I:NaN}; }
+function kvRows3(){ const r=[]; for(let i=1;i<=4;i++) r.push(['a'+i,t('lA','A'+i)]); for(let i=1;i<=S3.n;i++) r.push(['v'+i,t('lUi',bulbName('D'+i))]);
+  r.push(['v',t('lUbat2'),'sep'],['su',t('lUsum'),'big'],['rt',t('lRtd'),'sep'],['rs',t('lRsum'),'big']); return r; }
+function panel3(){ for(let i=1;i<=4;i++) kvSet('kv3','a'+i,fA(K3.el['A'+i].I)); for(let i=1;i<=S3.n;i++) kvSet('kv3','v'+i,fV(vm3('V'+i)));
+  const s=sums3(); kvSet('kv3','v',fV(s.U)); kvSet('kv3','su',fV(s.su)); kvSet('kv3','rt',isFinite(s.Rt)?fR(s.Rt):'—'); kvSet('kv3','rs',nf(s.sr,0)+' Ω'); }
+function obs3(){ const open=!S3.K||S3.rm.slice(0,S3.n).some(x=>x); if(open) return [['wn',t('obs3open')]]; const s=sums3();
+  const out=[['hl',t('obs3eq',fA(s.I))],['hl',t('obs3u',fV(s.su),fV(s.U))],['',t('obs3r',fR(s.Rt),nf(s.sr,0)+' Ω')]];
+  const R=S3.R.slice(0,S3.n); if(Math.max(...R)-Math.min(...R)>=1) out.push(['',t('obs3big')]); return out; }
+
+/* ---------- TAB 4: song song ---------- */
+const V4=view('cv4',540);
+function build4(){ const xs=[430,640,850];
+  K4=new Circuit(parDef({xL:110,yT:100,yB:470,xs,main:[BAT([110,285]),SW('K',[190,100]),AMM('A',[310,100])],
+    branch:(i,x)=>[SW('K'+(i+1),[x,165],[-42,0]),AMM('A'+(i+1),[x,245],[-80,0]),BULB('D'+(i+1),[x,370],[-58,0])],
+    volts:xs.map((x,i)=>({name:'V'+(i+1),body:[x+76,370],a:[x,318],b:[x,425],lo:[0,46]}))})); }
+function sync4(){ const e=K4.el; e.E.E=S4.U; e.E.r=S4.ri?1:0; e.K.closed=S4.K; for(let i=0;i<3;i++){ e['K'+(i+1)].closed=S4.Kb[i]; const b=e['D'+(i+1)]; b.R=S4.R[i]; b.Pref=36/S4.R[i]; } K4.solve(); }
+function frame4(dt,dtr){ sync4(); K4.step(dt); if(fit(V4)) drawCircuit(V4,K4,dtr);
+  if(frameN%5===0){ const none=!S4.K||!S4.Kb.some(x=>x); setStatus('st4',none?t('stOpen'):'',false); panel4(); setObs('obs4',obs4()); } }
+function vals4(){ const e=K4.el, I=Math.abs(e.A.I), Ib=[1,2,3].map(i=>Math.abs(e['A'+i].I)), U=[1,2,3].map(i=>{ const m=K4.volts[i-1]; return Math.abs(K4.Vloc(m.pa)-K4.Vloc(m.pb)); });
+  const Ubat=S4.U-I*(S4.ri?1:0), Ub=S4.K?U.reduce((a,b)=>Math.max(a,b),0):0; let g=0; S4.Kb.forEach((k,i)=>{ if(k) g+=1/S4.R[i]; });
+  return {I,Ib,U,Ubat,Ub,Rt:I>1e-6?Ub/I:NaN,Rf:g>0?1/g:NaN}; }
+function kvRows4(){ return [['i',t('lI'),'big'],['i1',t('lIb',1)],['i2',t('lIb',2)],['i3',t('lIb',3)],['is',t('lIsum'),'big'],['u1',t('lUi',bulbName('D1')),'sep'],['u2',t('lUi',bulbName('D2'))],['u3',t('lUi',bulbName('D3'))],['ub',t('lUbat2')],['rt',t('lRtd'),'sep'],['rf',t('lRpar'),'big']]; }
+function panel4(){ const s=vals4(); kvSet('kv4','i',fA(s.I)); s.Ib.forEach((x,i)=>kvSet('kv4','i'+(i+1),fA(x))); kvSet('kv4','is',fA(s.Ib[0]+s.Ib[1]+s.Ib[2]));
+  s.U.forEach((x,i)=>kvSet('kv4','u'+(i+1),fV(x))); kvSet('kv4','ub',fV(S4.K&&S4.Kb.some(x=>x)?s.Ubat:S4.U)); kvSet('kv4','rt',isFinite(s.Rt)?fR(s.Rt):'—'); kvSet('kv4','rf',isFinite(s.Rf)?fR(s.Rf):'—'); }
+function obs4(){ if(!S4.K||!S4.Kb.some(x=>x)) return [['wn',t('obs4none')]]; const s=vals4(); const sum=s.Ib[0]+s.Ib[1]+s.Ib[2];
+  let minR=Infinity; S4.Kb.forEach((k,i)=>{ if(k) minR=Math.min(minR,S4.R[i]); });
+  const out=[['hl',t('obs4sum',fA(sum),fA(s.I))],['hl',t('obs4u',fV(s.Ub))],['',t('obs4r',fR(s.Rt),nf(minR,0)+' Ω')]]; if(S4.ri) out.push(['wn',t('obs4ri')]); return out; }
+
+/* ---------- TAB 5: hộp đen ---------- */
+const V5=view('cv5',480);
+function build5(){ const d=S5.mode==='ser'
+  ? loopDef({x0:40,y0:110,x1:460,y1:420,els:[BAT([40,265],{lab:[64,0]}),AMM('A',[150,110]),RES('R1',[300,110],[0,-54]),RES('R2',[460,265],[-62,0])]})
+  : parDef({xL:40,yT:110,yB:420,xs:[250,400],main:[BAT([40,265],{lab:[64,0]}),AMM('A',[145,110])],branch:(i,x)=>[RES('R'+(i+1),[x,265],[54,0])]});
+  K5a=new Circuit(d);
+  K5b=new Circuit(loopDef({x0:560,y0:110,x1:960,y1:420,els:[BAT([560,265],{lab:[64,0]}),AMM('A',[690,110]),{t:'box',id:'X',at:[960,265],R:40,lab:[-110,0]}]})); }
+function sync5(){ for(const K of [K5a,K5b]){ K.el.E.E=S5.U; } K5a.el.R1.R=S5.R1; K5a.el.R2.R=S5.R2; K5b.el.X.R=S5.Rx; K5a.solve(); K5b.solve(); }
+function req5(){ return S5.mode==='ser'?S5.R1+S5.R2:S5.R1*S5.R2/(S5.R1+S5.R2); }
+function frame5(dt,dtr){ sync5(); K5a.step(dt); K5b.step(dt);
+  if(fit(V5)){ drawCircuit(V5,K5a,dtr); drawCircuit(V5,K5b,dtr); const c=V5.ctx; c.setLineDash([8,8]); c.strokeStyle=C.line; c.lineWidth=2; c.beginPath(); c.moveTo(510,20); c.lineTo(510,460); c.stroke(); c.setLineDash([]);
+    txt(V5,t('lReal')+' ('+t(S5.mode)+')',250,22,{size:19}); txt(V5,t('lBox'),760,22,{size:19}); }
+  if(frameN%5===0) panel5(); }
+function panel5(){ const a=Math.abs(K5a.el.A.I), b=Math.abs(K5b.el.A.I), m=Math.abs(a-b)/Math.max(a,1e-9)<0.01;
+  kvSet('kv5','a',fA(a)); kvSet('kv5','b',fA(b)); kvSet('kv5','x',nf(S5.Rx,1,1)+' Ω');
+  const fb=hideNums?t('fb5hidden'):m?t('fb5match'):t('fb5no',fA(a-b)); const el=$('#fb5'); if(el.innerHTML!==fb) el.innerHTML=fb;
+  const fm=$('#fm5'); fm.hidden=!(m&&!hideNums); if(!fm.hidden){ const h=S5.mode==='ser'?t('fm5ser',S5.R1,S5.R2,nf(req5(),2,0)):t('fm5par',S5.R1,S5.R2,nf(req5(),2,0)); if(fm.innerHTML!==h) fm.innerHTML=h; }
+  setStatus('st5','',false); setObs('obs5',[['',S5.mode==='ser'?t('obs5ser'):t('obs5par')]]); }
+
+/* ---------- TAB 6: thử thách, ứng dụng ---------- */
+const V6=view('cv6',480);
+const HOUSE={lamp:[1210,40],fan:[220*220/60,60],kettle:[48.4,1000]};
+function genProb(type){ const pick=a=>a[Math.floor(Math.random()*a.length)]; const Us=[3,4.5,6,9,12], Rs=[2,3,4,5,6,8,10,12,15,20,24,30];
+  const p={type,U:pick(Us),R1:pick(Rs),R2:pick(Rs),R3:pick(Rs)};
+  if(type==='nt') p.I=p.U/(p.R1+p.R2); else if(type==='ss') p.I=p.U/p.R1+p.U/p.R2; else p.I=p.U/(p.R1+p.R2*p.R3/(p.R2+p.R3)); return p; }
+function build6(){ const s=S6.sub; let d;
+  if(s==='bright'){ const D1o={R:12,Pref:3,Prated:3,sub:'6 V – 3 W'}, D2o={R:6,Pref:3,Prated:6,sub:'6 V – 6 W'};
+    d=S6.mode==='ser'? loopDef({x0:120,y0:100,x1:880,y1:420,els:[BAT([120,260]),SW('K',[250,100]),AMM('A',[380,100]),BULB('D1',[560,100],[0,60],D1o),BULB('D2',[760,100],[0,60],D2o)]})
+      : parDef({xL:120,yT:100,yB:420,xs:[520,780],main:[BAT([120,260]),SW('K',[210,100]),AMM('A',[340,100])],branch:(i,x)=>[AMM('A'+(i+1),[x,185],[-80,0]),BULB('D'+(i+1),[x,310],[74,-8],i?D2o:D1o)]}); }
+  else if(s==='calc'){ if(!S6.prob||S6.prob.type!==S6.ptype) S6.prob=genProb(S6.ptype); const p=S6.prob;
+    if(p.type==='nt') d=loopDef({x0:120,y0:100,x1:880,y1:420,els:[BAT([120,260]),AMM('A',[320,100]),RES('R1',[560,100],[0,-58]),RES('R2',[880,260],[-70,0])]});
+    else if(p.type==='ss') d=parDef({xL:120,yT:100,yB:420,xs:[540,780],main:[BAT([120,260]),AMM('A',[320,100])],branch:(i,x)=>[RES('R'+(i+1),[x,260],[-62,0])]});
+    else d=parDef({xL:120,yT:100,yB:420,xs:[580,800],main:[BAT([120,260]),AMM('A',[300,100]),RES('R1',[350,420],[0,-58])],branch:(i,x)=>[RES('R'+(i+2),[x,260],[-62,0])]}); }
+  else { const devs=['lamp','fan','kettle'];
+    d=S6.house==='par'? parDef({xL:110,yT:100,yB:460,xs:[430,640,850],kv:40,main:[BAT([110,280],{E:220,lab:[80,0]}),AMM('A',[270,100])],branch:(i,x)=>[SW('K'+(i+1),[x,175],[-42,0]),DEV(devs[i],[x,330],...HOUSE[devs[i]])]})
+      : loopDef({x0:110,y0:100,x1:880,y1:460,kv:40,els:[BAT([110,280],{E:220,lab:[80,0]}),SW('K1',[200,100]),DEV('lamp',[340,100],...HOUSE.lamp),SW('K2',[490,100]),DEV('fan',[640,100],...HOUSE.fan),SW('K3',[880,180],[42,0]),DEV('kettle',[880,330],...HOUSE.kettle),AMM('A',[500,460],[0,-54])]}); }
+  K6=new Circuit(d); const H=s==='house'?540:480; if(V6.H!==H){ V6.H=H; V6.dirty=true; } }
+function sync6(){ const e=K6.el, s=S6.sub;
+  if(s==='bright'){ e.E.E=S6.U; e.K.closed=S6.K; }
+  else if(s==='calc'){ const p=S6.prob; e.E.E=p.U; e.R1.R=p.R1; e.R2.R=p.R2; if(e.R3) e.R3.R=p.R3; }
+  else { e.E.E=220; for(let i=0;i<3;i++) e['K'+(i+1)].closed=S6.Kh[i]; }
+  K6.solve(); }
+function frame6(dt,dtr){ sync6(); K6.step(dt); if(fit(V6)) drawCircuit(V6,K6,dtr,{hideA:S6.sub==='calc'&&!S6.checked});
+  if(frameN%5===0) panel6(); }
+function panel6(){ const s=S6.sub, e=K6.el;
+  if(s==='bright'){ const D1=e.D1, D2=e.D2; kvSet('kv6a','p1',fP(D1.P)); kvSet('kv6a','p2',fP(D2.P)); kvSet('kv6a','i1',fA(D1.I)); kvSet('kv6a','i2',fA(D2.I)); kvSet('kv6a','u1',fV(Math.abs(D1.U))); kvSet('kv6a','u2',fV(Math.abs(D2.U)));
+    const over=[D1,D2].some(d=>d.P>d.Prated*1.05); setStatus('st6',!S6.K?t('stOpen'):over?t('stOver'):'',over&&S6.K);
+    const out=[]; if(S6.K&&S6.U>0) out.push(['hl',S6.mode==='ser'?t('obs6ser',fP(D1.P),fP(D2.P)):t('obs6par',fP(D1.P),fP(D2.P))]); if(over) out.push(['wn',t('obs6over')]); setObs('obs6',out); }
+  else if(s==='calc'){ setStatus('st6','',false); setObs('obs6',[['',t('obs6calc')]]); }
+  else { kvSet('kv6c','i',fA(e.A?e.A.I:0)); ['lamp','fan','kettle'].forEach((id,i)=>{ const d=e[id]; kvSet('kv6c','d'+(i+1),Math.abs(d.I)>1e-6?hid(nf(Math.abs(d.U),0))+' V · '+hid(nf(d.P/d.Pd*100,d.P/d.Pd<0.1?1:0))+' %':'—'); });
+    setStatus('st6','',false); setObs('obs6',S6.house==='par'?[['hl',t('obs6hp')],['',t('obs6hi',fA(e.A.I))]]:[['wn',t('obs6hs')]]); } }
+function renderProb6(){ const p=S6.prob; if(!p) return; const f=x=>nf(x,1,0);
+  $('#prob6').textContent=p.type==='nt'?t('pNT',f(p.U),p.R1,p.R2):p.type==='ss'?t('pSS',f(p.U),p.R1,p.R2):t('pHH',f(p.U),p.R1,p.R2,p.R3);
+  const sb=lang==='vi'?'tđ':'eq', n=x=>nf(x,3,0); let h;
+  if(p.type==='nt') h=`R<sub>${sb}</sub> = R₁ + R₂ = ${p.R1} + ${p.R2} = ${p.R1+p.R2} Ω<br>I = U / R<sub>${sb}</sub> = ${f(p.U)} / ${p.R1+p.R2} ≈ ${n(p.I)} A`;
+  else if(p.type==='ss'){ const r=p.R1*p.R2/(p.R1+p.R2); h=`R<sub>${sb}</sub> = R₁·R₂ / (R₁ + R₂) = ${p.R1}·${p.R2} / ${p.R1+p.R2} ≈ ${n(r)} Ω<br>I = U / R<sub>${sb}</sub> ≈ ${n(p.I)} A<br>${lang==='vi'?'hoặc':'or'}: I = U/R₁ + U/R₂ = ${n(p.U/p.R1)} + ${n(p.U/p.R2)} = ${n(p.I)} A`; }
+  else { const r23=p.R2*p.R3/(p.R2+p.R3); h=`R₂₃ = R₂·R₃ / (R₂ + R₃) = ${p.R2}·${p.R3} / ${p.R2+p.R3} ≈ ${n(r23)} Ω<br>R<sub>${sb}</sub> = R₁ + R₂₃ ≈ ${n(p.R1+r23)} Ω<br>I = U / R<sub>${sb}</sub> ≈ ${n(p.I)} A`; }
+  $('#solTxt6').innerHTML=h; }
+function check6(){ const raw=$('#ans6').value.trim().replace(',','.'), x=parseFloat(raw), fb=$('#fb6'); fb.hidden=false;
+  if(!isFinite(x)){ fb.innerHTML=t('empty6'); return; } const p=S6.prob, ok=Math.abs(x-p.I)/p.I<0.02; S6.checked=true;
+  fb.innerHTML=ok?t('good6',nf(p.I,3,0)+' A'):t('bad6',nf(p.I,3,0)+' A'); $('#sol6').hidden=false; if(!ok) $('#sol6').open=true; }
+function newProb6(){ S6.prob=genProb(S6.ptype); S6.checked=false; $('#ans6').value=''; $('#fb6').hidden=true; $('#sol6').hidden=true; $('#sol6').open=false; build6(); renderProb6(); }
+
+/* ================= giao diện chung ================= */
+function setStatus(id,s,warn){ const el=$('#'+id); if(el.textContent!==s) el.textContent=s; el.classList.toggle('warn',!!warn||s===t('stOpen')&&false); }
+function setObs(id,arr){ const h=arr.map(([c,s])=>`<p class="${c}">${s}</p>`).join(''); const el=$('#'+id); if(el.innerHTML!==h) el.innerHTML=h; }
+function kvBuild(id,rows){ $('#'+id).innerHTML=rows.map(([k,l,c])=>`<dt class="${c==='sep'?'sep':''}">${l}</dt><dd id="${id}_${k}" class="${c||''}"></dd>`).join(''); }
+function kvSet(id,k,v){ const el=document.getElementById(id+'_'+k); if(el&&el.textContent!==v) el.textContent=v; }
+function segSet(id,val){ $$('#'+id+' .btn').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===String(val)))); }
+function buildPred(){ $$('.pred').forEach(p=>{ const q=p.dataset.q, Qd=I18N[lang].Q[q];
+  p.innerHTML=`<p class="q">${Qd.q}</p><div class="choices">${Qd.o.map((o,i)=>`<button class="btn" data-i="${i}">${o}</button>`).join('')}</div><p class="fb" hidden></p>`;
+  $$('.btn',p).forEach(b=>b.onclick=()=>{ if(PA[q]!=null) return; PA[q]=+b.dataset.i; renderPred(p); checkConcl(); }); renderPred(p); }); }
+function renderPred(p){ const q=p.dataset.q, a=PA[q], fb=$('.fb',p); $$('.btn',p).forEach(b=>{ const i=+b.dataset.i; b.classList.toggle('right',a!=null&&i===ANS[q]); b.classList.toggle('wrong',a!=null&&i===a&&a!==ANS[q]); });
+  if(a==null){ fb.hidden=true; return; } fb.hidden=false; fb.innerHTML=`<b class="${a===ANS[q]?'good':'bad'}">${a===ANS[q]?t('okW'):t('noW')}</b> ${I18N[lang].Q[q].fb}`; }
+function checkConcl(){ for(let n=1;n<=5;n++){ if(TABQ[n].every(q=>PA[q]!=null)) $('#concl'+n).hidden=false; } }
+function renderMap(){ const A=I18N[lang].ana[S1.ana];
+  $('#map1').innerHTML=I18N[lang].mapRows.map((r,i)=>`<dt>${r}</dt><dd>${A.rows[i]}</dd>`).join('');
+  const keys=['water','bike','lift','crowd'], nm={water:'anaWater',bike:'anaBike',lift:'anaLift',crowd:'anaCrowd'};
+  $('#mapTbl').innerHTML=`<tr><th>${t('mapHead')}</th>${keys.map(k=>`<th class="${k===S1.ana?'on':''}">${t(nm[k])}</th>`).join('')}</tr>`+
+    I18N[lang].mapRows.map((r,i)=>`<tr><td>${r}</td>${keys.map(k=>`<td class="${k===S1.ana?'on':''}">${I18N[lang].ana[k].rows[i]}</td>`).join('')}</tr>`).join('');
+  $('#rw1r').innerHTML=A.r.map(x=>`<li>${x}</li>`).join(''); $('#rw1w').innerHTML=A.w.map(x=>`<li>${x}</li>`).join('');
+  $('#anaTitle').textContent=t(nm[S1.ana]); segSet('ana1',S1.ana); }
+function renderTables(){
+  $('#tb2').innerHTML=`<tr>${I18N[lang].th2.map(h=>`<th>${h}</th>`).join('')}</tr>`+S2.rec.map(r=>`<tr><td class="n">${hid(nf(r.U,1))}</td><td class="n">${hid(nf(r.I,3))}</td><td class="n">${r.I>0?hid(nf(r.U/r.I,2,0)):'—'}</td></tr>`).join('');
+  $('#tb3').innerHTML=`<tr>${I18N[lang].th3.map(h=>`<th>${h}</th>`).join('')}</tr>`+S3.rec.map(r=>`<tr>${r.map((x,i)=>`<td class="n">${isFinite(x)?hid(nf(x,i<2?(i?1:1):3,i?0:1)):'—'}</td>`).join('')}</tr>`).join('');
+  $('#tb4').innerHTML=`<tr>${I18N[lang].th4.map(h=>`<th>${h}</th>`).join('')}</tr>`+S4.rec.map(r=>`<tr>${r.map((x,i)=>`<td class="n">${hid(nf(x,i?3:1,i?3:1))}</td>`).join('')}</tr>`).join(''); }
+function buildCtl(){ $$('[data-ctl]').forEach((el,i)=>{ const n=el.closest('section').id.slice(1);
+  el.innerHTML=`<button class="btn ctl-run" id="run${n}"></button><div class="seg ctl-spd"><button class="btn" data-v="0.25"></button><button class="btn" data-v="0.5"></button><button class="btn" data-v="1"></button></div>`+
+  `<button class="btn ctl-reset" id="rst${n}" data-i18n="reset"></button><span class="hint" data-i18n="parts"></span><div class="seg ctl-part"><button class="btn" data-v="e" data-i18n="partE"></button><button class="btn" data-v="q" data-i18n="partQ"></button></div>`+
+  `<label class="chk"><input type="checkbox" id="pot${n}" class="ctl-pot"> <span data-i18n="potColor"></span></label>`; });
+  $$('.ctl-run').forEach(b=>b.onclick=()=>{ running=!running; ctlState(); });
+  $$('.ctl-spd .btn').forEach(b=>b.onclick=()=>{ speed=+b.dataset.v; ctlState(); });
+  $$('.ctl-part .btn').forEach(b=>b.onclick=()=>{ partMode=b.dataset.v; save(); ctlState(); legend(); });
+  $$('.ctl-pot').forEach(b=>b.onchange=()=>{ potOn=b.checked; save(); ctlState(); legend(); });
+  $$('.ctl-reset').forEach(b=>b.onclick=()=>resetTab(+b.id.slice(3))); }
+function ctlState(){ $$('.ctl-run').forEach(b=>b.textContent=running?t('pause'):t('play')); $$('.ctl-spd .btn').forEach(b=>{ b.textContent='×'+nf(+b.dataset.v,2,0); b.setAttribute('aria-pressed',String(+b.dataset.v===speed)); });
+  $$('.ctl-part .btn').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===partMode))); $$('.ctl-pot').forEach(b=>b.checked=potOn); }
+function legend(){ const h=`<span><span class="dot" style="background:var(--${partMode==='e'?'e':'q'})"></span>${partMode==='e'?t('lgE'):t('lgQ')}</span>`+(potOn?`<span>${t('lgPotLo')}<span class="ramp"></span>${t('lgPotHi')}</span>`:'')+`<span>${t('lgFlash')}</span>`;
+  $$('[data-legend]').forEach(el=>el.innerHTML=h); }
+function uiVals(){ const sv=(id,v)=>{ const el=$('#'+id); if(el) el.value=v; }, lb=(id,s)=>{ const el=$('#'+id); if(el) el.textContent=s; };
+  sv('rU1',S1.U); sv('rR1',S1.R); $('#k1').checked=S1.K; lb('vU1',nf(S1.U,1)+' V'); lb('vR1',nf(S1.R,0)+' Ω'); segSet('mode1',S1.mode);
+  sv('rU2',S2.U); sv('rR2',S2.R); $('#k2').checked=S2.K; lb('vU2',nf(S2.U,1)+' V'); lb('vR2',nf(S2.R,0)+' Ω');
+  sv('rU3',S3.U); lb('vU3',nf(S3.U,1)+' V'); ['a','b','c'].forEach((x,i)=>{ sv('rR'+x+'3',S3.R[i]); lb('vR'+x+'3',nf(S3.R[i],0)+' Ω'); $('#rm3'+x).checked=S3.rm[i]; });
+  $('#k3').checked=S3.K; segSet('n3',S3.n); $('#fRc3').hidden=S3.n<3; $('#lrm3c').hidden=S3.n<3;
+  sv('rU4',S4.U); lb('vU4',nf(S4.U,1)+' V'); ['a','b','c'].forEach((x,i)=>{ sv('rR'+x+'4',S4.R[i]); lb('vR'+x+'4',nf(S4.R[i],0)+' Ω'); $('#k4'+x).checked=S4.Kb[i]; }); $('#k4').checked=S4.K; $('#ri4').checked=S4.ri;
+  sv('rU5',S5.U); sv('rRa5',S5.R1); sv('rRb5',S5.R2); sv('rRx5',S5.Rx); lb('vU5',nf(S5.U,1)+' V'); lb('vRa5',nf(S5.R1,0)+' Ω'); lb('vRb5',nf(S5.R2,0)+' Ω'); lb('vRx5',nf(S5.Rx,1,1)+' Ω'); segSet('mode5',S5.mode);
+  sv('rU6',S6.U); lb('vU6',nf(S6.U,1)+' V'); $('#k6').checked=S6.K; segSet('sub6',S6.sub); segSet('mode6',S6.mode); segSet('ptype6',S6.ptype); segSet('hmode6',S6.house);
+  ['a','b','c'].forEach((x,i)=>$('#h6'+x).checked=S6.Kh[i]);
+  $$('[data-sub]').forEach(el=>el.hidden=el.dataset.sub!==S6.sub); $('#hint6').textContent=t('hint6'+S6.sub); }
+function resetTab(n){ const S=[null,S1,S2,S3,S4,S5,S6][n]; Object.assign(S,cp(DEF[n]));
+  TABQ[n].forEach(q=>delete PA[q]); const cc=$('#concl'+n); if(cc) cc.hidden=true;
+  if(n===1){ build1(); S1.bike={ph:0,aF:0,aR:0,aM:0}; }
+  if(n===2){ S2.pr={r:{x:880,y:150},k:{x:880,y:370}}; S2.rec=[]; S2.miss=[null,null,null,null]; build2(); renderMiss2(); }
+  if(n===3){ S3.rec=[]; build3(); kvBuild('kv3',kvRows3()); }
+  if(n===4){ S4.rec=[]; build4(); }
+  if(n===5) build5();
+  if(n===6){ S6.prob=null; S6.checked=false; $('#ans6').value=''; $('#fb6').hidden=true; $('#sol6').hidden=true; build6(); renderProb6(); }
+  uiVals(); renderMap(); renderTables(); buildPred(); }
+function applyLang(){ document.documentElement.lang=lang;
+  $$('[data-i18n]').forEach(el=>el.textContent=t(el.dataset.i18n)); $$('[data-i18n-html]').forEach(el=>el.innerHTML=t(el.dataset.i18nHtml));
+  $('#langBtn').textContent=lang==='vi'?'EN':'VI'; $('#hideBtn').textContent=hideNums?t('showNums'):t('hideNums'); $('#hideBtn').setAttribute('aria-pressed',String(hideNums));
+  kvBuild('kv2',[['u',t('lUbat')],['r',t('lRR')],['i',t('lAmm'),'big'],['v',t('lVolt'),'big'],['ee',t('lEe'),'sep'],['ne',t('lNe')],['p',t('lPR')]]);
+  kvBuild('kv3',kvRows3()); kvBuild('kv4',kvRows4()); kvBuild('kv5',[['a',t('lIreal'),'big'],['b',t('lIbox'),'big'],['x',t('lRbox')]]);
+  kvBuild('kv6a',[['p1',t('lP',bulbName('D1')),'big'],['p2',t('lP',bulbName('D2')),'big'],['i1',t('lIn',bulbName('D1')),'sep'],['i2',t('lIn',bulbName('D2'))],['u1',t('lUn',bulbName('D1'))],['u2',t('lUn',bulbName('D2'))]]);
+  kvBuild('kv6c',[['i',t('lImain'),'big'],['d1',t('lDev',t('dvLamp')),'sep'],['d2',t('lDev',t('dvFan'))],['d3',t('lDev',t('dvKettle'))]]);
+  ctlState(); legend(); renderMap(); renderMiss2(); renderTables(); buildPred(); renderProb6(); uiVals(); checkConcl();
+  $$('[data-concl]').forEach(b=>{}); }
+function setTab(n){ tab=n; $$('nav.tabs button').forEach(b=>{ const on=+b.dataset.tab===n; b.classList.toggle('on',on); b.setAttribute('aria-selected',String(on)); }); for(let i=1;i<=6;i++) $('#t'+i).hidden=i!==n; save(); }
+
+/* ================= sự kiện ================= */
+function bindRange(id,fn){ $('#'+id).addEventListener('input',e=>{ fn(+e.target.value); uiVals(); }); }
+bindRange('rU1',v=>S1.U=v); bindRange('rR1',v=>S1.R=v); $('#k1').onchange=e=>S1.K=e.target.checked;
+$$('#mode1 .btn').forEach(b=>b.onclick=()=>{ S1.mode=b.dataset.v; build1(); uiVals(); });
+$$('#ana1 .btn').forEach(b=>b.onclick=()=>{ S1.ana=b.dataset.v; renderMap(); });
+bindRange('rU2',v=>S2.U=v); bindRange('rR2',v=>S2.R=v); $('#k2').onchange=e=>S2.K=e.target.checked;
+$('#rec2').onclick=()=>{ if(!S2.K) return; S2.rec.push({U:S2.U,I:Math.abs(K2.el.A.I)}); if(S2.rec.length>10) S2.rec.shift(); renderTables(); };
+$('#clr2').onclick=()=>{ S2.rec=[]; renderTables(); };
+bindRange('rU3',v=>S3.U=v); ['a','b','c'].forEach((x,i)=>{ bindRange('rR'+x+'3',v=>S3.R[i]=v); $('#rm3'+x).onchange=e=>S3.rm[i]=e.target.checked; });
+$('#k3').onchange=e=>S3.K=e.target.checked;
+$$('#n3 .btn').forEach(b=>b.onclick=()=>{ S3.n=+b.dataset.v; if(S3.n<3) S3.rm[2]=false; build3(); kvBuild('kv3',kvRows3()); uiVals(); });
+$('#rec3').onclick=()=>{ const s=sums3(); S3.rec.push([S3.U,s.Rt,...[1,2,3,4].map(i=>Math.abs(K3.el['A'+i].I))]); if(S3.rec.length>8) S3.rec.shift(); renderTables(); };
+$('#clr3').onclick=()=>{ S3.rec=[]; renderTables(); };
+bindRange('rU4',v=>S4.U=v); ['a','b','c'].forEach((x,i)=>{ bindRange('rR'+x+'4',v=>S4.R[i]=v); $('#k4'+x).onchange=e=>S4.Kb[i]=e.target.checked; });
+$('#k4').onchange=e=>S4.K=e.target.checked; $('#ri4').onchange=e=>S4.ri=e.target.checked;
+$('#rec4').onclick=()=>{ const s=vals4(); S4.rec.push([S4.U,s.I,...s.Ib,s.Ib[0]+s.Ib[1]+s.Ib[2]]); if(S4.rec.length>8) S4.rec.shift(); renderTables(); };
+$('#clr4').onclick=()=>{ S4.rec=[]; renderTables(); };
+$$('#mode5 .btn').forEach(b=>b.onclick=()=>{ S5.mode=b.dataset.v; build5(); uiVals(); });
+bindRange('rU5',v=>S5.U=v); bindRange('rRa5',v=>S5.R1=v); bindRange('rRb5',v=>S5.R2=v); bindRange('rRx5',v=>S5.Rx=v);
+$$('[data-nd]').forEach(b=>b.onclick=()=>{ S5.Rx=Math.round(clamp(S5.Rx+(+b.dataset.nd),0.5,80)*10)/10; uiVals(); });
+$('#new5').onclick=()=>{ S5.mode=Math.random()<0.5?'ser':'par'; S5.R1=1+Math.floor(Math.random()*30); S5.R2=1+Math.floor(Math.random()*30); S5.Rx=40; build5(); uiVals(); };
+$$('#sub6 .btn').forEach(b=>b.onclick=()=>{ S6.sub=b.dataset.v; build6(); renderProb6(); uiVals(); });
+$$('#mode6 .btn').forEach(b=>b.onclick=()=>{ S6.mode=b.dataset.v; build6(); uiVals(); });
+$$('#ptype6 .btn').forEach(b=>b.onclick=()=>{ S6.ptype=b.dataset.v; newProb6(); uiVals(); });
+$$('#hmode6 .btn').forEach(b=>b.onclick=()=>{ S6.house=b.dataset.v; build6(); uiVals(); });
+bindRange('rU6',v=>S6.U=v); $('#k6').onchange=e=>S6.K=e.target.checked;
+['a','b','c'].forEach((x,i)=>$('#h6'+x).onchange=e=>S6.Kh[i]=e.target.checked);
+$('#chk6').onclick=check6; $('#newp6').onclick=newProb6; $('#ans6').addEventListener('keydown',e=>{ if(e.key==='Enter') check6(); });
+$$('nav.tabs button').forEach(b=>b.onclick=()=>setTab(+b.dataset.tab));
+$('#langBtn').onclick=()=>{ lang=lang==='vi'?'en':'vi'; save(); applyLang(); };
+$('#hideBtn').onclick=()=>{ hideNums=!hideNums; applyLang(); };
+$$('[data-concl]').forEach(b=>b.onclick=()=>{ const c=$('#concl'+b.dataset.concl); c.hidden=!c.hidden; });
+/* chạm, kéo trên canvas */
+function onTap(v,fn){ let st=null; v.cv.addEventListener('pointerdown',e=>{ st={x:e.clientX,y:e.clientY,t:performance.now()}; });
+  v.cv.addEventListener('pointerup',e=>{ if(!st) return; const d=Math.hypot(e.clientX-st.x,e.clientY-st.y); if(d<12&&performance.now()-st.t<600) fn(vpos(v,e)); st=null; });
+  v.cv.addEventListener('pointercancel',()=>st=null); }
+const HR=v=>Math.max(42,24/v.sc);
+onTap(V1c,p=>{ const e=K1.hit(p.x,p.y,q=>q.t==='sw',HR(V1c)); if(e){ S1.K=!S1.K; uiVals(); } });
+onTap(V3,p=>{ const e=K3.hit(p.x,p.y,q=>q.t==='sw'||q.t==='bulb',HR(V3)); if(!e) return; if(e.t==='sw') S3.K=!S3.K; else { const i=+e.id.slice(1)-1; S3.rm[i]=!S3.rm[i]; } uiVals(); });
+onTap(V4,p=>{ const e=K4.hit(p.x,p.y,q=>q.t==='sw',HR(V4)); if(!e) return; if(e.id==='K') S4.K=!S4.K; else { const i=+e.id.slice(1)-1; S4.Kb[i]=!S4.Kb[i]; } uiVals(); });
+onTap(V6,p=>{ const e=K6.hit(p.x,p.y,q=>q.t==='sw',HR(V6)); if(!e) return; if(S6.sub==='bright') S6.K=!S6.K; else if(S6.sub==='house'){ const i=+e.id.slice(1)-1; S6.Kh[i]=!S6.Kh[i]; } uiVals(); });
+(function(){ const v=V2; let tap=null;
+  v.cv.addEventListener('pointerdown',e=>{ const p=vpos(v,e); let best=null,bd=Math.max(40,26/v.sc);
+    for(const k of ['r','k']){ const q=S2.pr[k], L=probeLoc(q), x=L?L.x:q.x, y=L?L.y:q.y, d=Math.hypot(p.x-x,p.y-y); if(d<bd){ bd=d; best=k; } }
+    if(best){ S2.drag=best; v.cv.setPointerCapture(e.pointerId); e.preventDefault(); } else tap={x:e.clientX,y:e.clientY}; });
+  v.cv.addEventListener('pointermove',e=>{ if(!S2.drag) return; const p=vpos(v,e); S2.pr[S2.drag].x=clamp(p.x,10,990); S2.pr[S2.drag].y=clamp(p.y,10,590); });
+  const end=e=>{ if(S2.drag){ const q=S2.pr[S2.drag], L=K2.locate(q.x,q.y,46); if(L){ q.x=L.x; q.y=L.y; } S2.drag=null; }
+    else if(tap&&e.type==='pointerup'&&Math.hypot(e.clientX-tap.x,e.clientY-tap.y)<12){ const p=vpos(v,e); const s=K2.hit(p.x,p.y,q=>q.t==='sw',HR(v)); if(s){ S2.K=!S2.K; uiVals(); } } tap=null; };
+  v.cv.addEventListener('pointerup',end); v.cv.addEventListener('pointercancel',end); })();
+
+/* ================= khởi động ================= */
+const FR={1:frame1,2:frame2,3:frame3,4:frame4,5:frame5,6:frame6};
+readC(); buildCtl(); build1(); build2(); build3(); build4(); build5(); build6();
+(function(){ const p=document.createElement('p'); p.className='hint'; p.id='zsp2'; $('#zm2').after(p); })();
+applyLang(); setTab(tab);
+try{ matchMedia('(prefers-color-scheme: dark)').addEventListener('change',readC); }catch(e){}
+new MutationObserver(readC).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+let last=performance.now();
+function loop(now){ const dtr=Math.min(0.05,Math.max(0,(now-last)/1000)); last=now; const dt=running?dtr*speed:0; frameN++; if(frameN%90===0) readC();
+  try{ FR[tab](dt,dtr); }catch(err){ console.error(err); }
+  requestAnimationFrame(loop); }
+requestAnimationFrame(loop);
+</script>

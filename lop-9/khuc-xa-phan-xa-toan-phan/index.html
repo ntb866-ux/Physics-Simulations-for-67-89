@@ -1,0 +1,1982 @@
+<title>Khúc xạ và phản xạ toàn phần</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+:root{
+  --bg:#eef1f6; --panel:#ffffff; --lane:#f4f6fa; --ink:#121826; --muted:#566079; --line:#cfd6e3;
+  --accent:#2a4fb5; --accent-ink:#ffffff; --ok:#16834a; --warn:#c2410c;
+  --r1:#e2560f; --r2:#0e7c86; --r3:#9b2fae; --beam:#ee8a00;
+  --obj:#1d5fbf; --img:#c62a47; --glass:#bfe3f5; --glass2:#a5d4ee; --glass-edge:#3e8fc0;
+  --mask:#3b3f47; --axis:#7d879c; --grid:#e3e8f0; --wax:#e9dcc3; --flame:#ff9d1f; --zone1:#fde7c8; --zone2:#e2ecfb;
+  --room:#0f1216; --room-ink:#cfd6e3; --room-line:#2a313b; --screen:#1d2229; --skin:#e0b08a; --iris:#7a4a22; --wall:#d8d2c4; --floor:#b9b2a3;
+  --font-ui:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-num:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Consolas,monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0e1219; --panel:#161c26; --lane:#121822; --ink:#e4e9f2; --muted:#98a3b8; --line:#2a3344;
+  --accent:#86a0ff; --accent-ink:#0b1430; --ok:#45c47d; --warn:#f08a4b;
+  --r1:#ff8a4c; --r2:#38c2cc; --r3:#d27ae6; --beam:#ffb340;
+  --obj:#6aa6ff; --img:#ff6b85; --glass:#24475d; --glass2:#2d5670; --glass-edge:#6cbfe8;
+  --mask:#5a606b; --axis:#7c879d; --grid:#1f2735; --wax:#d9cbb0; --flame:#ffa733; --zone1:#3a2d18; --zone2:#1a2a44;
+  --room:#090b0e; --room-ink:#cfd6e3; --room-line:#262c35; --screen:#191d23; --skin:#d9a77f; --iris:#b07a4a; --wall:#4a463e; --floor:#3a362f;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1219; --panel:#161c26; --lane:#121822; --ink:#e4e9f2; --muted:#98a3b8; --line:#2a3344;
+  --accent:#86a0ff; --accent-ink:#0b1430; --ok:#45c47d; --warn:#f08a4b;
+  --r1:#ff8a4c; --r2:#38c2cc; --r3:#d27ae6; --beam:#ffb340;
+  --obj:#6aa6ff; --img:#ff6b85; --glass:#24475d; --glass2:#2d5670; --glass-edge:#6cbfe8;
+  --mask:#5a606b; --axis:#7c879d; --grid:#1f2735; --wax:#d9cbb0; --flame:#ffa733; --zone1:#3a2d18; --zone2:#1a2a44;
+  --room:#090b0e; --room-ink:#cfd6e3; --room-line:#262c35; --screen:#191d23; --skin:#d9a77f; --iris:#b07a4a; --wall:#4a463e; --floor:#3a362f;
+  color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-ui);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px 40px}
+.wrap{max-width:1320px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.eyebrow{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{margin:0;font-size:clamp(25px,3.4vw,36px);line-height:1.15;font-weight:800;text-wrap:balance;letter-spacing:-.01em}
+h2{margin:0;font-size:17px;font-weight:700;text-wrap:balance}
+h3{margin:0;font-size:15px;font-weight:700}
+.hdr-ctl{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{font:inherit;font-weight:600;font-size:15px;min-height:44px;padding:8px 14px;border-radius:8px;border:1px solid var(--line);
+  background:var(--panel);color:var(--ink);cursor:pointer;touch-action:manipulation}
+.btn:hover{border-color:var(--accent)}
+.btn:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel);max-width:100%}
+.seg .btn{border:0;border-radius:0;min-width:48px;padding:8px 12px}
+.seg .btn+.btn{border-left:1px solid var(--line)}
+.seg.full{display:flex}
+.seg.full .btn{flex:1 1 0;min-width:0}
+nav.tabs{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line)}
+nav.tabs button{font:inherit;font-size:15px;font-weight:600;white-space:nowrap;min-height:46px;padding:8px 14px;border:0;border-bottom:3px solid transparent;
+  background:none;color:var(--muted);cursor:pointer;margin-bottom:-1px}
+nav.tabs button.on{color:var(--ink);border-bottom-color:var(--accent)}
+.req{margin:0;font-size:14px;color:var(--muted);max-width:110ch}
+.req b{color:var(--ink);font-weight:600}
+.lab{display:grid;grid-template-columns:minmax(0,1fr) 370px;gap:14px;align-items:start}
+@media (max-width:1020px){.lab{grid-template-columns:minmax(0,1fr)}}
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.col{display:flex;flex-direction:column;gap:12px;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card p{margin:0}
+.card.predict{border-color:var(--accent);border-width:2px}
+canvas{display:block;width:100%;touch-action:none;border-radius:8px;background:var(--lane)}
+canvas.room{background:var(--room);touch-action:pan-y}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.hint{font-size:14px;color:var(--muted);margin:0}
+.status{font-size:16px;font-weight:600;margin:0;min-height:24px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.fld{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--muted);font-weight:600;min-width:0}
+.fld .val{color:var(--ink);font-family:var(--font-num);font-size:15px}
+.ends{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);font-weight:500;margin-top:-4px}
+input[type=range]{width:100%;min-width:0;height:32px;accent-color:var(--accent)}
+input[type=number]{font:inherit;font-family:var(--font-num);font-size:16px;min-height:44px;width:110px;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:var(--lane);color:var(--ink)}
+.chk{display:flex;align-items:center;gap:10px;font-size:15px;min-height:44px;cursor:pointer;color:var(--ink);font-weight:500}
+.chk input{width:22px;height:22px;accent-color:var(--accent);flex:none}
+.num{font-family:var(--font-num);font-variant-numeric:tabular-nums}
+.choices{display:flex;flex-wrap:wrap;gap:6px}
+.choices .btn{flex:1 1 120px;font-size:14px}
+.choices .btn.right{border-color:var(--ok);box-shadow:inset 0 0 0 2px var(--ok)}
+.choices .btn.wrong{border-color:var(--warn);box-shadow:inset 0 0 0 2px var(--warn)}
+.q{font-size:15px;font-weight:600}
+.fb{font-size:15px;padding:8px 10px;border-radius:8px;background:var(--lane)}
+.fb.good{color:var(--ok)} .fb.bad{color:var(--warn)}
+.tblwrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:6px 4px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.03em}
+td.n{font-family:var(--font-num);font-variant-numeric:tabular-nums;white-space:nowrap}
+.concl{font-size:15px;padding:10px 12px;border-radius:8px;border:1px dashed var(--accent);background:var(--lane)}
+.formula{font-family:var(--font-num);font-size:14px;background:var(--lane);padding:8px 10px;border-radius:8px;overflow-x:auto;white-space:nowrap;line-height:1.7}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--muted)}
+.legend i{display:inline-block;width:20px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}
+.legend i.dash{background:none!important;border-top:3px dashed currentColor;height:0}
+.obs{display:flex;flex-direction:column;gap:8px;font-size:15px}
+.obs p{margin:0}
+.rules{display:flex;flex-direction:column;gap:8px;margin:0;padding:0;list-style:none}
+.rules li{display:flex;gap:10px;align-items:flex-start;font-size:15px;padding:8px 10px;border-radius:8px;background:var(--lane)}
+.rules li .mk{flex:none;width:26px;height:26px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-weight:800;font-size:14px;color:var(--muted)}
+.rules li.done .mk{border-color:var(--ok);background:var(--ok);color:var(--panel)}
+.rules li .sw{flex:none;width:14px;height:4px;border-radius:2px;margin-top:11px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:15px;align-items:baseline}
+.kv dt{color:var(--muted);font-size:14px}
+.kv dd{margin:0;font-family:var(--font-num);font-variant-numeric:tabular-nums}
+.pill{display:inline-block;font-size:13px;font-weight:700;padding:2px 10px;border-radius:99px;border:1px solid currentColor}
+.pill.good{color:var(--ok)} .pill.mid{color:var(--warn)} .pill.off{color:var(--muted)}
+details{font-size:15px}
+summary{cursor:pointer;font-weight:600;color:var(--accent);min-height:32px}
+ol.steps{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px;font-size:15px}
+ol.steps li.done{color:var(--ok)}
+ol.steps li.cur{font-weight:700}
+.sub{display:flex;gap:6px;flex-wrap:wrap}
+.sub .btn{flex:1 1 120px}
+.nudge{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.nudge .btn{min-width:44px;padding:8px 10px}
+.nudge span{font-size:14px;color:var(--muted);font-weight:600}
+footer{font-size:13px;color:var(--muted)}
+footer p{margin:0 0 4px;max-width:120ch}
+@media (max-width:520px){ .seg .btn{padding:8px 8px;font-size:14px} nav.tabs button{padding:8px 10px;font-size:14px} }
+</style>
+<style>
+/* Bàn thí nghiệm quang học: tia laser đỏ có quầng sáng, độ đậm của tia = năng lượng thật (Fresnel). */
+:root{ --laser:#e0131b; --laser-glow:rgba(224,19,27,.22); --normal:#6b7590; --sky1:#7fb8ec; --sky2:#d6ebfb; --sand:#d9c49a; --road:#4a4d55; --tree:#3f8a4a; --bar-r:#e0131b; --bar-t:#2a4fb5; }
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){ --laser:#ff4a4a; --laser-glow:rgba(255,74,74,.25); --normal:#8a93ab; --sky1:#2d5a8a; --sky2:#6d9cc9; --sand:#8a7752; --road:#2c2f35; --tree:#3f8a4a; --bar-r:#ff4a4a; --bar-t:#86a0ff; }}
+:root[data-theme="dark"]{ --laser:#ff4a4a; --laser-glow:rgba(255,74,74,.25); --normal:#8a93ab; --sky1:#2d5a8a; --sky2:#6d9cc9; --sand:#8a7752; --road:#2c2f35; --tree:#3f8a4a; --bar-r:#ff4a4a; --bar-t:#86a0ff; }
+.bars{display:flex;flex-direction:column;gap:8px}
+.bar{display:grid;grid-template-columns:110px 1fr 58px;gap:8px;align-items:center;font-size:14px}
+.bar .tr{height:16px;border-radius:8px;background:var(--lane);border:1px solid var(--line);overflow:hidden}
+.bar .fill{height:100%;width:0;border-radius:8px;transition:width .08s linear}
+.bar .pc{font-family:var(--font-num);text-align:right}
+select{font:inherit;font-size:15px;min-height:44px;padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);max-width:100%}
+.medrow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.big{font-size:20px;font-weight:700;font-family:var(--font-num)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:640px){ .two{grid-template-columns:1fr} .bar{grid-template-columns:90px 1fr 52px} }
+.cap{font-size:13px;color:var(--muted);font-weight:600;margin:0}
+.lock{font-size:14px;color:var(--warn);font-weight:600;margin:0}
+.score{font-family:var(--font-num);font-weight:700}
+.quiz{display:flex;flex-direction:column;gap:12px}
+.quiz .qi{padding:10px 12px;border-radius:8px;background:var(--lane);display:flex;flex-direction:column;gap:8px}
+body.qual .qt{display:none!important}
+body:not(.qual) .ql{display:none!important}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow" data-i18n="eyebrow"></div>
+      <h1 data-i18n="title"></h1>
+    </div>
+    <div class="hdr-ctl">
+      <div class="seg" role="group" aria-label="level">
+        <button class="btn" id="lvQual" data-i18n="lvQual"></button>
+        <button class="btn" id="lvQuant" data-i18n="lvQuant"></button>
+      </div>
+      <button class="btn" id="langBtn">EN</button>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="1" data-i18n="tab1"></button>
+    <button role="tab" data-tab="2" data-i18n="tab2"></button>
+    <button role="tab" data-tab="3" data-i18n="tab3"></button>
+    <button role="tab" data-tab="4" data-i18n="tab4"></button>
+    <button role="tab" data-tab="5" data-i18n="tab5"></button>
+    <button role="tab" data-tab="6" data-i18n="tab6"></button>
+  </nav>
+
+  <!-- ===================== TAB 1: Vì sao tia sáng bị gãy ===================== -->
+  <section id="t1" class="col">
+    <p class="req" data-i18n-html="req1"></p>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" data-i18n="hint1"></p>
+        <div class="seg full" id="vm1"><button class="btn" data-v="ray" data-i18n="vmRay"></button><button class="btn" data-v="wave" data-i18n="vmWave"></button><button class="btn" data-v="march" data-i18n="vmMarch"></button></div>
+        <canvas id="cv1" aria-label="refraction"></canvas>
+        <div class="controls">
+          <button class="btn" id="perp1" data-i18n="perp"></button>
+          <button class="btn" id="play1" data-i18n="pause"></button>
+          <div class="seg" id="spd1"><button class="btn" data-v="0.4">×0,4</button><button class="btn" data-v="1">×1</button></div>
+        </div>
+        <div class="fld"><span><span data-i18n="angI"></span> <span class="val" id="iTxt1"></span></span>
+          <input type="range" id="rngI1" min="0" max="85" step="1" value="45"></div>
+        <p class="status" id="st1"></p>
+      </div>
+      <aside class="col">
+        <div class="card predict">
+          <h2 data-i18n="cPred"></h2>
+          <p class="q" data-i18n="q1"></p>
+          <div class="choices" id="pq1"><button class="btn" data-p="0" data-i18n="q1_0"></button><button class="btn" data-p="1" data-i18n="q1_1"></button><button class="btn" data-p="2" data-i18n="q1_2"></button><button class="btn" data-p="3" data-i18n="q1_3"></button></div>
+          <p class="lock" id="lock1" data-i18n="lock1"></p>
+          <p class="fb" id="fb1" hidden></p>
+        </div>
+        <div class="card">
+          <h2 data-i18n="cMedia"></h2>
+          <div class="medrow">
+            <label class="fld"><span data-i18n="medTop"></span><select id="m1a"></select></label>
+            <label class="fld"><span data-i18n="medBot"></span><select id="m1b"></select></label>
+          </div>
+          <dl class="kv" id="kv1"></dl>
+          <p class="formula qt" id="f1"></p>
+        </div>
+        <div class="card">
+          <h2 data-i18n="cObs"></h2>
+          <div id="obs1" class="obs"></div>
+          <details><summary data-i18n="concl"></summary><p class="concl" data-i18n-html="concl1"></p></details>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ===================== TAB 2: Phòng thí nghiệm ===================== -->
+  <section id="t2" class="col" hidden>
+    <p class="req" data-i18n-html="req2"></p>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" data-i18n="hint2"></p>
+        <canvas id="cv2" aria-label="semicircular block on protractor"></canvas>
+        <div class="controls">
+          <div class="nudge"><span data-i18n="angI"></span><button class="btn" data-d="-1">−1°</button><button class="btn" data-d="1">+1°</button></div>
+          <button class="btn" id="rev2" data-i18n="rev"></button>
+          <div class="seg" id="rot2"><button class="btn" data-v="0" data-i18n="rotH"></button><button class="btn" data-v="90" data-i18n="rotV"></button><button class="btn" data-v="30" data-i18n="rotS"></button></div>
+        </div>
+        <p class="status" id="st2"></p>
+        <div class="two">
+          <div><p class="cap" data-i18n="g2a"></p><canvas id="cv2a"></canvas></div>
+          <div class="qt"><p class="cap" data-i18n="g2b"></p><canvas id="cv2b"></canvas></div>
+        </div>
+      </div>
+      <aside class="col">
+        <div class="card">
+          <h2 data-i18n="cBlock"></h2>
+          <select id="m2"></select>
+          <div class="row"><button class="btn primary" id="rec2" data-i18n="record"></button><button class="btn" id="clr2" data-i18n="clear"></button></div>
+          <div class="tblwrap"><table id="tb2"></table></div>
+          <p class="hint" id="h2"></p>
+        </div>
+        <div class="card predict">
+          <h2 data-i18n="cPred"></h2>
+          <p class="q" data-i18n="q2a"></p>
+          <div class="choices" id="pq2a"><button class="btn" data-p="0" data-i18n="q2a_0"></button><button class="btn" data-p="1" data-i18n="q2a_1"></button><button class="btn" data-p="2" data-i18n="q2a_2"></button></div>
+          <p class="fb" id="fb2a" hidden></p>
+          <p class="q" data-i18n="q2b"></p>
+          <div class="choices" id="pq2b"><button class="btn" data-p="0" data-i18n="q2b_0"></button><button class="btn" data-p="1" data-i18n="q2b_1"></button><button class="btn" data-p="2" data-i18n="q2b_2"></button></div>
+          <p class="fb" id="fb2b" hidden></p>
+        </div>
+        <div class="card qt">
+          <h2 data-i18n="cEx2"></h2>
+          <p id="ex2"></p>
+          <div class="row"><span id="ex2lab">r =</span><input type="number" id="ex2in" step="0.1" inputmode="decimal"><span id="ex2u">°</span><button class="btn primary" id="ex2chk" data-i18n="check"></button><button class="btn" id="ex2new" data-i18n="newProb"></button></div>
+          <p class="fb" id="ex2fb" hidden></p>
+        </div>
+        <div class="card">
+          <h2 data-i18n="cObs"></h2>
+          <details><summary data-i18n="concl"></summary><p class="concl" data-i18n-html="concl2"></p></details>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ===================== TAB 3: Phản xạ toàn phần ===================== -->
+  <section id="t3" class="col" hidden>
+    <p class="req" data-i18n-html="req3"></p>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" id="hint3"></p>
+        <canvas id="cv3" aria-label="total internal reflection"></canvas>
+        <div class="controls">
+          <div class="nudge"><span data-i18n="angI"></span><button class="btn" data-d="-1">−1°</button><button class="btn" data-d="-0.1">−0,1°</button><button class="btn" data-d="0.1">+0,1°</button><button class="btn" data-d="1">+1°</button></div>
+          <button class="btn" id="rev3" data-i18n="rev3"></button>
+        </div>
+        <p class="status" id="st3"></p>
+        <div class="bars">
+          <div class="bar"><span data-i18n="eRefl"></span><div class="tr"><div class="fill" id="bR3" style="background:var(--bar-r)"></div></div><span class="pc" id="pR3"></span></div>
+          <div class="bar"><span data-i18n="eRefr"></span><div class="tr"><div class="fill" id="bT3" style="background:var(--bar-t)"></div></div><span class="pc" id="pT3"></span></div>
+        </div>
+        <p class="cap" data-i18n="g3"></p>
+        <canvas id="cv3g"></canvas>
+      </div>
+      <aside class="col">
+        <div class="card predict">
+          <h2 data-i18n="cPred"></h2>
+          <p class="q" data-i18n="q3a"></p>
+          <div class="choices" id="pq3a"><button class="btn" data-p="0" data-i18n="q3a_0"></button><button class="btn" data-p="1" data-i18n="q3a_1"></button><button class="btn" data-p="2" data-i18n="q3a_2"></button></div>
+          <p class="fb" id="fb3a" hidden></p>
+          <p class="q" data-i18n="q3b"></p>
+          <div class="choices" id="pq3b"><button class="btn" data-p="0" data-i18n="q3b_0"></button><button class="btn" data-p="1" data-i18n="q3b_1"></button></div>
+          <p class="fb" id="fb3b" hidden></p>
+        </div>
+        <div class="card">
+          <h2 data-i18n="cBlock3"></h2>
+          <select id="m3"></select>
+          <button class="btn primary" id="crit3" data-i18n="crit3"></button>
+          <p class="fb" id="fb3" hidden></p>
+          <div class="tblwrap"><table id="tb3"></table></div>
+        </div>
+        <div class="card">
+          <h2 data-i18n="cObs"></h2>
+          <details><summary data-i18n="concl"></summary><p class="concl" data-i18n-html="concl3"></p></details>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ===================== TAB 4: Hiện tượng quanh ta ===================== -->
+  <section id="t4" class="col" hidden>
+    <p class="req" data-i18n-html="req4"></p>
+    <div class="sub" id="sub4">
+      <button class="btn" data-v="coin" data-i18n="s4coin"></button>
+      <button class="btn" data-v="fish" data-i18n="s4fish"></button>
+      <button class="btn" data-v="win" data-i18n="s4win"></button>
+      <button class="btn" data-v="rod" data-i18n="s4rod"></button>
+      <button class="btn" data-v="mir" data-i18n="s4mir"></button>
+    </div>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" id="hint4"></p>
+        <canvas id="cv4" aria-label="phenomenon"></canvas>
+        <p class="cap" id="cap4b"></p>
+        <canvas id="cv4b" aria-label="what you see"></canvas>
+        <p class="status" id="st4"></p>
+      </div>
+      <aside class="col">
+        <div class="card" id="ctl4"></div>
+        <div class="card predict" id="pc4">
+          <h2 data-i18n="cPred"></h2>
+          <p class="q" id="q4"></p>
+          <div class="choices" id="pq4"></div>
+          <p class="fb" id="fb4" hidden></p>
+        </div>
+        <div class="card">
+          <h2 data-i18n="cExplain"></h2>
+          <p id="ex4"></p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ===================== TAB 5: Ứng dụng ===================== -->
+  <section id="t5" class="col" hidden>
+    <p class="req" data-i18n-html="req5"></p>
+    <div class="sub" id="sub5">
+      <button class="btn" data-v="fib" data-i18n="s5fib"></button>
+      <button class="btn" data-v="jet" data-i18n="s5jet"></button>
+      <button class="btn" data-v="dia" data-i18n="s5dia"></button>
+      <button class="btn" data-v="pri" data-i18n="s5pri"></button>
+    </div>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" id="hint5"></p>
+        <canvas id="cv5" aria-label="application"></canvas>
+        <p class="status" id="st5"></p>
+        <div class="bars" id="bars5"></div>
+      </div>
+      <aside class="col">
+        <div class="card" id="ctl5"></div>
+        <div class="card">
+          <h2 data-i18n="cExplain"></h2>
+          <p id="ex5"></p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ===================== TAB 6: Luyện tập ===================== -->
+  <section id="t6" class="col" hidden>
+    <p class="req" data-i18n-html="req6"></p>
+    <div class="sub" id="sub6">
+      <button class="btn" data-v="draw" data-i18n="s6draw"></button>
+      <button class="btn" data-v="game" data-i18n="s6game"></button>
+      <button class="btn" data-v="quiz" data-i18n="s6quiz"></button>
+    </div>
+    <div class="lab" id="lab6">
+      <div class="stage">
+        <p class="hint" id="hint6"></p>
+        <canvas id="cv6" aria-label="practice"></canvas>
+        <div class="controls" id="btn6"></div>
+        <p class="status" id="st6"></p>
+      </div>
+      <aside class="col">
+        <div class="card" id="side6"></div>
+      </aside>
+    </div>
+    <div class="card quiz" id="quiz6" hidden></div>
+  </section>
+
+  <footer id="foot"></footer>
+</div>
+<script>
+/* ============ Ngôn ngữ (mỗi phần tự thêm chuỗi của mình bằng addT) ============ */
+const I18N={vi:{},en:{}};
+function addT(vi,en){ Object.assign(I18N.vi,vi); Object.assign(I18N.en,en); }
+addT({
+  eyebrow:'KHTN 9 · Ánh sáng · Mô phỏng tương tác',
+  title:'Khúc xạ ánh sáng và phản xạ toàn phần',
+  lvQual:'Định tính', lvQuant:'Định lượng',
+  tab1:'1. Vì sao tia sáng gãy?', tab2:'2. Định luật khúc xạ', tab3:'3. Phản xạ toàn phần', tab4:'4. Hiện tượng quanh ta', tab5:'5. Ứng dụng', tab6:'6. Luyện tập',
+  cPred:'Dự đoán trước', cObs:'Quan sát và kết luận', cExplain:'Giải thích', concl:'Xem kết luận',
+  angI:'Góc tới i', check:'Kiểm tra', newProb:'Bài mới', record:'Ghi số liệu', clear:'Xoá bảng',
+  right:'Đúng rồi! ', wrong:'Chưa đúng. ',
+  air:'Không khí', water:'Nước', ice:'Nước đá', oil:'Dầu ăn', acrylic:'Nhựa mica', glass:'Thuỷ tinh', diamond:'Kim cương', mystery:'Vật liệu bí ẩn',
+  normal:'pháp tuyến', incident:'tia tới', refracted:'tia khúc xạ', reflected:'tia phản xạ',
+  foot:'Giả thiết mô phỏng: ánh sáng đơn sắc vàng (≈ 589 nm), không có tán sắc; chiết suất lấy theo số liệu thật ở 20 °C; độ đậm của tia vẽ theo phần năng lượng tính bằng công thức Fresnel (ánh sáng tự nhiên, trung bình hai phân cực), bỏ qua hấp thụ trong môi trường. Mặt sóng và "hàng người" là mô hình minh hoạ, tốc độ trên màn hình đã làm chậm hàng tỉ lần.'
+},{
+  eyebrow:'Grade 9 Science · Light · Interactive simulation',
+  title:'Refraction of light and total internal reflection',
+  lvQual:'Qualitative', lvQuant:'Quantitative',
+  tab1:'1. Why does light bend?', tab2:'2. Law of refraction', tab3:'3. Total internal reflection', tab4:'4. Everyday phenomena', tab5:'5. Applications', tab6:'6. Practice',
+  cPred:'Predict first', cObs:'Observe and conclude', cExplain:'Explanation', concl:'Show conclusion',
+  angI:'Angle of incidence i', check:'Check', newProb:'New problem', record:'Record data', clear:'Clear table',
+  right:'Correct! ', wrong:'Not quite. ',
+  air:'Air', water:'Water', ice:'Ice', oil:'Cooking oil', acrylic:'Acrylic', glass:'Glass', diamond:'Diamond', mystery:'Mystery material',
+  normal:'normal', incident:'incident ray', refracted:'refracted ray', reflected:'reflected ray',
+  foot:'Model assumptions: monochromatic yellow light (≈ 589 nm), no dispersion; real refractive indices at 20 °C; ray brightness follows the energy fraction from the Fresnel equations (unpolarised light, average of both polarisations), absorption ignored. Wavefronts and the "marching line" are illustrative models slowed down billions of times.'
+});
+
+/* ============ Tiện ích ============ */
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+let lang='vi', level='quant', tab=1;
+try{ const sv=JSON.parse(localStorage.getItem('khucxa-ui')||'{}'); if(sv.lang) lang=sv.lang; if(sv.level) level=sv.level; if(sv.tab) tab=sv.tab; }catch(e){}
+const HASH={'vi-sao-gay':1,'dinh-luat':2,'phan-xa-toan-phan':3,'hien-tuong':4,'ung-dung':5,'luyen-tap':6};
+if (HASH[location.hash.slice(1)]) tab=HASH[location.hash.slice(1)];
+function save(){ try{ localStorage.setItem('khucxa-ui',JSON.stringify({lang,level,tab})); }catch(e){} }
+function t(k,...a){ let v=I18N[lang][k]; if(v===undefined) v=I18N.vi[k]; if(v===undefined) return k; return typeof v==='function'? v(...a) : v; }
+function nf(x,d=1,min=0){ return new Intl.NumberFormat(lang==='vi'?'vi-VN':'en-US',{maximumFractionDigits:d,minimumFractionDigits:min}).format(x); }
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const quant=()=>level==='quant';
+const nN=n=>nf(n,2,n===1?0:2);
+const D2R=Math.PI/180, R2D=180/Math.PI;
+let C={};
+function readColors(){
+  const cs=getComputedStyle(document.documentElement);
+  for (const k of ['bg','panel','lane','ink','muted','line','accent','ok','warn','laser','laser-glow','normal','glass-edge','sky1','sky2','sand','road','tree','bar-r','bar-t','r2','r3','obj','img'])
+    C[k]=cs.getPropertyValue('--'+k).trim();
+}
+function fit(cv,aspect,minH,maxH){
+  const w=cv.clientWidth||300; const h=Math.round(clamp(w*aspect,minH,maxH));
+  cv.style.height=h+'px'; const dpr=window.devicePixelRatio||1;
+  cv.width=Math.round(w*dpr); cv.height=Math.round(h*dpr);
+  const ctx=cv.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0);
+  return {cv,ctx,w,h};
+}
+function ptr(cv,e){ const r=cv.getBoundingClientRect(); return {x:e.clientX-r.left, y:e.clientY-r.top}; }
+function font(ctx,size=13,weight=600){ ctx.font=`${weight} ${size}px "Be Vietnam Pro",system-ui,sans-serif`; }
+function label(ctx,txt,x,y,col,align='center',size=13,weight=600,bg){
+  font(ctx,size,weight); ctx.textAlign=align; ctx.textBaseline='middle';
+  if (bg){ const w=ctx.measureText(txt).width+8; const x0= align==='center'? x-w/2 : align==='right'? x-w+4 : x-4; ctx.fillStyle=bg; ctx.globalAlpha=.85; ctx.fillRect(x0,y-size*0.75,w,size*1.5); ctx.globalAlpha=1; }
+  ctx.fillStyle=col; ctx.fillText(txt,x,y);
+}
+/* Khung nhìn đều tỉ lệ: toạ độ thế giới (y hướng lên) vừa khít hộp [x0,x1]×[y0,y1] */
+function fitView(D,x0,x1,y0,y1,pad=10){
+  const k=Math.min((D.w-2*pad)/(x1-x0),(D.h-2*pad)/(y1-y0));
+  const ox=(D.w-(x1-x0)*k)/2, oy=(D.h-(y1-y0)*k)/2;
+  return {k, X:x=>ox+(x-x0)*k, Y:y=>D.h-oy-(y-y0)*k, ix:px=>x0+(px-ox)/k, iy:py=>y0+(D.h-oy-py)/k};
+}
+function clear(D){ D.ctx.clearRect(0,0,D.w,D.h); }
+
+/* ============ Vật lí ============ */
+const MED={
+  air:{n:1.000, fill:'rgba(0,0,0,0)'},
+  water:{n:1.33, fill:'rgba(52,145,230,.24)'},
+  ice:{n:1.31, fill:'rgba(140,215,235,.30)'},
+  oil:{n:1.47, fill:'rgba(230,190,40,.28)'},
+  acrylic:{n:1.49, fill:'rgba(120,170,200,.22)'},
+  glass:{n:1.50, fill:'rgba(40,170,160,.24)'},
+  diamond:{n:2.42, fill:'rgba(150,120,230,.24)'},
+  mystery:{n:1.36, fill:'rgba(230,90,150,.22)'}
+};
+const MYST=[{n:1.36,vi:'cồn (rượu etylic)',en:'ethanol'},{n:1.47,vi:'glixerin',en:'glycerol'},{n:1.54,vi:'muối ăn (tinh thể)',en:'rock salt'},{n:1.77,vi:'hồng ngọc',en:'ruby'},{n:2.0,vi:'thuỷ tinh flint nặng',en:'dense flint glass'}];
+let myst=MYST[Math.floor(Math.random()*MYST.length)]; MED.mystery.n=myst.n;
+const C0=3.00e8;
+/* Định luật khúc xạ: trả về góc khúc xạ (rad) hoặc null nếu phản xạ toàn phần */
+function snell(n1,n2,i){ const s=n1/n2*Math.sin(i); return Math.abs(s)>1? null : Math.asin(s); }
+/* Hệ số phản xạ năng lượng (Fresnel, ánh sáng tự nhiên) */
+function fresnel(n1,n2,i){
+  const ci=Math.cos(i), si=Math.sin(i), st=n1/n2*si; if (Math.abs(st)>=1) return 1;
+  const ct=Math.sqrt(1-st*st);
+  const rs=(n1*ci-n2*ct)/(n1*ci+n2*ct), rp=(n1*ct-n2*ci)/(n1*ct+n2*ci);
+  return (rs*rs+rp*rp)/2;
+}
+function critAngle(n1,n2){ return n1>n2? Math.asin(n2/n1) : null; }
+function medOptions(sel,ids,val){
+  sel.innerHTML=ids.map(id=>`<option value="${id}">${t(id)}${id==='mystery'||!quant()?'':' (n = '+nN(MED[id].n)+')'}</option>`).join(''); sel.value=val;
+}
+
+/* ============ Vẽ tia laser: độ đậm theo năng lượng ============ */
+function beamAlpha(I){ return I<=0.002? 0 : clamp(Math.sqrt(I),0.12,1); }
+function beam(ctx,x1,y1,x2,y2,I,arrow=true){
+  const a=beamAlpha(I); if (!a) return;
+  ctx.save(); ctx.lineCap='round';
+  ctx.globalAlpha=a; ctx.strokeStyle=C['laser-glow']; ctx.lineWidth=9; ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+  ctx.strokeStyle=C.laser; ctx.lineWidth=2.6; ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+  if (arrow){ const mx=(x1+x2)/2, my=(y1+y2)/2, an=Math.atan2(y2-y1,x2-x1), L=Math.hypot(x2-x1,y2-y1);
+    if (L>40){ ctx.fillStyle=C.laser; ctx.beginPath(); ctx.moveTo(mx+9*Math.cos(an),my+9*Math.sin(an));
+      ctx.lineTo(mx-6*Math.cos(an)+6*Math.sin(an),my-6*Math.sin(an)-6*Math.cos(an)); ctx.lineTo(mx-6*Math.cos(an)-6*Math.sin(an),my-6*Math.sin(an)+6*Math.cos(an)); ctx.fill(); } }
+  ctx.restore();
+}
+function dashLine(ctx,x1,y1,x2,y2,col,lw=1.5,dash=[6,5]){ ctx.save(); ctx.strokeStyle=col; ctx.lineWidth=lw; ctx.setLineDash(dash); ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke(); ctx.restore(); }
+function arcAngle(ctx,cx,cy,r,a0,a1,col,txt){
+  ctx.save(); ctx.strokeStyle=col; ctx.lineWidth=2; ctx.beginPath();
+  const ccw = ((a1-a0+3*Math.PI)%(2*Math.PI))-Math.PI < 0;
+  ctx.arc(cx,cy,r,a0,a1,ccw); ctx.stroke(); ctx.restore();
+  if (txt){ const am=a0+(((a1-a0+3*Math.PI)%(2*Math.PI))-Math.PI)/2; label(ctx,txt,cx+(r+16)*Math.cos(am),cy+(r+16)*Math.sin(am),col,'center',14,700); }
+}
+/* Đèn laser: thân hình hộp hướng theo phương phát (ang theo pixel) */
+function laserBody(ctx,x,y,ang,hl){
+  ctx.save(); ctx.translate(x,y); ctx.rotate(ang);
+  ctx.fillStyle=hl? C.accent : '#3a3f4a'; ctx.strokeStyle=C.ink; ctx.lineWidth=1.2;
+  ctx.beginPath(); ctx.roundRect(-46,-9,46,18,4); ctx.fill(); ctx.stroke();
+  ctx.fillStyle=C.laser; ctx.fillRect(-4,-4,4,8);
+  ctx.fillStyle='#ffd54a'; ctx.beginPath(); ctx.arc(-34,0,3,0,7); ctx.fill();
+  ctx.restore();
+}
+/* Dự đoán: nút chọn + phản hồi */
+function predict(boxSel,fbSel,correct,fbKey,onDone){
+  $$(boxSel+' .btn').forEach(b=>b.onclick=()=>{
+    const p=+b.dataset.p, ok=p===correct;
+    $$(boxSel+' .btn').forEach(x=>x.classList.remove('right','wrong'));
+    b.classList.add(ok?'right':'wrong'); if(!ok) $(boxSel+` .btn[data-p="${correct}"]`).classList.add('right');
+    const fb=$(fbSel); fb.hidden=false; fb.className='fb '+(ok?'good':'bad'); fb.dataset.k=fbKey; fb.dataset.ok=ok?1:0;
+    fb.textContent=(ok?t('right'):t('wrong'))+t(fbKey);
+    if (onDone) onDone(ok);
+  });
+}
+function refreshFb(){ $$('.fb[data-k]').forEach(fb=>{ if(!fb.hidden) fb.textContent=(fb.dataset.ok==='1'?t('right'):t('wrong'))+t(fb.dataset.k); }); }
+/* Thanh phần trăm */
+function setBar(fill,pc,v){ $(fill).style.width=(clamp(v,0,1)*100)+'%'; $(pc).textContent=nf(v*100,v<0.1?1:0)+' %'; }
+/* Đồ thị đơn giản */
+function axes(D,x0,x1,y0,y1,xl,yl,tx,ty){
+  const ctx=D.ctx, L=44, R=12, T=12, B=34;
+  const G={X:x=>L+(x-x0)/(x1-x0)*(D.w-L-R), Y:y=>D.h-B-(y-y0)/(y1-y0)*(D.h-T-B)};
+  ctx.strokeStyle=C.line; ctx.lineWidth=1; font(ctx,11,500); ctx.fillStyle=C.muted;
+  for (const v of tx){ const X=G.X(v); ctx.beginPath(); ctx.moveTo(X,T); ctx.lineTo(X,D.h-B); ctx.stroke(); ctx.textAlign='center'; ctx.textBaseline='top'; ctx.fillText(typeof v==='number'? nf(v,2):v,X,D.h-B+4); }
+  for (const v of ty){ const Y=G.Y(v); ctx.beginPath(); ctx.moveTo(L,Y); ctx.lineTo(D.w-R,Y); ctx.stroke(); ctx.textAlign='right'; ctx.textBaseline='middle'; ctx.fillText(nf(v,2),L-4,Y); }
+  ctx.strokeStyle=C.muted; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(L,T); ctx.lineTo(L,D.h-B); ctx.lineTo(D.w-R,D.h-B); ctx.stroke();
+  label(ctx,xl,D.w-R,D.h-8,C.ink,'right',12,600); label(ctx,yl,L+4,T+2,C.ink,'left',12,600);
+  return G;
+}
+
+/* ================= TAB 1: Vì sao tia sáng bị gãy ================= */
+addT({
+  req1:'<b>Yêu cầu cần đạt:</b> Chứng tỏ được khi truyền từ môi trường này sang môi trường khác, tia sáng có thể bị khúc xạ (lệch khỏi phương truyền ban đầu). Nêu được chiết suất bằng tỉ số tốc độ ánh sáng trong không khí (chân không) với tốc độ ánh sáng trong môi trường.',
+  hint1:'Kéo đèn laser (hoặc thanh trượt) để đổi góc tới. Chuyển cách xem: tia sáng, mặt sóng, hàng người.',
+  vmRay:'Tia sáng', vmWave:'Mặt sóng', vmMarch:'Hàng người',
+  perp:'Chiếu vuông góc', pause:'Tạm dừng', play:'Chạy',
+  cMedia:'Hai môi trường', medTop:'Môi trường trên', medBot:'Môi trường dưới',
+  q1:'Tia laser từ không khí chiếu xiên xuống mặt nước. Phần tia sáng trong nước sẽ đi thế nào?',
+  q1_0:'Đi thẳng, không đổi hướng', q1_1:'Gãy lại gần pháp tuyến', q1_2:'Gãy ra xa pháp tuyến', q1_3:'Không vào nước, bật lại hết',
+  lock1:'Hãy chọn dự đoán để mở phần dưới mặt nước.',
+  fb1:'Nước trong suốt nhưng ánh sáng vẫn bị gãy ở mặt phân cách, vì ánh sáng đi trong nước chậm hơn trong không khí. Chỉ một phần nhỏ bị phản xạ lại.',
+  speed:'Tốc độ ánh sáng', sFast:'đi nhanh', sSlow:'đi chậm',
+  ground1:'Sân xi măng', ground2:'Bãi cát',
+  o1perp:'Chiếu vuông góc (i = 0°): tia sáng đi thẳng, không bị gãy, dù tốc độ vẫn thay đổi. Ở chế độ "hàng người": cả hàng chạm mặt phân cách cùng lúc nên không ai xoay.',
+  o1same:'Hai môi trường cùng chiết suất, ánh sáng đi cùng tốc độ: tia đi thẳng, không bị gãy.',
+  o1slow:'Ánh sáng đi vào môi trường chậm hơn: tia khúc xạ gãy lại gần pháp tuyến (r < i).',
+  o1fast:'Ánh sáng đi vào môi trường nhanh hơn: tia khúc xạ gãy ra xa pháp tuyến (r > i).',
+  o1tir:'Không còn tia khúc xạ: toàn bộ ánh sáng bị phản xạ lại. Đó là phản xạ toàn phần (xem phần 3).',
+  o1wave:'Mặt sóng là các đỉnh sóng. Vào môi trường chậm, các mặt sóng sít lại (bước sóng ngắn hơn). Đầu mặt sóng nào chạm mặt phân cách trước thì chậm lại trước, nên cả mặt sóng bị xoay hướng.',
+  o1march:'Người nào bước xuống cát trước thì đi chậm lại trước, trong khi người còn trên sân vẫn đi nhanh. Vì khoác tay nhau nên cả hàng phải xoay hướng, giống tia sáng.',
+  o1oil:'Thử: dầu ăn nhẹ hơn nước (nổi trên nước) nhưng ánh sáng trong dầu lại chậm hơn trong nước. Chiết quang không phải là "nặng" hay "đặc".',
+  concl1:'Khi ánh sáng truyền xiên góc từ môi trường này sang môi trường khác có tốc độ ánh sáng khác, tia sáng bị gãy khúc tại mặt phân cách. Hiện tượng này gọi là <b>khúc xạ ánh sáng</b>. Môi trường làm ánh sáng đi càng chậm thì có <b>chiết suất</b> càng lớn: <b>n = c / v</b> (c ≈ 3·10⁸ m/s là tốc độ ánh sáng trong chân không, gần bằng trong không khí). Chiếu vuông góc thì tia không bị gãy.',
+  kvI:'Góc tới i', kvR:'Góc khúc xạ r', kvV1:'v (trên)', kvV2:'v (dưới)', kvN1:'n (trên)', kvN2:'n (dưới)', kvCmp:'So sánh tốc độ',
+  cmpSlow:'dưới chậm hơn trên', cmpFast:'dưới nhanh hơn trên', cmpEq:'bằng nhau', none:'không có'
+},{
+  req1:'<b>Learning outcome:</b> Show that light can be refracted (deviated from its original direction) when it passes from one medium to another. State that the refractive index equals the ratio of the speed of light in air (vacuum) to the speed of light in the medium.',
+  hint1:'Drag the laser (or the slider) to change the angle of incidence. Switch view: rays, wavefronts, marching line.',
+  vmRay:'Rays', vmWave:'Wavefronts', vmMarch:'Marching line',
+  perp:'Normal incidence', pause:'Pause', play:'Play',
+  cMedia:'Two media', medTop:'Upper medium', medBot:'Lower medium',
+  q1:'A laser beam in air hits a water surface at an angle. How does the light travel inside the water?',
+  q1_0:'Straight on, no change', q1_1:'Bends towards the normal', q1_2:'Bends away from the normal', q1_3:'It cannot enter, all bounces back',
+  lock1:'Choose a prediction to reveal what happens below the surface.',
+  fb1:'Water is transparent, yet light still bends at the boundary because light travels more slowly in water than in air. Only a small part is reflected.',
+  speed:'Speed of light', sFast:'fast', sSlow:'slow',
+  ground1:'Pavement', ground2:'Sand',
+  o1perp:'Normal incidence (i = 0°): the ray goes straight on without bending, even though its speed changes. In "marching line" view the whole row reaches the boundary at once, so nobody turns.',
+  o1same:'Both media have the same refractive index, so light keeps the same speed: no bending.',
+  o1slow:'Light enters a slower medium: the refracted ray bends towards the normal (r < i).',
+  o1fast:'Light enters a faster medium: the refracted ray bends away from the normal (r > i).',
+  o1tir:'There is no refracted ray: all the light is reflected. This is total internal reflection (see part 3).',
+  o1wave:'Wavefronts are wave crests. In a slower medium they crowd together (shorter wavelength). The end of a wavefront that reaches the boundary first slows down first, so the whole wavefront turns.',
+  o1march:'Whoever steps onto the sand first slows down first while the others on the pavement are still fast. Because their arms are linked, the whole row turns, just like a light ray.',
+  o1oil:'Try: cooking oil is lighter than water (it floats) yet light travels more slowly in oil than in water. Being optically dense is not about being heavy.',
+  concl1:'When light passes obliquely from one medium into another where light has a different speed, the ray bends at the boundary. This is <b>refraction of light</b>. The slower light travels in a medium, the larger its <b>refractive index</b>: <b>n = c / v</b> (c ≈ 3·10⁸ m/s is the speed of light in vacuum, almost the same in air). At normal incidence the ray does not bend.',
+  kvI:'Angle of incidence i', kvR:'Angle of refraction r', kvV1:'v (upper)', kvV2:'v (lower)', kvN1:'n (upper)', kvN2:'n (lower)', kvCmp:'Speeds',
+  cmpSlow:'lower is slower', cmpFast:'lower is faster', cmpEq:'equal', none:'none'
+});
+const s1={i:45, a:'air', b:'water', vm:'ray', tau:0, run:true, spd:1, pred:false};
+let D1=null, V1=null, drag1=false;
+function setup1(){
+  const cv=$('#cv1');
+  $('#rngI1').oninput=e=>{ s1.i=+e.target.value; ui1(); };
+  $('#perp1').onclick=()=>{ s1.i=0; ui1(); };
+  $('#play1').onclick=()=>{ s1.run=!s1.run; ui1(); };
+  $$('#spd1 .btn').forEach(b=>b.onclick=()=>{ s1.spd=+b.dataset.v; ui1(); });
+  $$('#vm1 .btn').forEach(b=>b.onclick=()=>{ s1.vm=b.dataset.v; ui1(); });
+  $('#m1a').onchange=e=>{ s1.a=e.target.value; ui1(); };
+  $('#m1b').onchange=e=>{ s1.b=e.target.value; ui1(); };
+  predict('#pq1','#fb1',1,'fb1',()=>{ s1.pred=true; ui1(); });
+  const set=e=>{ const p=ptr(cv,e), x=V1.ix(p.x), y=V1.iy(p.y); if (y<0.2) return; s1.i=Math.round(clamp(Math.atan2(-x,y)*R2D,0,85)); ui1(); };
+  cv.addEventListener('pointerdown',e=>{ if(!V1) return; const p=ptr(cv,e); if (V1.iy(p.y)<0.2) return; drag1=true; cv.setPointerCapture(e.pointerId); set(e); });
+  cv.addEventListener('pointermove',e=>{ if(drag1) set(e); });
+  const up=()=>{ drag1=false; }; cv.addEventListener('pointerup',up); cv.addEventListener('pointercancel',up);
+}
+function ui1(){
+  const ids=['air','water','ice','oil','acrylic','glass','diamond'];
+  medOptions($('#m1a'),ids,s1.a); medOptions($('#m1b'),ids,s1.b);
+  $('#rngI1').value=s1.i; $('#iTxt1').textContent=nf(s1.i,0)+'°';
+  $('#play1').textContent=t(s1.run?'pause':'play');
+  $$('#spd1 .btn').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.v===s1.spd)));
+  $$('#vm1 .btn').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===s1.vm)));
+  $('#lock1').hidden=s1.pred;
+  const n1=MED[s1.a].n, n2=MED[s1.b].n, i=s1.i*D2R, r=snell(n1,n2,i);
+  const v1=C0/n1, v2=C0/n2;
+  const show=s1.pred;
+  const rows=[[t('kvI'),nf(s1.i,0)+'°'],[t('kvR'), !show?'?': r===null? t('none') : nf(r*R2D,1)+'°']];
+  if (quant()) rows.push([t('kvV1'),nf(v1/1e8,2,2)+'·10⁸ m/s'],[t('kvV2'),nf(v2/1e8,2,2)+'·10⁸ m/s'],[t('kvN1'),nf(n1,2)],[t('kvN2'),nf(n2,2)]);
+  else rows.push([t('kvCmp'), n2>n1? t('cmpSlow') : n2<n1? t('cmpFast') : t('cmpEq')]);
+  $('#kv1').innerHTML=rows.map(([a,b])=>`<dt>${a}</dt><dd>${b}</dd>`).join('');
+  $('#f1').innerHTML=`n = c / v = ${nf(3,2,2)}·10⁸ / ${nf(v2/1e8,2,2)}·10⁸ = ${nN(n2)}`;
+  const o=[];
+  if (!show) o.push(t('lock1'));
+  else {
+    if (r===null) o.push(t('o1tir'));
+    else if (s1.i===0) o.push(t('o1perp'));
+    else if (n1===n2) o.push(t('o1same'));
+    else o.push(t(n2>n1?'o1slow':'o1fast'));
+    if (s1.vm==='wave') o.push(t('o1wave'));
+    if (s1.vm==='march') o.push(t('o1march'));
+    if (s1.a==='water'&&s1.b==='oil'||s1.a==='oil'&&s1.b==='water') o.push(t('o1oil'));
+  }
+  $('#obs1').innerHTML=o.map(x=>`<p>${x}</p>`).join('');
+  $('#st1').textContent= show? (r===null? `i = ${nf(s1.i,0)}° · ${t('o1tir').split(':')[0]}` : `i = ${nf(s1.i,0)}°  →  r = ${nf(r*R2D,1)}°`) : `i = ${nf(s1.i,0)}°`;
+}
+function draw1(dt){
+  const D=D1, ctx=D.ctx; clear(D);
+  const V=V1=fitView(D,-11,11,-7,7,6), k=V.k;
+  const n1=MED[s1.a].n, n2=MED[s1.b].n, i=s1.i*D2R, r=snell(n1,n2,i), show=s1.pred;
+  if (s1.run) s1.tau+=dt*0.55*s1.spd;
+  /* nền hai môi trường */
+  const march=s1.vm==='march';
+  ctx.fillStyle= march? 'rgba(150,150,150,.18)' : MED[s1.a].fill; ctx.fillRect(0,0,D.w,V.Y(0));
+  ctx.fillStyle= march? (C.sand) : MED[s1.b].fill; if (march) ctx.globalAlpha=.45; ctx.fillRect(0,V.Y(0),D.w,D.h-V.Y(0)); ctx.globalAlpha=1;
+  if (!show){ ctx.fillStyle=C.lane; ctx.globalAlpha=.75; ctx.fillRect(0,V.Y(0),D.w,D.h-V.Y(0)); ctx.globalAlpha=1; label(ctx,'?',D.w/2,(V.Y(0)+D.h)/2,C.muted,'center',54,800); }
+  ctx.strokeStyle=C['glass-edge']; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(0,V.Y(0)); ctx.lineTo(D.w,V.Y(0)); ctx.stroke();
+  const nameA= march? t('ground1')+' – '+t('sFast') : t(s1.a)+(quant()?`  n = ${nN(n1)}`:'');
+  const nameB= march? t('ground2')+' – '+t('sSlow') : t(s1.b)+(quant()?`  n = ${nN(n2)}`:'');
+  label(ctx,nameA,10,V.Y(0)-16,C.ink,'left',14,700,C.panel);
+  if (show) label(ctx,nameB,10,V.Y(0)+18,C.ink,'left',14,700,C.panel);
+  /* pháp tuyến */
+  dashLine(ctx,V.X(0),V.Y(6.6),V.X(0),V.Y(-6.6),C.normal,1.5);
+  label(ctx,t('normal'),V.X(0)+6,V.Y(6.4),C.normal,'left',12,600);
+  const R=8, Lx=-R*Math.sin(i), Ly=R*Math.cos(i);
+  const d1={x:Math.sin(i),y:-Math.cos(i)};
+  const d2= r===null? {x:Math.sin(i),y:Math.cos(i)} : {x:Math.sin(r),y:-Math.cos(r)};
+  if (s1.vm==='ray'){
+    const Rf=fresnel(n1,n2,i);
+    beam(ctx,V.X(Lx),V.Y(Ly),V.X(0),V.Y(0),1);
+    if (show){
+      beam(ctx,V.X(0),V.Y(0),V.X(R*Math.sin(i)),V.Y(R*Math.cos(i)),r===null?1:Rf);
+      if (r!==null) beam(ctx,V.X(0),V.Y(0),V.X(9*Math.sin(r)),V.Y(-9*Math.cos(r)),1-Rf);
+      if (r!==null && s1.i>0) dashLine(ctx,V.X(0),V.Y(0),V.X(-Lx*0.9),V.Y(-Ly*0.9),C.muted,1.2,[3,5]);
+      if (r!==null && s1.i>0) arcAngle(ctx,V.X(0),V.Y(0),2.6*k,Math.PI/2,Math.PI/2-r,C['bar-t'],'r');
+      if (quant() && show && r!==null) label(ctx,nf((1-Rf)*100,0)+' %',V.X(4.2*Math.sin(r))+30,V.Y(-4.2*Math.cos(r)),C.muted,'left',12,600,C.panel);
+      if (quant() && show) label(ctx,nf((r===null?1:Rf)*100,r===null?0:1)+' %',V.X(4.5*Math.sin(i))+28,V.Y(4.5*Math.cos(i)),C.muted,'left',12,600,C.panel);
+    }
+    if (s1.i>0) arcAngle(ctx,V.X(0),V.Y(0),2.2*k,-Math.PI/2,-Math.PI/2-i,C.laser,'i');
+  } else {
+    /* chùm có bề rộng W; hàng = mặt sóng cùng pha; cột = đường đi của từng "người" */
+    const W=3.6, lam0=march?2.3:1.25, L1=lam0/n1, L2=(r===null? lam0/n1 : lam0/n2);
+    const e1={x:Math.cos(i),y:Math.sin(i)}, NC=march?5:31, sStart=-R;
+    const ti=Math.tan(i);
+    const colPt=(u,phi)=>{ /* điểm của cột u ở pha phi */
+      const sB=u*ti, phB=sB/L1;
+      if (phi<=phB || !show){ const s=phi*L1; if (s<sStart) return null; const P={x:s*d1.x+u*e1.x, y:s*d1.y+u*e1.y, m:1}; return (!show&&P.y<0)? null : P; }
+      const Bx=u/Math.cos(i), q=(phi-phB)*L2; return {x:Bx+q*d2.x, y:q*d2.y, m:2};
+    };
+    /* dải chùm sáng */
+    ctx.save(); ctx.fillStyle=C['laser-glow']; ctx.beginPath();
+    const a0={x:sStart*d1.x-W/2*e1.x,y:sStart*d1.y-W/2*e1.y}, a1={x:sStart*d1.x+W/2*e1.x,y:sStart*d1.y+W/2*e1.y};
+    const b0={x:-W/2/Math.cos(i),y:0}, b1={x:W/2/Math.cos(i),y:0};
+    ctx.moveTo(V.X(a0.x),V.Y(a0.y)); ctx.lineTo(V.X(a1.x),V.Y(a1.y)); ctx.lineTo(V.X(b1.x),V.Y(b1.y)); ctx.lineTo(V.X(b0.x),V.Y(b0.y)); ctx.fill();
+    if (show){ ctx.beginPath(); ctx.moveTo(V.X(b0.x),V.Y(b0.y)); ctx.lineTo(V.X(b1.x),V.Y(b1.y)); ctx.lineTo(V.X(b1.x+14*d2.x),V.Y(14*d2.y)); ctx.lineTo(V.X(b0.x+14*d2.x),V.Y(14*d2.y)); ctx.fill(); }
+    ctx.restore();
+    ctx.save(); ctx.beginPath(); ctx.rect(0,0,D.w,D.h); ctx.clip();
+    const frac=s1.tau%1, kmin=Math.floor(sStart/L1)-1, kmax=40;
+    for (let kk=kmin; kk<kmax; kk++){
+      const phi=kk+frac; const pts=[];
+      for (let j=0;j<NC;j++){
+        const u=-W/2+W*j/(NC-1);
+        const p=colPt(u,phi); if (p) pts.push({...p,u});
+      }
+      if (pts.length<2) { if (march && pts.length===1){} else if(!march) continue; }
+      /* chèn điểm gãy đúng trên mặt phân cách */
+      if (!march && show && ti>1e-6){ const us=phi*L1/ti; if (us>-W/2 && us<W/2){ pts.push({x:us/Math.cos(i),y:0,u:us}); pts.sort((a,b)=>a.u-b.u); } }
+      if (!pts.length) continue;
+      if (pts.every(p=>Math.abs(p.x)>12||p.y<-8||p.y>8)) continue;
+      if (!march){
+        ctx.strokeStyle=C.laser; ctx.lineWidth=2.6; ctx.beginPath();
+        pts.forEach((p,q)=>q? ctx.lineTo(V.X(p.x),V.Y(p.y)) : ctx.moveTo(V.X(p.x),V.Y(p.y))); ctx.stroke();
+      } else {
+        ctx.strokeStyle=C.muted; ctx.lineWidth=2; ctx.beginPath();
+        pts.forEach((p,q)=>q? ctx.lineTo(V.X(p.x),V.Y(p.y)) : ctx.moveTo(V.X(p.x),V.Y(p.y))); ctx.stroke();
+        for (const p of pts){
+          const dd= p.m===1? d1 : d2, ang=Math.atan2(-dd.y,dd.x);
+          ctx.save(); ctx.translate(V.X(p.x),V.Y(p.y)); ctx.rotate(ang);
+          ctx.fillStyle= p.m===1? C.accent : C.warn; ctx.beginPath(); ctx.ellipse(0,0,0.16*k,0.36*k,0,0,7); ctx.fill();
+          ctx.fillStyle=C.ink; ctx.beginPath(); ctx.arc(0.05*k,0,0.15*k,0,7); ctx.fill();
+          ctx.restore();
+        }
+      }
+    }
+    ctx.restore();
+  }
+  laserBody(ctx,V.X(Lx),V.Y(Ly),Math.atan2(-(0-Ly),(0-Lx)),drag1);
+}
+
+/* ================= TAB 2: Phòng thí nghiệm định luật khúc xạ ================= */
+addT({
+  req2:'<b>Yêu cầu cần đạt:</b> Thực hiện được thí nghiệm để rút ra và phát biểu được định luật khúc xạ ánh sáng. Vận dụng được biểu thức n = sin i / sin r trong một số trường hợp đơn giản.',
+  hint2:'Kéo đèn laser quanh bảng chia độ. Ánh sáng chiếu vào tâm O của mặt phẳng khối bán trụ, đọc góc tới i và góc khúc xạ r trên thước rồi bấm "Ghi số liệu".',
+  rev:'Đổi chiều ánh sáng', rotH:'Mặt ngang', rotV:'Mặt đứng', rotS:'Mặt xiên',
+  cBlock:'Khối bán trụ và bảng số liệu',
+  g2a:'Đồ thị r theo i', g2b:'Đồ thị sin i theo sin r',
+  thN:'Lần', thMat:'Chất', thI:'i', thR:'r',
+  q2a:'Chiếu tia sáng vuông góc với mặt phẳng của khối (i = 0°). Tia sáng sẽ:',
+  q2a_0:'Đi thẳng, không gãy', q2a_1:'Bị gãy lệch đi', q2a_2:'Bật ngược lại hết',
+  fb2a:'Kéo đèn về 0° để kiểm tra: tia vuông góc đi thẳng (r = 0°). Chỉ khoảng 4% ánh sáng phản xạ ngược lại.',
+  q2b:'Tăng góc tới từ 20° lên 40° (gấp đôi). Góc khúc xạ sẽ:',
+  q2b_0:'Tăng đúng gấp đôi', q2b_1:'Tăng, nhưng ít hơn gấp đôi', q2b_2:'Không thay đổi',
+  fb2b:'Với thuỷ tinh: i = 20° thì r ≈ 13,2°; i = 40° thì r ≈ 25,4°; i = 80° thì r ≈ 41,0°. Tỉ số i/r thay đổi, nhưng sin i / sin r luôn ≈ 1,5. Nhà thiên văn Ptolemy (thế kỉ 2) cũng từng nghĩ r tỉ lệ thuận với i.',
+  cEx2:'Vận dụng n = sin i / sin r',
+  ex2r:(m,n,i)=>`Ánh sáng đi từ không khí vào ${m} (n = ${n}) với góc tới i = ${i}°. Tính góc khúc xạ r.`,
+  ex2n:(i,r)=>`Chiếu tia sáng từ không khí vào một chất lỏng: đo được i = ${i}°, r = ${r}°. Tính chiết suất n của chất lỏng.`,
+  ex2ok:(v)=>`Đáp số: ${v}.`,
+  noRec:'Đang phản xạ toàn phần, không có góc khúc xạ để ghi.',
+  h2qual:'Quan sát cột i và r: i tăng thì r tăng, nhưng i tăng gấp đôi thì r không tăng gấp đôi.',
+  h2quant:'So sánh cột i/r (thay đổi) với cột sin i / sin r (gần như không đổi). Trên đồ thị phải, các điểm nằm trên một đường thẳng qua gốc, độ dốc chính là n.',
+  h2rev:'Đổi chiều thì ánh sáng đi ngược lại đúng đường cũ (tính thuận nghịch). Lúc này sin i / sin r = 1/n.',
+  mystQ:'Đo vài cặp i, r rồi tính n của vật liệu bí ẩn:', mystOk:(n,nm)=>`Đúng: n = ${n}, đó là ${nm}.`, mystNo:'Chưa khớp, hãy đo thêm và tính lại.',
+  slope:'độ dốc ≈ ',
+  concl2:'<b>Định luật khúc xạ ánh sáng:</b> Tia khúc xạ nằm trong mặt phẳng tới, ở phía bên kia pháp tuyến so với tia tới. Với hai môi trường trong suốt nhất định, tỉ số giữa sin góc tới và sin góc khúc xạ luôn không đổi: <b>sin i / sin r = n</b> (ánh sáng đi từ không khí vào môi trường có chiết suất n). Góc tới tăng thì góc khúc xạ tăng nhưng không tỉ lệ thuận. Chiếu vuông góc (i = 0°) thì tia đi thẳng. Đường truyền của ánh sáng có tính thuận nghịch.'
+},{
+  req2:'<b>Learning outcome:</b> Carry out an experiment to derive and state the law of refraction. Apply n = sin i / sin r in simple cases.',
+  hint2:'Drag the laser around the protractor. The beam aims at the centre O of the flat face of the semicircular block. Read i and r on the scale, then press "Record data".',
+  rev:'Reverse the light', rotH:'Horizontal face', rotV:'Vertical face', rotS:'Tilted face',
+  cBlock:'Semicircular block and data table',
+  g2a:'Graph of r against i', g2b:'Graph of sin i against sin r',
+  thN:'#', thMat:'Material', thI:'i', thR:'r',
+  q2a:'A ray hits the flat face of the block at right angles (i = 0°). The ray will:',
+  q2a_0:'Go straight on', q2a_1:'Be bent aside', q2a_2:'Bounce straight back',
+  fb2a:'Drag the laser to 0° to check: the ray goes straight through (r = 0°). Only about 4% is reflected back.',
+  q2b:'The angle of incidence is increased from 20° to 40° (doubled). The angle of refraction will:',
+  q2b_0:'Exactly double', q2b_1:'Increase, but less than double', q2b_2:'Stay the same',
+  fb2b:'For glass: i = 20° gives r ≈ 13.2°; i = 40° gives r ≈ 25.4°; i = 80° gives r ≈ 41.0°. The ratio i/r changes, but sin i / sin r stays ≈ 1.5. The astronomer Ptolemy (2nd century) also thought r was proportional to i.',
+  cEx2:'Apply n = sin i / sin r',
+  ex2r:(m,n,i)=>`Light passes from air into ${m} (n = ${n}) with angle of incidence i = ${i}°. Find the angle of refraction r.`,
+  ex2n:(i,r)=>`A ray goes from air into a liquid: i = ${i}°, r = ${r}°. Find the refractive index n of the liquid.`,
+  ex2ok:(v)=>`Answer: ${v}.`,
+  noRec:'Total internal reflection: there is no angle of refraction to record.',
+  h2qual:'Look at the i and r columns: r increases with i, but doubling i does not double r.',
+  h2quant:'Compare the i/r column (changing) with the sin i / sin r column (almost constant). On the right graph the points lie on a straight line through the origin; its slope is n.',
+  h2rev:'Reversed light retraces exactly the same path (reversibility). Now sin i / sin r = 1/n.',
+  mystQ:'Measure a few pairs of i and r, then calculate n of the mystery material:', mystOk:(n,nm)=>`Correct: n = ${n}, it is ${nm}.`, mystNo:'Not yet, measure more and recalculate.',
+  slope:'slope ≈ ',
+  concl2:'<b>Law of refraction:</b> The refracted ray lies in the plane of incidence, on the other side of the normal from the incident ray. For two given transparent media, the ratio of the sine of the angle of incidence to the sine of the angle of refraction is constant: <b>sin i / sin r = n</b> (light passing from air into a medium of refractive index n). As i increases r increases, but not in proportion. At normal incidence (i = 0°) the ray goes straight on. Light paths are reversible.'
+});
+const s2={i:40, mat:'glass', rev:false, rot:0, rows:[], ex:null};
+let D2=null, V2=null, D2a=null, D2b=null, drag2=false;
+const MATCOL={water:'#2f86d6',ice:'#3fb0c8',oil:'#c99a10',acrylic:'#6b8fb0',glass:'#14907f',diamond:'#8a5ad6',mystery:'#d6457f'};
+function setup2(){
+  const cv=$('#cv2');
+  $$('#t2 .nudge .btn').forEach(b=>b.onclick=()=>{ s2.i=clamp(s2.i+ +b.dataset.d,0,89); ui2(); });
+  $('#rev2').onclick=()=>{ s2.rev=!s2.rev; ui2(); };
+  $$('#rot2 .btn').forEach(b=>b.onclick=()=>{ s2.rot=+b.dataset.v; ui2(); });
+  $('#m2').onchange=e=>{ s2.mat=e.target.value; ui2(); };
+  $('#rec2').onclick=()=>{ const r=ang2().r; if (r===null){ $('#h2').textContent=t('noRec'); return; } s2.rows.push({mat:s2.mat,i:s2.i,r:r*R2D,rev:s2.rev}); ui2(); };
+  $('#clr2').onclick=()=>{ s2.rows=[]; ui2(); };
+  predict('#pq2a','#fb2a',0,'fb2a'); predict('#pq2b','#fb2b',1,'fb2b');
+  $('#ex2new').onclick=()=>{ newEx2(); ui2(); };
+  $('#ex2chk').onclick=()=>{ const v=parseFloat($('#ex2in').value.replace(',','.')), e=s2.ex, fb=$('#ex2fb'); fb.hidden=false;
+    const ok= isFinite(v) && Math.abs(v-e.ans)<=e.tol; fb.className='fb '+(ok?'good':'bad');
+    fb.textContent=(ok?t('right'):t('wrong'))+t('ex2ok',e.type==='r'? nf(e.ans,1)+'°' : 'n ≈ '+nf(e.ans,2)); };
+  newEx2();
+  const set=e=>{ const p=ptr(cv,e); let x=V2.ix(p.x), y=V2.iy(p.y); const c=Math.cos(-s2.rot*D2R), s=Math.sin(-s2.rot*D2R); const lx=x*c-y*s, ly=x*s+y*c;
+    const a= s2.rev? Math.atan2(-lx,-ly) : Math.atan2(-lx,ly); s2.i=Math.round(clamp(a*R2D,0,89)); ui2(); };
+  cv.addEventListener('pointerdown',e=>{ if(!V2) return; drag2=true; cv.setPointerCapture(e.pointerId); set(e); });
+  cv.addEventListener('pointermove',e=>{ if(drag2) set(e); });
+  const up=()=>{ drag2=false; }; cv.addEventListener('pointerup',up); cv.addEventListener('pointercancel',up);
+}
+function newEx2(){
+  const mats=['water','glass','diamond','acrylic'];
+  if (Math.random()<0.6){ const m=mats[Math.floor(Math.random()*4)], i=5*(2+Math.floor(Math.random()*15)), n=MED[m].n;
+    s2.ex={type:'r', m, i, n, ans:Math.asin(Math.sin(i*D2R)/n)*R2D, tol:0.6}; }
+  else { const n=[1.33,1.36,1.40,1.44,1.47][Math.floor(Math.random()*5)], i=5*(4+Math.floor(Math.random()*11)), r=Math.round(Math.asin(Math.sin(i*D2R)/n)*R2D*10)/10;
+    s2.ex={type:'n', i, r, ans:Math.sin(i*D2R)/Math.sin(r*D2R), tol:0.02}; }
+  $('#ex2in').value=''; $('#ex2fb').hidden=true;
+}
+function ang2(){ const n=MED[s2.mat].n, i=s2.i*D2R; return s2.rev? {n1:n,n2:1,r:snell(n,1,i)} : {n1:1,n2:n,r:snell(1,n,i)}; }
+function ui2(){
+  medOptions($('#m2'),['water','acrylic','glass','diamond','mystery'],s2.mat);
+  $('#rev2').setAttribute('aria-pressed',String(s2.rev));
+  $$('#rot2 .btn').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.v===s2.rot)));
+  const {r}=ang2();
+  $('#st2').textContent=`i = ${nf(s2.i,0)}°   ·   r = ${r===null? t('none') : nf(r*R2D,1)+'°'}`;
+  const q=quant();
+  let h=`<tr><th>${t('thN')}</th><th>${t('thMat')}</th><th>${t('thI')}</th><th>${t('thR')}</th>${q?'<th>i/r</th><th>sin i</th><th>sin r</th><th>sin i / sin r</th>':''}</tr>`;
+  s2.rows.forEach((w,k)=>{ const si=Math.sin(w.i*D2R), sr=Math.sin(w.r*D2R);
+    h+=`<tr><td class="n">${k+1}</td><td><span style="color:${MATCOL[w.mat]}">●</span> ${t(w.mat)}${w.rev?' ↺':''}</td><td class="n">${nf(w.i,0)}°</td><td class="n">${nf(w.r,1)}°</td>${q?`<td class="n">${w.r>0?nf(w.i/w.r,2):'–'}</td><td class="n">${nf(si,3)}</td><td class="n">${nf(sr,3)}</td><td class="n"><b>${sr>0?nf(si/sr,2):'–'}</b></td>`:''}</tr>`; });
+  $('#tb2').innerHTML=h;
+  const hint=[]; if (s2.rows.length>=3) hint.push(t(q?'h2quant':'h2qual')); if (s2.rows.some(w=>w.rev)) hint.push(t('h2rev'));
+  let hh=hint.join(' ');
+  if (s2.mat==='mystery') hh+=`<span style="display:block;margin-top:8px">${t('mystQ')}</span><span class="row"><span>n ≈</span><input type="number" id="myst2" step="0.01" inputmode="decimal"><button class="btn" id="myst2b">${t('check')}</button></span><span id="myst2f"></span>`;
+  $('#h2').innerHTML=hh;
+  if ($('#myst2b')) $('#myst2b').onclick=()=>{ const v=parseFloat($('#myst2').value.replace(',','.')); const ok=Math.abs(v-myst.n)<=0.04;
+    $('#myst2f').textContent= ok? t('mystOk',nf(myst.n,2),myst[lang]) : t('mystNo'); $('#myst2f').className= ok?'fb good':'fb bad'; };
+  const e=s2.ex; $('#ex2').textContent= e.type==='r'? t('ex2r',t(e.m).toLowerCase(),nN(e.n),e.i) : t('ex2n',e.i,nf(e.r,1));
+  $('#ex2lab').textContent= e.type==='r'?'r =':'n ='; $('#ex2u').textContent= e.type==='r'?'°':'';
+  if (D2a) drawGraphs2();
+}
+function draw2(){
+  const D=D2, ctx=D.ctx; clear(D);
+  const V=V2=fitView(D,-11,11,-11,11,4), k=V.k;
+  const ro=s2.rot*D2R, cr=Math.cos(ro), sr_=Math.sin(ro);
+  const P=(x,y)=>[V.X(x*cr-y*sr_), V.Y(x*sr_+y*cr)];
+  const n=MED[s2.mat].n, i=s2.i*D2R, {n1,n2,r}=ang2(), Rf=fresnel(n1,n2,i);
+  const RB=6.6, RR=9.2, RL=10.2;
+  /* bảng chia độ tròn */
+  const [ox,oy]=P(0,0);
+  ctx.save(); ctx.strokeStyle=C.line; ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(ox,oy,RR*k,0,7); ctx.stroke();
+  for (let a=0;a<360;a+=5){ const big=a%10===0, c=Math.cos(a*D2R), s=Math.sin(a*D2R);
+    const [x1,y1]=P(RR*s,RR*c), [x2,y2]=P((RR-(big?0.6:0.3))*s,(RR-(big?0.6:0.3))*c);
+    ctx.strokeStyle=C.muted; ctx.lineWidth=big?1.4:0.8; ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+    if (big && D.w>360 || a%30===0){ const deg=a<=90?a: a<=180? 180-a : a<=270? a-180 : 360-a; const [lx,ly]=P((RR-1.2)*s,(RR-1.2)*c); label(ctx,String(deg),lx,ly,C.muted,'center',D.w>500?11:9,500); } }
+  ctx.restore();
+  /* khối bán trụ (nửa dưới trong hệ toạ độ của bàn) */
+  ctx.beginPath(); for (let a=0;a<=180;a+=3){ const [x,y]=P(RB*Math.cos(a*D2R),-RB*Math.sin(a*D2R)); a?ctx.lineTo(x,y):ctx.moveTo(x,y); } ctx.closePath();
+  ctx.fillStyle=MED[s2.mat].fill; ctx.fill(); ctx.strokeStyle=C['glass-edge']; ctx.lineWidth=2; ctx.stroke();
+  /* pháp tuyến và mặt phân cách */
+  { const [a,b]=P(0,RR), [c,d]=P(0,-RR); dashLine(ctx,a,b,c,d,C.normal,1.5); const [e,f]=P(-RR,0),[g,h]=P(RR,0); dashLine(ctx,e,f,g,h,C.line,1,[2,4]); }
+  label(ctx,'▼ '+t(s2.mat)+(quant()&&s2.mat!=='mystery'?` (n = ${nN(n)})`:''),D.w-8,D.h-14,C.ink,'right',13,700,C.panel);
+  label(ctx,'▲ '+t('air')+(quant()?' (n = 1)':''),D.w-8,14,C.muted,'right',13,600,C.panel);
+  const ray=(x1,y1,x2,y2,I)=>{ const [a,b]=P(x1,y1),[c,d]=P(x2,y2); beam(ctx,a,b,c,d,I); };
+  const dir=(a,len,sgn)=>[len*Math.sin(a), sgn*len*Math.cos(a)];
+  let laserPos, laserAng;
+  if (!s2.rev){
+    const [lx,ly]=[-RL*Math.sin(i),RL*Math.cos(i)]; laserPos=P(lx,ly); laserAng=[P(0,0),laserPos];
+    ray(lx,ly,0,0,1);
+    ray(0,0,RR*Math.sin(i),RR*Math.cos(i),Rf);
+    if (r!==null){ ray(0,0,RR*Math.sin(r),-RR*Math.cos(r),1-Rf); }
+  } else {
+    const [lx,ly]=[-RL*Math.sin(i),-RL*Math.cos(i)]; laserPos=P(lx,ly); laserAng=[P(0,0),laserPos];
+    ray(lx,ly,0,0,1);
+    ray(0,0,RR*Math.sin(i),-RR*Math.cos(i),r===null?1:Rf);
+    if (r!==null) ray(0,0,RR*Math.sin(r),RR*Math.cos(r),1-Rf);
+  }
+  /* cung góc */
+  const angPx=(x,y)=>{ const [a,b]=P(x,y); return Math.atan2(b-oy,a-ox); };
+  if (s2.i>0){
+    if (!s2.rev){ arcAngle(ctx,ox,oy,2.4*k,angPx(0,1),angPx(-Math.sin(i),Math.cos(i)),C.laser,'i');
+      if (r!==null) arcAngle(ctx,ox,oy,2.9*k,angPx(0,-1),angPx(Math.sin(r),-Math.cos(r)),C['bar-t'],'r'); }
+    else { arcAngle(ctx,ox,oy,2.4*k,angPx(0,-1),angPx(-Math.sin(i),-Math.cos(i)),C.laser,'i');
+      if (r!==null) arcAngle(ctx,ox,oy,2.9*k,angPx(0,1),angPx(Math.sin(r),Math.cos(r)),C['bar-t'],'r'); }
+  }
+  label(ctx,'O',ox-10,oy+12,C.ink,'center',12,700);
+  const [lp,lq]=laserPos; laserBody(ctx,lp,lq,Math.atan2(oy-lq,ox-lp),drag2);
+}
+function drawGraphs2(){
+  /* r theo i */
+  { const D=D2a, ctx=D.ctx; clear(D);
+    const G=axes(D,0,90,0,90,'i (°)','r (°)',[0,30,60,90],[0,30,60,90]);
+    dashLine(ctx,G.X(0),G.Y(0),G.X(90),G.Y(90),C.line,1,[4,4]);
+    for (const w of s2.rows){ ctx.fillStyle=MATCOL[w.mat]; ctx.beginPath(); ctx.arc(G.X(w.i),G.Y(w.r),4.5,0,7); ctx.fill(); }
+    const {r}=ang2(); if (r!==null){ ctx.strokeStyle=C.ink; ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(G.X(s2.i),G.Y(r*R2D),6,0,7); ctx.stroke(); } }
+  if (!quant()) return;
+  { const D=D2b, ctx=D.ctx; clear(D);
+    const G=axes(D,0,1,0,1,'sin r','sin i',[0,0.5,1],[0,0.5,1]);
+    const groups={};
+    for (const w of s2.rows){ const x=Math.sin(w.r*D2R), y=Math.sin(w.i*D2R); ctx.fillStyle=MATCOL[w.mat]; ctx.beginPath(); ctx.arc(G.X(x),G.Y(y),4.5,0,7); ctx.fill();
+      const key=w.mat+(w.rev?'r':''); (groups[key]=groups[key]||[]).push([x,y]); }
+    let ly=24;
+    for (const [key,pts] of Object.entries(groups)){ if (pts.length<2) continue;
+      const m=pts.reduce((a,[x,y])=>a+x*y,0)/pts.reduce((a,[x])=>a+x*x,0); const mat=key.replace(/r$/,'');
+      const xe=Math.min(1,1/m); ctx.strokeStyle=MATCOL[mat]; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(G.X(0),G.Y(0)); ctx.lineTo(G.X(xe),G.Y(xe*m)); ctx.stroke();
+      label(ctx,t('slope')+nf(m,2),D.w-14,ly,MATCOL[mat],'right',12,700,C.panel); ly+=18; }
+  }
+}
+
+/* ================= TAB 3: Phản xạ toàn phần ================= */
+addT({
+  req3:'<b>Yêu cầu cần đạt:</b> Thực hiện thí nghiệm để rút ra được điều kiện xảy ra phản xạ toàn phần và xác định được góc tới hạn.',
+  hint3a:'Đèn laser đặt bên trong khối, chiếu ra không khí qua tâm O. Kéo đèn (hoặc bấm ±0,1°) để tăng dần góc tới, theo dõi độ sáng của hai tia và hai thanh năng lượng.',
+  hint3b:'Bây giờ đèn ở trong không khí, chiếu vào khối. Hãy thử kéo góc tới tới gần 90°: có lúc nào tia khúc xạ biến mất không?',
+  rev3:'Đặt đèn ra ngoài không khí', rev3b:'Đặt đèn vào trong khối',
+  eRefl:'Phản xạ', eRefr:'Khúc xạ (ló ra)',
+  g3:'Phần năng lượng phản xạ (đỏ) và khúc xạ (xanh) theo góc tới',
+  cBlock3:'Tìm góc tới hạn',
+  crit3:'Đây là góc tới hạn!',
+  q3a:'Ánh sáng đi từ thuỷ tinh ra không khí. Khi tăng dần góc tới, tia khúc xạ sẽ:',
+  q3a_0:'Tắt đột ngột; trước đó không có tia phản xạ', q3a_1:'Mờ dần, tia phản xạ sáng dần, đến một góc thì mất hẳn', q3a_2:'Luôn luôn còn',
+  fb3a:'Phản xạ toàn phần không bật tắt đột ngột: tia phản xạ luôn có, sáng dần lên tới 100 %, còn tia khúc xạ mờ dần, là sát mặt phân cách rồi mất hẳn ở góc tới hạn.',
+  q3b:'Ánh sáng từ không khí chiếu vào nước. Có thể xảy ra phản xạ toàn phần không?',
+  q3b_0:'Có, nếu góc tới đủ lớn', q3b_1:'Không bao giờ',
+  fb3b:'Từ không khí vào nước, góc khúc xạ luôn nhỏ hơn góc tới nên luôn có tia khúc xạ. Bấm "Đặt đèn ra ngoài không khí" để kiểm tra.',
+  tir:'PHẢN XẠ TOÀN PHẦN',
+  thMat3:'Chất', thGh:'i_gh đo được', thInv:'1/n', thSin:'sin i_gh',
+  c3ok:(a)=>`Chính xác! Góc tới hạn ≈ ${a}. Đã ghi vào bảng.`,
+  c3low:'Vẫn còn tia khúc xạ ló ra. Tăng thêm góc tới.',
+  c3high:'Đã phản xạ toàn phần từ trước. Giảm góc tới để tìm đúng lúc tia khúc xạ vừa biến mất.',
+  c3air:'Đèn đang ở trong không khí (chiết suất nhỏ hơn): không có góc tới hạn.',
+  st3:(i,r)=>`i = ${i}   ·   r = ${r}`,
+  igh:'i_gh',
+  concl3:'<b>Phản xạ toàn phần</b> là hiện tượng toàn bộ ánh sáng bị phản xạ trở lại môi trường cũ, không còn tia khúc xạ. <b>Điều kiện:</b> (1) ánh sáng truyền từ môi trường có chiết suất lớn sang môi trường có chiết suất nhỏ hơn (nước, thuỷ tinh → không khí); (2) góc tới lớn hơn hoặc bằng góc tới hạn: <b>i ≥ i<sub>gh</sub></b>. Khi môi trường thứ hai là không khí: <b>sin i<sub>gh</sub> = 1/n</b>. Nước: 48,8°; thuỷ tinh: 41,8°; kim cương: 24,4°. Ở đúng góc tới hạn, tia khúc xạ là sát mặt phân cách nhưng gần như không còn năng lượng; đó không phải một tia sáng chạy mãi dọc mặt nước.'
+},{
+  req3:'<b>Learning outcome:</b> Carry out an experiment to derive the conditions for total internal reflection and determine the critical angle.',
+  hint3a:'The laser sits inside the block and shines out into air through the centre O. Drag the laser (or press ±0.1°) to increase the angle of incidence step by step; watch the brightness of both rays and the two energy bars.',
+  hint3b:'Now the laser is in air, shining into the block. Try dragging the angle close to 90°: does the refracted ray ever disappear?',
+  rev3:'Put the laser in air', rev3b:'Put the laser inside the block',
+  eRefl:'Reflected', eRefr:'Refracted (out)',
+  g3:'Fraction of energy reflected (red) and refracted (blue) versus angle of incidence',
+  cBlock3:'Find the critical angle',
+  crit3:'This is the critical angle!',
+  q3a:'Light goes from glass into air. As the angle of incidence increases, the refracted ray will:',
+  q3a_0:'Switch off suddenly; there is no reflected ray before that', q3a_1:'Fade while the reflected ray brightens, then vanish at a certain angle', q3a_2:'Always remain',
+  fb3a:'Total internal reflection is not an on/off switch: a reflected ray is always present and brightens up to 100 %, while the refracted ray fades, skims along the boundary and vanishes at the critical angle.',
+  q3b:'Light shines from air into water. Can total internal reflection happen?',
+  q3b_0:'Yes, if the angle is large enough', q3b_1:'Never',
+  fb3b:'From air into water the angle of refraction is always smaller than the angle of incidence, so there is always a refracted ray. Press "Put the laser in air" to check.',
+  tir:'TOTAL INTERNAL REFLECTION',
+  thMat3:'Material', thGh:'measured i_c', thInv:'1/n', thSin:'sin i_c',
+  c3ok:(a)=>`Spot on! Critical angle ≈ ${a}. Added to the table.`,
+  c3low:'There is still a refracted ray. Increase the angle.',
+  c3high:'Total internal reflection started earlier. Decrease the angle to find the moment the refracted ray just disappears.',
+  c3air:'The laser is in air (lower refractive index): there is no critical angle.',
+  st3:(i,r)=>`i = ${i}   ·   r = ${r}`,
+  igh:'i_c',
+  concl3:'<b>Total internal reflection</b> is when all the light is reflected back into the original medium and there is no refracted ray. <b>Conditions:</b> (1) light travels from a medium of higher refractive index to one of lower index (water, glass → air); (2) the angle of incidence is greater than or equal to the critical angle: <b>i ≥ i<sub>c</sub></b>. When the second medium is air: <b>sin i<sub>c</sub> = 1/n</b>. Water: 48.8°; glass: 41.8°; diamond: 24.4°. Exactly at the critical angle the refracted ray skims the boundary but carries almost no energy; it is not a ray running along the surface forever.'
+});
+const s3={i:30, mat:'glass', air:false, rows:[]};
+let D3=null, D3g=null, V3=null, drag3=false;
+function setup3(){
+  const cv=$('#cv3');
+  $$('#t3 .nudge .btn').forEach(b=>b.onclick=()=>{ s3.i=Math.round(clamp(s3.i+ +b.dataset.d,0,89.9)*10)/10; ui3(); });
+  $('#rev3').onclick=()=>{ s3.air=!s3.air; ui3(); };
+  $('#m3').onchange=e=>{ s3.mat=e.target.value; $('#fb3').hidden=true; ui3(); };
+  predict('#pq3a','#fb3a',1,'fb3a'); predict('#pq3b','#fb3b',1,'fb3b');
+  $('#crit3').onclick=()=>{ const fb=$('#fb3'); fb.hidden=false; const n=MED[s3.mat].n;
+    if (s3.air){ fb.className='fb bad'; fb.textContent=t('c3air'); return; }
+    const g=critAngle(n,1)*R2D;
+    if (Math.abs(s3.i-g)<=0.5){ fb.className='fb good'; fb.textContent=t('c3ok',nf(s3.i,1)+'°');
+      s3.rows=s3.rows.filter(w=>w.mat!==s3.mat); s3.rows.push({mat:s3.mat,g:s3.i}); }
+    else { fb.className='fb bad'; fb.textContent=t(s3.i<g?'c3low':'c3high'); }
+    ui3(); };
+  const set=e=>{ const p=ptr(cv,e), x=V3.ix(p.x), y=V3.iy(p.y); const a= s3.air? Math.atan2(-x,y) : Math.atan2(-x,-y); s3.i=Math.round(clamp(a*R2D,0,89.9)*2)/2; ui3(); };
+  cv.addEventListener('pointerdown',e=>{ if(!V3) return; drag3=true; cv.setPointerCapture(e.pointerId); set(e); });
+  cv.addEventListener('pointermove',e=>{ if(drag3) set(e); });
+  const up=()=>{ drag3=false; }; cv.addEventListener('pointerup',up); cv.addEventListener('pointercancel',up);
+}
+function phys3(){ const n=MED[s3.mat].n, i=s3.i*D2R; const n1=s3.air?1:n, n2=s3.air?n:1; const r=snell(n1,n2,i); return {n,n1,n2,i,r,R:fresnel(n1,n2,i)}; }
+function ui3(){
+  medOptions($('#m3'),['water','ice','oil','acrylic','glass','diamond','mystery'],s3.mat);
+  $('#rev3').textContent=t(s3.air?'rev3b':'rev3'); $('#hint3').textContent=t(s3.air?'hint3b':'hint3a');
+  const {r,R}=phys3();
+  setBar('#bR3','#pR3',R); setBar('#bT3','#pT3',1-R);
+  $('#st3').textContent=t('st3',nf(s3.i,1)+'°', r===null? '— ('+t('tir').toLowerCase()+')' : nf(r*R2D,1)+'°');
+  const q=quant();
+  let h=`<tr><th>${t('thMat3')}</th><th>${t('thGh')}</th>${q?`<th>${t('thSin')}</th><th>${t('thInv')}</th>`:''}</tr>`;
+  for (const w of s3.rows){ const n=MED[w.mat].n; h+=`<tr><td><span style="color:${MATCOL[w.mat]}">●</span> ${t(w.mat)}</td><td class="n">${nf(w.g,1)}°</td>${q?`<td class="n">${nf(Math.sin(w.g*D2R),3)}</td><td class="n">${w.mat==='mystery'?'?':nf(1/n,3)}</td>`:''}</tr>`; }
+  $('#tb3').innerHTML=h;
+  if (D3g) drawGraph3();
+}
+function draw3(){
+  const D=D3, ctx=D.ctx; clear(D);
+  const V=V3=fitView(D,-11,11,-10.6,10.6,4), k=V.k;
+  const {n,n1,n2,i,r,R}=phys3();
+  const RB=7.5, RL=9.8, RR=10.2;
+  const ox=V.X(0), oy=V.Y(0);
+  ctx.fillStyle=MED.air.fill;
+  ctx.beginPath(); for (let a=0;a<=180;a+=3){ const x=V.X(RB*Math.cos(a*D2R)), y=V.Y(-RB*Math.sin(a*D2R)); a?ctx.lineTo(x,y):ctx.moveTo(x,y); } ctx.closePath();
+  ctx.fillStyle=MED[s3.mat].fill; ctx.fill(); ctx.strokeStyle=C['glass-edge']; ctx.lineWidth=2; ctx.stroke();
+  /* thước góc mờ */
+  ctx.strokeStyle=C.line; ctx.lineWidth=1; ctx.beginPath(); ctx.arc(ox,oy,RR*k,0,7); ctx.stroke();
+  for (let a=0;a<360;a+=10){ const c=Math.cos(a*D2R), s=Math.sin(a*D2R); ctx.beginPath(); ctx.moveTo(V.X(RR*s),V.Y(RR*c)); ctx.lineTo(V.X((RR-0.5)*s),V.Y((RR-0.5)*c)); ctx.stroke(); }
+  dashLine(ctx,ox,V.Y(RR),ox,V.Y(-RR),C.normal,1.5);
+  dashLine(ctx,V.X(-RR),oy,V.X(RR),oy,C.line,1,[2,4]);
+  label(ctx,'▼ '+t(s3.mat)+(quant()&&s3.mat!=='mystery'?` (n = ${nN(n)})`:''),D.w-8,D.h-14,C.ink,'right',14,700,C.panel);
+  label(ctx,'▲ '+t('air')+(quant()?' (n = 1)':''),D.w-8,14,C.muted,'right',14,600,C.panel);
+  /* góc tới hạn: vạch chỉ dẫn mờ */
+  const g=critAngle(n,1);
+  const sg= s3.air? 1 : -1; /* phía đặt đèn */
+  const Lx=-RL*Math.sin(i), Ly=sg*RL*Math.cos(i);
+  beam(ctx,V.X(Lx),V.Y(Ly),ox,oy,1);
+  beam(ctx,ox,oy,V.X(RR*Math.sin(i)),V.Y(sg*RR*Math.cos(i)),R);
+  if (r!==null) beam(ctx,ox,oy,V.X(RR*Math.sin(r)),V.Y(-sg*RR*Math.cos(r)),1-R);
+  if (s3.i>0){
+    arcAngle(ctx,ox,oy,2.3*k,(sg<0?Math.PI/2:-Math.PI/2),Math.atan2(-Ly,Lx),C.laser,'i');
+    if (r!==null) arcAngle(ctx,ox,oy,2.9*k,(sg<0?-Math.PI/2:Math.PI/2),Math.atan2(sg*Math.cos(r),Math.sin(r)),C['bar-t'],'r');
+  }
+  if (r===null) label(ctx,t('tir'),D.w/2,V.Y(6.2),C.laser,'center',D.w<480?16:20,800,C.panel);
+  label(ctx,'O',ox-10,oy-12,C.ink,'center',12,700);
+  laserBody(ctx,V.X(Lx),V.Y(Ly),Math.atan2(oy-V.Y(Ly),ox-V.X(Lx)),drag3);
+}
+function drawGraph3(){
+  const D=D3g, ctx=D.ctx; clear(D);
+  const {n1,n2}=phys3();
+  const G=axes(D,0,90,0,1,'i (°)','%',[0,15,30,45,60,75,90],[0,0.5,1]);
+  const curve=(f,col)=>{ ctx.strokeStyle=col; ctx.lineWidth=2.5; ctx.beginPath(); for (let a=0;a<=90;a+=0.25){ const v=f(a*D2R); a?ctx.lineTo(G.X(a),G.Y(v)):ctx.moveTo(G.X(a),G.Y(v)); } ctx.stroke(); };
+  curve(a=>fresnel(n1,n2,Math.min(a,89.99*D2R)),C['bar-r']); curve(a=>1-fresnel(n1,n2,Math.min(a,89.99*D2R)),C['bar-t']);
+  const g=critAngle(n1,n2); if (g && s3.rows.some(w=>w.mat===s3.mat)){ dashLine(ctx,G.X(g*R2D),G.Y(0),G.X(g*R2D),G.Y(1),C.warn,1.2,[4,4]); label(ctx,t('igh')+(quant()?' = '+nf(g*R2D,1)+'°':''),G.X(g*R2D)-4,G.Y(0.55),C.warn,'right',12,700,C.panel); }
+  const R=fresnel(n1,n2,s3.i*D2R);
+  ctx.fillStyle=C['bar-r']; ctx.beginPath(); ctx.arc(G.X(s3.i),G.Y(R),5.5,0,7); ctx.fill();
+  ctx.fillStyle=C['bar-t']; ctx.beginPath(); ctx.arc(G.X(s3.i),G.Y(1-R),5.5,0,7); ctx.fill();
+}
+
+/* ================= TAB 4: Hiện tượng quanh ta ================= */
+addT({
+  req4:'<b>Vận dụng:</b> giải thích các hiện tượng đời sống bằng khúc xạ và phản xạ toàn phần. Mắt luôn "nghĩ" ánh sáng đi thẳng, nên ta thấy vật ở chỗ khác chỗ thật.',
+  s4coin:'Đồng xu trong cốc', s4fish:'Bể bơi và con cá', s4win:'Cá nhìn lên trời', s4rod:'Que thuỷ tinh tàng hình', s4mir:'Ảo ảnh trên đường',
+  eye:'mắt', image:'ảnh', real:'vật thật',
+  /* đồng xu */
+  h4coin:'Kéo con mắt để đổi chỗ nhìn. Kéo thanh trượt để đổ nước vào cốc.',
+  waterLvl:'Mực nước', liquid:'Chất lỏng', noLiquid:'Không có',
+  q4coin:'Đặt mắt sao cho vừa không thấy đồng xu (bị thành cốc che). Giữ nguyên mắt và cốc, đổ nước vào. Mắt sẽ:',
+  q4coin_0:'Vẫn không thấy đồng xu', q4coin_1:'Thấy đồng xu hiện ra', q4coin_2:'Thấy đồng xu chìm sâu hơn',
+  fb4coin:'Ánh sáng từ đồng xu tới mặt nước bị khúc xạ, gãy ra xa pháp tuyến, nên vượt qua được mép cốc để tới mắt.',
+  ex4coin:'Khi chưa có nước, ánh sáng từ đồng xu đi thẳng và bị thành cốc chặn lại. Khi có nước, ánh sáng từ đồng xu đi lên tới mặt nước thì bị khúc xạ: đi từ nước ra không khí nên gãy ra xa pháp tuyến, "nghiêng" bớt và lọt qua mép cốc tới mắt. Mắt nghĩ ánh sáng đi thẳng nên thấy <b>ảnh</b> của đồng xu ở cao hơn chỗ thật (hình mờ).',
+  cSee:'Mắt thấy cả đồng xu', cPart:'Mắt thấy một phần đồng xu', cNo:'Mắt không thấy đồng xu (thành cốc che mất)',
+  /* cá */
+  h4fish:'Kéo con mắt (người đứng trên bờ). Đường nét đứt là đường mắt "tưởng" ánh sáng đi thẳng tới.',
+  depth:'Độ sâu bể', showBottom:'Hiện đáy bể nhìn thấy',
+  q4fish:'Đứng trên bờ, dùng xiên để đâm con cá. Phải nhắm vào đâu?',
+  q4fish_0:'Đúng chỗ thấy con cá', q4fish_1:'Thấp hơn chỗ thấy con cá', q4fish_2:'Cao hơn chỗ thấy con cá',
+  fb4fish:'Ảnh của con cá nằm cao hơn con cá thật, nên phải nhắm thấp hơn. Điều thú vị: nếu dùng tia laser thì lại nhắm thẳng vào ảnh, vì tia laser cũng bị khúc xạ theo đúng con đường đó.',
+  ex4fish:'Ánh sáng từ con cá ra khỏi mặt nước bị gãy ra xa pháp tuyến. Kéo dài ngược các tia tới mắt, chúng gặp nhau ở <b>ảnh</b> của cá, cao hơn và gần bờ hơn cá thật. Vì vậy bể bơi trông nông hơn thực tế, và càng nhìn xiên thì đáy càng như được nâng lên. Người không biết bơi dễ gặp nguy hiểm vì tưởng nước nông.',
+  realD:'Độ sâu thật của cá', appD:'Độ sâu của ảnh', approxD:'Nhìn gần thẳng đứng: h/n',
+  /* cửa sổ Snell */
+  h4win:'Kéo con cá lên xuống để đổi độ sâu. Khung dưới là cảnh cá thấy khi ngước nhìn thẳng lên.',
+  fishDepth:'Độ sâu của mắt cá',
+  q4win:'Một con cá dưới hồ nước trong ngước nhìn lên mặt nước. Nó sẽ thấy:',
+  q4win_0:'Cả mặt nước sáng đều như bầu trời', q4win_1:'Bầu trời thu vào một vòng tròn, xung quanh là ảnh phản chiếu của đáy hồ', q4win_2:'Chỉ thấy tối đen',
+  fb4win:'Mọi tia sáng từ bầu trời (kể cả tia gần như nằm ngang) khi vào nước đều bị gãy, chỉ còn nằm trong hình nón góc mở khoảng 97,5° (= 2 × 48,8°). Nhìn xiên hơn thế, cá thấy mặt nước như một tấm gương phản chiếu đáy hồ.',
+  ex4win:'Ánh sáng từ không khí vào nước luôn gãy lại gần pháp tuyến, góc khúc xạ lớn nhất bằng góc tới hạn 48,8°. Vì vậy cả bầu trời "dồn" vào một hình tròn trên mặt nước, gọi là <b>cửa sổ Snell</b>; cây cối trên bờ bị ép sát mép. Ngoài vòng tròn, ánh sáng từ đáy hồ đi lên gặp mặt nước với góc tới lớn hơn góc tới hạn nên bị <b>phản xạ toàn phần</b>: mặt nước như một tấm gương. Thợ lặn và người chụp ảnh dưới nước thấy rõ hiện tượng này.',
+  winLbl:'cửa sổ Snell', winDia:'Đường kính cửa sổ trên mặt nước', fishSees:'Cá nhìn thẳng lên thấy:',
+  sky:'bầu trời', bottomRefl:'ảnh phản chiếu đáy hồ', bank:'bờ, cây cối', sun:'Mặt Trời',
+  /* que */
+  h4rod:'Đổi chất lỏng trong cốc. Khung dưới: nhìn từ trên xuống, các tia sáng từ tấm nền sọc đi qua que thuỷ tinh tới mắt.',
+  rodN:'Chiết suất chất lỏng',
+  q4rod:'Nhúng que thuỷ tinh vào dầu ăn (chiết suất gần bằng thuỷ tinh). Phần que nằm trong dầu sẽ:',
+  q4rod_0:'Vẫn thấy rõ như khi ở trong nước', q4rod_1:'Gần như biến mất', q4rod_2:'Trông to gấp đôi',
+  fb4rod:'Khi chiết suất của que và chất lỏng bằng nhau, ánh sáng đi qua mặt phân cách không bị gãy và không bị phản xạ, nên mắt không phân biệt được que với dầu.',
+  ex4rod:'Ta nhìn thấy một vật trong suốt là nhờ ánh sáng bị <b>khúc xạ</b> (làm cảnh phía sau méo đi) và bị <b>phản xạ một phần</b> ở mặt của vật. Cả hai chỉ xảy ra khi hai môi trường có chiết suất khác nhau. Que thuỷ tinh chịu nhiệt (n ≈ 1,47) gần bằng dầu ăn (n ≈ 1,47), nên trong dầu nó "tàng hình". Thử làm ở nhà với cốc thuỷ tinh nhỏ và dầu ăn.',
+  rodGlass:'que thuỷ tinh n = 1,47', topView:'Nhìn từ trên xuống: tia sáng qua que',
+  /* ảo ảnh */
+  h4mir:'Kéo thanh trượt để đổi nhiệt độ mặt đường. Hình trên phóng đại chiều đứng để thấy tia sáng cong; hình dưới là cảnh người quan sát nhìn thấy.',
+  roadT:'Nhiệt độ mặt đường', airT:'Không khí ở độ cao mắt: 30 °C',
+  q4mir:'Ngày nắng nóng, nhìn xa trên mặt đường nhựa ta thấy như có vũng nước. Đó là:',
+  q4mir_0:'Nước thật đọng trên đường', q4mir_1:'Ảnh của bầu trời, do ánh sáng bị cong khi đi qua lớp không khí nóng sát mặt đường', q4mir_2:'Ánh nắng phản xạ trên mặt đường bóng',
+  fb4mir:'Không khí sát mặt đường nóng hơn nên loãng hơn, chiết suất nhỏ hơn. Ánh sáng từ bầu trời đi xiên xuống bị khúc xạ dần qua các lớp, cong ngược lên rồi tới mắt. Mắt thấy "bầu trời trên mặt đường", trông như vũng nước.',
+  ex4mir:'Chiết suất của không khí giảm rất ít khi nóng lên (khoảng 0,00003), nên chỉ những tia sáng gần như nằm ngang (lệch dưới 0,5°) mới bị cong ngược lên. Đó là lí do vũng nước ảo luôn ở rất xa và lùi dần khi ta đến gần. Ô tô phía trước cũng có ảnh lộn ngược bên dưới. Mô phỏng chia lớp không khí thành rất nhiều lớp mỏng có chiết suất giảm dần về phía mặt đường.',
+  exag:(k)=>`Chiều đứng phóng đại khoảng ${k} lần`,
+  mirSees:'Người quan sát nhìn thấy:', mirage:'vũng nước ảo (ảnh bầu trời)', car:'ô tô', invCar:'ảnh lộn ngược',
+  mirNone:'Mặt đường chưa đủ nóng: chưa thấy vũng nước ảo.', mirYes:(d)=>`Vũng nước ảo bắt đầu ở cách khoảng ${d} m.`,
+  rayRoad:'tia chạm mặt đường', raySky:'tia cong lên tới bầu trời', rayCar:'tia tới ô tô', carOn:'Có ô tô phía trước'
+},{
+  req4:'<b>Apply:</b> explain everyday phenomena with refraction and total internal reflection. The eye always "assumes" light travels in straight lines, so we see objects somewhere other than where they really are.',
+  s4coin:'Coin in a cup', s4fish:'Pool and fish', s4win:'A fish looks up', s4rod:'Invisible glass rod', s4mir:'Road mirage',
+  eye:'eye', image:'image', real:'real object',
+  h4coin:'Drag the eye to change the viewpoint. Use the slider to pour water into the cup.',
+  waterLvl:'Water level', liquid:'Liquid', noLiquid:'None',
+  q4coin:'Place the eye so the coin is just hidden by the rim. Keep eye and cup still and pour in water. The eye will:',
+  q4coin_0:'Still not see the coin', q4coin_1:'See the coin appear', q4coin_2:'See the coin sink deeper',
+  fb4coin:'Light from the coin is refracted at the water surface, bending away from the normal, so it clears the rim and reaches the eye.',
+  ex4coin:'Without water, light from the coin travels straight and is blocked by the side of the cup. With water, light from the coin is refracted at the surface: going from water into air it bends away from the normal, tilts over and passes the rim to reach the eye. The eye assumes straight-line travel, so it sees an <b>image</b> of the coin higher than the real coin (faded picture).',
+  cSee:'The eye sees the whole coin', cPart:'The eye sees part of the coin', cNo:'The eye cannot see the coin (blocked by the cup)',
+  h4fish:'Drag the eye (a person on the side). The dashed lines show where the eye "thinks" the light comes from.',
+  depth:'Pool depth', showBottom:'Show the bottom as it appears',
+  q4fish:'Standing on the side, you try to spear a fish. Where should you aim?',
+  q4fish_0:'Exactly where you see it', q4fish_1:'Below where you see it', q4fish_2:'Above where you see it',
+  fb4fish:'The image of the fish is higher than the real fish, so aim lower. Fun fact: with a laser you would aim straight at the image, because the laser light is refracted along exactly the same path.',
+  ex4fish:'Light leaving the water bends away from the normal. Extending the rays that reach the eye backwards, they meet at the <b>image</b> of the fish, higher and closer to the side than the real fish. That is why a pool looks shallower than it is, and the more obliquely you look the more the bottom seems raised. Non-swimmers can be fooled into thinking the water is shallow.',
+  realD:'Real depth of fish', appD:'Depth of image', approxD:'Viewed almost vertically: h/n',
+  h4win:'Drag the fish up or down to change its depth. The lower picture shows what the fish sees looking straight up.',
+  fishDepth:'Depth of the fish’s eye',
+  q4win:'A fish in a clear lake looks up at the surface. It sees:',
+  q4win_0:'The whole surface evenly bright like the sky', q4win_1:'The sky squeezed into a circle, surrounded by a reflection of the lake bottom', q4win_2:'Only darkness',
+  fb4win:'Every ray from the sky (even almost horizontal ones) is bent on entering the water and stays inside a cone about 97.5° wide (= 2 × 48.8°). Looking more obliquely, the fish sees the surface as a mirror reflecting the lake bottom.',
+  ex4win:'Light going from air into water always bends towards the normal; the largest angle of refraction equals the critical angle 48.8°. So the whole sky is packed into a circle on the surface called <b>Snell’s window</b>; trees on the bank are squeezed against its edge. Outside the circle, light from the bottom meets the surface at more than the critical angle and undergoes <b>total internal reflection</b>: the surface acts as a mirror. Divers and underwater photographers see this clearly.',
+  winLbl:'Snell’s window', winDia:'Window diameter on the surface', fishSees:'Looking straight up the fish sees:',
+  sky:'sky', bottomRefl:'reflection of the lake bottom', bank:'bank, trees', sun:'Sun',
+  h4rod:'Change the liquid in the beaker. Lower picture: seen from above, rays from the striped card pass through the glass rod to the eye.',
+  rodN:'Refractive index of liquid',
+  q4rod:'A glass rod is dipped into cooking oil (refractive index close to glass). The part of the rod in the oil will:',
+  q4rod_0:'Stay as visible as in water', q4rod_1:'Almost disappear', q4rod_2:'Look twice as thick',
+  fb4rod:'When rod and liquid have the same refractive index, light crossing the boundary is neither bent nor reflected, so the eye cannot tell rod and oil apart.',
+  ex4rod:'We see a transparent object because light is <b>refracted</b> (distorting the scene behind) and <b>partly reflected</b> at its surface. Both happen only when the two media have different refractive indices. Heat-resistant glass (n ≈ 1.47) matches cooking oil (n ≈ 1.47), so in oil it becomes "invisible". Try it at home with a small glass and cooking oil.',
+  rodGlass:'glass rod n = 1.47', topView:'From above: rays through the rod',
+  h4mir:'Use the slider to change the road temperature. The top picture stretches the vertical direction to show the curved rays; the bottom picture is what the observer sees.',
+  roadT:'Road surface temperature', airT:'Air at eye height: 30 °C',
+  q4mir:'On a hot day you see what looks like a puddle far down the road. It is:',
+  q4mir_0:'Real water on the road', q4mir_1:'An image of the sky, because light bends in the hot air just above the road', q4mir_2:'Sunlight reflecting off a shiny road',
+  fb4mir:'Air just above the road is hotter, so it is thinner and has a lower refractive index. Light from the sky heading down at a shallow angle is refracted layer by layer, curves back up and reaches the eye. You see "sky on the road", which looks like water.',
+  ex4mir:'The refractive index of air changes only slightly when heated (about 0.00003), so only rays that are almost horizontal (less than 0.5° downwards) curve back up. That is why the puddle is always far away and moves away as you approach. A car ahead also shows an upside-down image below it. The simulation divides the air into very many thin layers whose refractive index decreases towards the road.',
+  exag:(k)=>`Vertical direction stretched about ${k}×`,
+  mirSees:'What the observer sees:', mirage:'mirage puddle (image of the sky)', car:'car', invCar:'inverted image',
+  mirNone:'The road is not hot enough yet: no mirage.', mirYes:(d)=>`The mirage puddle starts about ${d} m away.`,
+  rayRoad:'ray hits the road', raySky:'ray curves up to the sky', rayCar:'ray reaches the car', carOn:'Car ahead'
+});
+const s4={sub:'coin',
+  coin:{h:0, liq:'water', eye:{x:-8,y:20}},
+  fish:{H:2, eye:{x:-0.6,y:2.1}, bot:true},
+  win:{d:1.5},
+  rod:{liq:'water', n:1.33},
+  mir:{Tr:55, car:false, cache:null}};
+const PRED4={coin:1,fish:1,win:1,rod:1,mir:1};
+let D4=null, D4b=null, V4=null, drag4=null;
+/* Tìm điểm khúc xạ P trên mặt y = ys sao cho ánh sáng từ S (trong chất lỏng n) tới mắt E (không khí) */
+function refrPoint(S,E,n,ys){
+  const sg=Math.sign(E.x-S.x)||1, tot=Math.abs(E.x-S.x), dw=ys-S.y, da=E.y-ys;
+  let lo=0, hi=tot;
+  for (let k=0;k<60;k++){ const u=(lo+hi)/2; const g=n*u/Math.hypot(u,dw)-(tot-u)/Math.hypot(tot-u,da); if (g>0) hi=u; else lo=u; }
+  return {x:S.x+sg*(lo+hi)/2, y:ys};
+}
+/* Ảnh ảo: giao điểm của hai tia lân cận kéo dài ngược */
+function virtImage(S,E,n,ys){
+  const P1=refrPoint(S,E,n,ys); const d1=norm(E.x-P1.x,E.y-P1.y);
+  const sg=Math.sign(P1.x-S.x)||1, P2={x:P1.x+sg*0.004*Math.max(0.5,Math.abs(ys-S.y)),y:ys};
+  const sw=(P2.x-S.x)/Math.hypot(P2.x-S.x,ys-S.y), sa=n*sw; if (Math.abs(sa)>=1) return null;
+  const d2={x:sa,y:Math.sqrt(1-sa*sa)};
+  const det=d1.x*(-d2.y)-d1.y*(-d2.x); if (Math.abs(det)<1e-12) return null;
+  const rx=P2.x-P1.x, ry=P2.y-P1.y; const tt=(rx*(-d2.y)-ry*(-d2.x))/det;
+  return {x:P1.x+tt*d1.x, y:P1.y+tt*d1.y, P:P1};
+}
+function norm(x,y){ const l=Math.hypot(x,y)||1; return {x:x/l,y:y/l}; }
+function drawEye(ctx,x,y,ang,hl){
+  ctx.save(); ctx.translate(x,y); ctx.rotate(ang);
+  ctx.fillStyle=C.panel; ctx.strokeStyle=hl?C.accent:C.ink; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(-14,0); ctx.quadraticCurveTo(0,-11,14,0); ctx.quadraticCurveTo(0,11,-14,0); ctx.fill(); ctx.stroke();
+  ctx.fillStyle='#3a6ea5'; ctx.beginPath(); ctx.arc(4,0,5,0,7); ctx.fill(); ctx.fillStyle='#111'; ctx.beginPath(); ctx.arc(5,0,2.4,0,7); ctx.fill();
+  ctx.restore();
+}
+function fishShape(ctx,x,y,s,alpha,flip=false,col='#f08a24'){
+  ctx.save(); ctx.globalAlpha=alpha; ctx.translate(x,y); if(flip) ctx.scale(-1,1);
+  ctx.fillStyle=col; ctx.beginPath(); ctx.ellipse(0,0,s,s*0.45,0,0,7); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(-s*0.85,0); ctx.lineTo(-s*1.45,-s*0.42); ctx.lineTo(-s*1.45,s*0.42); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#111'; ctx.beginPath(); ctx.arc(s*0.55,-s*0.08,s*0.09,0,7); ctx.fill();
+  ctx.restore();
+}
+function setup4(){
+  $$('#sub4 .btn').forEach(b=>b.onclick=()=>{ s4.sub=b.dataset.v; renderAll(); });
+  const cv=$('#cv4');
+  cv.addEventListener('pointerdown',e=>{ if(!V4) return; const p=ptr(cv,e), x=V4.ix(p.x), y=V4.iy(p.y), sb=s4.sub;
+    if (sb==='coin'||sb==='fish') drag4='eye'; else if (sb==='win') drag4='fish'; else return;
+    cv.setPointerCapture(e.pointerId); move4(x,y); });
+  const move4=(x,y)=>{ const sb=s4.sub;
+    if (drag4==='eye' && sb==='coin'){ s4.coin.eye={x:clamp(x,-13,11.5),y:clamp(y,Math.max(s4.coin.h,0)+0.8,21.5)}; if (s4.coin.eye.x>0.2&&s4.coin.eye.x<7.8) s4.coin.eye.y=Math.max(s4.coin.eye.y,11); }
+    if (drag4==='eye' && sb==='fish'){ s4.fish.eye={x:clamp(x,-2.3,6.8),y:clamp(y,0.25,2.3)}; }
+    if (drag4==='fish'){ s4.win.d=Math.round(clamp(-y,0.4,3.2)*10)/10; }
+    ui4(); };
+  cv.addEventListener('pointermove',e=>{ if(!drag4) return; const p=ptr(cv,e); move4(V4.ix(p.x),V4.iy(p.y)); });
+  const up=()=>{ drag4=null; }; cv.addEventListener('pointerup',up); cv.addEventListener('pointercancel',up);
+}
+let pred4Done={};
+function ctl4(){
+  const sb=s4.sub, c=$('#ctl4');
+  if (sb==='coin') c.innerHTML=`<div class="fld"><span>${t('waterLvl')} <span class="val" id="v4a"></span></span><input type="range" id="r4a" min="0" max="10" step="0.1" value="${s4.coin.h}"></div>
+    <div class="seg full" id="lq4"><button class="btn" data-v="water">${t('water')}</button><button class="btn" data-v="oil">${t('oil')}</button></div><dl class="kv" id="kv4"></dl>`;
+  if (sb==='fish') c.innerHTML=`<div class="fld"><span>${t('depth')} <span class="val" id="v4a"></span></span><input type="range" id="r4a" min="0.6" max="3" step="0.1" value="${s4.fish.H}"></div>
+    <label class="chk"><input type="checkbox" id="c4a" ${s4.fish.bot?'checked':''}> <span>${t('showBottom')}</span></label><dl class="kv" id="kv4"></dl>`;
+  if (sb==='win') c.innerHTML=`<div class="fld"><span>${t('fishDepth')} <span class="val" id="v4a"></span></span><input type="range" id="r4a" min="0.4" max="3.2" step="0.1" value="${s4.win.d}"></div><dl class="kv" id="kv4"></dl>`;
+  if (sb==='rod') c.innerHTML=`<div class="seg full" id="lq4"><button class="btn" data-v="air">${t('noLiquid')}</button><button class="btn" data-v="water">${t('water')}</button><button class="btn" data-v="oil">${t('oil')}</button></div>
+    <div class="fld qt"><span>${t('rodN')} <span class="val" id="v4a"></span></span><input type="range" id="r4a" min="1.30" max="1.65" step="0.01" value="${s4.rod.n}"></div><dl class="kv" id="kv4"></dl>`;
+  if (sb==='mir') c.innerHTML=`<div class="fld"><span>${t('roadT')} <span class="val" id="v4a"></span></span><input type="range" id="r4a" min="30" max="70" step="1" value="${s4.mir.Tr}"></div><p class="hint">${t('airT')}</p><label class="chk"><input type="checkbox" id="c4b" ${s4.mir.car?'checked':''}> <span>${t('carOn')}</span></label><dl class="kv" id="kv4"></dl>`;
+  const r=$('#r4a'); if (r) r.oninput=e=>{ const v=+e.target.value;
+    if (sb==='coin') s4.coin.h=v; if (sb==='fish') s4.fish.H=v; if (sb==='win') s4.win.d=v;
+    if (sb==='rod'){ s4.rod.n=v; s4.rod.liq= Math.abs(v-1.33)<0.005?'water': Math.abs(v-1.47)<0.005?'oil':'custom'; }
+    if (sb==='mir'){ s4.mir.Tr=v; s4.mir.cache=null; } ui4(); };
+  $$('#lq4 .btn').forEach(b=>b.onclick=()=>{ if (sb==='coin') s4.coin.liq=b.dataset.v; else { s4.rod.liq=b.dataset.v; if (b.dataset.v!=='air') s4.rod.n=MED[b.dataset.v].n; } ctl4(); ui4(); });
+  const cb=$('#c4a'); if (cb) cb.onchange=e=>{ s4.fish.bot=e.target.checked; };
+  const cb2=$('#c4b'); if (cb2) cb2.onchange=e=>{ s4.mir.car=e.target.checked; };
+  /* dự đoán */
+  $('#q4').textContent=t('q4'+sb);
+  $('#pq4').innerHTML=[0,1,2].map(p=>`<button class="btn" data-p="${p}">${t('q4'+sb+'_'+p)}</button>`).join('');
+  const fb=$('#fb4'); fb.hidden=true; fb.removeAttribute('data-k');
+  predict('#pq4','#fb4',PRED4[sb],'fb4'+sb,()=>{ pred4Done[sb]=true; });
+  $('#ex4').innerHTML=t('ex4'+sb); $('#hint4').textContent=t('h4'+sb);
+}
+let lastSub4=null, lastLang4=null, lastLv4=null;
+function ui4(){
+  const sb=s4.sub;
+  if (sb!==lastSub4 || lang!==lastLang4 || level!==lastLv4){ lastSub4=sb; lastLang4=lang; lastLv4=level; ctl4(); }
+  $$('#sub4 .btn').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===sb)));
+  $$('#lq4 .btn').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===(sb==='coin'?s4.coin.liq:s4.rod.liq))));
+  const two= sb==='win'||sb==='rod'||sb==='mir'; $('#cv4b').hidden=!two; $('#cap4b').hidden=!two;
+  $('#cap4b').textContent= sb==='win'? t('fishSees') : sb==='rod'? t('topView') : sb==='mir'? t('mirSees') : '';
+  const v=$('#v4a'), kv=$('#kv4'); let rows=[];
+  if (sb==='coin'){ v.textContent=nf(s4.coin.h,1)+' cm'; }
+  if (sb==='fish'){ v.textContent=nf(s4.fish.H,1)+' m'; }
+  if (sb==='win'){ v.textContent=nf(s4.win.d,1)+' m'; const g=critAngle(1.33,1); rows=[[t('winDia'),nf(2*s4.win.d*Math.tan(g),1)+' m'],['i_gh',nf(g*R2D,1)+'°'],[lang==='vi'?'Góc mở':'Cone angle',nf(2*g*R2D,1)+'°']]; }
+  if (sb==='rod'){ if (v) v.textContent=nN(s4.rod.n); const nl=s4.rod.liq==='air'?1:s4.rod.n; rows=[[t('rodN'),nN(nl)],[lang==='vi'?'Que':'Rod','1,47'.replace(',',lang==='vi'?',':'.')],[lang==='vi'?'Phản xạ ở mặt que':'Reflection at rod surface',nf(fresnel(nl,1.47,0)*100,2)+' %']]; }
+  if (sb==='mir'){ v.textContent=s4.mir.Tr+' °C'; }
+  if (kv && rows.length) kv.innerHTML=rows.map(([a,b])=>`<dt>${a}</dt><dd>${b}</dd>`).join('');
+  else if (kv && sb!=='fish') kv.innerHTML='';
+}
+function resize4(){
+  if (tab!==4) return;
+  const sb=s4.sub;
+  D4=fit($('#cv4'), sb==='mir'?0.42 : sb==='rod'?0.62 : 0.66, 280, 520);
+  if (sb==='win') D4b=fit($('#cv4b'),0.62,240,380);
+  if (sb==='rod') D4b=fit($('#cv4b'),0.5,220,320);
+  if (sb==='mir'){ D4b=fit($('#cv4b'),0.42,200,320); s4.mir.cache=null; }
+}
+function draw4(){
+  if (!D4) return; const sb=s4.sub;
+  if (sb==='coin') drawCoin(); if (sb==='fish') drawFish(); if (sb==='win') drawWin(); if (sb==='rod') drawRod(); if (sb==='mir') drawMir();
+}
+/* ---- Đồng xu ---- */
+function drawCoin(){
+  const D=D4, ctx=D.ctx; clear(D); const st=s4.coin;
+  const V=V4=fitView(D,-14,12.5,-1.5,22,6), k=V.k;
+  const n=MED[st.liq].n, h=st.h, E=st.eye, W=8, Hc=10;
+  /* bàn */
+  ctx.fillStyle=C.line; ctx.fillRect(0,V.Y(0)+0.3*k,D.w,D.h);
+  /* nước */
+  if (h>0.05){ ctx.fillStyle=MED[st.liq].fill; ctx.fillRect(V.X(0),V.Y(h),W*k,h*k); ctx.strokeStyle=C['glass-edge']; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(V.X(0),V.Y(h)); ctx.lineTo(V.X(W),V.Y(h)); ctx.stroke(); }
+  /* cốc (thành dày, không trong suốt để che) */
+  ctx.fillStyle=C.muted; ctx.fillRect(V.X(-0.4),V.Y(Hc),0.4*k,(Hc+0.3)*k); ctx.fillRect(V.X(W),V.Y(Hc),0.4*k,(Hc+0.3)*k); ctx.fillRect(V.X(-0.4),V.Y(0),(W+0.8)*k,0.3*k);
+  /* đồng xu */
+  const cx=6.3, cw=2.4, cy=0.15;
+  const pts=[cx-cw/2+0.1,cx,cx+cw/2-0.1].map(x=>({x,y:cy}));
+  const blocked=(A,B)=>{ /* đoạn A→B (trong không khí) cắt thành cốc x=0 hoặc x=W dưới miệng cốc? */
+    for (const xw of [0,W]){ if ((A.x-xw)*(B.x-xw)<0){ const yy=A.y+(B.y-A.y)*(xw-A.x)/(B.x-A.x); if (yy<Hc) return true; } } return false; };
+  const res=pts.map(S=>{ if (h<0.3){ return {vis:!blocked(S,E), P:null}; }
+    const P=refrPoint(S,E,n,h); if (P.x<0||P.x>W) return {vis:false,P}; return {vis:!blocked(P,E),P}; });
+  const nv=res.filter(r=>r.vis).length;
+  ctx.fillStyle='#d4a017'; ctx.strokeStyle='#8a6a0a'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.roundRect(V.X(cx-cw/2),V.Y(0.35),cw*k,0.35*k,3); ctx.fill(); ctx.stroke();
+  label(ctx,t('real'),V.X(cx),V.Y(0)+0.3*k+12,C.muted,'center',12,600);
+  /* tia và ảnh */
+  const S=pts[1], r=res[1];
+  if (r.vis){
+    if (r.P){ beam(ctx,V.X(S.x),V.Y(S.y),V.X(r.P.x),V.Y(r.P.y),1); beam(ctx,V.X(r.P.x),V.Y(r.P.y),V.X(E.x),V.Y(E.y),1);
+      dashLine(ctx,V.X(r.P.x),V.Y(r.P.y+2),V.X(r.P.x),V.Y(r.P.y-2),C.normal,1.2);
+      const im=virtImage(S,E,n,h);
+      if (im){ dashLine(ctx,V.X(r.P.x),V.Y(r.P.y),V.X(im.x),V.Y(im.y),C.laser,1.4,[5,4]);
+        ctx.save(); ctx.globalAlpha=.45; ctx.fillStyle='#d4a017'; ctx.beginPath(); ctx.roundRect(V.X(im.x-cw/2),V.Y(im.y+0.17),cw*k,0.35*k,3); ctx.fill(); ctx.restore();
+        label(ctx,t('image'),V.X(im.x),V.Y(im.y)-14,C.laser,'center',12,700,C.panel); } }
+    else { beam(ctx,V.X(S.x),V.Y(S.y),V.X(E.x),V.Y(E.y),1); }
+  } else {
+    /* đường nhìn của mắt sượt qua miệng cốc */
+    const rim={x:0,y:Hc}; const d=norm(rim.x-E.x,rim.y-E.y); const tt=(0.3-E.y)/d.y;
+    dashLine(ctx,V.X(E.x),V.Y(E.y),V.X(E.x+d.x*tt),V.Y(0.3),C.muted,1.4,[6,5]);
+    if (r.P && h>=0.3){ beam(ctx,V.X(S.x),V.Y(S.y),V.X(r.P.x),V.Y(r.P.y),0.5); const d2=norm(E.x-r.P.x,E.y-r.P.y); const L=Math.min(30,Math.abs((Hc+0.5-r.P.y)/Math.max(d2.y,0.05)));
+      beam(ctx,V.X(r.P.x),V.Y(r.P.y),V.X(r.P.x+d2.x*L),V.Y(r.P.y+d2.y*L),0.5,false); }
+    else beam(ctx,V.X(S.x),V.Y(S.y),V.X(S.x+(E.x-S.x)*(-S.x)/(E.x-S.x)),V.Y(S.y+(E.y-S.y)*(-S.x)/(E.x-S.x)),0.5,false);
+  }
+  drawEye(ctx,V.X(E.x),V.Y(E.y),Math.atan2(V.Y(4)-V.Y(E.y),V.X(4)-V.X(E.x)),drag4==='eye');
+  label(ctx,t('eye'),V.X(E.x),V.Y(E.y)-20,C.ink,'center',12,700);
+  $('#st4').textContent= nv===3? t('cSee') : nv>0? t('cPart') : t('cNo');
+  $('#st4').style.color= nv>0? C.ok : C.warn;
+}
+/* ---- Cá trong bể ---- */
+function drawFish(){
+  const D=D4, ctx=D.ctx; clear(D); const st=s4.fish, n=1.33, H=st.H;
+  const V=V4=fitView(D,-2.6,7,-3.3,2.5,6), k=V.k;
+  ctx.fillStyle=MED.water.fill; ctx.fillRect(V.X(0),V.Y(0),D.w,H*k);
+  ctx.fillStyle=C.line; ctx.fillRect(0,V.Y(0),V.X(0),D.h); ctx.fillRect(V.X(0),V.Y(-H),D.w,D.h);
+  /* gạch đáy bể */
+  ctx.strokeStyle=C.muted; ctx.lineWidth=1; for (let x=0;x<7;x+=0.5){ ctx.beginPath(); ctx.moveTo(V.X(x),V.Y(-H)); ctx.lineTo(V.X(x),V.Y(-H)+6); ctx.stroke(); }
+  ctx.strokeStyle=C['glass-edge']; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(V.X(0),V.Y(0)); ctx.lineTo(D.w,V.Y(0)); ctx.stroke();
+  const E=st.eye, F={x:3.8,y:-H+0.35};
+  /* người đứng trên bờ */
+  if (E.x<0){ ctx.strokeStyle=C.muted; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(V.X(E.x-0.1),V.Y(E.y-0.15)); ctx.lineTo(V.X(E.x-0.1),V.Y(0)); ctx.stroke(); }
+  /* đáy bể nhìn thấy */
+  if (st.bot){ const pts=[]; for (let x=0.05;x<=6.95;x+=0.1){ const im=virtImage({x,y:-H},E,n,0); if (im && im.P.x>=0) pts.push(im); }
+    ctx.save(); ctx.strokeStyle=C.r3; ctx.lineWidth=2; ctx.setLineDash([7,5]); ctx.beginPath(); pts.forEach((p,q)=>q?ctx.lineTo(V.X(p.x),V.Y(p.y)):ctx.moveTo(V.X(p.x),V.Y(p.y))); ctx.stroke(); ctx.restore();
+    if (pts.length) label(ctx,lang==='vi'?'đáy bể trông như ở đây':'apparent bottom',V.X(pts[pts.length-1].x)-4,V.Y(pts[pts.length-1].y)-12,C.r3,'right',12,700,C.panel); }
+  fishShape(ctx,V.X(F.x),V.Y(F.y),0.32*k,1,true);
+  label(ctx,t('real'),V.X(F.x),V.Y(F.y)+0.32*k+4,C.ink,'center',12,700,C.panel);
+  const S1={x:F.x-0.12,y:F.y}, S2={x:F.x+0.12,y:F.y};
+  const im=virtImage(F,E,n,0);
+  for (const S of [S1,S2]){ const P=refrPoint(S,E,n,0); beam(ctx,V.X(S.x),V.Y(S.y),V.X(P.x),V.Y(P.y),1); beam(ctx,V.X(P.x),V.Y(P.y),V.X(E.x),V.Y(E.y),1,false);
+    if (im) dashLine(ctx,V.X(P.x),V.Y(P.y),V.X(im.x),V.Y(im.y),C.laser,1.3,[5,4]); }
+  if (im){ fishShape(ctx,V.X(im.x),V.Y(im.y),0.32*k,0.4,true); label(ctx,t('image'),V.X(im.x),V.Y(im.y)-0.32*k-6,C.laser,'center',12,700,C.panel); }
+  drawEye(ctx,V.X(E.x),V.Y(E.y),Math.atan2(V.Y(F.y)-V.Y(E.y),V.X(F.x)-V.X(E.x)),drag4==='eye');
+  const rows=[[t('realD'),nf(-F.y,2)+' m'],[t('appD'), im? nf(-im.y,2)+' m' : '–']];
+  if (quant()) rows.push([t('approxD'),nf(-F.y/n,2)+' m']);
+  const html=rows.map(([a,b])=>`<dt>${a}</dt><dd>${b}</dd>`).join(''); if ($('#kv4').innerHTML!==html) $('#kv4').innerHTML=html;
+  $('#st4').style.color=C.ink;
+  $('#st4').textContent= im? (lang==='vi'?`Ảnh của cá nông hơn cá thật ${nf(im.y-F.y,2)} m.`:`The image is ${nf(im.y-F.y,2)} m shallower than the real fish.`) : '';
+}
+/* ---- Cửa sổ Snell ---- */
+const PEB=Array.from({length:90},(_,k)=>({a:(k*137.5)%360, r:((k*0.618)%1), s:0.5+((k*7)%5)/5}));
+function drawWin(){
+  const D=D4, ctx=D.ctx; clear(D); const n=1.33, d=s4.win.d, g=critAngle(n,1), Hb=3.8;
+  const V=V4=fitView(D,-6.5,6.5,-Hb,2.8,4), k=V.k;
+  /* trời và nước */
+  const gr=ctx.createLinearGradient(0,0,0,V.Y(0)); gr.addColorStop(0,C.sky1); gr.addColorStop(1,C.sky2); ctx.fillStyle=gr; ctx.fillRect(0,0,D.w,V.Y(0));
+  ctx.fillStyle=MED.water.fill; ctx.fillRect(0,V.Y(0),D.w,D.h); ctx.fillStyle=C.sand; ctx.fillRect(0,V.Y(-Hb),D.w,D.h);
+  ctx.strokeStyle=C['glass-edge']; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(0,V.Y(0)); ctx.lineTo(D.w,V.Y(0)); ctx.stroke();
+  /* cây trên bờ */
+  ctx.fillStyle=C.tree; ctx.beginPath(); ctx.arc(V.X(-5.8),V.Y(1.5),0.6*k,0,7); ctx.fill(); ctx.fillRect(V.X(-5.86),V.Y(1),0.12*k,1*k);
+  /* tia từ bầu trời */
+  const E={x:0,y:-d};
+  for (const deg of [-88,-70,-50,-30,-10,10,30,50,70,88]){
+    const a=deg*D2R, w=Math.asin(Math.sin(a)/n), xs=d*Math.tan(w), L=3.2;
+    const T=1-fresnel(1,n,Math.abs(a));
+    beam(ctx,V.X(xs+L*Math.sin(a)),V.Y(L*Math.cos(a)),V.X(xs),V.Y(0),1,false);
+    beam(ctx,V.X(xs),V.Y(0),V.X(E.x),V.Y(E.y),T);
+  }
+  /* tia từ đáy phản xạ toàn phần */
+  for (const deg of [-75,-62,62,75]){ const a=deg*D2R, xs=d*Math.tan(a), xb=xs+(Hb)*Math.tan(a);
+    ctx.save(); ctx.strokeStyle=C.r2; ctx.lineWidth=2.5; ctx.beginPath(); ctx.moveTo(V.X(xb),V.Y(-Hb)); ctx.lineTo(V.X(xs),V.Y(0)); ctx.lineTo(V.X(0),V.Y(-d)); ctx.stroke(); ctx.restore(); }
+  /* biên cửa sổ */
+  const xw=d*Math.tan(g);
+  dashLine(ctx,V.X(0),V.Y(-d),V.X(-xw),V.Y(0),C.warn,2,[6,4]); dashLine(ctx,V.X(0),V.Y(-d),V.X(xw),V.Y(0),C.warn,2,[6,4]);
+  ctx.strokeStyle=C.warn; ctx.lineWidth=5; ctx.beginPath(); ctx.moveTo(V.X(-xw),V.Y(0)); ctx.lineTo(V.X(xw),V.Y(0)); ctx.stroke();
+  label(ctx,t('winLbl'),V.X(0),V.Y(0)-14,C.warn,'center',13,800,C.panel);
+  arcAngle(ctx,V.X(0),V.Y(-d),Math.min(1.1*k,d*k*0.6),-Math.PI/2-g,-Math.PI/2+g,C.warn,nf(2*g*R2D,1)+'°');
+  fishShape(ctx,V.X(0)-0.25*k,V.Y(-d)+0.12*k,0.3*k,1,false);
+  label(ctx,t('sky'),V.X(4.8),V.Y(2.3),C.ink,'center',12,700);
+  label(ctx,lang==='vi'?'tia từ đáy hồ, phản xạ toàn phần':'rays from the bottom, totally reflected',D.w-8,V.Y(-Hb)-12,C.r2,'right',12,700,C.panel);
+  $('#st4').style.color=C.ink; $('#st4').textContent=(lang==='vi'?'Kéo con cá lên xuống: ':'Drag the fish: ')+t('winDia').toLowerCase()+' = '+nf(2*xw,1)+' m';
+  drawWinView();
+}
+function drawWinView(){
+  const D=D4b, ctx=D.ctx; clear(D); const n=1.33, g=critAngle(n,1);
+  const cx=D.w/2, cy=D.h/2, R=Math.min(D.w,D.h)/2-8;
+  const rad=phi=>phi/(Math.PI/2)*R;   /* góc nhìn so với phương thẳng đứng → bán kính trên hình */
+  ctx.save(); ctx.beginPath(); ctx.arc(cx,cy,R,0,7); ctx.clip();
+  ctx.fillStyle=C.sand; ctx.fillRect(0,0,D.w,D.h);
+  for (const p of PEB){ const r=rad(g)+(R-rad(g))*p.r, a=p.a*D2R; ctx.fillStyle= p.s>1?'#8a7a5a':'#a8946a'; ctx.globalAlpha=.6; ctx.beginPath(); ctx.arc(cx+r*Math.cos(a),cy+r*Math.sin(a),3+p.s*3,0,7); ctx.fill(); }
+  ctx.globalAlpha=1; ctx.fillStyle='rgba(20,60,90,.35)'; ctx.fillRect(0,0,D.w,D.h);
+  const gr=ctx.createRadialGradient(cx,cy,0,cx,cy,rad(g)); gr.addColorStop(0,C.sky2); gr.addColorStop(1,C.sky1);
+  ctx.fillStyle=gr; ctx.beginPath(); ctx.arc(cx,cy,rad(g),0,7); ctx.fill();
+  /* cây bờ hồ: góc trên không 75°–89° ép vào vành sát mép */
+  const r1=rad(Math.asin(Math.sin(70*D2R)/n)), r2=rad(Math.asin(Math.sin(89.5*D2R)/n));
+  ctx.fillStyle=C.tree; ctx.globalAlpha=.85; ctx.beginPath(); ctx.arc(cx,cy,r2,Math.PI*0.95,Math.PI*1.55); ctx.arc(cx,cy,r1,Math.PI*1.55,Math.PI*0.95,true); ctx.fill(); ctx.globalAlpha=1;
+  /* Mặt Trời ở góc 35° so với phương thẳng đứng */
+  const rs=rad(Math.asin(Math.sin(35*D2R)/n)); ctx.fillStyle='#ffd23f'; ctx.beginPath(); ctx.arc(cx+rs*0.7,cy-rs*0.7,10,0,7); ctx.fill();
+  ctx.restore();
+  ctx.strokeStyle=C.warn; ctx.lineWidth=2.5; ctx.beginPath(); ctx.arc(cx,cy,rad(g),0,7); ctx.stroke();
+  ctx.strokeStyle=C.line; ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(cx,cy,R,0,7); ctx.stroke();
+  label(ctx,t('sky'),cx,cy+rad(g)*0.35,C.ink,'center',13,700);
+  label(ctx,t('sun'),cx+rs*0.7,cy-rs*0.7+20,C.ink,'center',12,600);
+  label(ctx,t('bank'),cx-r2*0.98,cy-r2*0.55,C.ink,'right',12,700,C.panel);
+  label(ctx,t('bottomRefl'),cx,cy+R-18,'#fff','center',12,700);
+}
+/* ---- Que thuỷ tinh tàng hình ---- */
+function rodTrace(b,a,m){ /* tia song song lệch b so với trục, qua trụ bán kính a, chiết suất tỉ đối m; trả về {ye, yo, dev} hoặc null nếu phản xạ toàn phần */
+  const t1=Math.asin(clamp(b/a,-1,1)), s2=Math.sin(t1)/m; if (Math.abs(s2)>=1) return null;
+  const t2=Math.asin(s2), ex=2*t2-t1, dev=-2*(t1-t2);
+  return {x0:-a*Math.cos(t1), xe:a*Math.cos(ex), ye:a*Math.sin(ex), dev};
+}
+function drawRod(){
+  const D=D4, ctx=D.ctx; clear(D); const st=s4.rod, nr=1.47, nl= st.liq==='air'?1:st.n;
+  const bx0=D.w*0.22, bx1=D.w*0.78, by0=D.h*0.16, by1=D.h*0.94, ly=D.h*0.42;
+  const per=Math.max(10,Math.round(D.w/60));
+  const stripe=x=>(Math.floor((x-bx0+10000*per)/per)%2===0);
+  /* tấm nền sọc phía sau */
+  const card0=D.w*0.08, card1=D.w*0.92;
+  for (let x=card0;x<card1;x+=1){ ctx.fillStyle= stripe(x)? '#1d2433' : '#f2f2ee'; ctx.fillRect(x,D.h*0.04,1,D.h*0.92); }
+  /* cốc + chất lỏng */
+  if (st.liq!=='air'){ ctx.fillStyle= st.liq==='oil'||Math.abs(nl-1.47)<0.03? 'rgba(230,190,40,.35)' : 'rgba(52,145,230,.25)'; ctx.fillRect(bx0,ly,bx1-bx0,by1-ly); }
+  ctx.strokeStyle=C.muted; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(bx0,by0); ctx.lineTo(bx0,by1); ctx.lineTo(bx1,by1); ctx.lineTo(bx1,by0); ctx.stroke();
+  if (st.liq!=='air'){ ctx.strokeStyle='rgba(120,120,120,.6)'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(bx0,ly); ctx.lineTo(bx1,ly); ctx.stroke(); }
+  /* que: vẽ từng cột điểm ảnh theo đường truyền thật của tia qua trụ */
+  const xc=D.w*0.5, a=Math.max(14,D.w*0.045), Dbg=a*2, top=D.h*0.07, bot=D.h*0.9;
+  const seg=(y0,y1,m,tint)=>{
+    for (let px=-a;px<a;px+=1){
+      const b=px+0.5, tr=rodTrace(b,a,m); let col, R;
+      if (!tr){ col='#c9ced6'; R=1; }
+      else { const yb=tr.ye+(Dbg-tr.xe)*Math.tan(tr.dev); col= stripe(xc+yb)? '#1d2433' : '#f2f2ee'; R=Math.min(1,2*fresnel(1,m,Math.asin(Math.min(1,Math.abs(b)/a)))); }
+      ctx.fillStyle=col; ctx.fillRect(xc+px,y0,1,y1-y0);
+      if (R>0.004){ ctx.fillStyle=`rgba(235,240,250,${R})`; ctx.fillRect(xc+px,y0,1,y1-y0); }
+      if (tint){ ctx.fillStyle=tint; ctx.fillRect(xc+px,y0,1,y1-y0); }
+    } };
+  const tint= st.liq==='air'? null : (st.liq==='oil'||Math.abs(nl-1.47)<0.03? 'rgba(230,190,40,.35)' : 'rgba(52,145,230,.25)');
+  seg(top, st.liq==='air'?bot:ly, nr/1, null);
+  if (st.liq!=='air') seg(ly,bot,nr/nl,tint);
+  /* đầu que */
+  ctx.strokeStyle='rgba(150,160,175,.9)'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.ellipse(xc,top,a,a*0.3,0,0,7); ctx.stroke();
+  label(ctx,t('rodGlass'),xc+a+8,top+18,C.ink,'left',13,700,C.panel);
+  if (st.liq!=='air') label(ctx,(st.liq==='custom'? (lang==='vi'?'chất lỏng':'liquid') : t(st.liq))+` n = ${nN(nl)}`,bx1-8,by1-16,C.ink,'right',13,700,C.panel);
+  const dn=Math.abs(nl-nr);
+  $('#st4').style.color= dn<0.02? C.ok : C.ink;
+  $('#st4').textContent= st.liq==='air'? (lang==='vi'?'Trong không khí: que thấy rõ (chênh lệch chiết suất lớn).':'In air: the rod is clearly visible (large index difference).')
+    : dn<0.005? (lang==='vi'?'Chiết suất bằng nhau: phần que trong chất lỏng gần như biến mất!':'Equal indices: the rod almost vanishes in the liquid!')
+    : (lang==='vi'?`Chênh lệch chiết suất ${nf(dn,2)}: vẫn thấy que.`:`Index difference ${nf(dn,2)}: the rod is still visible.`);
+  drawRodTop(nl,nr);
+}
+function drawRodTop(nl,nr){
+  const D=D4b, ctx=D.ctx; clear(D); const st=s4.rod;
+  const cx=D.w/2, cy=D.h*0.5, a=Math.min(D.h*0.3,D.w*0.16);
+  ctx.fillStyle= st.liq==='air'? C.lane : (Math.abs(nl-1.47)<0.03||st.liq==='oil'? 'rgba(230,190,40,.25)':'rgba(52,145,230,.2)'); ctx.fillRect(0,0,D.w,D.h);
+  ctx.fillStyle=MED.glass.fill; ctx.strokeStyle=C['glass-edge']; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(cx,cy,a,0,7); ctx.fill(); ctx.stroke();
+  label(ctx,lang==='vi'?'▲ tấm nền sọc':'▲ striped card',8,12,C.muted,'left',12,600); label(ctx,lang==='vi'?'▼ phía mắt nhìn':'▼ towards the eye',8,D.h-12,C.muted,'left',12,600);
+  const m=nr/nl;
+  for (let k2=-4;k2<=4;k2++){ const b=k2/4.6*a, tr=rodTrace(b,a,m);
+    /* toạ độ: ánh sáng đi từ trên xuống; "x" của công thức = hướng đi xuống, "y" = lệch ngang */
+    const X=(lat)=>cx+lat, Y=(along)=>cy+along;
+    if (!tr){ beam(ctx,X(b),0,X(b),Y(-Math.sqrt(a*a-b*b)),1,false); continue; }
+    const L=D.h;
+    beam(ctx,X(b),0,X(b),Y(tr.x0),1,false);
+    beam(ctx,X(b),Y(tr.x0),X(tr.ye),Y(tr.xe),1,false);
+    beam(ctx,X(tr.ye),Y(tr.xe),X(tr.ye+Math.tan(tr.dev)*L),Y(tr.xe+L),1,false);
+  }
+}
+/* ---- Ảo ảnh ---- */
+function nAir(y,Tr){ const Ta=303.15, T=Ta+(Tr+273.15-Ta)*Math.exp(-Math.max(0,y)/0.25); return 1+2.93e-4*288.15/T; }
+function dnAir(y,Tr){ const h=1e-4; return (nAir(y+h,Tr)-nAir(Math.max(0,y-h),Tr))/(y>h?2*h:h+y); }
+const MIR={X:600, y0:1.6, carX:330, carW:4, carH:1.45};
+/* Tia từ mắt đi xuống góc alpha (rad), lần theo phương trình tia y'' = (1/n)(dn/dy)(1+y'²) */
+function traceMir(alpha,Tr,keep,car){
+  let x=0, y=MIR.y0, s=-Math.tan(alpha); const dx=0.5, pts=keep?[[x,y]]:null;
+  while (x<MIR.X){
+    const n=nAir(y,Tr); s+= dnAir(y,Tr)/n*(1+s*s)*dx; y+= s*dx; x+=dx;
+    if (keep && (Math.round(x*2)%8===0)) pts.push([x,y]);
+    if (car && x>=MIR.carX && x<MIR.carX+MIR.carW && y<MIR.carH && y>0) return {kind:'car',x,y,pts};
+    if (y<=0) return {kind:'road',x,y:0,pts};
+    if (y>40) break;
+  }
+  return {kind:'end', x, y, s, pts};
+}
+const hillH=az=>2.6+1.4*Math.sin(az*R2D*2.3+1)+0.8*Math.sin(az*R2D*5.1);
+function drawMir(){
+  const D=D4, ctx=D.ctx; clear(D); const Tr=s4.mir.Tr, car=s4.mir.car;
+  const L=46, B=24, kx=(D.w-L-10)/MIR.X, ky=(D.h-B-10)/3.2;
+  const X=x=>L+x*kx, Y=y=>D.h-B-y*ky;
+  const gr=ctx.createLinearGradient(0,0,0,Y(0)); gr.addColorStop(0,C.sky1); gr.addColorStop(1,C.sky2); ctx.fillStyle=gr; ctx.fillRect(L,0,D.w-L,Y(0));
+  const hg=ctx.createLinearGradient(0,Y(0),0,Y(0.8)); hg.addColorStop(0,`rgba(255,120,40,${0.1+0.5*(Tr-30)/40})`); hg.addColorStop(1,'rgba(255,120,40,0)'); ctx.fillStyle=hg; ctx.fillRect(L,Y(0.8),D.w-L,Y(0)-Y(0.8));
+  ctx.fillStyle=C.road; ctx.fillRect(L,Y(0),D.w-L,B);
+  ctx.fillStyle='#4f7a4a'; ctx.fillRect(X(MIR.X)-6,Y(3),6,3*ky);
+  if (car){ ctx.fillStyle='#c62a47'; ctx.fillRect(X(MIR.carX),Y(MIR.carH),Math.max(4,MIR.carW*kx),MIR.carH*ky); label(ctx,t('car'),X(MIR.carX)+4,Y(MIR.carH)-10,C.ink,'center',12,700,C.panel); }
+  font(ctx,11,500); ctx.fillStyle=C.muted; ctx.textAlign='right'; ctx.textBaseline='middle';
+  for (const v of [0,1,2,3]) ctx.fillText(nf(v,0)+' m',L-4,Y(v));
+  ctx.textAlign='center'; ctx.textBaseline='top'; ctx.fillStyle='#fff'; for (const v of [100,200,300,400,500]) ctx.fillText(v+' m',X(v),D.h-B+5);
+  for (let k2=0;k2<16;k2++){ const a=(0.04+k2*0.06)*D2R; const r=traceMir(a,Tr,true,car);
+    const col= r.kind==='end'? C['bar-t'] : r.kind==='car'? '#c62a47' : C.muted;
+    ctx.save(); ctx.beginPath(); ctx.rect(L,0,D.w-L,D.h); ctx.clip();
+    ctx.strokeStyle=col; ctx.lineWidth=r.kind==='end'?2.2:1.4; ctx.beginPath(); r.pts.forEach(([x,y],q)=>q?ctx.lineTo(X(x),Y(y)):ctx.moveTo(X(x),Y(y))); ctx.lineTo(X(r.x),Y(r.y)); ctx.stroke(); ctx.restore(); }
+  drawEye(ctx,X(0)+12,Y(MIR.y0),0.05,false);
+  label(ctx,t('exag',Math.round(ky/kx)),D.w-8,12,C.ink,'right',12,700,C.panel);
+  const lg=[[C.muted,t('rayRoad')],[C['bar-t'],t('raySky')]].concat(car?[['#c62a47',t('rayCar')]]:[]); let lx=L+8;
+  for (const [c,tx] of lg){ ctx.fillStyle=c; ctx.fillRect(lx,8,16,4); label(ctx,tx,lx+20,10,C.ink,'left',11,600); font(ctx,11,600); lx+=ctx.measureText(tx).width+36; }
+  const amax=Math.sqrt(2*Math.max(0,nAir(MIR.y0,Tr)-nAir(0,Tr)));
+  let dist=null; for (let a=0.02;a<1.2;a+=0.01){ const r=traceMir(a*D2R,Tr,false,false); if (r.kind==='road'){ dist=r.x; break; } }
+  $('#st4').style.color=C.ink;
+  $('#st4').textContent= amax*R2D<0.08 ? t('mirNone') : t('mirYes',nf(Math.round((dist||600)/10)*10,0));
+  drawMirView(Tr,car);
+}
+function drawMirView(Tr,car){
+  const D=D4b, ctx=D.ctx;
+  if (!s4.mir.cache || s4.mir.cache.Tr!==Tr || s4.mir.cache.w!==D.w || s4.mir.cache.car!==car){
+    const off=document.createElement('canvas'); off.width=D.w; off.height=D.h; const o=off.getContext('2d');
+    const hz=D.h*0.45, degPx=D.h/1.5;
+    for (let py=0;py<D.h;py+=1){
+      const a=(py-hz)/degPx*D2R;
+      const r=traceMir(a,Tr,false,car); let r2=null;
+      for (let px=0;px<D.w;px+=2){
+        const az=(px-D.w/2)/degPx*D2R; let rr=r;
+        if (r.kind==='car' && Math.abs(az*r.x)>=MIR.carW*0.45){ if (!r2) r2=traceMir(a,Tr,false,false); rr=r2; }
+        let col;
+        if (rr.kind==='car') col='#c62a47';
+        else if (rr.kind==='road'){ const lat=Math.abs(az*rr.x); col= lat<3.5? (lat<0.08 && Math.floor(rr.x/6)%2===0? '#e8e8e0' : C.road) : '#7aa05f'; }
+        else col= (rr.y>0 && rr.y<hillH(az))? '#4f7a4a' : (a<-0.25*D2R? C.sky1 : C.sky2);
+        o.fillStyle=col; o.fillRect(px,py,2,1);
+      }
+    }
+    s4.mir.cache={Tr,car,w:D.w,img:off,hz};
+  }
+  clear(D); ctx.drawImage(s4.mir.cache.img,0,0,D.w,D.h);
+  label(ctx,lang==='vi'?'đường chân trời':'horizon',8,s4.mir.cache.hz-10,C.ink,'left',11,600,C.panel);
+}
+
+/* ================= TAB 5: Ứng dụng phản xạ toàn phần ================= */
+addT({
+  req5:'<b>Vận dụng:</b> các ứng dụng của phản xạ toàn phần. Độ đậm của tia vẽ theo năng lượng thật; chỗ nào tia "rò" ra ngoài là chỗ góc tới nhỏ hơn góc tới hạn.',
+  s5fib:'Sợi quang', s5jet:'Vòi nước dẫn sáng', s5dia:'Kim cương lấp lánh', s5pri:'Lăng kính phản xạ toàn phần',
+  h5fib:'Kéo thanh trượt để uốn cong sợi và nghiêng tia laser. Theo dõi phần trăm ánh sáng tới được đầu kia.',
+  bend:'Độ uốn cong', bendR:'Bán kính chỗ uốn', tilt:'Góc nghiêng tia laser', core:'Lõi sợi',
+  delivered:'Tới đầu kia', leaked:'Rò ra ngoài', back:'Phản xạ về',
+  ex5fib:'Ánh sáng đi trong lõi gặp thành sợi với góc tới lớn hơn góc tới hạn nên bị <b>phản xạ toàn phần</b> liên tục, nảy dọc theo sợi tới đầu kia mà gần như không mất năng lượng, kể cả khi sợi cong. Uốn quá gắt thì góc tới ở thành ngoài nhỏ hơn góc tới hạn, ánh sáng rò ra. Cáp quang thật mảnh như sợi tóc, gồm lõi (n ≈ 1,48) bọc bởi lớp vỏ có chiết suất nhỏ hơn một chút; nó truyền tín hiệu Internet đi hàng chục kilômét. Ở đây sợi được vẽ to và ánh sáng chỉ đi trong mặt phẳng để dễ quan sát. Ứng dụng khác: ống nội soi trong y tế.',
+  h5jet:'Đổi tốc độ nước phun để dòng nước cong nhiều hay ít. Tia laser chiếu từ phía sau thùng, đi vào lỗ thoát nước.',
+  speedJ:'Tốc độ nước phun',
+  ex5jet:'Năm 1842, nhà vật lí Thuỵ Sĩ Jean-Daniel Colladon chiếu ánh sáng vào một dòng nước chảy ra từ thùng: ánh sáng bị "giam" trong dòng nước, đi cong theo nó và làm sáng chỗ nước rơi. Nguyên nhân là ánh sáng gặp mặt ngoài dòng nước với góc tới lớn hơn góc tới hạn của nước (48,8°) nên phản xạ toàn phần. Đây là tổ tiên của cáp quang; sau này người ta dùng nó làm đài phun nước phát sáng.',
+  atBasin:'Tới chỗ nước rơi',
+  h5dia:'Ánh sáng chiếu từ trên xuống mặt trên viên đá. Đổi góc nghiêng mặt dưới và đổi vật liệu, xem bao nhiêu ánh sáng quay lại mắt người nhìn.',
+  pav:'Góc mặt dưới (so với mặt ngang)', mat5:'Vật liệu', ideal:'chuẩn ≈ 40,8°',
+  toEye:'Quay lại phía mắt', toBottom:'Lọt ra mặt dưới',
+  ex5dia:'Kim cương có chiết suất rất lớn (2,42) nên góc tới hạn chỉ 24,4°. Ánh sáng vào mặt trên, gặp các mặt dưới với góc tới lớn hơn góc tới hạn, bị phản xạ toàn phần hai lần rồi quay ngược lên mắt, làm viên đá lấp lánh. Người thợ phải mài đúng góc (khoảng 40,8°): mài quá sâu hoặc quá nông thì ánh sáng lọt ra mặt dưới, đá trông tối. Thuỷ tinh giả kim cương (n = 1,5, góc tới hạn 41,8°) để lọt nhiều ánh sáng hơn nên kém lấp lánh. (Mô phỏng lát cắt hai chiều, chưa tính tán sắc tạo ra màu sắc.)',
+  h5pri:'So sánh hai cách đổi hướng ánh sáng trong kính tiềm vọng: dùng lăng kính phản xạ toàn phần hoặc dùng gương. Nghiêng tia sáng để thử.',
+  mode5:'Bộ phận đổi hướng', prism:'Lăng kính', mirror:'Gương',
+  ar:'Mặt lăng kính có lớp chống phản xạ (như ống nhòm thật)',
+  toEyeP:'Tới mắt',
+  ex5pri:'Lăng kính thuỷ tinh có tiết diện tam giác vuông cân: ánh sáng vào vuông góc với một mặt, gặp mặt huyền với góc tới 45°, lớn hơn góc tới hạn 41,8° của thuỷ tinh, nên bị phản xạ toàn phần, đổi hướng 90°. Phản xạ toàn phần giữ lại 100% ánh sáng, còn gương tráng bạc chỉ phản xạ khoảng 90% và lớp bạc lâu ngày bị xỉn. Vì vậy ống nhòm, kính tiềm vọng, máy ảnh ống kính rời dùng lăng kính. Nếu nghiêng tia quá nhiều, góc tới ở mặt huyền nhỏ hơn 41,8° và ánh sáng lọt ra ngoài.'
+},{
+  req5:'<b>Apply:</b> applications of total internal reflection. Ray brightness follows the real energy; wherever light "leaks" out, the angle of incidence is below the critical angle.',
+  s5fib:'Optical fibre', s5jet:'Light-guiding water jet', s5dia:'Sparkling diamond', s5pri:'Totally reflecting prism',
+  h5fib:'Use the sliders to bend the fibre and tilt the laser. Watch what percentage of the light reaches the far end.',
+  bend:'Bend', bendR:'Radius of the bend', tilt:'Laser tilt', core:'Fibre core',
+  delivered:'Reaches far end', leaked:'Leaks out', back:'Reflected back',
+  ex5fib:'Light in the core meets the wall at more than the critical angle, so it is <b>totally internally reflected</b> again and again, bouncing along the fibre to the far end with almost no loss, even when the fibre bends. Bend it too sharply and the angle at the outer wall drops below the critical angle, so light leaks out. Real fibres are as thin as a hair: a core (n ≈ 1.48) surrounded by cladding of slightly lower index; they carry Internet signals for tens of kilometres. Here the fibre is drawn thick and light stays in one plane so it is easy to see. Another use: medical endoscopes.',
+  h5jet:'Change the speed of the jet so the stream curves more or less. The laser shines from the back of the tank into the outlet hole.',
+  speedJ:'Jet speed',
+  ex5jet:'In 1842 the Swiss physicist Jean-Daniel Colladon shone light into a stream of water flowing from a tank: the light was "trapped" in the stream, followed its curve and lit up the spot where the water landed. The light meets the surface of the stream at more than the critical angle of water (48.8°) and is totally internally reflected. This is the ancestor of optical fibres; later it was used for illuminated fountains.',
+  atBasin:'Reaches the landing spot',
+  h5dia:'Light shines down onto the top of the stone. Change the angle of the lower facets and the material, and see how much light comes back to the viewer.',
+  pav:'Lower facet angle (from horizontal)', mat5:'Material', ideal:'ideal ≈ 40.8°',
+  toEye:'Back towards the eye', toBottom:'Leaks out the bottom',
+  ex5dia:'Diamond has a very high refractive index (2.42), so its critical angle is only 24.4°. Light enters the top, meets the lower facets at more than the critical angle, is totally reflected twice and returns upwards to the eye, making the stone sparkle. The cutter must use the right angle (about 40.8°): too deep or too shallow and light leaks out of the bottom so the stone looks dark. Glass imitations (n = 1.5, critical angle 41.8°) let more light leak, so they sparkle less. (2D cross-section; the dispersion that creates colours is not included.)',
+  h5pri:'Compare two ways of turning light in a periscope: totally reflecting prisms or mirrors. Tilt the beam to test.',
+  mode5:'Turning element', prism:'Prism', mirror:'Mirror',
+  ar:'Prism faces have anti-reflection coating (as in real binoculars)',
+  toEyeP:'Reaches the eye',
+  ex5pri:'The glass prism has a right isosceles triangular cross-section: light enters at right angles to one face, meets the hypotenuse at 45°, more than the critical angle of glass (41.8°), and is totally reflected, turning through 90°. Total internal reflection keeps 100% of the light, whereas a silvered mirror reflects only about 90% and tarnishes over time. That is why binoculars, periscopes and SLR cameras use prisms. Tilt the beam too much and the angle at the hypotenuse falls below 41.8°, letting light escape.'
+});
+/* ---- Bộ dò tia tổng quát: đa giác có chiết suất, gương, ghi năng lượng theo nhãn mặt ---- */
+function mkScene(){ return {polys:[], segs:[], nOut:1}; }
+function addPoly(S,pts,n,tags){ const id=S.polys.length; S.polys.push({pts,n});
+  for (let k=0;k<pts.length;k++){ const a=pts[k], b=pts[(k+1)%pts.length]; S.segs.push({a,b,tag:(tags&&tags[k])||null}); } return id; }
+function inPoly(p,pts){ let c=false; for (let i=0,j=pts.length-1;i<pts.length;j=i++){ const a=pts[i], b=pts[j];
+  if ((a[1]>p[1])!==(b[1]>p[1]) && p[0]<(b[0]-a[0])*(p[1]-a[1])/(b[1]-a[1])+a[0]) c=!c; } return c; }
+function nAtS(S,p){ let n=S.nOut; for (const P of S.polys) if (inPoly(p,P.pts)) n=P.n; return n; }
+function traceS(S,o,d,I,out,depth=0){
+  if (I<0.015 || depth>80 || out.segs.length>3000) return;
+  let best=null, bt=1e9;
+  for (const s of S.segs){
+    const ex=s.b[0]-s.a[0], ey=s.b[1]-s.a[1], den=d[0]*ey-d[1]*ex; if (Math.abs(den)<1e-12) continue;
+    const ox=s.a[0]-o[0], oy=s.a[1]-o[1]; const tt=(ox*ey-oy*ex)/den, u=(ox*d[1]-oy*d[0])/den;
+    if (tt>1e-7 && u>=0 && u<=1 && tt<bt){ bt=tt; best=s; }
+  }
+  if (!best){ out.segs.push([o[0],o[1],o[0]+d[0]*400,o[1]+d[1]*400,I]); out.exit.push({d,I}); return; }
+  const h=[o[0]+d[0]*bt, o[1]+d[1]*bt]; out.segs.push([o[0],o[1],h[0],h[1],I]);
+  const ex=best.b[0]-best.a[0], ey=best.b[1]-best.a[1], L=Math.hypot(ex,ey); let N=[-ey/L, ex/L];
+  let ci=-(N[0]*d[0]+N[1]*d[1]); if (ci<0){ N=[-N[0],-N[1]]; ci=-ci; }
+  const refl=[d[0]+2*ci*N[0], d[1]+2*ci*N[1]];
+  if (best.mirror!==undefined){ out.tag[best.tag]=(out.tag[best.tag]||0); traceS(S,h,refl,I*best.mirror,out,depth+1); return; }
+  const n1=nAtS(S,[h[0]-d[0]*1e-5,h[1]-d[1]*1e-5]), n2=nAtS(S,[h[0]+d[0]*1e-5,h[1]+d[1]*1e-5]);
+  if (n1===n2){ traceS(S,[h[0]+d[0]*1e-6,h[1]+d[1]*1e-6],d,I,out,depth+1); return; }
+  const eta=n1/n2, k=1-eta*eta*(1-ci*ci);
+  if (k<0){ out.tir=(out.tir||0)+1; traceS(S,h,refl,I,out,depth+1); return; }
+  let R=fresnel(n1,n2,Math.acos(Math.min(1,ci))); if (best.ar) R=Math.min(R,0.004);
+  const tdir=[eta*d[0]+(eta*ci-Math.sqrt(k))*N[0], eta*d[1]+(eta*ci-Math.sqrt(k))*N[1]];
+  if (best.tag && n1>n2) out.tag[best.tag]=(out.tag[best.tag]||0)+I*(1-R);
+  traceS(S,h,tdir,I*(1-R),out,depth+1);
+  traceS(S,h,refl,I*R,out,depth+1);
+}
+function runS(S,rays){ const out={segs:[],exit:[],tag:{},tir:0}; for (const r of rays) traceS(S,r.o,r.d,r.I,out); return out; }
+function drawSegs(ctx,V,out,scale=1){ for (const [x1,y1,x2,y2,I] of out.segs) beam(ctx,V.X(x1),V.Y(y1),V.X(x2),V.Y(y2),I*scale,false); }
+function polyPath(ctx,V,pts){ ctx.beginPath(); pts.forEach((p,k)=>k?ctx.lineTo(V.X(p[0]),V.Y(p[1])):ctx.moveTo(V.X(p[0]),V.Y(p[1]))); ctx.closePath(); }
+
+const s5={sub:'fib', fib:{bend:90, R:3, tilt:6}, jet:{v:140}, dia:{pav:40.8, mat:'diamond'}, pri:{mode:'prism', tilt:0, ar:true}};
+let D5=null, V5=null;
+function setup5(){ $$('#sub5 .btn').forEach(b=>b.onclick=()=>{ s5.sub=b.dataset.v; lastSub5=null; renderAll(); }); }
+let lastSub5=null, lastLang5=null, lastLv5=null;
+function slider5(id,lab,min,max,step,val,unit){ return `<div class="fld"><span>${lab} <span class="val" id="v${id}"></span></span><input type="range" id="${id}" min="${min}" max="${max}" step="${step}" value="${val}"></div>`; }
+function ctl5(){
+  const sb=s5.sub, c=$('#ctl5');
+  if (sb==='fib') c.innerHTML=`<h2>${t('core')}: ${t('glass').toLowerCase()} n = ${nN(1.5)}</h2>`+slider5('f5a',t('bend'),0,180,5,s5.fib.bend)+slider5('f5b',t('bendR'),1.2,8,0.1,s5.fib.R)+slider5('f5c',t('tilt'),-25,25,1,s5.fib.tilt);
+  if (sb==='jet') c.innerHTML=slider5('f5a',t('speedJ'),70,260,5,s5.jet.v);
+  if (sb==='dia') c.innerHTML=`<div class="seg full" id="m5"><button class="btn" data-v="diamond">${t('diamond')}</button><button class="btn" data-v="glass">${t('glass')}</button></div>`+slider5('f5a',t('pav'),30,55,0.5,s5.dia.pav)+`<p class="hint">${t('ideal')}</p>`;
+  if (sb==='pri') c.innerHTML=`<div class="seg full" id="m5"><button class="btn" data-v="prism">${t('prism')}</button><button class="btn" data-v="mirror">${t('mirror')}</button></div>`+slider5('f5a',t('tilt'),-12,12,0.5,s5.pri.tilt)+`<label class="chk"><input type="checkbox" id="c5" ${s5.pri.ar?'checked':''}> <span>${t('ar')}</span></label>`;
+  const on=(id,f)=>{ const e=$('#'+id); if (e) e.oninput=ev=>{ f(+ev.target.value); ui5(); }; };
+  if (sb==='fib'){ on('f5a',v=>s5.fib.bend=v); on('f5b',v=>s5.fib.R=v); on('f5c',v=>s5.fib.tilt=v); }
+  if (sb==='jet') on('f5a',v=>s5.jet.v=v);
+  if (sb==='dia') on('f5a',v=>s5.dia.pav=v);
+  if (sb==='pri'){ on('f5a',v=>s5.pri.tilt=v); $('#c5').onchange=e=>{ s5.pri.ar=e.target.checked; ui5(); }; }
+  $$('#m5 .btn').forEach(b=>b.onclick=()=>{ if (sb==='dia') s5.dia.mat=b.dataset.v; else s5.pri.mode=b.dataset.v; ui5(); });
+  $('#hint5').textContent=t('h5'+sb); $('#ex5').innerHTML=t('ex5'+sb);
+  const bars= sb==='fib'? [['delivered','var(--bar-t)'],['leaked','var(--bar-r)']] : sb==='jet'? [['atBasin','var(--bar-t)'],['leaked','var(--bar-r)']] : sb==='dia'? [['toEye','var(--bar-t)'],['toBottom','var(--bar-r)']] : [['toEyeP','var(--bar-t)']];
+  $('#bars5').innerHTML=bars.map(([k,c],q)=>`<div class="bar"><span>${t(k)}</span><div class="tr"><div class="fill" id="b5${q}" style="background:${c}"></div></div><span class="pc" id="p5${q}"></span></div>`).join('');
+}
+function ui5(){
+  const sb=s5.sub;
+  if (sb!==lastSub5 || lang!==lastLang5 || level!==lastLv5){ lastSub5=sb; lastLang5=lang; lastLv5=level; ctl5(); }
+  $$('#sub5 .btn').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===sb)));
+  $$('#m5 .btn').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===(sb==='dia'?s5.dia.mat:s5.pri.mode))));
+  const sv=(id,txt)=>{ const e=$('#v'+id); if (e) e.textContent=txt; };
+  if (sb==='fib'){ sv('f5a',nf(s5.fib.bend,0)+'°'); sv('f5b',nf(s5.fib.R,1)+' cm'); sv('f5c',nf(s5.fib.tilt,0)+'°'); }
+  if (sb==='jet') sv('f5a',nf(s5.jet.v/100,2)+' m/s');
+  if (sb==='dia') sv('f5a',nf(s5.dia.pav,1)+'°');
+  if (sb==='pri') sv('f5a',nf(s5.pri.tilt,1)+'°');
+  s5.cache=null;
+}
+function resize5(){ if (tab!==5) return; D5=fit($('#cv5'), s5.sub==='dia'?0.62 : s5.sub==='pri'?0.62 : 0.56, 280, 520); s5.cache=null; }
+function draw5(){
+  if (!D5) return; const D=D5, ctx=D.ctx; clear(D); const sb=s5.sub;
+  if (sb==='fib') drawFib(D,ctx); if (sb==='jet') drawJet(D,ctx); if (sb==='dia') drawDia(D,ctx); if (sb==='pri') drawPri(D,ctx);
+}
+function bars5(vals){ vals.forEach((v,q)=>{ if ($('#b5'+q)) setBar('#b5'+q,'#p5'+q,v); }); }
+/* ---- Sợi quang ---- */
+function fiberGeom(){
+  const {bend,R}=s5.fib, w=0.9, pts=[]; let x=-10, y=0, a=0;
+  pts.push([x,y,a]); x=-4; pts.push([x,y,a]);
+  const th=bend*D2R, steps=Math.max(2,Math.round(bend/3)); const cx=x, cy=y+R;
+  for (let k=1;k<=steps;k++){ const ang=th*k/steps; pts.push([cx+R*Math.sin(ang), cy-R*Math.cos(ang), ang]); }
+  const last=pts[pts.length-1]; const Ls=4; pts.push([last[0]+Ls*Math.cos(th), last[1]+Ls*Math.sin(th), th]);
+  const L=[], Rr=[]; for (const [px,py,pa] of pts){ const nx=-Math.sin(pa), ny=Math.cos(pa); L.push([px+nx*w/2,py+ny*w/2]); Rr.push([px-nx*w/2,py-ny*w/2]); }
+  const poly=L.concat(Rr.reverse()); const tags=poly.map(()=>null); tags[L.length-1]='end';
+  return {poly,tags,pts,w};
+}
+function drawFib(D,ctx){
+  const g=fiberGeom();
+  const xs=g.poly.map(p=>p[0]), ys=g.poly.map(p=>p[1]);
+  const V=V5=fitView(D,Math.min(...xs,-11)-0.5,Math.max(...xs)+2,Math.min(...ys)-1.2,Math.max(...ys)+1.5,8);
+  const S=mkScene(); addPoly(S,g.poly,1.5,g.tags);
+  ctx.fillStyle=MED.glass.fill; ctx.strokeStyle=C['glass-edge']; ctx.lineWidth=1.5; polyPath(ctx,V,g.poly); ctx.fill(); ctx.stroke();
+  const tl=s5.fib.tilt*D2R, rays=[];
+  for (const off of [-0.25,0,0.25]){ const d=[Math.cos(tl),Math.sin(tl)];
+    /* gốc tia đặt sao cho tia đi qua mặt đầu sợi tại độ lệch off */
+    rays.push({o:[-10-1.2*Math.cos(tl), off-1.2*Math.sin(tl)], d, I:1/3}); }
+  const out=runS(S,rays);
+  drawSegs(ctx,V,out,3);
+  laserBody(ctx,V.X(-10-1.3*Math.cos(tl)),V.Y(-1.3*Math.sin(tl)),Math.atan2(-Math.sin(tl),Math.cos(tl)),false);
+  const del=out.tag.end||0;
+  bars5([del,Math.max(0,1-del)]);
+  $('#st5').textContent= del>0.85? (lang==='vi'?'Hầu hết ánh sáng tới được đầu kia nhờ phản xạ toàn phần.':'Most of the light reaches the far end thanks to total internal reflection.')
+    : (lang==='vi'?'Ánh sáng rò ra ở chỗ uốn gắt: góc tới ở thành sợi nhỏ hơn góc tới hạn 41,8°.':'Light leaks at the sharp bend: the angle at the wall is below the critical angle 41.8°.');
+}
+/* ---- Vòi nước Colladon ---- */
+function drawJet(D,ctx){
+  const v=s5.jet.v, g=980, y0=30, w=1.1;
+  const yAt=x=>y0-g/(2*v*v)*x*x, xL=v*Math.sqrt(2*y0/g);
+  const V=V5=fitView(D,-26,72,-6,48,6);
+  /* thùng nước */
+  ctx.fillStyle=MED.water.fill; ctx.fillRect(V.X(-22),V.Y(44),22*V.k,44*V.k);
+  ctx.strokeStyle=C.muted; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(V.X(-22),V.Y(46)); ctx.lineTo(V.X(-22),V.Y(0)); ctx.lineTo(V.X(0),V.Y(0)); ctx.lineTo(V.X(0),V.Y(y0-w/2)); ctx.moveTo(V.X(0),V.Y(y0+w/2)); ctx.lineTo(V.X(0),V.Y(46)); ctx.stroke();
+  /* chậu hứng */
+  ctx.fillStyle=MED.water.fill; ctx.fillRect(V.X(10),V.Y(0),62*V.k,4*V.k);
+  ctx.strokeStyle=C.muted; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(V.X(10),V.Y(4)); ctx.lineTo(V.X(10),V.Y(-2)); ctx.lineTo(V.X(72),V.Y(-2)); ctx.stroke();
+  /* dòng nước */
+  const pts=[]; const N=80; for (let k=0;k<=N;k++){ const x=xL*k/N; const sl=-g/(v*v)*x; pts.push([x,yAt(x),Math.atan(sl)]); }
+  const L=[],R=[]; for (const [px,py,pa] of pts){ const nx=-Math.sin(pa), ny=Math.cos(pa); L.push([px+nx*w/2,py+ny*w/2]); R.push([px-nx*w/2,py-ny*w/2]); }
+  const poly=L.concat(R.reverse()); const tags=poly.map(()=>null); tags[L.length-1]='end';
+  const S=mkScene(); addPoly(S,poly,1.33,tags);
+  ctx.fillStyle='rgba(52,145,230,.45)'; ctx.strokeStyle=C['glass-edge']; ctx.lineWidth=1; polyPath(ctx,V,poly); ctx.fill(); ctx.stroke();
+  /* laser phía sau thùng chiếu tới lỗ */
+  beam(ctx,V.X(-21),V.Y(y0),V.X(0),V.Y(y0),1,true);
+  laserBody(ctx,V.X(-20),V.Y(y0),0,false);
+  const rays=[]; for (const off of [-0.3,-0.1,0.1,0.3]) for (const an of [-2,2]) rays.push({o:[0.01,y0+off],d:[Math.cos(an*D2R),Math.sin(an*D2R)],I:1/8});
+  const out=runS(S,rays); drawSegs(ctx,V,out,4);
+  const del=out.tag.end||0;
+  /* đốm sáng chỗ nước rơi */
+  const gl=ctx.createRadialGradient(V.X(xL),V.Y(0),0,V.X(xL),V.Y(0),30*Math.sqrt(del)+4); gl.addColorStop(0,`rgba(255,60,60,${0.9*del})`); gl.addColorStop(1,'rgba(255,60,60,0)');
+  ctx.fillStyle=gl; ctx.beginPath(); ctx.arc(V.X(xL),V.Y(0),30*Math.sqrt(del)+4,0,7); ctx.fill();
+  bars5([del,Math.max(0,1-del)]);
+  $('#st5').textContent= lang==='vi'? `Bán kính cong của dòng nước ở gần lỗ: ${nf(v*v/g,0)} cm.` : `Radius of curvature of the jet near the hole: ${nf(v*v/g,0)} cm.`;
+}
+/* ---- Kim cương ---- */
+function drawDia(D,ctx){
+  const n=MED[s5.dia.mat].n, pa=s5.dia.pav*D2R, tb=0.53, hc=(1-tb)*Math.tan(34.5*D2R), hp=Math.tan(pa);
+  const V=V5=fitView(D,-1.9,1.9,-hp-0.35,1.45,6);
+  const poly=[[-tb,hc],[tb,hc],[1,0],[0,-hp],[-1,0]];
+  const S=mkScene(); addPoly(S,poly,n);
+  ctx.fillStyle= s5.dia.mat==='diamond'? MED.diamond.fill : MED.glass.fill; ctx.strokeStyle=C['glass-edge']; ctx.lineWidth=2; polyPath(ctx,V,poly); ctx.fill(); ctx.stroke();
+  const rays=[]; const M=11; for (let k=0;k<M;k++){ const x=-0.48+0.96*k/(M-1); rays.push({o:[x,1.4],d:[0.0,-1],I:1/M}); }
+  const out=runS(S,rays);
+  drawSegs(ctx,V,out,2.2);
+  let up=0, down=0; for (const e of out.exit){ if (e.d[1]>0.05) up+=e.I; else down+=e.I; }
+  bars5([up,down]);
+  drawEye(ctx,V.X(1.45),V.Y(1.2),Math.atan2(V.Y(0.2)-V.Y(1.2),V.X(0)-V.X(1.45)),false);
+  label(ctx,'i_gh = '+nf(critAngle(n,1)*R2D,1)+'°',8,14,C.ink,'left',13,700,C.panel);
+  $('#st5').textContent= up>0.7? (lang==='vi'?'Lấp lánh: phần lớn ánh sáng quay lại mắt.':'Brilliant: most light returns to the eye.') : (lang==='vi'?'Đá trông tối: nhiều ánh sáng lọt ra mặt dưới.':'The stone looks dull: much light leaks out the bottom.');
+}
+/* ---- Kính tiềm vọng ---- */
+function drawPri(D,ctx){
+  const p=s5.pri, V=V5=fitView(D,-6,9,-9.5,3.5,6);
+  const S=mkScene(); const a=2.4;
+  /* ống */
+  ctx.strokeStyle=C.muted; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(V.X(-1.5),V.Y(2.6)); ctx.lineTo(V.X(a+0.3),V.Y(2.6)); ctx.lineTo(V.X(a+0.3),V.Y(-8.6)); ctx.lineTo(V.X(-1.5),V.Y(-8.6)); ctx.moveTo(V.X(-0.3),V.Y(-6)); ctx.lineTo(V.X(-0.3),V.Y(0)); ctx.stroke();
+  if (p.mode==='prism'){
+    const pTop=[[0,0.1],[0,2.5],[a,0.1]];      /* huyền nối (0,2.5)–(a,0.1) */
+    const pBot=[[0,-6],[a,-8.4],[a,-6]];       /* huyền nối (0,-6)–(a,-8.4) */
+    addPoly(S,pTop,1.5,[ 'ar','hyp','ar' ]); addPoly(S,pBot,1.5,['hyp','ar','ar']);
+    if (p.ar) S.segs.forEach(s=>{ if (s.tag==='ar') s.ar=true; });
+    S.segs.forEach(s=>{ s.tag=null; });
+    for (const P of [pTop,pBot]){ ctx.fillStyle=MED.glass.fill; ctx.strokeStyle=C['glass-edge']; ctx.lineWidth=2; polyPath(ctx,V,P); ctx.fill(); ctx.stroke(); }
+  } else {
+    S.segs.push({a:[0,2.5],b:[a,0.1],mirror:0.9,tag:'m'}); S.segs.push({a:[0,-6],b:[a,-8.4],mirror:0.9,tag:'m'});
+    for (const [q1,q2] of [[[0,2.5],[a,0.1]],[[0,-6],[a,-8.4]]]){ ctx.strokeStyle='#9aa4b5'; ctx.lineWidth=5; ctx.beginPath(); ctx.moveTo(V.X(q1[0]),V.Y(q1[1])); ctx.lineTo(V.X(q2[0]),V.Y(q2[1])); ctx.stroke(); }
+  }
+  /* mắt nhận ánh sáng: một màn dò ở bên phải dưới */
+  S.segs.push({a:[a+2.2,-6],b:[a+2.2,-8.4],mirror:0,tag:'eye'});
+  const tl=p.tilt*D2R, rays=[]; for (const off of [-0.5,0,0.5]) rays.push({o:[-5.5,1.3+off],d:[Math.cos(tl),Math.sin(tl)],I:1/3});
+  /* tính năng lượng tới mắt: đi tới mặt dò */
+  const out={segs:[],exit:[],tag:{},tir:0}; let toEye=0;
+  for (const r of rays){ const o2={segs:[],exit:[],tag:{},tir:0}; traceEye(S,r.o,r.d,r.I,o2); out.segs.push(...o2.segs); toEye+=o2.eye||0; out.tir+=o2.tir||0; }
+  drawSegs(ctx,V,out,3);
+  drawEye(ctx,V.X(a+2.6),V.Y(-7.2),Math.PI,false);
+  laserBody(ctx,V.X(-5.6),V.Y(1.3),-tl,false);
+  label(ctx,lang==='vi'?'ánh sáng từ vật':'light from object',V.X(-5.6),V.Y(2.4),C.muted,'left',12,600);
+  bars5([toEye]);
+  $('#st5').textContent= p.mode==='prism'? (lang==='vi'?`Phản xạ toàn phần ở mặt huyền: ${out.tir? '100 %' : 'không xảy ra'}.`:`Total internal reflection at the hypotenuse: ${out.tir?'100 %':'not happening'}.`)
+    : (lang==='vi'?'Mỗi gương chỉ phản xạ khoảng 90 % ánh sáng.':'Each mirror reflects only about 90 % of the light.');
+}
+function traceEye(S,o,d,I,out,depth=0){
+  /* như traceS nhưng dừng ở mặt dò "eye" và cộng năng lượng */
+  if (I<0.01 || depth>40) return;
+  let best=null, bt=1e9;
+  for (const s of S.segs){ const ex=s.b[0]-s.a[0], ey=s.b[1]-s.a[1], den=d[0]*ey-d[1]*ex; if (Math.abs(den)<1e-12) continue;
+    const ox=s.a[0]-o[0], oy=s.a[1]-o[1]; const tt=(ox*ey-oy*ex)/den, u=(ox*d[1]-oy*d[0])/den; if (tt>1e-7&&u>=0&&u<=1&&tt<bt){ bt=tt; best=s; } }
+  if (!best){ out.segs.push([o[0],o[1],o[0]+d[0]*40,o[1]+d[1]*40,I]); return; }
+  const h=[o[0]+d[0]*bt,o[1]+d[1]*bt]; out.segs.push([o[0],o[1],h[0],h[1],I]);
+  if (best.tag==='eye'){ out.eye=(out.eye||0)+I; return; }
+  const ex=best.b[0]-best.a[0], ey=best.b[1]-best.a[1], L=Math.hypot(ex,ey); let N=[-ey/L,ex/L]; let ci=-(N[0]*d[0]+N[1]*d[1]); if (ci<0){ N=[-N[0],-N[1]]; ci=-ci; }
+  const refl=[d[0]+2*ci*N[0], d[1]+2*ci*N[1]];
+  if (best.mirror!==undefined){ traceEye(S,h,refl,I*best.mirror,out,depth+1); out.eye=out.eye||0; return; }
+  const n1=nAtS(S,[h[0]-d[0]*1e-5,h[1]-d[1]*1e-5]), n2=nAtS(S,[h[0]+d[0]*1e-5,h[1]+d[1]*1e-5]);
+  const eta=n1/n2, k=1-eta*eta*(1-ci*ci);
+  if (k<0){ out.tir=(out.tir||0)+1; traceEye(S,h,refl,I,out,depth+1); return; }
+  let R=fresnel(n1,n2,Math.acos(Math.min(1,ci))); if (best.ar) R=Math.min(R,0.004);
+  const tdir=[eta*d[0]+(eta*ci-Math.sqrt(k))*N[0], eta*d[1]+(eta*ci-Math.sqrt(k))*N[1]];
+  const sub={segs:[],eye:0,tir:0}; traceEye(S,h,tdir,I*(1-R),sub,depth+1); traceEye(S,h,refl,I*R,sub,depth+1);
+  out.segs.push(...sub.segs); out.eye=(out.eye||0)+sub.eye; out.tir=(out.tir||0)+sub.tir;
+}
+
+/* ================= TAB 6: Luyện tập ================= */
+addT({
+  req6:'<b>Luyện tập:</b> vẽ đường truyền tia sáng qua mặt phân cách (có cả mặt thẳng đứng, mặt xiên), trò chơi bắn tia laser trúng con cá, và câu hỏi nhanh về các quan niệm hay nhầm.',
+  s6draw:'Vẽ tia khúc xạ', s6game:'Bắn laser trúng cá', s6quiz:'Câu hỏi nhanh',
+  h6draw:'Kéo chấm tròn để vẽ tia khúc xạ, hoặc bấm "Phản xạ toàn phần" nếu ánh sáng không ló ra được. Rồi bấm Kiểm tra.',
+  showN:'Hiện pháp tuyến', tirBtn:'Phản xạ toàn phần',
+  d6ok:(r)=>`Chính xác! Góc khúc xạ r = ${r}.`, d6side:'Tia khúc xạ phải ở phía bên kia pháp tuyến so với tia tới.',
+  d6dir:(w)=>`Sai hướng gãy: ánh sáng đi vào môi trường ${w} nên phải gãy ${w==='chiết quang hơn'?'lại gần':'ra xa'} pháp tuyến.`,
+  d6ang:(r,s)=>`Gần đúng rồi nhưng chưa chính xác: r đúng = ${r}, bạn vẽ ${s}.`,
+  d6tirNo:'Chưa đúng: ở đây vẫn có tia khúc xạ (đi vào môi trường chiết quang hơn, hoặc góc tới nhỏ hơn góc tới hạn).',
+  d6tirOk:(g)=>`Chính xác! Góc tới lớn hơn góc tới hạn ${g} nên phản xạ toàn phần.`,
+  d6tirMiss:(g)=>`Ở đây góc tới lớn hơn góc tới hạn ${g}: phản xạ toàn phần, không có tia khúc xạ.`,
+  moreDense:'chiết quang hơn', lessDense:'kém chiết quang hơn',
+  score:(a,b)=>`Điểm: ${a}/${b}`,
+  h6game:'Kéo trên hình để ngắm đèn laser (đường nét đứt là hướng ngắm thẳng), rồi bấm "Bắn". Ánh sáng sẽ bị khúc xạ ở mặt nước!',
+  fire:'Bắn', nextFish:'Con cá khác',
+  hit:'Trúng rồi! Bạn đã tính đến sự khúc xạ ở mặt nước.', miss:'Trượt! Tia sáng bị gãy lại gần pháp tuyến khi vào nước nên đi dốc hơn hướng ngắm.',
+  g6tip:'Mẹo: tia vào nước bị gãy lại gần pháp tuyến (dốc xuống hơn), nên phải ngắm xa hơn con cá một chút.',
+  shots:(a,b)=>`Trúng ${a} / ${b} lần bắn`,
+  qTitle:'Câu hỏi nhanh: chọn đáp án, đọc giải thích',
+  qScore:(a,b)=>`Đúng ${a}/${b} câu`
+},{
+  req6:'<b>Practice:</b> draw rays across a boundary (including vertical and tilted ones), a game of hitting a fish with a laser, and quick questions on common misconceptions.',
+  s6draw:'Draw the refracted ray', s6game:'Laser the fish', s6quiz:'Quick quiz',
+  h6draw:'Drag the dot to draw the refracted ray, or press "Total internal reflection" if no light can get out. Then press Check.',
+  showN:'Show the normal', tirBtn:'Total internal reflection',
+  d6ok:(r)=>`Correct! Angle of refraction r = ${r}.`, d6side:'The refracted ray must be on the other side of the normal from the incident ray.',
+  d6dir:(w)=>`Wrong direction: light enters a ${w} medium so it must bend ${w==='optically denser'?'towards':'away from'} the normal.`,
+  d6ang:(r,s)=>`Close but not accurate: correct r = ${r}, you drew ${s}.`,
+  d6tirNo:'Not quite: there is still a refracted ray here (entering a denser medium, or the angle is below the critical angle).',
+  d6tirOk:(g)=>`Correct! The angle is larger than the critical angle ${g}, so the light is totally reflected.`,
+  d6tirMiss:(g)=>`Here the angle exceeds the critical angle ${g}: total internal reflection, no refracted ray.`,
+  moreDense:'optically denser', lessDense:'optically less dense',
+  score:(a,b)=>`Score: ${a}/${b}`,
+  h6game:'Drag on the picture to aim the laser (the dashed line is the straight aiming line), then press "Fire". The light will be refracted at the water surface!',
+  fire:'Fire', nextFish:'Another fish',
+  hit:'Hit! You allowed for refraction at the surface.', miss:'Miss! Entering water the ray bends towards the normal, so it goes down more steeply than your aim.',
+  g6tip:'Tip: the ray bends towards the normal (steeper) in water, so aim a little beyond the fish.',
+  shots:(a,b)=>`${a} hits / ${b} shots`,
+  qTitle:'Quick quiz: choose an answer, read the explanation',
+  qScore:(a,b)=>`${a}/${b} correct`
+});
+const QUIZ=[
+ {vi:['Chiết suất của nước là 1,33. Điều đó có nghĩa là:','Ánh sáng trong không khí đi nhanh gấp 1,33 lần trong nước','Nước nặng gấp 1,33 lần không khí','Tia sáng vào nước luôn bị lệch 1,33°','Nước phản xạ 1,33 % ánh sáng'], en:['The refractive index of water is 1.33. This means:','Light travels 1.33 times faster in air than in water','Water is 1.33 times heavier than air','A ray entering water is always deviated by 1.33°','Water reflects 1.33 % of the light'], a:0,
+  fv:'n = c/v: tốc độ ánh sáng trong không khí (≈ chân không) chia cho tốc độ trong nước bằng 1,33.', fe:'n = c/v: the speed of light in air (≈ vacuum) divided by its speed in water is 1.33.'},
+ {vi:['Chiếu tia sáng vuông góc với mặt một tấm kính (i = 0°). Tia sáng:','Đi thẳng, không bị gãy','Bị gãy lại gần pháp tuyến','Bị phản xạ toàn phần','Bị gãy ra xa pháp tuyến'], en:['A ray hits a glass sheet at right angles (i = 0°). The ray:','Goes straight on without bending','Bends towards the normal','Is totally reflected','Bends away from the normal'], a:0,
+  fv:'sin r = sin 0° / n = 0, nên r = 0°: tia đi thẳng (dù tốc độ vẫn giảm).', fe:'sin r = sin 0° / n = 0, so r = 0°: straight on (although the speed still drops).'},
+ {vi:['Tia sáng đi từ nước ra không khí với góc tới 30°. Góc khúc xạ:','Lớn hơn 30°','Nhỏ hơn 30°','Bằng 30°','Bằng 0°'], en:['A ray goes from water into air with i = 30°. The angle of refraction is:','Greater than 30°','Less than 30°','Equal to 30°','0°'], a:0,
+  fv:'Ra môi trường kém chiết quang hơn thì tia gãy ra xa pháp tuyến: sin r = 1,33 × sin 30° = 0,665, r ≈ 41,7°.', fe:'Into a less dense medium the ray bends away from the normal: sin r = 1.33 × sin 30° = 0.665, r ≈ 41.7°.'},
+ {vi:['Điều kiện để xảy ra phản xạ toàn phần là:','Ánh sáng đi từ môi trường chiết suất lớn sang nhỏ và i ≥ i_gh','Ánh sáng đi từ không khí vào nước với góc tới lớn','Mặt phân cách phải được tráng bạc','Chỉ cần góc tới lớn hơn 45°'], en:['Total internal reflection requires:','Light going from higher to lower refractive index and i ≥ i_c','Light going from air into water at a large angle','A silvered boundary','Just an angle of incidence above 45°'], a:0,
+  fv:'Cần đủ hai điều kiện: n₁ > n₂ và góc tới lớn hơn hoặc bằng góc tới hạn.', fe:'Both conditions are needed: n₁ > n₂ and the angle of incidence at least the critical angle.'},
+ {vi:['Kim cương lấp lánh hơn thuỷ tinh chủ yếu vì:','Góc tới hạn của kim cương nhỏ (24,4°) nên ánh sáng dễ bị phản xạ toàn phần','Kim cương tự phát sáng','Kim cương nặng hơn thuỷ tinh','Kim cương có màu trắng'], en:['Diamond sparkles more than glass mainly because:','Its critical angle is small (24.4°) so light is easily totally reflected','Diamond glows by itself','Diamond is heavier than glass','Diamond is white'], a:0,
+  fv:'Chiết suất 2,42 rất lớn nên góc tới hạn rất nhỏ; ánh sáng bị giữ lại và quay ra mặt trên.', fe:'Its index 2.42 is very high so the critical angle is very small; light is trapped and returns through the top.'},
+ {vi:['Nhìn từ trên bờ, bể bơi trông nông hơn thực tế vì:','Ánh sáng từ đáy bị khúc xạ khi ra khỏi mặt nước, mắt thấy ảnh của đáy ở cao hơn','Nước làm co đáy bể','Ánh sáng bị nước hấp thụ','Mắt nhìn xuống bị mỏi'], en:['From the side, a pool looks shallower than it is because:','Light from the bottom is refracted leaving the water, so the eye sees an image of the bottom higher up','Water shrinks the bottom','Water absorbs the light','Looking down tires the eyes'], a:0,
+  fv:'Mắt kéo dài ngược tia ló theo đường thẳng, gặp nhau ở ảnh nằm cao hơn đáy thật (≈ h/n khi nhìn thẳng).', fe:'The eye traces the emerging rays back in straight lines, which meet at an image above the real bottom (≈ h/n viewed vertically).'},
+ {vi:['Lớp không khí sát mặt đường nóng có chiết suất so với lớp phía trên:','Nhỏ hơn','Lớn hơn','Bằng nhau','Bằng chiết suất của nước'], en:['Compared with the air above it, the hot air just above a road has a refractive index that is:','Lower','Higher','The same','Equal to water'], a:0,
+  fv:'Không khí nóng loãng hơn nên chiết suất nhỏ hơn; ánh sáng đi xiên xuống bị cong ngược lên, tạo ảo ảnh.', fe:'Hot air is thinner so its index is lower; light heading down at a shallow angle curves back up, causing a mirage.'},
+ {vi:['Dầu ăn nổi trên nước nhưng có chiết suất lớn hơn nước. Điều này cho thấy:','Chiết suất không phải là "độ nặng" hay khối lượng riêng của chất','Dầu chìm xuống khi có ánh sáng','Đo chiết suất bị sai','Ánh sáng đi trong dầu nhanh hơn trong nước'], en:['Cooking oil floats on water yet has a higher refractive index. This shows:','Refractive index is not the "heaviness" or density of a substance','Oil sinks when lit','The measurement is wrong','Light travels faster in oil than in water'], a:0,
+  fv:'Chiết suất cho biết ánh sáng đi chậm cỡ nào trong chất, không phải chất nặng hay nhẹ.', fe:'Refractive index tells how slowly light travels in a substance, not how heavy it is.'},
+ {q:1, vi:['Tia sáng đi từ không khí vào một chất có n = 1,41 với góc tới 45°. Góc khúc xạ bằng:','30°','45°','63°','32°'], en:['A ray passes from air into a material with n = 1.41 at i = 45°. The angle of refraction is:','30°','45°','63°','32°'], a:0,
+  fv:'sin r = sin 45° / 1,41 = 0,707 / 1,41 ≈ 0,50, nên r = 30°.', fe:'sin r = sin 45° / 1.41 = 0.707 / 1.41 ≈ 0.50, so r = 30°.'},
+ {q:1, vi:['Thuỷ tinh có n = 1,5. Góc tới hạn khi ánh sáng đi từ thuỷ tinh ra không khí là:','≈ 41,8°','≈ 48,8°','≈ 33,7°','≈ 60°'], en:['Glass has n = 1.5. The critical angle from glass into air is:','≈ 41.8°','≈ 48.8°','≈ 33.7°','≈ 60°'], a:0,
+  fv:'sin i_gh = 1/n = 1/1,5 ≈ 0,667, nên i_gh ≈ 41,8°.', fe:'sin i_c = 1/n = 1/1.5 ≈ 0.667, so i_c ≈ 41.8°.'}
+];
+/* xáo đáp án một lần (giữ cố định trong phiên) */
+const QORD=QUIZ.map((q,k)=>{ const o=[0,1,2,3]; for (let i=3;i>0;i--){ const j=(k*7+i*3)%(i+1); [o[i],o[j]]=[o[j],o[i]]; } return o; });
+const s6={sub:'draw', prob:null, ans:null, checked:false, showN:false, score:0, tries:0,
+  game:{fish:null, aim:0.5, shots:0, hits:0, shot:null}, quiz:{}};
+let D6=null, V6=null, drag6=false;
+function newProb6(){
+  const pairs=[['air','water'],['air','glass'],['water','air'],['glass','air'],['glass','water'],['water','glass'],['diamond','air'],['air','diamond']];
+  const [a,b]=pairs[Math.floor(Math.random()*pairs.length)];
+  const rots=[0,90,180,270,30,-35,210];
+  const n1=MED[a].n, n2=MED[b].n; let i=10+5*Math.floor(Math.random()*14);
+  s6.prob={a,b,n1,n2,i,rot:rots[Math.floor(Math.random()*rots.length)]};
+  s6.ans={x:0.4,y:-0.8}; s6.tirChosen=false; s6.checked=false; s6.fb=null;
+}
+function newFish(){ s6.game.fish={x:1.2+Math.random()*5.3, y:-(0.6+Math.random()*2.2)}; s6.game.shot=null; s6.game.msg=null; }
+function setup6(){
+  newProb6(); newFish();
+  $$('#sub6 .btn').forEach(b=>b.onclick=()=>{ s6.sub=b.dataset.v; lastSub6=null; renderAll(); });
+  const cv=$('#cv6');
+  const set=e=>{ const p=ptr(cv,e), x=V6.ix(p.x), y=V6.iy(p.y);
+    if (s6.sub==='draw'){ const ro=-s6.prob.rot*D2R; s6.ans={x:x*Math.cos(ro)-y*Math.sin(ro), y:x*Math.sin(ro)+y*Math.cos(ro)}; s6.tirChosen=false; s6.checked=false; s6.fb=null; }
+    if (s6.sub==='game'){ const L=GL; s6.game.aim=clamp(Math.atan2(L.y-y,x-L.x),0.05,1.45); s6.game.shot=null; }
+    ui6(); };
+  cv.addEventListener('pointerdown',e=>{ if(!V6) return; drag6=true; cv.setPointerCapture(e.pointerId); set(e); });
+  cv.addEventListener('pointermove',e=>{ if(drag6) set(e); });
+  const up=()=>{ drag6=false; }; cv.addEventListener('pointerup',up); cv.addEventListener('pointercancel',up);
+}
+const GL={x:-5.5,y:2.6};
+let lastSub6=null, lastLang6=null, lastLv6=null;
+function ctl6(){
+  const sb=s6.sub;
+  $('#lab6').hidden= sb==='quiz'; $('#quiz6').hidden= sb!=='quiz';
+  $('#hint6').textContent= sb==='draw'? t('h6draw') : t('h6game');
+  if (sb==='draw'){
+    $('#btn6').innerHTML=`<button class="btn" id="tir6">${t('tirBtn')}</button><button class="btn primary" id="chk6">${t('check')}</button><button class="btn" id="new6">${t('newProb')}</button><label class="chk"><input type="checkbox" id="sn6" ${s6.showN?'checked':''}> <span>${t('showN')}</span></label>`;
+    $('#tir6').onclick=()=>{ s6.tirChosen=true; s6.checked=false; s6.fb=null; ui6(); };
+    $('#chk6').onclick=()=>{ check6(); ui6(); };
+    $('#new6').onclick=()=>{ newProb6(); ui6(); };
+    $('#sn6').onchange=e=>{ s6.showN=e.target.checked; };
+  }
+  if (sb==='game'){
+    $('#btn6').innerHTML=`<button class="btn primary" id="fire6">${t('fire')}</button><button class="btn" id="nf6">${t('nextFish')}</button>`;
+    $('#fire6').onclick=()=>{ fire6(); ui6(); };
+    $('#nf6').onclick=()=>{ newFish(); ui6(); };
+  }
+  if (sb==='quiz') buildQuiz();
+}
+function check6(){
+  const P=s6.prob, i=P.i*D2R, r=snell(P.n1,P.n2,i), g=critAngle(P.n1,P.n2);
+  s6.tries++; s6.checked=true;
+  if (r===null){ if (s6.tirChosen){ s6.score++; s6.fb={ok:true,k:'d6tirOk',a:[nf(g*R2D,1)+'°']}; } else s6.fb={ok:false,k:'d6tirMiss',a:[nf(g*R2D,1)+'°']}; return; }
+  if (s6.tirChosen){ s6.fb={ok:false,k:'d6tirNo',a:[]}; return; }
+  const A=s6.ans; if (A.y>-0.05){ s6.fb={ok:false,k:'d6side',a:[]}; return; }
+  if (A.x<0){ s6.fb={ok:false,k:'d6side',a:[]}; return; }
+  const rs=Math.atan2(A.x,-A.y); const tol=(quant()?3:7)*D2R;
+  if (Math.abs(rs-r)<=tol){ s6.score++; s6.fb={ok:true,k:'d6ok',a:[nf(r*R2D,1)+'°']}; return; }
+  const denser=P.n2>P.n1; const wrongDir= denser? rs>i : rs<i;
+  if (wrongDir && P.n1!==P.n2) s6.fb={ok:false,k:'d6dir',a:[t(denser?'moreDense':'lessDense')]};
+  else s6.fb={ok:false,k:'d6ang',a:[nf(r*R2D,1)+'°',nf(rs*R2D,0)+'°']};
+}
+function fire6(){
+  const G=s6.game, a=G.aim, d={x:Math.cos(a),y:-Math.sin(a)};
+  const tS=GL.y/(-d.y), S={x:GL.x+d.x*tS,y:0};
+  const i=Math.PI/2-a, r=snell(1,1.33,i), d2={x:Math.sin(r),y:-Math.cos(r)};
+  const F=G.fish; const tt=((F.x-S.x)*d2.x+(F.y-S.y)*d2.y); const px=S.x+d2.x*tt, py=S.y+d2.y*tt; const dist=Math.hypot(F.x-px,F.y-py);
+  const hit= dist<0.28 && tt>0;
+  G.shots++; if (hit) G.hits++;
+  G.shot={S,d2,hit}; G.msg= hit? 'hit' : 'miss';
+}
+function ui6(){
+  const sb=s6.sub;
+  if (sb!==lastSub6 || lang!==lastLang6 || level!==lastLv6){ lastSub6=sb; lastLang6=lang; lastLv6=level; ctl6(); }
+  $$('#sub6 .btn').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===sb)));
+  if (sb==='draw'){
+    const P=s6.prob;
+    const rows=[[lang==='vi'?'Môi trường tới':'Incident medium',t(P.a)+(quant()?` (n = ${nN(P.n1)})`:'')],[lang==='vi'?'Môi trường khúc xạ':'Second medium',t(P.b)+(quant()?` (n = ${nN(P.n2)})`:'')],[t('angI'),nf(P.i,0)+'°']];
+    $('#side6').innerHTML=`<h2>${lang==='vi'?'Đề bài':'Problem'}</h2><dl class="kv">${rows.map(([a,b])=>`<dt>${a}</dt><dd>${b}</dd>`).join('')}</dl>`+
+      (s6.fb? `<p class="fb ${s6.fb.ok?'good':'bad'}">${t(s6.fb.k,...s6.fb.a)}</p>`:'')+`<p class="hint score">${t('score',s6.score,s6.tries)}</p>`;
+    $('#st6').textContent= s6.tirChosen? t('tirBtn')+' ✓' : '';
+  }
+  if (sb==='game'){
+    const G=s6.game;
+    $('#side6').innerHTML=`<h2>${t('s6game')}</h2><p>${t('g6tip')}</p>`+(G.msg? `<p class="fb ${G.msg==='hit'?'good':'bad'}">${t(G.msg)}</p>`:'')+`<p class="hint score">${t('shots',G.hits,G.shots)}</p>`;
+    $('#st6').textContent='';
+  }
+}
+function resize6(){ if (tab!==6) return; if (s6.sub!=='quiz') D6=fit($('#cv6'),0.62,280,520); }
+function draw6(){
+  if (!D6 || s6.sub==='quiz') return; const D=D6, ctx=D.ctx; clear(D);
+  if (s6.sub==='draw') drawDraw6(D,ctx); else drawGame6(D,ctx);
+}
+function drawDraw6(D,ctx){
+  const P=s6.prob, V=V6=fitView(D,-10,10,-8,8,6), k=V.k;
+  const ro=P.rot*D2R, cr=Math.cos(ro), sr=Math.sin(ro);
+  const Q=(x,y)=>[V.X(x*cr-y*sr),V.Y(x*sr+y*cr)];
+  /* hai môi trường */
+  const half=(sg,fill)=>{ ctx.fillStyle=fill; ctx.beginPath(); const c=[[-30,0],[30,0],[30,sg*30],[-30,sg*30]].map(([x,y])=>Q(x,y)); c.forEach(([x,y],q)=>q?ctx.lineTo(x,y):ctx.moveTo(x,y)); ctx.fill(); };
+  half(1,MED[P.a].fill); half(-1,MED[P.b].fill);
+  { const [x1,y1]=Q(-30,0),[x2,y2]=Q(30,0); ctx.strokeStyle=C['glass-edge']; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke(); }
+  { const [ax,ay]=Q(-6,3.2),[bx,by]=Q(-6,-3.2); label(ctx,t(P.a)+(quant()?` ${nN(P.n1)}`:''),ax,ay,C.ink,'center',13,700,C.panel); label(ctx,t(P.b)+(quant()?` ${nN(P.n2)}`:''),bx,by,C.ink,'center',13,700,C.panel); }
+  const [ox,oy]=Q(0,0), R=7, i=P.i*D2R;
+  if (s6.showN || s6.checked){ const [a,b]=Q(0,8),[c,d]=Q(0,-8); dashLine(ctx,a,b,c,d,C.normal,1.5); }
+  const [lx,ly]=Q(-R*Math.sin(i),R*Math.cos(i)); beam(ctx,lx,ly,ox,oy,1);
+  /* tia học sinh vẽ */
+  if (!s6.tirChosen){ const A=s6.ans, L=Math.hypot(A.x,A.y)||1; const [ex,ey]=Q(A.x/L*R,A.y/L*R);
+    ctx.save(); ctx.strokeStyle=C.accent; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(ox,oy); ctx.lineTo(ex,ey); ctx.stroke();
+    ctx.fillStyle=C.accent; ctx.beginPath(); ctx.arc(ex,ey,11,0,7); ctx.fill(); ctx.restore(); }
+  else { const [ex,ey]=Q(R*Math.sin(i),R*Math.cos(i)); ctx.save(); ctx.strokeStyle=C.accent; ctx.lineWidth=3; ctx.setLineDash([8,5]); ctx.beginPath(); ctx.moveTo(ox,oy); ctx.lineTo(ex,ey); ctx.stroke(); ctx.restore(); }
+  /* đáp án sau khi kiểm tra */
+  if (s6.checked){ const r=snell(P.n1,P.n2,i);
+    const [ex,ey]= r===null? Q(R*Math.sin(i),R*Math.cos(i)) : Q(R*Math.sin(r),-R*Math.cos(r));
+    ctx.save(); ctx.strokeStyle=C.ok; ctx.lineWidth=2.5; ctx.setLineDash([4,4]); ctx.beginPath(); ctx.moveTo(ox,oy); ctx.lineTo(ex,ey); ctx.stroke(); ctx.restore();
+    label(ctx,lang==='vi'?'đáp án':'answer',ex,ey-14,C.ok,'center',12,700,C.panel); }
+  if (P.i>0 && (s6.showN||s6.checked)){ const a0=Math.atan2(Q(0,1)[1]-oy,Q(0,1)[0]-ox), a1=Math.atan2(ly-oy,lx-ox); arcAngle(ctx,ox,oy,2*k,a0,a1,C.laser,nf(P.i,0)+'°'); }
+}
+function drawGame6(D,ctx){
+  const G=s6.game, V=V6=fitView(D,-7,8,-3.4,3.6,6), k=V.k;
+  const gr=ctx.createLinearGradient(0,0,0,V.Y(0)); gr.addColorStop(0,C.sky1); gr.addColorStop(1,C.sky2); ctx.fillStyle=gr; ctx.fillRect(0,0,D.w,V.Y(0));
+  ctx.fillStyle=MED.water.fill; ctx.fillRect(0,V.Y(0),D.w,D.h); ctx.fillStyle=C.sand; ctx.fillRect(0,V.Y(-3.3),D.w,D.h);
+  ctx.strokeStyle=C['glass-edge']; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(0,V.Y(0)); ctx.lineTo(D.w,V.Y(0)); ctx.stroke();
+  /* bờ */
+  ctx.fillStyle=C.line; ctx.fillRect(0,V.Y(2.2),V.X(-4.6),D.h);
+  const F=G.fish; fishShape(ctx,V.X(F.x),V.Y(F.y),0.32*k,1,true);
+  const a=G.aim, d={x:Math.cos(a),y:-Math.sin(a)};
+  /* đường ngắm thẳng */
+  const tEnd=(F.y-0.6-GL.y)/d.y; dashLine(ctx,V.X(GL.x),V.Y(GL.y),V.X(GL.x+d.x*Math.max(tEnd,3)),V.Y(GL.y+d.y*Math.max(tEnd,3)),C.muted,1.5,[7,6]);
+  if (G.shot){ const S=G.shot.S, d2=G.shot.d2; beam(ctx,V.X(GL.x),V.Y(GL.y),V.X(S.x),V.Y(S.y),1); const Lb=(-3.3-S.y)/d2.y; beam(ctx,V.X(S.x),V.Y(S.y),V.X(S.x+d2.x*Lb),V.Y(S.y+d2.y*Lb),0.97);
+    dashLine(ctx,V.X(S.x),V.Y(1),V.X(S.x),V.Y(-1.2),C.normal,1.2);
+    if (G.shot.hit){ ctx.strokeStyle=C.ok; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(V.X(F.x),V.Y(F.y),0.5*k,0,7); ctx.stroke(); } }
+  laserBody(ctx,V.X(GL.x),V.Y(GL.y),Math.atan2(-d.y,d.x),drag6);
+}
+function buildQuiz(){
+  const box=$('#quiz6'), L=lang;
+  const items=QUIZ.map((q,k)=>({q,k})).filter(({q})=>!q.q||quant());
+  box.innerHTML=`<h2>${t('qTitle')}</h2><p class="hint score" id="qs6"></p>`+items.map(({q,k})=>{ const arr=q[L], o=QORD[k];
+    return `<div class="qi" data-k="${k}"><p class="q">${k+1}. ${arr[0]}</p><div class="choices">${o.map(j=>`<button class="btn" data-j="${j}">${arr[j+1]}</button>`).join('')}</div><p class="fb" hidden></p></div>`; }).join('');
+  $$('#quiz6 .qi').forEach(el=>{ const k=+el.dataset.k, q=QUIZ[k];
+    el.querySelectorAll('.btn').forEach(b=>b.onclick=()=>{ const j=+b.dataset.j, ok=j===q.a; s6.quiz[k]=ok;
+      el.querySelectorAll('.btn').forEach(x=>x.classList.remove('right','wrong')); b.classList.add(ok?'right':'wrong'); if (!ok) el.querySelector(`.btn[data-j="${q.a}"]`).classList.add('right');
+      const fb=el.querySelector('.fb'); fb.hidden=false; fb.className='fb '+(ok?'good':'bad'); fb.textContent=(ok?t('right'):t('wrong'))+(L==='vi'?q.fv:q.fe); qScore(); });
+    if (s6.quiz[k]!==undefined){} });
+  qScore();
+}
+function qScore(){ const v=Object.values(s6.quiz); $('#qs6').textContent=t('qScore',v.filter(Boolean).length,v.length); }
+
+/* ============ Chung ============ */
+const TABS=[1,2,3,4,5,6];
+const fnc=n=>typeof window[n]==='function'? window[n] : ()=>{};
+function applyLang(){
+  document.documentElement.lang=lang;
+  $$('[data-i18n]').forEach(el=>el.textContent=t(el.dataset.i18n));
+  $$('[data-i18n-html]').forEach(el=>el.innerHTML=t(el.dataset.i18nHtml));
+  $('#langBtn').textContent= lang==='vi'?'EN':'VI';
+  $$('#spd1 .btn').forEach(b=>b.textContent='×'+nf(+b.dataset.v,1));
+  refreshFb(); renderAll();
+}
+function renderAll(){
+  document.body.classList.toggle('qual',!quant());
+  $('#lvQual').setAttribute('aria-pressed',String(level==='qual')); $('#lvQuant').setAttribute('aria-pressed',String(level==='quant'));
+  $$('nav.tabs button').forEach(b=>{ const on=+b.dataset.tab===tab; b.classList.toggle('on',on); b.setAttribute('aria-selected',String(on)); });
+  for (const i of TABS) $('#t'+i).hidden= i!==tab;
+  $('#foot').innerHTML=`<p>${t('foot')}</p>`;
+  for (const i of TABS) fnc('ui'+i)();
+  resize();
+  for (const i of TABS) fnc('ui'+i)();
+}
+function resize(){
+  if (tab===1) D1=fit($('#cv1'),0.62,300,520);
+  if (tab===2){ D2=fit($('#cv2'),0.85,320,560); D2a=fit($('#cv2a'),0.75,200,280); if (quant()) D2b=fit($('#cv2b'),0.75,200,280); drawGraphs2(); }
+  if (tab===3){ D3=fit($('#cv3'),0.8,320,540); D3g=fit($('#cv3g'),0.38,170,240); drawGraph3(); }
+  fnc('resize'+tab)();
+}
+let lastT=performance.now();
+function loop(now){
+  const dt=Math.min((now-lastT)/1000,0.1); lastT=now;
+  try{
+    if (tab===1 && D1) draw1(dt);
+    if (tab===2 && D2) draw2(dt);
+    if (tab===3 && D3) draw3(dt);
+    if (tab>=4) fnc('draw'+tab)(dt);
+  }catch(err){ console.error(err); }
+  requestAnimationFrame(loop);
+}
+function init(){
+  readColors();
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{ readColors(); renderAll(); });
+  new MutationObserver(()=>{ readColors(); }).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+  for (const i of TABS) fnc('setup'+i)();
+  $('#langBtn').onclick=()=>{ lang= lang==='vi'?'en':'vi'; save(); applyLang(); };
+  $('#lvQual').onclick=()=>{ level='qual'; save(); renderAll(); };
+  $('#lvQuant').onclick=()=>{ level='quant'; save(); renderAll(); };
+  $$('nav.tabs button').forEach(b=>b.onclick=()=>{ tab=+b.dataset.tab; save(); renderAll(); });
+  let rt=null; window.addEventListener('resize',()=>{ clearTimeout(rt); rt=setTimeout(renderAll,120); });
+  applyLang();
+  requestAnimationFrame(loop);
+}
+init();
+</script>
