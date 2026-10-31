@@ -2,178 +2,232 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mô Phỏng Ánh Sáng</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bóng tối và bóng nửa tối</title>
+<meta name="description" content="Mô phỏng KHTN 7: vùng tối, vùng nửa tối do nguồn sáng hẹp và nguồn sáng rộng.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&display=swap');
+/* Bóng tối và bóng nửa tối (KHTN 7). Khung giao diện theo bộ mô phỏng KHTN 6–9:
+   sân khấu canvas bên trái, sổ ghi chép bên phải, điện thoại xếp một cột. Sân khấu luôn nền tối để thấy rõ tia sáng. */
 :root{
-  --bg:#080c14;--panel:#0b101a;--border:#1e2d45;
-  --accent:#f4c430;--accent2:#ff6b35;--text:#c8d8e8;--dim:#4a6080;
+  --bg:#edf0f3; --panel:#ffffff; --lane:#f4f6f9; --ink:#141c26; --muted:#556170; --line:#c9d1db;
+  --accent:#1d5fa8; --accent-ink:#ffffff; --ok:#1d8a4b; --warn:#c2410c; --dark:#020408;
+  --font-ui:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-num:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Consolas,monospace;
+  --r:10px;
 }
-*{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%;overflow:hidden}
-body{
-  background:var(--bg);color:var(--text);
-  font-family:'Oswald', sans-serif;
-  display:flex;flex-direction:column;
-}
-
-/* ── Header ── */
-header{
-  flex-shrink:0;
-  padding:10px 24px;border-bottom:1px solid var(--border);
-  background:var(--panel);
-  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
-}
-header h1{font-family:'Oswald', sans-serif;font-weight:800;font-size:1.1rem;
-          color:var(--accent);letter-spacing:.05em;white-space:nowrap}
-header span{font-size:.65rem;color:var(--dim);font-style:italic}
-
-/* ── Canvas fills remaining space ── */
-#simWrap{
-  flex:1;overflow:hidden;position:relative;
-  background:#020408;
-}
-canvas{display:block;width:100%;height:100%;cursor:crosshair}
-
-/* ── Bottom control bar ── */
-#ctrlBar{
-  flex-shrink:0;
-  background:var(--panel);border-top:1px solid var(--border);
-  padding:10px 18px 10px;
-  display:flex;flex-wrap:wrap;gap:6px 20px;align-items:flex-end;
-}
-
-/* Control group */
-.cg{display:flex;flex-direction:column;min-width:130px;flex:1;max-width:200px}
-.cg label{font-size:.58rem;color:var(--dim);text-transform:uppercase;
-          letter-spacing:.09em;margin-bottom:3px;display:flex;justify-content:space-between}
-.cg label .val{color:var(--accent);font-size:.65rem}
-input[type=range]{
-  width:100%;-webkit-appearance:none;height:3px;
-  background:var(--border);border-radius:2px;outline:none;
-}
-input[type=range]::-webkit-slider-thumb{
-  -webkit-appearance:none;width:13px;height:13px;border-radius:50%;
-  background:var(--accent);cursor:pointer;box-shadow:0 0 6px var(--accent);
-}
-
-/* Divider between groups */
-.div{width:1px;background:var(--border);align-self:stretch;margin:0 4px}
-
-/* Section label */
-.sec-lbl{
-  font-family:'Oswald', sans-serif;font-size:.6rem;font-weight:700;
-  color:var(--accent2);letter-spacing:.1em;text-transform:uppercase;
-  align-self:flex-end;padding-bottom:2px;white-space:nowrap;
-}
-
-/* ── Source toggle strip ── */
-#srcToggles{
-  display:none;flex-wrap:wrap;gap:4px;align-items:center;
-  align-self:flex-end;
-}
-.src-btn{
-  display:flex;align-items:center;gap:3px;
-  padding:3px 7px;border-radius:3px;border:1px solid var(--border);
-  background:#0a111c;cursor:pointer;font-family:'Oswald', sans-serif;
-  font-size:.6rem;color:var(--dim);transition:all .12s;user-select:none;
-}
-.src-btn .dot{width:7px;height:7px;border-radius:50%;background:#3a5a80;transition:background .12s}
-.src-btn.on .dot{box-shadow:0 0 5px currentColor}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0e131a; --panel:#161e28; --lane:#111821; --ink:#e3e9f0; --muted:#97a3b2; --line:#2a3644;
+  --accent:#5ea6ec; --accent-ink:#04182c; --ok:#47c47d; --warn:#f08a4b; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e131a; --panel:#161e28; --lane:#111821; --ink:#e3e9f0; --muted:#97a3b2; --line:#2a3644;
+  --accent:#5ea6ec; --accent-ink:#04182c; --ok:#47c47d; --warn:#f08a4b; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-ui);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px 40px}
+.wrap{max-width:1320px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:12px}
+.hbtns{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.eyebrow{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{margin:0;font-size:clamp(25px,3.4vw,36px);line-height:1.15;font-weight:800;text-wrap:balance;letter-spacing:-.01em}
+h2{margin:0;font-size:17px;font-weight:700;text-wrap:balance}
+.btn{font:inherit;font-weight:600;font-size:15px;min-height:44px;padding:8px 14px;border-radius:8px;border:1px solid var(--line);
+  background:var(--panel);color:var(--ink);cursor:pointer;touch-action:manipulation}
+.btn:hover{border-color:var(--accent)}
+.btn:focus-visible,input:focus-visible,summary:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.btn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.req{margin:0;font-size:14px;color:var(--muted);max-width:110ch}
+.req b{color:var(--ink);font-weight:600}
+.lab{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:14px;align-items:start}
+@media (max-width:1020px){.lab{grid-template-columns:minmax(0,1fr)}}
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.col{display:flex;flex-direction:column;gap:12px;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card p{margin:0}
+#simWrap{position:relative;width:100%;height:clamp(340px,64vh,620px);border-radius:8px;overflow:hidden;background:var(--dark)}
+@media (max-width:720px){#simWrap{height:400px}}
+#sim{display:block;width:100%;height:100%;cursor:grab;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+#sim.drag{cursor:grabbing}
+.hint{margin:0;font-size:14px;color:var(--muted)}
+.chk{display:inline-flex;align-items:center;gap:8px;min-height:44px;font-size:15px;cursor:pointer}
+.chk input{width:22px;height:22px;accent-color:var(--accent)}
+.controls{display:flex;flex-wrap:wrap;gap:4px 18px;align-items:center}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:14px;color:var(--muted)}
+.legend i{display:inline-block;width:18px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px;border:1px solid var(--line)}
+.legend i.ln{height:0;border:0;border-top:3px dashed #e0b62a;border-radius:0;vertical-align:middle}
+.legend i.lu{height:0;border:0;border-top:3px solid #9a5cff;border-radius:0;vertical-align:middle}
+.sl{display:flex;flex-direction:column;gap:0}
+.sl .top{display:flex;justify-content:space-between;gap:8px;font-size:15px}
+.sl .val{font-family:var(--font-num);font-weight:600;text-align:right}
+input[type=range]{width:100%;height:40px;accent-color:var(--accent);margin:0}
+.srcs{display:flex;flex-wrap:wrap;gap:6px}
+.srcs .btn{min-height:38px;padding:4px 10px;font-size:14px;display:inline-flex;align-items:center;gap:6px}
+.srcs .btn i{display:inline-block;width:12px;height:12px;border-radius:50%}
+.srcs .btn.off{opacity:.45;text-decoration:line-through}
+.kv{display:grid;grid-template-columns:minmax(0,1fr) max-content;gap:4px 12px;font-size:15px;margin:0}
+.kv dt{color:var(--muted)} .kv dd{margin:0;font-family:var(--font-num);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.kv dd.t{font-family:var(--font-ui);font-weight:600}
+.opts{display:flex;flex-direction:column;gap:6px}
+.opts .btn{text-align:left;font-size:14px}
+.opts .btn.right{background:color-mix(in srgb,var(--ok) 18%,var(--panel));border-color:var(--ok)}
+.opts .btn.wrong{background:color-mix(in srgb,var(--warn) 14%,var(--panel));border-color:var(--warn)}
+.ans{background:var(--lane);border-left:4px solid var(--ok);padding:8px 12px;border-radius:6px;font-size:15px}
+.pv{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+#preview{width:160px;height:160px;border-radius:6px;background:var(--dark);flex:none}
+.pv .legend{flex-direction:column;gap:6px;flex:1;min-width:140px}
+details{border:1px solid var(--line);border-radius:var(--r);background:var(--panel);padding:0 14px}
+details[open]{padding-bottom:12px}
+summary{cursor:pointer;font-weight:700;min-height:44px;display:flex;align-items:center;font-size:15px}
+details p,details ul,details ol{margin:6px 0;font-size:15px;max-width:95ch}
+details ul,details ol{padding-left:22px}
+details li{margin:3px 0}
+details h3{font-size:15px;margin:12px 0 2px}
+.fine{font-size:13px;color:var(--muted);margin:0}
+body.hideNums .num{filter:blur(7px);user-select:none}
+body.hideNums .num:hover{filter:none}
+footer{font-size:13px;color:var(--muted)}
 </style>
 </head>
 <body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow">KHTN 7 · Ánh sáng · Vùng tối, vùng nửa tối</div>
+      <h1>Bóng tối và bóng nửa tối</h1>
+    </div>
+    <div class="hbtns">
+      <button class="btn" id="gvBtn" aria-pressed="false" title="Làm mờ số liệu để cả lớp dự đoán trước">Che số liệu</button>
+    </div>
+  </header>
 
-<header>
-  <h1>⚡ MÔ PHỎNG ÁNH SÁNG</h1>
-  <span>Nguồn sáng → Vật chắn → Màn chiếu &nbsp;|&nbsp; Umbra &amp; Penumbra</span>
-  <span style="margin-left:auto;font-size:.62rem;color:#3a5a80">🖱️ Kéo nguồn sáng để di chuyển</span>
-</header>
+  <p class="req"><b>Yêu cầu cần đạt:</b> Vẽ được hình biểu diễn vùng tối do nguồn sáng rộng và vùng tối do nguồn sáng hẹp.</p>
 
-<div id="simWrap">
-  <canvas id="sim"></canvas>
+  <div class="lab">
+    <section class="stage" aria-label="Sân khấu mô phỏng">
+      <p class="hint">Kéo nguồn sáng (chấm sáng bên trái) để di chuyển. Đường nét đứt vàng là các tia sáng đi sát mép vật chắn.</p>
+      <div id="simWrap"><canvas id="sim" aria-label="Nguồn sáng, vật chắn và màn chắn nhìn từ bên cạnh"></canvas></div>
+      <div class="legend">
+        <span><i style="background:#f4c430"></i>Vùng sáng</span>
+        <span><i style="background:linear-gradient(90deg,#f4c430,#020408)"></i>Bóng nửa tối</span>
+        <span><i style="background:#020408"></i>Bóng tối</span>
+        <span><i class="ln"></i>Tia giới hạn</span>
+      </div>
+      <div class="controls">
+        <label class="chk"><input type="checkbox" id="showBoundary" checked> Hiện tia giới hạn</label>
+        <label class="chk"><input type="checkbox" id="showBarrier" checked> Hiện vật chắn</label>
+      </div>
+    </section>
+
+    <div class="col">
+      <section class="card" aria-labelledby="hPred">
+        <h2 id="hPred">Dự đoán trước</h2>
+        <p>Thay nguồn sáng điểm bằng một nguồn sáng rộng (kéo thanh “Kích thước nguồn” lên). Trên màn chắn sẽ thấy gì?</p>
+        <div class="opts" id="pred">
+          <button class="btn" data-k="0">Bóng tối to hơn, vẫn chỉ có bóng tối và vùng sáng</button>
+          <button class="btn" data-k="1">Bóng tối thu nhỏ lại, xung quanh có thêm bóng nửa tối</button>
+          <button class="btn" data-k="2">Bóng biến mất, cả màn được chiếu sáng đều</button>
+        </div>
+        <p class="ans" id="predAns" hidden></p>
+      </section>
+
+      <section class="card" aria-labelledby="hSrc">
+        <h2 id="hSrc">Nguồn sáng</h2>
+        <div class="sl"><div class="top"><label for="srcSize">Kích thước nguồn</label><span class="val" id="vSrcSize">điểm</span></div>
+          <input type="range" id="srcSize" min="0" max="200" value="0"></div>
+        <div class="sl"><div class="top"><label for="numSources">Số lượng nguồn</label><span class="val" id="vNumSrc">1</span></div>
+          <input type="range" id="numSources" min="1" max="10" step="1" value="1"></div>
+        <div class="srcs" id="srcToggles" hidden></div>
+        <div class="sl"><div class="top"><label for="srcY">Vị trí dọc nguồn</label><span class="val" id="vSrcY">50%</span></div>
+          <input type="range" id="srcY" min="2" max="98" value="50"></div>
+        <div class="sl"><div class="top"><label for="srcX">Vị trí ngang nguồn</label><span class="val" id="vSrcX">10%</span></div>
+          <input type="range" id="srcX" min="2" max="45" value="10"></div>
+      </section>
+
+      <section class="card" aria-labelledby="hObj">
+        <h2 id="hObj">Vật chắn và màn chắn</h2>
+        <div class="sl"><div class="top"><label for="barrierSize">Kích thước vật chắn</label><span class="val" id="vBarrierSize">120px</span></div>
+          <input type="range" id="barrierSize" min="20" max="400" value="120"></div>
+        <div class="sl"><div class="top"><label for="barrierY">Vị trí dọc vật chắn</label><span class="val" id="vBarrierY">50%</span></div>
+          <input type="range" id="barrierY" min="5" max="95" value="50"></div>
+        <div class="sl"><div class="top"><label for="barrierX">Vị trí ngang vật chắn</label><span class="val" id="vBarrierX">30%</span></div>
+          <input type="range" id="barrierX" min="15" max="82" value="30"></div>
+        <div class="sl"><div class="top"><label for="screenX">Vị trí màn chắn</label><span class="val" id="vScreenX">78%</span></div>
+          <input type="range" id="screenX" min="50" max="95" value="78"></div>
+      </section>
+
+      <section class="card" aria-labelledby="hPv">
+        <h2 id="hPv">Mặt trước màn chắn</h2>
+        <div class="pv">
+          <canvas id="preview" aria-label="Bóng trên màn nhìn từ phía trước"></canvas>
+          <div class="legend">
+            <span><i class="lu"></i>Ranh giới bóng tối</span>
+            <span><i class="ln"></i>Ranh giới bóng nửa tối</span>
+            <span class="fine">Giả sử vật chắn là một đĩa tròn, nên bóng nhìn từ trước là các vòng tròn đồng tâm.</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="hData">
+        <h2 id="hData">Số liệu trên màn</h2>
+        <dl class="kv">
+          <dt>Loại nguồn sáng</dt><dd class="t" id="dType">Nguồn điểm</dd>
+          <dt>Độ cao bóng tối</dt><dd class="num" id="dUmbra">–</dd>
+          <dt>Độ cao bóng nửa tối (trên + dưới)</dt><dd class="num" id="dPen">–</dd>
+          <dt>Tổng độ cao vùng bóng</dt><dd class="num" id="dAll">–</dd>
+          <dt>Nguồn → vật chắn</dt><dd class="num" id="dSO">–</dd>
+          <dt>Vật chắn → màn</dt><dd class="num" id="dOM">–</dd>
+        </dl>
+        <p class="fine">Đơn vị px là điểm ảnh trên hình, dùng để so sánh với nhau, không phải độ dài thật.</p>
+      </section>
+
+      <section class="card" aria-labelledby="hView">
+        <h2 id="hView">Hiển thị</h2>
+        <div class="sl"><div class="top"><label for="intensity">Cường độ sáng</label><span class="val" id="vIntensity">80%</span></div>
+          <input type="range" id="intensity" min="20" max="100" value="80"></div>
+        <div class="sl"><div class="top"><label for="rays">Số tia sáng vẽ</label><span class="val" id="vRays">80</span></div>
+          <input type="range" id="rays" min="20" max="3000" value="80"></div>
+      </section>
+    </div>
+  </div>
+
+  <details>
+    <summary>Kết luận và giải thích</summary>
+    <h3>Cơ chế</h3>
+    <p>Trong một môi trường trong suốt và đồng tính, ánh sáng truyền theo đường thẳng. Vì vậy sau vật chắn sáng có những chỗ mà tia sáng không tới được.</p>
+    <ul>
+      <li><b>Bóng tối (vùng tối)</b>: chỗ trên màn không nhận được ánh sáng từ <i>bất kì điểm nào</i> của nguồn, vì vật chắn che kín toàn bộ nguồn.</li>
+      <li><b>Bóng nửa tối (vùng nửa tối)</b>: chỗ chỉ nhận được ánh sáng từ <i>một phần</i> của nguồn. Càng vào gần bóng tối thì phần nguồn bị che càng lớn, nên càng tối dần.</li>
+      <li>Nguồn sáng <b>hẹp</b> (nguồn điểm): ranh giới bóng sắc nét, chỉ có bóng tối và vùng sáng. Nguồn sáng <b>rộng</b>: bóng tối thu nhỏ, xung quanh có bóng nửa tối.</li>
+    </ul>
+    <h3>Nói với học sinh</h3>
+    <p>Đứng ở một điểm trên màn và “nhìn về” phía nguồn sáng. Nếu vật chắn che hết nguồn, em đứng trong bóng tối. Nếu chỉ che một phần, em đứng trong bóng nửa tối. Nếu không che gì, em ở vùng sáng.</p>
+    <h3>Học sinh hay hiểu sai</h3>
+    <ul>
+      <li>“Bóng nửa tối là do ánh sáng lọt qua mép vật chắn.” Thực ra là do nguồn sáng có kích thước, mỗi điểm của nguồn cho một bóng riêng, các bóng này chồng lên nhau không khít.</li>
+      <li>“Vật càng to thì luôn có bóng nửa tối.” Với nguồn điểm thì không có bóng nửa tối, dù vật to hay nhỏ.</li>
+    </ul>
+    <h3>Vận dụng</h3>
+    <p>Nhật thực và nguyệt thực: Mặt Trời là nguồn sáng rộng. Người đứng trong bóng tối của Mặt Trăng thấy nhật thực toàn phần, người đứng trong bóng nửa tối thấy nhật thực một phần.</p>
+    <h3>Thuật ngữ</h3>
+    <p>Tiếng Anh dùng <i>umbra</i> (Latinh: “bóng, bóng râm”) cho bóng tối và <i>penumbra</i> (Latinh <i>paene</i> “gần như” + <i>umbra</i>, nghĩa là “gần như bóng”) cho bóng nửa tối. Tiếng Pháp: <i>ombre</i> và <i>pénombre</i>.</p>
+    <h3>Giả thiết mô phỏng</h3>
+    <ul>
+      <li>Hình vẽ là mặt cắt bên cạnh; vật chắn là một đoạn thẳng không cho ánh sáng đi qua.</li>
+      <li>Nguồn sáng rộng được thay bằng nhiều nguồn điểm xếp sát nhau.</li>
+      <li>Bỏ qua hiện tượng nhiễu xạ ở mép vật (rất nhỏ với vật thường gặp).</li>
+    </ul>
+  </details>
+
+  <footer>Mô phỏng KHTN 7 · Chủ đề Ánh sáng · Chương trình GDPT 2018.</footer>
 </div>
-
-<div id="ctrlBar">
-
-  <span class="sec-lbl">Vật chắn</span>
-  <div class="cg">
-    <label>Kích thước <span class="val" id="vBarrierSize">120px</span></label>
-    <input type="range" id="barrierSize" min="20" max="400" value="120">
-  </div>
-  <div class="cg">
-    <label>Vị trí dọc <span class="val" id="vBarrierY">50%</span></label>
-    <input type="range" id="barrierY" min="5" max="95" value="50">
-  </div>
-  <div class="cg">
-    <label>Vị trí ngang <span class="val" id="vBarrierX">30%</span></label>
-    <input type="range" id="barrierX" min="15" max="82" value="30">
-  </div>
-
-  <div class="div"></div>
-  <span class="sec-lbl">Nguồn sáng</span>
-
-  <div class="cg">
-    <label>Kích thước nguồn <span class="val" id="vSrcSize">điểm</span></label>
-    <input type="range" id="srcSize" min="0" max="200" value="0">
-  </div>
-  <div class="cg">
-    <label>Số lượng nguồn <span class="val" id="vNumSrc">1</span></label>
-    <input type="range" id="numSources" min="1" max="10" step="1" value="1">
-  </div>
-  <div class="cg">
-    <label>Vị trí dọc nguồn <span class="val" id="vSrcY">50%</span></label>
-    <input type="range" id="srcY" min="2" max="98" value="50">
-  </div>
-  <div class="cg">
-    <label>Vị trí ngang nguồn <span class="val" id="vSrcX">10%</span></label>
-    <input type="range" id="srcX" min="2" max="45" value="10">
-  </div>
-
-  <div id="srcToggles"></div>
-
-  <div class="div"></div>
-  <span class="sec-lbl">Màn chiếu</span>
-
-  <div class="cg">
-    <label>Vị trí màn chiếu <span class="val" id="vScreenX">78%</span></label>
-    <input type="range" id="screenX" min="50" max="95" value="78">
-  </div>
-
-  <div class="div"></div>
-  <span class="sec-lbl">Hiển thị</span>
-
-  <div class="cg">
-    <label>Cường độ <span class="val" id="vIntensity">80%</span></label>
-    <input type="range" id="intensity" min="20" max="100" value="80">
-  </div>
-  <div class="cg">
-    <label>Số tia sáng <span class="val" id="vRays">80</span></label>
-    <input type="range" id="rays" min="20" max="3000" value="80">
-  </div>
-
-  <div class="div"></div>
-  <span class="sec-lbl">Tùy chọn</span>
-
-  <div class="cg" style="min-width:120px;max-width:160px;gap:6px">
-    <label style="flex-direction:row;align-items:center;gap:6px;cursor:pointer">
-      <input type="checkbox" id="showBoundary" checked
-        style="width:13px;height:13px;accent-color:var(--accent);cursor:pointer">
-      <span style="font-size:.58rem;color:var(--dim);text-transform:uppercase;letter-spacing:.08em">Hiện nét đứt boundary</span>
-    </label>
-    <label style="flex-direction:row;align-items:center;gap:6px;cursor:pointer;margin-top:4px">
-      <input type="checkbox" id="showBarrier" checked
-        style="width:13px;height:13px;accent-color:var(--accent);cursor:pointer">
-      <span style="font-size:.58rem;color:var(--dim);text-transform:uppercase;letter-spacing:.08em">Hiện vật cản</span>
-    </label>
-  </div>
-
-</div>
-
 <script>
 const canvas = document.getElementById('sim');
 const ctx    = canvas.getContext('2d');
+const pcv    = document.getElementById('preview');
+const pctx   = pcv.getContext('2d');
+const DPR    = Math.min(2, window.devicePixelRatio||1);
 const wrap   = document.getElementById('simWrap');
 
 let W, H, SCREEN_X;
@@ -181,8 +235,9 @@ let W, H, SCREEN_X;
 function resizeCanvas(){
   W = wrap.clientWidth;
   H = wrap.clientHeight;
-  canvas.width  = W;
-  canvas.height = H;
+  canvas.width  = Math.round(W*DPR);
+  canvas.height = Math.round(H*DPR);
+  ctx.setTransform(DPR,0,0,DPR,0,0);
   // Use slider values if available, else defaults
   const sxPct = +document.getElementById('screenX').value/100;
   SCREEN_X = Math.floor(sxPct * W);
@@ -301,35 +356,15 @@ function buildProfile(subs,bT,bB){
 
 // ── Screen preview: front-facing view ──────────────────
 function drawScreenPreview(p, subs, bT, bB){
-  const PAD   = 16;
-  const SIZE  = Math.min(Math.floor(Math.min(W,H)*0.22), 180);
-  const CX    = PAD + SIZE/2;
-  const CY    = PAD + SIZE/2;
-  const SQ_X  = PAD, SQ_Y = PAD, SQ_W = SIZE, SQ_H = SIZE;
-
-  // Legend panel sits to the right of the square
-  const LEG_X   = PAD + SIZE + 8;
-  const LEG_Y   = PAD;
-  const LEG_W   = 110;
-  const LEG_H   = SIZE;
-  const PANEL_W = SIZE + 8 + LEG_W + 12; // total width for outer panel
-
-  // ── Outer panel background ──
+  // Vẽ lên canvas riêng ở thẻ "Mặt trước màn chắn"
+  const ctx = pctx;
+  const SIZE = pcv.clientWidth || 160;
+  if(pcv.width!==Math.round(SIZE*DPR)){pcv.width=Math.round(SIZE*DPR);pcv.height=Math.round(SIZE*DPR);}
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  ctx.clearRect(0,0,SIZE,SIZE);
+  const CX = SIZE/2, CY = SIZE/2;
+  const SQ_X = 0, SQ_Y = 0, SQ_W = SIZE, SQ_H = SIZE;
   ctx.save();
-  ctx.fillStyle='rgba(4,8,16,0.90)';
-  roundRect(ctx, PAD-6, PAD-6, PANEL_W, SIZE+28, 7);
-  ctx.fill();
-  ctx.strokeStyle='rgba(80,120,180,.30)';
-  ctx.lineWidth=1;
-  roundRect(ctx, PAD-6, PAD-6, PANEL_W, SIZE+28, 7);
-  ctx.stroke();
-
-  // Title centred under the square
-  ctx.fillStyle='rgba(140,170,220,.75)';
-  ctx.font='bold 9px Oswald, sans-serif';
-  ctx.textAlign='center';
-  ctx.fillText('MẶT TRƯỚC MÀN CHIẾU', PAD + SIZE/2, PAD + SIZE + 18);
-  ctx.textAlign='left';
 
   // ── Compute umbra & penumbra ──
   const prof2 = buildProfile(subs, bT, bB);
@@ -449,107 +484,9 @@ function drawScreenPreview(p, subs, bT, bB){
 
   ctx.restore(); // end clip
 
-  // Square border
   ctx.strokeStyle='rgba(80,130,210,.45)';
   ctx.lineWidth=1.5; ctx.setLineDash([]);
-  ctx.strokeRect(SQ_X, SQ_Y, SQ_W, SQ_H);
-
-  // ── Legend panel (right of square, no clip) ──
-  ctx.save();
-
-  // Divider line
-  ctx.strokeStyle='rgba(40,60,90,.6)';
-  ctx.lineWidth=1;
-  ctx.beginPath();
-  ctx.moveTo(LEG_X - 2, LEG_Y + 4);
-  ctx.lineTo(LEG_X - 2, LEG_Y + LEG_H - 4);
-  ctx.stroke();
-
-  const lf = ctx.font; // save
-  ctx.font='600 9px Oswald, sans-serif';
-
-  let ly = LEG_Y + 14; // current y cursor in legend
-  const LH = 28;       // line height per legend item
-
-  // Helper: draw one legend row
-  // lineStyle: 'dashed-yellow' | 'solid-purple' | 'solid-yellow'
-  function legendRow(label, sublabel, lineStyle){
-    const lx = LEG_X + 6;
-    const lineY = ly;
-    const lineLen = 22;
-
-    // Draw the line sample
-    ctx.lineWidth = 1.5;
-    if(lineStyle === 'dashed-yellow'){
-      ctx.strokeStyle='rgba(244,210,40,.9)';
-      ctx.setLineDash([4,4]);
-    } else if(lineStyle === 'solid-purple'){
-      ctx.strokeStyle='rgba(160,80,255,.9)';
-      ctx.setLineDash([]);
-    } else {
-      ctx.strokeStyle='rgba(255,225,80,.7)';
-      ctx.setLineDash([]);
-    }
-    ctx.beginPath();
-    ctx.moveTo(lx, lineY);
-    ctx.lineTo(lx + lineLen, lineY);
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-    // Label
-    ctx.fillStyle='rgba(200,215,235,.9)';
-    ctx.font='700 8.5px Oswald, sans-serif';
-    ctx.fillText(label, lx + lineLen + 5, lineY + 3);
-
-    // Sublabel
-    if(sublabel){
-      ctx.fillStyle='rgba(120,145,175,.75)';
-      ctx.font='400 7.5px Oswald, sans-serif';
-      ctx.fillText(sublabel, lx + lineLen + 5, lineY + 13);
-    }
-
-    ly += LH;
-  }
-
-  legendRow('Ranh giới bóng nửa tối', null, 'dashed-yellow');
-  legendRow('Ranh giới bóng tối', null, 'solid-purple');
-
-  // Small colour swatches
-  ly += 4;
-  // Penumbra swatch
-  ctx.fillStyle='rgba(4,8,16,0.85)';
-  ctx.fillRect(LEG_X+6, ly, 10, 10);
-  const pg=ctx.createRadialGradient(LEG_X+11,ly+5,0,LEG_X+11,ly+5,6);
-  pg.addColorStop(0,'rgba(8,10,20,.95)');
-  pg.addColorStop(1,'rgba(255,225,80,0)');
-  ctx.fillStyle=pg; ctx.fillRect(LEG_X+6,ly,10,10);
-  ctx.strokeStyle='rgba(244,210,40,.7)';ctx.lineWidth=1;ctx.setLineDash([2,2]);
-  ctx.strokeRect(LEG_X+6,ly,10,10); ctx.setLineDash([]);
-  ctx.fillStyle='rgba(200,215,235,.85)';
-  ctx.font='400 7.5px Oswald, sans-serif';
-  ctx.fillText('Bóng nửa tối', LEG_X+20, ly+8);
-  ly+=16;
-
-  // Umbra swatch
-  ctx.fillStyle='rgb(2,4,8)';
-  ctx.fillRect(LEG_X+6, ly, 10, 10);
-  ctx.strokeStyle='rgba(160,80,255,.7)';ctx.lineWidth=1;ctx.setLineDash([]);
-  ctx.strokeRect(LEG_X+6,ly,10,10);
-  ctx.fillStyle='rgba(200,215,235,.85)';
-  ctx.font='400 7.5px Oswald, sans-serif';
-  ctx.fillText('Bóng tối', LEG_X+20, ly+8);
-  ly+=16;
-
-  // Lit swatch
-  ctx.fillStyle=`rgba(255,225,80,${p.intens*0.6})`;
-  ctx.fillRect(LEG_X+6, ly, 10, 10);
-  ctx.strokeStyle='rgba(255,225,80,.4)';ctx.lineWidth=1;
-  ctx.strokeRect(LEG_X+6,ly,10,10);
-  ctx.fillStyle='rgba(200,215,235,.85)';
-  ctx.font='400 7.5px Oswald, sans-serif';
-  ctx.fillText('Vùng sáng', LEG_X+20, ly+8);
-
-  ctx.restore();
+  ctx.strokeRect(0.75, 0.75, SIZE-1.5, SIZE-1.5);
 }
 
 function roundRect(ctx,x,y,w,h,r){
@@ -703,7 +640,7 @@ function draw(){
       ctx.save();
       ctx.translate(bx+BAND_W/2, 6);
       ctx.fillStyle=`rgb(${cr},${cg},${cb})`;
-      ctx.font='bold 9px Oswald, sans-serif';
+      ctx.font='bold 12px "Be Vietnam Pro", system-ui, sans-serif';
       ctx.textAlign='center';
       ctx.fillText(`S${src.idx+1}`, 0, 8);
       ctx.restore();
@@ -718,7 +655,7 @@ function draw(){
   }
 
   // ── Screen labels ──
-  ctx.font='11px Oswald, sans-serif';
+  ctx.font='14px "Be Vietnam Pro", system-ui, sans-serif';
   let uTop=-1,uBot=-1;
   for(let y=0;y<H;y++){if(prof[y]<.02){if(uTop<0)uTop=y;uBot=y;}}
   let p1T=-1,p1B=-1,p2T=-1,p2B=-1;
@@ -735,9 +672,9 @@ function draw(){
   if(uTop>=0&&uBot-uTop>10){ctx.fillStyle='rgba(100,120,230,.95)';ctx.fillText('BÓNG TỐI',lblX,(uTop+uBot)/2+4);}
   if(p1T>=0&&p1B-p1T>6){ctx.fillStyle='rgba(220,220,60,.9)';ctx.fillText('BÓNG NỬA TỐI',lblX,(p1T+p1B)/2+4);}
   if(p2T>=0&&p2B-p2T>6){ctx.fillStyle='rgba(220,220,60,.9)';ctx.fillText('BÓNG NỬA TỐI',lblX,(p2T+p2B)/2+4);}
-  const ref=uTop>=0?uTop:H/2;
+  const ref=p1T>=0?p1T:(uTop>=0?uTop:H/2);
   if(ref>40){ctx.fillStyle='rgba(244,196,48,.85)';ctx.fillText('SÁNG',lblX,ref*.4+8);}
-  const ref2=uBot>=0?uBot:H/2;
+  const ref2=p2B>=0?p2B:(uBot>=0?uBot:H/2);
   if(ref2<H-30){ctx.fillStyle='rgba(244,196,48,.85)';ctx.fillText('SÁNG',lblX,ref2+(H-ref2)*.5);}
   ctx.textAlign='left';
 
@@ -750,8 +687,8 @@ function draw(){
     ctx.beginPath();ctx.moveTo(bT.x,bT.y);ctx.lineTo(bB.x,bB.y);ctx.stroke();
     ctx.strokeStyle='#80b8f0';ctx.lineWidth=2;
     ctx.beginPath();ctx.moveTo(bT.x,bT.y);ctx.lineTo(bB.x,bB.y);ctx.stroke();
-    ctx.fillStyle='rgba(100,170,255,.9)';ctx.font='bold 11px Oswald, sans-serif';
-    ctx.fillText('VẬT CHẮN',bT.x+10,bT.y-10);
+    ctx.fillStyle='rgba(100,170,255,.9)';ctx.font='bold 14px "Be Vietnam Pro", system-ui, sans-serif';
+    ctx.fillText('VẬT CHẮN',bB.x+10,bB.y+20);
   }
 
   // ── Sub-sources ──
@@ -773,7 +710,7 @@ function draw(){
     if(p.nSrc>1&&!renderedIdx.has(src.idx)){
       renderedIdx.add(src.idx);
       ctx.fillStyle=`rgba(${cr},${cg},${cb},.95)`;
-      ctx.font='bold 10px Oswald, sans-serif';
+      ctx.font='bold 13px "Be Vietnam Pro", system-ui, sans-serif';
       ctx.fillText(`S${src.idx+1}`,src.x+10,src.y+4);
     }
   }
@@ -792,12 +729,13 @@ function draw(){
     const lbl=p.nSrc>1
       ?`${activeN}/${p.nSrc} NGUỒN`
       :(p.sSize>0?`MỞ RỘNG (${p.sSize}px)`:'NGUỒN ĐIỂM');
-    ctx.fillStyle='rgba(255,220,80,.9)';ctx.font='bold 10px Oswald, sans-serif';
+    ctx.fillStyle='rgba(255,220,80,.9)';ctx.font='bold 13px "Be Vietnam Pro", system-ui, sans-serif';
     ctx.fillText(lbl,srcCenter.x+13,Math.min(y1,y2)-14);
   }
 
-  // ── Circular screen preview (top-left inset) ──
+  // ── Mặt trước màn chắn + số liệu ──
   drawScreenPreview(p, subs, bT, bB);
+  updateStats(p, subs, prof, bCX);
 
   // ── Per-source shadow boundary lines ON the screen (layer trên cùng) ──
   if(p.nSrc>1 && subs.length>1){
@@ -820,7 +758,7 @@ function draw(){
       }
       ctx.setLineDash([]);
       ctx.fillStyle=`rgb(${cr},${cg},${cb})`;
-      ctx.font='bold 9px Oswald, sans-serif';
+      ctx.font='bold 12px "Be Vietnam Pro", system-ui, sans-serif';
       ctx.textAlign='left';
       if(sT>8&&sT<H-8) ctx.fillText(`S${src.idx+1}`,SCREEN_X+TICK_W+3,sT+4);
       if(sB>8&&sB<H-8) ctx.fillText(`S${src.idx+1}`,SCREEN_X+TICK_W+3,sB+4);
@@ -839,18 +777,20 @@ function draw(){
 function rebuildToggles(n){
   const cont=document.getElementById('srcToggles');
   cont.innerHTML='';
-  if(n<=1){cont.style.display='none';return;}
-  cont.style.display='flex';
+  if(n<=1){cont.hidden=true;return;}
+  cont.hidden=false;
   for(let i=0;i<n;i++){
     if(sourceActive[i]===undefined)sourceActive[i]=true;
     const [cr,cg,cb]=SRC_COLORS[i%SRC_COLORS.length];
-    const btn=document.createElement('div');
-    btn.className='src-btn'+(sourceActive[i]?' on':'');
-    btn.innerHTML=`<span class="dot"></span>S${i+1}`;
+    const btn=document.createElement('button');
+    btn.type='button';
+    btn.className='btn'+(sourceActive[i]?'':' off');
+    btn.setAttribute('aria-pressed',sourceActive[i]);
+    btn.innerHTML=`<i></i>S${i+1}`;
     if(sourceActive[i]){
       btn.style.borderColor=`rgb(${cr},${cg},${cb})`;
       btn.style.color=`rgb(${cr},${cg},${cb})`;
-      btn.querySelector('.dot').style.background=`rgb(${cr},${cg},${cb})`;
+      btn.querySelector('i').style.background=`rgb(${cr},${cg},${cb})`;
     }
     btn.addEventListener('click',()=>{
       sourceActive[i]=!sourceActive[i];
@@ -917,7 +857,7 @@ canvas.addEventListener('mousedown',e=>{
   const r=canvas.getBoundingClientRect();
   const scx=W/r.width, scy=H/r.height;
   const mx=(e.clientX-r.left)*scx, my=(e.clientY-r.top)*scy;
-  if(Math.hypot(mx-srcCenter.x,my-srcCenter.y)<32)dragging=true;
+  if(Math.hypot(mx-srcCenter.x,my-srcCenter.y)<32){dragging=true;canvas.classList.add('drag');}
 });
 canvas.addEventListener('mousemove',e=>{
   if(!dragging)return;
@@ -927,18 +867,17 @@ canvas.addEventListener('mousemove',e=>{
   srcCenter.y=Math.max(12,Math.min(H-12,(e.clientY-r.top)*scy));
   syncToSliders(); draw();
 });
-canvas.addEventListener('mouseup',()=>dragging=false);
-canvas.addEventListener('mouseleave',()=>dragging=false);
+canvas.addEventListener('mouseup',()=>{dragging=false;canvas.classList.remove('drag');});
+canvas.addEventListener('mouseleave',()=>{dragging=false;canvas.classList.remove('drag');});
 canvas.addEventListener('touchstart',e=>{
-  e.preventDefault();
   const r=canvas.getBoundingClientRect(),t=e.touches[0];
   const scx=W/r.width, scy=H/r.height;
   const mx=(t.clientX-r.left)*scx, my=(t.clientY-r.top)*scy;
-  if(Math.hypot(mx-srcCenter.x,my-srcCenter.y)<36)dragging=true;
+  if(Math.hypot(mx-srcCenter.x,my-srcCenter.y)<40){dragging=true;e.preventDefault();}
 },{passive:false});
 canvas.addEventListener('touchmove',e=>{
-  e.preventDefault();
   if(!dragging)return;
+  e.preventDefault();
   const r=canvas.getBoundingClientRect(),t=e.touches[0];
   const scx=W/r.width, scy=H/r.height;
   srcCenter.x=Math.max(12,Math.min(W*.45,(t.clientX-r.left)*scx));
@@ -946,6 +885,38 @@ canvas.addEventListener('touchmove',e=>{
   syncToSliders(); draw();
 },{passive:false});
 canvas.addEventListener('touchend',()=>dragging=false);
+
+
+// ── Số liệu trên màn ──
+function updateStats(p, subs, prof, bCX){
+  const $=id=>document.getElementById(id);
+  $('dType').textContent = p.nSrc>1 ? subs.length+' nguồn điểm' : (p.sSize>0 ? 'Nguồn rộng ('+p.sSize+' px)' : 'Nguồn điểm');
+  let u=0, pen=0;
+  for(let y=0;y<H;y++){ const v=prof[y]; if(v<.02)u++; else if(v<.98)pen++; }
+  const on=p.showBarrier;
+  $('dUmbra').textContent = on ? u+' px' : '–';
+  $('dPen').textContent   = on ? pen+' px' : '–';
+  $('dAll').textContent   = on ? (u+pen)+' px' : '–';
+  $('dSO').textContent    = on ? Math.round(bCX-srcCenter.x)+' px' : '–';
+  $('dOM').textContent    = on ? Math.round(SCREEN_X-bCX)+' px' : '–';
+}
+
+// ── Dự đoán trước ──
+document.querySelectorAll('#pred .btn').forEach(b=>b.addEventListener('click',()=>{
+  const k=+b.dataset.k;
+  document.querySelectorAll('#pred .btn').forEach(x=>x.classList.remove('right','wrong'));
+  b.classList.add(k===1?'right':'wrong');
+  const a=document.getElementById('predAns');
+  a.hidden=false;
+  a.textContent=(k===1?'Đúng. ':'Chưa đúng. ')+'Hãy kéo “Kích thước nguồn” lên để kiểm tra: mỗi điểm của nguồn rộng cho một bóng riêng, chỗ mọi bóng chồng lên nhau là bóng tối, chỗ chỉ bị che một phần nguồn là bóng nửa tối.';
+}));
+
+// ── Che số liệu ──
+document.getElementById('gvBtn').onclick=()=>{
+  const on=!document.body.classList.contains('hideNums');
+  document.body.classList.toggle('hideNums',on);
+  document.getElementById('gvBtn').setAttribute('aria-pressed',on);
+};
 
 // ── Init & resize ──
 for(let i=0;i<10;i++)sourceActive[i]=true;
