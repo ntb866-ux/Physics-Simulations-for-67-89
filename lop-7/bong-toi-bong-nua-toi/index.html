@@ -66,9 +66,6 @@ input[type=range]{width:100%;height:40px;accent-color:var(--accent);margin:0}
 .srcs .btn{min-height:38px;padding:4px 10px;font-size:14px;display:inline-flex;align-items:center;gap:6px}
 .srcs .btn i{display:inline-block;width:12px;height:12px;border-radius:50%}
 .srcs .btn.off{opacity:.45;text-decoration:line-through}
-.kv{display:grid;grid-template-columns:minmax(0,1fr) max-content;gap:4px 12px;font-size:15px;margin:0}
-.kv dt{color:var(--muted)} .kv dd{margin:0;font-family:var(--font-num);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
-.kv dd.t{font-family:var(--font-ui);font-weight:600}
 .opts{display:flex;flex-direction:column;gap:6px}
 .opts .btn{text-align:left;font-size:14px}
 .opts .btn.right{background:color-mix(in srgb,var(--ok) 18%,var(--panel));border-color:var(--ok)}
@@ -85,8 +82,6 @@ details ul,details ol{padding-left:22px}
 details li{margin:3px 0}
 details h3{font-size:15px;margin:12px 0 2px}
 .fine{font-size:13px;color:var(--muted);margin:0}
-body.hideNums .num{filter:blur(7px);user-select:none}
-body.hideNums .num:hover{filter:none}
 footer{font-size:13px;color:var(--muted)}
 </style>
 </head>
@@ -94,135 +89,150 @@ footer{font-size:13px;color:var(--muted)}
 <div class="wrap">
   <header>
     <div>
-      <div class="eyebrow">KHTN 7 · Ánh sáng · Vùng tối, vùng nửa tối</div>
-      <h1>Bóng tối và bóng nửa tối</h1>
+      <div class="eyebrow" data-i18n="eyebrow"></div>
+      <h1 data-i18n="title"></h1>
     </div>
     <div class="hbtns">
-      <button class="btn" id="gvBtn" aria-pressed="false" title="Làm mờ số liệu để cả lớp dự đoán trước">Che số liệu</button>
+      <button class="btn" id="langBtn">EN</button>
     </div>
   </header>
 
-  <p class="req"><b>Yêu cầu cần đạt:</b> Vẽ được hình biểu diễn vùng tối do nguồn sáng rộng và vùng tối do nguồn sáng hẹp.</p>
+  <p class="req" data-i18n-html="req"></p>
 
   <div class="lab">
-    <section class="stage" aria-label="Sân khấu mô phỏng">
-      <p class="hint">Kéo nguồn sáng (chấm sáng bên trái) để di chuyển. Đường nét đứt vàng là các tia sáng đi sát mép vật chắn.</p>
-      <div id="simWrap"><canvas id="sim" aria-label="Nguồn sáng, vật chắn và màn chắn nhìn từ bên cạnh"></canvas></div>
+    <section class="stage" aria-label="Sim">
+      <p class="hint" data-i18n="hint"></p>
+      <div id="simWrap"><canvas id="sim"></canvas></div>
       <div class="legend">
-        <span><i style="background:#f4c430"></i>Vùng sáng</span>
-        <span><i style="background:linear-gradient(90deg,#f4c430,#020408)"></i>Bóng nửa tối</span>
-        <span><i style="background:#020408"></i>Bóng tối</span>
-        <span><i class="ln"></i>Tia giới hạn</span>
+        <span><i style="background:#f4c430"></i><span data-i18n="lgLit"></span></span>
+        <span><i style="background:linear-gradient(90deg,#f4c430,#020408)"></i><span data-i18n="lgPen"></span></span>
+        <span><i style="background:#020408"></i><span data-i18n="lgUmb"></span></span>
+        <span><i class="ln"></i><span data-i18n="lgRay"></span></span>
       </div>
       <div class="controls">
-        <label class="chk"><input type="checkbox" id="showBoundary" checked> Hiện tia giới hạn</label>
-        <label class="chk"><input type="checkbox" id="showBarrier" checked> Hiện vật chắn</label>
+        <label class="chk"><input type="checkbox" id="showBoundary" checked> <span data-i18n="chkRay"></span></label>
+        <label class="chk"><input type="checkbox" id="showBarrier" checked> <span data-i18n="chkObj"></span></label>
       </div>
     </section>
 
     <div class="col">
       <section class="card" aria-labelledby="hPred">
-        <h2 id="hPred">Dự đoán trước</h2>
-        <p>Thay nguồn sáng điểm bằng một nguồn sáng rộng (kéo thanh “Kích thước nguồn” lên). Trên màn chắn sẽ thấy gì?</p>
+        <h2 id="hPred" data-i18n="predT"></h2>
+        <p data-i18n="predQ"></p>
         <div class="opts" id="pred">
-          <button class="btn" data-k="0">Bóng tối to hơn, vẫn chỉ có bóng tối và vùng sáng</button>
-          <button class="btn" data-k="1">Bóng tối thu nhỏ lại, xung quanh có thêm bóng nửa tối</button>
-          <button class="btn" data-k="2">Bóng biến mất, cả màn được chiếu sáng đều</button>
+          <button class="btn" data-k="0" data-i18n="pred0"></button>
+          <button class="btn" data-k="1" data-i18n="pred1"></button>
+          <button class="btn" data-k="2" data-i18n="pred2"></button>
         </div>
         <p class="ans" id="predAns" hidden></p>
       </section>
 
       <section class="card" aria-labelledby="hSrc">
-        <h2 id="hSrc">Nguồn sáng</h2>
-        <div class="sl"><div class="top"><label for="srcSize">Kích thước nguồn</label><span class="val" id="vSrcSize">điểm</span></div>
+        <h2 id="hSrc" data-i18n="srcT"></h2>
+        <div class="sl"><div class="top"><label for="srcSize" data-i18n="srcSize"></label><span class="val" id="vSrcSize"></span></div>
           <input type="range" id="srcSize" min="0" max="200" value="0"></div>
-        <div class="sl"><div class="top"><label for="numSources">Số lượng nguồn</label><span class="val" id="vNumSrc">1</span></div>
+        <div class="sl"><div class="top"><label for="numSources" data-i18n="numSrc"></label><span class="val" id="vNumSrc">1</span></div>
           <input type="range" id="numSources" min="1" max="10" step="1" value="1"></div>
         <div class="srcs" id="srcToggles" hidden></div>
-        <div class="sl"><div class="top"><label for="srcY">Vị trí dọc nguồn</label><span class="val" id="vSrcY">50%</span></div>
+        <div class="sl"><div class="top"><label for="srcY" data-i18n="srcY"></label><span class="val" id="vSrcY">50%</span></div>
           <input type="range" id="srcY" min="2" max="98" value="50"></div>
-        <div class="sl"><div class="top"><label for="srcX">Vị trí ngang nguồn</label><span class="val" id="vSrcX">10%</span></div>
+        <div class="sl"><div class="top"><label for="srcX" data-i18n="srcX"></label><span class="val" id="vSrcX">10%</span></div>
           <input type="range" id="srcX" min="2" max="45" value="10"></div>
       </section>
 
       <section class="card" aria-labelledby="hObj">
-        <h2 id="hObj">Vật chắn và màn chắn</h2>
-        <div class="sl"><div class="top"><label for="barrierSize">Kích thước vật chắn</label><span class="val" id="vBarrierSize">120px</span></div>
+        <h2 id="hObj" data-i18n="objT"></h2>
+        <div class="sl"><div class="top"><label for="barrierSize" data-i18n="bSize"></label><span class="val" id="vBarrierSize">120px</span></div>
           <input type="range" id="barrierSize" min="20" max="400" value="120"></div>
-        <div class="sl"><div class="top"><label for="barrierY">Vị trí dọc vật chắn</label><span class="val" id="vBarrierY">50%</span></div>
+        <div class="sl"><div class="top"><label for="barrierY" data-i18n="bY"></label><span class="val" id="vBarrierY">50%</span></div>
           <input type="range" id="barrierY" min="5" max="95" value="50"></div>
-        <div class="sl"><div class="top"><label for="barrierX">Vị trí ngang vật chắn</label><span class="val" id="vBarrierX">30%</span></div>
+        <div class="sl"><div class="top"><label for="barrierX" data-i18n="bX"></label><span class="val" id="vBarrierX">30%</span></div>
           <input type="range" id="barrierX" min="15" max="82" value="30"></div>
-        <div class="sl"><div class="top"><label for="screenX">Vị trí màn chắn</label><span class="val" id="vScreenX">78%</span></div>
+        <div class="sl"><div class="top"><label for="screenX" data-i18n="scrX"></label><span class="val" id="vScreenX">78%</span></div>
           <input type="range" id="screenX" min="50" max="95" value="78"></div>
       </section>
 
       <section class="card" aria-labelledby="hPv">
-        <h2 id="hPv">Mặt trước màn chắn</h2>
+        <h2 id="hPv" data-i18n="pvT"></h2>
         <div class="pv">
-          <canvas id="preview" aria-label="Bóng trên màn nhìn từ phía trước"></canvas>
+          <canvas id="preview"></canvas>
           <div class="legend">
-            <span><i class="lu"></i>Ranh giới bóng tối</span>
-            <span><i class="ln"></i>Ranh giới bóng nửa tối</span>
-            <span class="fine">Giả sử vật chắn là một đĩa tròn, nên bóng nhìn từ trước là các vòng tròn đồng tâm.</span>
+            <span><i class="lu"></i><span data-i18n="pvU"></span></span>
+            <span><i class="ln"></i><span data-i18n="pvP"></span></span>
+            <span class="fine" data-i18n="pvNote"></span>
           </div>
         </div>
       </section>
 
-      <section class="card" aria-labelledby="hData">
-        <h2 id="hData">Số liệu trên màn</h2>
-        <dl class="kv">
-          <dt>Loại nguồn sáng</dt><dd class="t" id="dType">Nguồn điểm</dd>
-          <dt>Độ cao bóng tối</dt><dd class="num" id="dUmbra">–</dd>
-          <dt>Độ cao bóng nửa tối (trên + dưới)</dt><dd class="num" id="dPen">–</dd>
-          <dt>Tổng độ cao vùng bóng</dt><dd class="num" id="dAll">–</dd>
-          <dt>Nguồn → vật chắn</dt><dd class="num" id="dSO">–</dd>
-          <dt>Vật chắn → màn</dt><dd class="num" id="dOM">–</dd>
-        </dl>
-        <p class="fine">Đơn vị px là điểm ảnh trên hình, dùng để so sánh với nhau, không phải độ dài thật.</p>
-      </section>
-
       <section class="card" aria-labelledby="hView">
-        <h2 id="hView">Hiển thị</h2>
-        <div class="sl"><div class="top"><label for="intensity">Cường độ sáng</label><span class="val" id="vIntensity">80%</span></div>
+        <h2 id="hView" data-i18n="viewT"></h2>
+        <div class="sl"><div class="top"><label for="intensity" data-i18n="intens"></label><span class="val" id="vIntensity">80%</span></div>
           <input type="range" id="intensity" min="20" max="100" value="80"></div>
-        <div class="sl"><div class="top"><label for="rays">Số tia sáng vẽ</label><span class="val" id="vRays">80</span></div>
+        <div class="sl"><div class="top"><label for="rays" data-i18n="rays"></label><span class="val" id="vRays">80</span></div>
           <input type="range" id="rays" min="20" max="3000" value="80"></div>
       </section>
     </div>
   </div>
 
-  <details>
-    <summary>Kết luận và giải thích</summary>
-    <h3>Cơ chế</h3>
-    <p>Trong một môi trường trong suốt và đồng tính, ánh sáng truyền theo đường thẳng. Vì vậy sau vật chắn sáng có những chỗ mà tia sáng không tới được.</p>
-    <ul>
-      <li><b>Bóng tối (vùng tối)</b>: chỗ trên màn không nhận được ánh sáng từ <i>bất kì điểm nào</i> của nguồn, vì vật chắn che kín toàn bộ nguồn.</li>
-      <li><b>Bóng nửa tối (vùng nửa tối)</b>: chỗ chỉ nhận được ánh sáng từ <i>một phần</i> của nguồn. Càng vào gần bóng tối thì phần nguồn bị che càng lớn, nên càng tối dần.</li>
-      <li>Nguồn sáng <b>hẹp</b> (nguồn điểm): ranh giới bóng sắc nét, chỉ có bóng tối và vùng sáng. Nguồn sáng <b>rộng</b>: bóng tối thu nhỏ, xung quanh có bóng nửa tối.</li>
-    </ul>
-    <h3>Nói với học sinh</h3>
-    <p>Đứng ở một điểm trên màn và “nhìn về” phía nguồn sáng. Nếu vật chắn che hết nguồn, em đứng trong bóng tối. Nếu chỉ che một phần, em đứng trong bóng nửa tối. Nếu không che gì, em ở vùng sáng.</p>
-    <h3>Học sinh hay hiểu sai</h3>
-    <ul>
-      <li>“Bóng nửa tối là do ánh sáng lọt qua mép vật chắn.” Thực ra là do nguồn sáng có kích thước, mỗi điểm của nguồn cho một bóng riêng, các bóng này chồng lên nhau không khít.</li>
-      <li>“Vật càng to thì luôn có bóng nửa tối.” Với nguồn điểm thì không có bóng nửa tối, dù vật to hay nhỏ.</li>
-    </ul>
-    <h3>Vận dụng</h3>
-    <p>Nhật thực và nguyệt thực: Mặt Trời là nguồn sáng rộng. Người đứng trong bóng tối của Mặt Trăng thấy nhật thực toàn phần, người đứng trong bóng nửa tối thấy nhật thực một phần.</p>
-    <h3>Thuật ngữ</h3>
-    <p>Tiếng Anh dùng <i>umbra</i> (Latinh: “bóng, bóng râm”) cho bóng tối và <i>penumbra</i> (Latinh <i>paene</i> “gần như” + <i>umbra</i>, nghĩa là “gần như bóng”) cho bóng nửa tối. Tiếng Pháp: <i>ombre</i> và <i>pénombre</i>.</p>
-    <h3>Giả thiết mô phỏng</h3>
-    <ul>
-      <li>Hình vẽ là mặt cắt bên cạnh; vật chắn là một đoạn thẳng không cho ánh sáng đi qua.</li>
-      <li>Nguồn sáng rộng được thay bằng nhiều nguồn điểm xếp sát nhau.</li>
-      <li>Bỏ qua hiện tượng nhiễu xạ ở mép vật (rất nhỏ với vật thường gặp).</li>
-    </ul>
-  </details>
+  <details><summary data-i18n="concT"></summary><div data-i18n-html="conc"></div></details>
 
-  <footer>Mô phỏng KHTN 7 · Chủ đề Ánh sáng · Chương trình GDPT 2018.</footer>
+  <footer data-i18n="footer"></footer>
 </div>
 <script>
+
+// ── Song ngữ Việt / Anh ──
+const I18N={
+vi:{docTitle:'Bóng tối và bóng nửa tối',eyebrow:'KHTN 7 · Ánh sáng · Vùng tối, vùng nửa tối',title:'Bóng tối và bóng nửa tối',
+req:'<b>Yêu cầu cần đạt:</b> Vẽ được hình biểu diễn vùng tối do nguồn sáng rộng và vùng tối do nguồn sáng hẹp.',
+hint:'Kéo nguồn sáng (chấm sáng bên trái) để di chuyển. Đường nét đứt vàng là các tia sáng đi sát mép vật chắn.',
+lgLit:'Vùng sáng',lgPen:'Bóng nửa tối',lgUmb:'Bóng tối',lgRay:'Tia giới hạn',chkRay:'Hiện tia giới hạn',chkObj:'Hiện vật chắn',
+predT:'Dự đoán trước',predQ:'Thay nguồn sáng điểm bằng một nguồn sáng rộng (kéo thanh “Kích thước nguồn” lên). Trên màn chắn sẽ thấy gì?',
+pred0:'Bóng tối to hơn, vẫn chỉ có bóng tối và vùng sáng',pred1:'Bóng tối thu nhỏ lại, xung quanh có thêm bóng nửa tối',pred2:'Bóng biến mất, cả màn được chiếu sáng đều',
+predOk:'Đúng. ',predNo:'Chưa đúng. ',predAns:'Hãy kéo “Kích thước nguồn” lên để kiểm tra: mỗi điểm của nguồn rộng cho một bóng riêng, chỗ mọi bóng chồng lên nhau là bóng tối, chỗ chỉ bị che một phần nguồn là bóng nửa tối.',
+srcT:'Nguồn sáng',srcSize:'Kích thước nguồn',numSrc:'Số lượng nguồn',srcY:'Vị trí dọc nguồn',srcX:'Vị trí ngang nguồn',point:'điểm',
+objT:'Vật chắn và màn chắn',bSize:'Kích thước vật chắn',bY:'Vị trí dọc vật chắn',bX:'Vị trí ngang vật chắn',scrX:'Vị trí màn chắn',
+pvT:'Mặt trước màn chắn',pvU:'Ranh giới bóng tối',pvP:'Ranh giới bóng nửa tối',pvNote:'Giả sử vật chắn là một đĩa tròn, nên bóng nhìn từ trước là các vòng tròn đồng tâm.',
+viewT:'Hiển thị',intens:'Cường độ sáng',rays:'Số tia sáng vẽ',
+cvUmb:'BÓNG TỐI',cvPen:'BÓNG NỬA TỐI',cvLit:'SÁNG',cvObj:'VẬT CHẮN',cvPoint:'NGUỒN ĐIỂM',cvWide:'NGUỒN RỘNG',cvN:'NGUỒN',
+concT:'Kết luận và giải thích',
+conc:`<h3>Cơ chế</h3><p>Trong một môi trường trong suốt và đồng tính, ánh sáng truyền theo đường thẳng. Vì vậy sau vật chắn sáng có những chỗ mà tia sáng không tới được.</p>
+<ul><li><b>Bóng tối (vùng tối)</b>: chỗ trên màn không nhận được ánh sáng từ <i>bất kì điểm nào</i> của nguồn, vì vật chắn che kín toàn bộ nguồn.</li>
+<li><b>Bóng nửa tối (vùng nửa tối)</b>: chỗ chỉ nhận được ánh sáng từ <i>một phần</i> của nguồn. Càng vào gần bóng tối thì phần nguồn bị che càng lớn, nên càng tối dần.</li>
+<li>Nguồn sáng <b>hẹp</b> (nguồn điểm): ranh giới bóng sắc nét, chỉ có bóng tối và vùng sáng. Nguồn sáng <b>rộng</b>: bóng tối thu nhỏ, xung quanh có bóng nửa tối.</li></ul>
+<h3>Nói với học sinh</h3><p>Đứng ở một điểm trên màn và “nhìn về” phía nguồn sáng. Nếu vật chắn che hết nguồn, em đứng trong bóng tối. Nếu chỉ che một phần, em đứng trong bóng nửa tối. Nếu không che gì, em ở vùng sáng.</p>
+<h3>Học sinh hay hiểu sai</h3><ul><li>“Bóng nửa tối là do ánh sáng lọt qua mép vật chắn.” Thực ra là do nguồn sáng có kích thước, mỗi điểm của nguồn cho một bóng riêng, các bóng này chồng lên nhau không khít.</li>
+<li>“Vật càng to thì luôn có bóng nửa tối.” Với nguồn điểm thì không có bóng nửa tối, dù vật to hay nhỏ.</li></ul>
+<h3>Vận dụng</h3><p>Nhật thực và nguyệt thực: Mặt Trời là nguồn sáng rộng. Người đứng trong bóng tối của Mặt Trăng thấy nhật thực toàn phần, người đứng trong bóng nửa tối thấy nhật thực một phần.</p>
+<h3>Thuật ngữ</h3><p>Tiếng Anh dùng <i>umbra</i> (Latinh: “bóng, bóng râm”) cho bóng tối và <i>penumbra</i> (Latinh <i>paene</i> “gần như” + <i>umbra</i>, nghĩa là “gần như bóng”) cho bóng nửa tối. Tiếng Pháp: <i>ombre</i> và <i>pénombre</i>.</p>
+<h3>Giả thiết mô phỏng</h3><ul><li>Hình vẽ là mặt cắt bên cạnh; vật chắn là một đoạn thẳng không cho ánh sáng đi qua.</li><li>Nguồn sáng rộng được thay bằng nhiều nguồn điểm xếp sát nhau.</li><li>Bỏ qua hiện tượng nhiễu xạ ở mép vật (rất nhỏ với vật thường gặp).</li></ul>`,
+footer:'Mô phỏng KHTN 7 · Chủ đề Ánh sáng · Chương trình GDPT 2018.'},
+en:{docTitle:'Umbra and penumbra',eyebrow:'Science 7 · Light · Umbra and penumbra',title:'Umbra and penumbra',
+req:'<b>Learning outcome:</b> Draw diagrams showing the shadow formed by an extended light source and by a point light source.',
+hint:'Drag the light source (the bright dot on the left) to move it. The yellow dashed lines are rays that just graze the edges of the obstacle.',
+lgLit:'Lit region',lgPen:'Penumbra',lgUmb:'Umbra',lgRay:'Limiting rays',chkRay:'Show limiting rays',chkObj:'Show obstacle',
+predT:'Predict first',predQ:'Replace the point source with an extended source (drag “Source size” up). What will you see on the screen?',
+pred0:'A bigger umbra, still only umbra and lit region',pred1:'The umbra shrinks and a penumbra appears around it',pred2:'The shadow disappears and the whole screen is evenly lit',
+predOk:'Correct. ',predNo:'Not quite. ',predAns:'Drag “Source size” up to check: every point of an extended source casts its own shadow. Where all those shadows overlap is the umbra; where only part of the source is hidden is the penumbra.',
+srcT:'Light source',srcSize:'Source size',numSrc:'Number of sources',srcY:'Source vertical position',srcX:'Source horizontal position',point:'point',
+objT:'Obstacle and screen',bSize:'Obstacle size',bY:'Obstacle vertical position',bX:'Obstacle horizontal position',scrX:'Screen position',
+pvT:'Front view of the screen',pvU:'Edge of the umbra',pvP:'Edge of the penumbra',pvNote:'The obstacle is assumed to be a disc, so seen from the front the shadow is a set of concentric circles.',
+viewT:'Display',intens:'Brightness',rays:'Rays drawn',
+cvUmb:'UMBRA',cvPen:'PENUMBRA',cvLit:'LIT',cvObj:'OBSTACLE',cvPoint:'POINT SOURCE',cvWide:'EXTENDED SOURCE',cvN:'SOURCES',
+concT:'Conclusion and explanation',
+conc:`<h3>Mechanism</h3><p>In a transparent, uniform medium light travels in straight lines, so behind an opaque obstacle there are places that rays cannot reach.</p>
+<ul><li><b>Umbra</b>: the part of the screen that receives light from <i>no point</i> of the source, because the obstacle hides the whole source.</li>
+<li><b>Penumbra</b>: the part that receives light from <i>only part</i> of the source. Closer to the umbra, more of the source is hidden, so it gets gradually darker.</li>
+<li><b>Point</b> source: a sharp shadow with only umbra and lit region. <b>Extended</b> source: the umbra shrinks and is surrounded by a penumbra.</li></ul>
+<h3>For students</h3><p>Stand at a point on the screen and “look back” at the source. If the obstacle hides all of it, you are in the umbra. If it hides part of it, you are in the penumbra. If it hides none, you are in the light.</p>
+<h3>Common misconceptions</h3><ul><li>“The penumbra is light leaking round the edge of the obstacle.” It is actually because the source has a size: each point of the source casts its own shadow and these shadows do not overlap exactly.</li>
+<li>“A big object always has a penumbra.” With a point source there is no penumbra, however big the object.</li></ul>
+<h3>Applications</h3><p>Solar and lunar eclipses: the Sun is an extended source. People in the Moon’s umbra see a total eclipse; people in its penumbra see a partial eclipse.</p>
+<h3>Terms</h3><p><i>Umbra</i> is Latin for “shadow, shade”; <i>penumbra</i> comes from Latin <i>paene</i> “almost” + <i>umbra</i>, “almost a shadow”. French: <i>ombre</i> and <i>pénombre</i>.</p>
+<h3>Model assumptions</h3><ul><li>The picture is a side cross-section; the obstacle is an opaque line segment.</li><li>An extended source is modelled as many point sources side by side.</li><li>Diffraction at the edges is ignored (very small for everyday objects).</li></ul>`,
+footer:'Science 7 simulation · Light · Vietnam 2018 curriculum.'}};
+let lang='vi';
+function T(k){return (I18N[lang]&&I18N[lang][k])||I18N.vi[k]||k;}
+
 const canvas = document.getElementById('sim');
 const ctx    = canvas.getContext('2d');
 const pcv    = document.getElementById('preview');
@@ -669,13 +679,13 @@ function draw(){
   // Labels go left of screen line
   const lblX=SCREEN_X-8;
   ctx.textAlign='right';
-  if(uTop>=0&&uBot-uTop>10){ctx.fillStyle='rgba(100,120,230,.95)';ctx.fillText('BÓNG TỐI',lblX,(uTop+uBot)/2+4);}
-  if(p1T>=0&&p1B-p1T>6){ctx.fillStyle='rgba(220,220,60,.9)';ctx.fillText('BÓNG NỬA TỐI',lblX,(p1T+p1B)/2+4);}
-  if(p2T>=0&&p2B-p2T>6){ctx.fillStyle='rgba(220,220,60,.9)';ctx.fillText('BÓNG NỬA TỐI',lblX,(p2T+p2B)/2+4);}
+  if(uTop>=0&&uBot-uTop>10){ctx.fillStyle='rgba(100,120,230,.95)';ctx.fillText(T('cvUmb'),lblX,(uTop+uBot)/2+4);}
+  if(p1T>=0&&p1B-p1T>6){ctx.fillStyle='rgba(220,220,60,.9)';ctx.fillText(T('cvPen'),lblX,(p1T+p1B)/2+4);}
+  if(p2T>=0&&p2B-p2T>6){ctx.fillStyle='rgba(220,220,60,.9)';ctx.fillText(T('cvPen'),lblX,(p2T+p2B)/2+4);}
   const ref=p1T>=0?p1T:(uTop>=0?uTop:H/2);
-  if(ref>40){ctx.fillStyle='rgba(244,196,48,.85)';ctx.fillText('SÁNG',lblX,ref*.4+8);}
+  if(ref>40){ctx.fillStyle='rgba(244,196,48,.85)';ctx.fillText(T('cvLit'),lblX,ref*.4+8);}
   const ref2=p2B>=0?p2B:(uBot>=0?uBot:H/2);
-  if(ref2<H-30){ctx.fillStyle='rgba(244,196,48,.85)';ctx.fillText('SÁNG',lblX,ref2+(H-ref2)*.5);}
+  if(ref2<H-30){ctx.fillStyle='rgba(244,196,48,.85)';ctx.fillText(T('cvLit'),lblX,ref2+(H-ref2)*.5);}
   ctx.textAlign='left';
 
   // ── Barrier ──
@@ -688,7 +698,7 @@ function draw(){
     ctx.strokeStyle='#80b8f0';ctx.lineWidth=2;
     ctx.beginPath();ctx.moveTo(bT.x,bT.y);ctx.lineTo(bB.x,bB.y);ctx.stroke();
     ctx.fillStyle='rgba(100,170,255,.9)';ctx.font='bold 14px "Be Vietnam Pro", system-ui, sans-serif';
-    ctx.fillText('VẬT CHẮN',bB.x+10,bB.y+20);
+    ctx.fillText(T('cvObj'),bB.x+10,bB.y+20);
   }
 
   // ── Sub-sources ──
@@ -727,15 +737,14 @@ function draw(){
     }
     const activeN=p.nSrc>1?subs.length:1;
     const lbl=p.nSrc>1
-      ?`${activeN}/${p.nSrc} NGUỒN`
-      :(p.sSize>0?`MỞ RỘNG (${p.sSize}px)`:'NGUỒN ĐIỂM');
+      ?`${activeN}/${p.nSrc} ${T('cvN')}`
+      :(p.sSize>0?`${T('cvWide')} (${p.sSize}px)`:T('cvPoint'));
     ctx.fillStyle='rgba(255,220,80,.9)';ctx.font='bold 13px "Be Vietnam Pro", system-ui, sans-serif';
     ctx.fillText(lbl,srcCenter.x+13,Math.min(y1,y2)-14);
   }
 
   // ── Mặt trước màn chắn + số liệu ──
   drawScreenPreview(p, subs, bT, bB);
-  updateStats(p, subs, prof, bCX);
 
   // ── Per-source shadow boundary lines ON the screen (layer trên cùng) ──
   if(p.nSrc>1 && subs.length>1){
@@ -805,7 +814,7 @@ function rebuildToggles(n){
 const fmt={
   barrierSize:v=>v+'px', barrierY:v=>v+'%', barrierX:v=>v+'%',
   intensity:v=>v+'%', rays:v=>v,
-  srcSize:v=>+v===0?'điểm':v+'px',
+  srcSize:v=>+v===0?T('point'):v+'px',
   numSources:v=>v,
   srcY:v=>v+'%', srcX:v=>v+'%',
   screenX:v=>v+'%',
@@ -886,37 +895,28 @@ canvas.addEventListener('touchmove',e=>{
 },{passive:false});
 canvas.addEventListener('touchend',()=>dragging=false);
 
-
-// ── Số liệu trên màn ──
-function updateStats(p, subs, prof, bCX){
-  const $=id=>document.getElementById(id);
-  $('dType').textContent = p.nSrc>1 ? subs.length+' nguồn điểm' : (p.sSize>0 ? 'Nguồn rộng ('+p.sSize+' px)' : 'Nguồn điểm');
-  let u=0, pen=0;
-  for(let y=0;y<H;y++){ const v=prof[y]; if(v<.02)u++; else if(v<.98)pen++; }
-  const on=p.showBarrier;
-  $('dUmbra').textContent = on ? u+' px' : '–';
-  $('dPen').textContent   = on ? pen+' px' : '–';
-  $('dAll').textContent   = on ? (u+pen)+' px' : '–';
-  $('dSO').textContent    = on ? Math.round(bCX-srcCenter.x)+' px' : '–';
-  $('dOM').textContent    = on ? Math.round(SCREEN_X-bCX)+' px' : '–';
+let predPick=-1;
+function showPred(){
+  if(predPick<0)return;
+  const a=document.getElementById('predAns');a.hidden=false;
+  a.textContent=(predPick===1?T('predOk'):T('predNo'))+T('predAns');
 }
-
-// ── Dự đoán trước ──
+function applyLang(){
+  document.documentElement.lang=lang;document.title=T('docTitle');
+  document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=T(el.dataset.i18n));
+  document.querySelectorAll('[data-i18n-html]').forEach(el=>el.innerHTML=T(el.dataset.i18nHtml));
+  document.getElementById('langBtn').textContent=lang==='vi'?'EN':'VI';
+  const ss=document.getElementById('srcSize');document.getElementById('vSrcSize').textContent=fmt.srcSize(ss.value);
+  showPred();draw();
+}
+document.getElementById('langBtn').onclick=()=>{lang=lang==='vi'?'en':'vi';applyLang();};
 document.querySelectorAll('#pred .btn').forEach(b=>b.addEventListener('click',()=>{
-  const k=+b.dataset.k;
+  predPick=+b.dataset.k;
   document.querySelectorAll('#pred .btn').forEach(x=>x.classList.remove('right','wrong'));
-  b.classList.add(k===1?'right':'wrong');
-  const a=document.getElementById('predAns');
-  a.hidden=false;
-  a.textContent=(k===1?'Đúng. ':'Chưa đúng. ')+'Hãy kéo “Kích thước nguồn” lên để kiểm tra: mỗi điểm của nguồn rộng cho một bóng riêng, chỗ mọi bóng chồng lên nhau là bóng tối, chỗ chỉ bị che một phần nguồn là bóng nửa tối.';
+  b.classList.add(predPick===1?'right':'wrong');
+  showPred();
 }));
-
-// ── Che số liệu ──
-document.getElementById('gvBtn').onclick=()=>{
-  const on=!document.body.classList.contains('hideNums');
-  document.body.classList.toggle('hideNums',on);
-  document.getElementById('gvBtn').setAttribute('aria-pressed',on);
-};
+applyLang();
 
 // ── Init & resize ──
 for(let i=0;i<10;i++)sourceActive[i]=true;
