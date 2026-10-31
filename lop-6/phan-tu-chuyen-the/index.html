@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Phân tử và sự chuyển thể</title>
+<meta name="description" content="Mô phỏng KHTN 6: mô hình phân tử ba thể của chất; nóng chảy, đông đặc, bay hơi, sôi, ngưng tụ.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: lab bench — the simulation stage on the left, an instrument panel on the right, reference tables underneath */
+:root{
+  --bg:#edf0f3; --surface:#ffffff; --surface2:#f4f6f9; --ink:#16202b; --muted:#5a6776; --line:#d5dce4;
+  --accent:#1f4f8a; --accent-ink:#ffffff; --accent-soft:#e3ecf7;
+  --solid:#3657c2; --liquid:#0d8a7e; --liquid2:#7b4fc4; --gas:#c43d86;
+  --heat:#e0521c; --cold:#2f8fd3; --glass:#93a8bd;
+  --serA:#1f6fd1; --serB:#d9792b;
+  --f-display:"Be Vietnam Pro", system-ui, sans-serif;
+  --f-body:"Be Vietnam Pro", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-data:"IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e1319; --surface:#161d26; --surface2:#1c2530; --ink:#e5eaf0; --muted:#9aa8b6; --line:#2c3845;
+    --accent:#8db4ec; --accent-ink:#0e1319; --accent-soft:#1e2c3e;
+    --solid:#7a93f2; --liquid:#33c2b1; --liquid2:#ad8cf0; --gas:#ec74b9;
+    --heat:#ff7b45; --cold:#5db4ef; --glass:#6f8397;
+    --serA:#6fa8f5; --serB:#f0a35e; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e1319; --surface:#161d26; --surface2:#1c2530; --ink:#e5eaf0; --muted:#9aa8b6; --line:#2c3845;
+  --accent:#8db4ec; --accent-ink:#0e1319; --accent-soft:#1e2c3e;
+  --solid:#7a93f2; --liquid:#33c2b1; --liquid2:#ad8cf0; --gas:#ec74b9;
+  --heat:#ff7b45; --cold:#5db4ef; --glass:#6f8397;
+  --serA:#6fa8f5; --serB:#f0a35e; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0}
+img{max-width:100%}
+[hidden]:not([hidden=until-found i]){display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5}
+.wrap{max-width:1260px;margin:0 auto;padding-inline:16px;padding-block:18px 40px;display:flex;flex-direction:column;gap:16px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.2}
+h1{font-size:clamp(1.45rem,2.6vw,2.05rem);font-weight:600;letter-spacing:-.01em}
+h2{font-size:1.05rem;font-weight:600}
+h3{font-size:.95rem;font-weight:600}
+p{margin:0}
+.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px}
+.eyebrow{font-size:.74rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:600;margin-bottom:4px}
+.req{font-size:.9rem;color:var(--muted);max-width:110ch}
+.top-actions{display:flex;gap:8px;flex-wrap:wrap}
+button,select{font:inherit;color:inherit}
+.btn{min-height:40px;padding:0 14px;border:1px solid var(--line);background:var(--surface);border-radius:8px;cursor:pointer;font-weight:500;font-size:.9rem;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{border-color:var(--muted)}
+.btn[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--ink)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);min-width:92px;justify-content:center}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tab{appearance:none;background:none;border:0;border-bottom:3px solid transparent;padding:10px 14px 9px;font-family:var(--f-display);font-weight:500;font-size:1rem;color:var(--muted);cursor:pointer;white-space:nowrap;min-height:44px}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.panel{display:flex;flex-direction:column;gap:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.stage{display:grid;grid-template-columns:minmax(0,1fr) 318px;gap:16px;align-items:start}
+@media (max-width:920px){.stage{grid-template-columns:minmax(0,1fr)}}
+.cv-wrap{width:100%;min-width:0}
+canvas{display:block;touch-action:none}
+.transport{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;flex-wrap:wrap}
+.seg button{border:0;background:var(--surface);min-height:40px;padding:0 11px;cursor:pointer;font-size:.88rem;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.seg.full{display:flex}
+.seg.full button{flex:1}
+.spacer{flex:1}
+.assume{font-size:.8rem;color:var(--muted)}
+.label{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+.field{display:flex;flex-direction:column;gap:7px}
+.setrow{display:flex;gap:8px}
+.setrow input{flex:1;min-width:0;min-height:40px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font-family:var(--f-data);font-size:1rem;padding:0 10px}
+#presetSeg button{font-family:var(--f-data);font-size:.8rem;padding:0 4px}
+.heat-scale{display:flex;justify-content:space-between;font-size:.8rem;color:var(--muted)}
+.heat-scale output{font-family:var(--f-data);color:var(--ink);font-size:.85rem}
+input[type=range]{width:100%;accent-color:var(--accent);min-height:28px}
+#heat{appearance:none;-webkit-appearance:none;height:10px;border-radius:6px;background:linear-gradient(90deg,var(--cold),var(--line) 50%,var(--heat));min-height:10px;margin:9px 0}
+#heat::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:var(--surface);border:3px solid var(--ink);cursor:grab}
+#heat::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--surface);border:3px solid var(--ink);cursor:grab}
+.readout{display:flex;flex-direction:column;gap:10px;padding-top:12px;border-top:1px solid var(--line)}
+.temp-row{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.bigT{font-family:var(--f-data);font-size:2rem;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:.84rem;font-weight:600;background:var(--surface2);border:1px solid var(--line)}
+.chip i{width:9px;height:9px;border-radius:50%;background:var(--muted);display:inline-block}
+.kv{display:grid;grid-template-columns:1fr auto;gap:3px 12px;margin:0;font-size:.86rem}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0;font-family:var(--f-data);font-variant-numeric:tabular-nums;text-align:right}
+.bars{display:flex;flex-direction:column;gap:6px}
+.bar{display:grid;grid-template-columns:62px 1fr 46px;align-items:center;gap:8px;font-size:.82rem}
+.bar .track{height:10px;border-radius:5px;background:var(--surface2);border:1px solid var(--line);overflow:hidden}
+.bar .fill{height:100%;width:0%}
+.bar b{font-family:var(--f-data);font-weight:500;text-align:right;font-variant-numeric:tabular-nums}
+.explain{background:var(--surface2);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px;font-size:.88rem}
+.explain .simple{border-top:1px dashed var(--line);padding-top:8px;color:var(--ink)}
+.explain .simple strong{font-family:var(--f-display);font-weight:600;font-size:.8rem;color:var(--muted);display:block;margin-bottom:2px;text-transform:uppercase;letter-spacing:.06em}
+.lower{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:920px){.lower{grid-template-columns:minmax(0,1fr)}}
+.note{font-size:.8rem;color:var(--muted)}
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.86rem}
+th,td{text-align:left;padding:8px 9px;border-bottom:1px solid var(--line);vertical-align:top}
+thead th{font-family:var(--f-display);font-weight:600;font-size:.84rem;white-space:nowrap}
+tbody th{font-weight:500;color:var(--muted);font-size:.82rem;min-width:96px}
+.cmp td.on,.cmp th.on{background:var(--accent-soft)}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:baseline}
+.pqe{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+@media (max-width:820px){.pqe{grid-template-columns:minmax(0,1fr)}}
+.pqe h3{margin-bottom:4px}
+.pqe .step{display:flex;flex-direction:column;gap:6px;font-size:.9rem}
+.pqe .tag{font-family:var(--f-data);font-size:.72rem;color:var(--muted);letter-spacing:.06em}
+details{font-size:.88rem}
+details summary{cursor:pointer;font-weight:600;color:var(--accent);min-height:32px;display:flex;align-items:center}
+details p{margin-top:6px}
+.factors th,.factors td{padding:7px 5px;vertical-align:middle}
+.factors select{width:100%;min-height:38px;border:1px solid var(--line);border-radius:7px;background:var(--surface);padding:0 6px;font-size:.86rem}
+.factors output{font-family:var(--f-data);font-size:.82rem;display:block;text-align:center}
+.factors .cA{color:var(--serA)} .factors .cB{color:var(--serB)}
+.fair{font-size:.85rem;padding:10px 12px;border-radius:9px;background:var(--surface2);border-left:4px solid var(--muted)}
+.fair.ok{border-left-color:var(--liquid)}
+.fair.bad{border-left-color:var(--heat)}
+.num{font-family:var(--f-data);font-variant-numeric:tabular-nums}
+.legend{display:flex;gap:14px;font-size:.82rem;color:var(--muted);flex-wrap:wrap}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:16px;height:3px;border-radius:2px;display:inline-block}
+.secret{transition:opacity .2s}
+body.hide-num .secret{opacity:0;pointer-events:none}
+.hide-hint{display:none;font-size:.8rem;color:var(--muted)}
+body.hide-num .hide-hint{display:block}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <p class="eyebrow" data-i18n="eyebrow">KHTN 6 · Các thể của chất và sự chuyển thể</p>
+      <h1 data-i18n="title">Phân tử và sự chuyển thể</h1>
+    </div>
+    <div class="top-actions">
+      <button class="btn" id="hideBtn" aria-pressed="false" data-i18n="hideNum">Ẩn số liệu</button>
+      <button class="btn" id="langBtn" aria-label="Language">EN</button>
+    </div>
+  </header>
+
+  <p class="req" data-i18n="req"></p>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" id="tab-model" aria-selected="true" aria-controls="panel-model" data-tab="model" data-i18n="tabModel">Mô hình phân tử và chuyển thể</button>
+    <button class="tab" role="tab" id="tab-evap" aria-selected="false" aria-controls="panel-evap" data-tab="evap" data-i18n="tabEvap">Sôi và bay hơi</button>
+    <button class="tab" role="tab" id="tab-cond" aria-selected="false" aria-controls="panel-cond" data-tab="cond" data-i18n="tabCond">Sự ngưng tụ</button>
+  </nav>
+
+  <!-- ================= TAB 1 ================= -->
+  <section class="panel" id="panel-model" role="tabpanel" aria-labelledby="tab-model">
+    <div class="stage">
+      <div class="card">
+        <div class="cv-wrap" id="w1"><canvas id="c1" aria-label="Mô phỏng phân tử"></canvas></div>
+        <div class="transport">
+          <button class="btn primary" id="run1" data-i18n="pause">Tạm dừng</button>
+          <button class="btn" id="step1" data-i18n="step">Bước</button>
+          <button class="btn" id="reset1" data-i18n="reset">Đặt lại</button>
+          <div class="seg" id="spd1" role="group" aria-label="speed">
+            <button data-v="0.5" aria-pressed="false">×0,5</button><button data-v="1" aria-pressed="true">×1</button><button data-v="2" aria-pressed="false">×2</button><button data-v="4" aria-pressed="false">×4</button>
+          </div>
+          <span class="spacer"></span>
+          <button class="btn" id="trailBtn" aria-pressed="true" data-i18n="trail">Vết 1 phân tử</button>
+          <button class="btn" id="arrowBtn" aria-pressed="false" data-i18n="arrows">Mũi tên vận tốc</button>
+        </div>
+        <p class="assume" data-i18n="assume1"></p>
+      </div>
+
+      <aside class="card" aria-label="Bảng điều khiển">
+        <div class="field">
+          <span class="label" data-i18n="substance">Chất</span>
+          <div class="seg full" id="subSeg">
+            <button data-v="water" aria-pressed="true" data-i18n="sub_water">Nước</button>
+            <button data-v="naph" aria-pressed="false" data-i18n="sub_naph">Băng phiến</button>
+            <button data-v="ethanol" aria-pressed="false" data-i18n="sub_ethanol">Rượu etylic</button>
+          </div>
+        </div>
+        <div class="field">
+          <label class="label" for="heat" data-i18n="heatSrc">Nguồn nhiệt</label>
+          <input type="range" id="heat" min="-100" max="100" step="5" value="40">
+          <div class="heat-scale"><span data-i18n="cool">◂ Làm lạnh</span><output id="heatOut" for="heat">+40 %</output><span data-i18n="warm">Đun nóng ▸</span></div>
+          <button class="btn" id="heatOff" data-i18n="heatOff">Tắt nguồn nhiệt</button>
+        </div>
+        <div class="field">
+          <label class="label" for="setT" data-i18n="setTemp">Đặt nhiệt độ mẫu (°C)</label>
+          <div class="setrow"><input type="number" id="setT" min="-270" max="1000" step="1" value="-20"><button class="btn" id="setTBtn" data-i18n="setBtn">Đặt</button></div>
+          <div class="seg full" id="presetSeg">
+            <button data-v="-270">−270</button><button data-v="-100">−100</button><button data-v="25">25</button><button data-v="300">300</button><button data-v="1000">1000</button>
+          </div>
+          <p class="note" data-i18n="rangeNote"></p>
+        </div>
+        <div class="field">
+          <span class="label" data-i18n="jumpTo">Đưa nhanh mẫu về</span>
+          <div class="seg full" id="jumpSeg">
+            <button data-v="solid" aria-pressed="false" data-i18n="solid">Thể rắn</button>
+            <button data-v="liquid" aria-pressed="false" data-i18n="liquid">Thể lỏng</button>
+            <button data-v="gas" aria-pressed="false" data-i18n="gas">Thể khí</button>
+          </div>
+        </div>
+        <div class="readout">
+          <div class="temp-row">
+            <div><div class="label" data-i18n="temp">Nhiệt độ mẫu</div><div class="bigT secret" id="tVal">−20 °C</div></div>
+            <span class="chip" id="stateChip"><i></i><span>Thể rắn</span></span>
+          </div>
+          <p class="hide-hint" data-i18n="hiddenHint">Số liệu đang ẩn để học sinh dự đoán.</p>
+          <dl class="kv secret">
+            <dt data-i18n="tm">Nhiệt độ nóng chảy</dt><dd id="tmVal">0 °C</dd>
+            <dt data-i18n="tb">Nhiệt độ sôi (1 atm)</dt><dd id="tbVal">100 °C</dd>
+            <dt data-i18n="vrel">Tốc độ TB phân tử (so với ở 0 °C)</dt><dd id="vVal">×0,98</dd>
+            <dt data-i18n="exch">Bay hơi / ngưng tụ (10 s gần nhất)</dt><dd id="exVal">0 / 0</dd>
+          </dl>
+          <div class="bars" aria-label="Số phân tử ở mỗi thể">
+            <div class="label" data-i18n="countHead">Số phân tử trong khung (72)</div>
+            <div class="bar"><span data-i18n="solidS">Rắn</span><div class="track"><div class="fill" id="bS" style="background:var(--solid)"></div></div><b id="nS">72</b></div>
+            <div class="bar"><span data-i18n="liquidS">Lỏng</span><div class="track"><div class="fill" id="bL" style="background:var(--liquid)"></div></div><b id="nL">0</b></div>
+            <div class="bar"><span data-i18n="gasS">Khí</span><div class="track"><div class="fill" id="bG" style="background:var(--gas)"></div></div><b id="nG">0</b></div>
+          </div>
+        </div>
+        <div class="explain">
+          <h3 data-i18n="explainHead">Điều gì đang xảy ra?</h3>
+          <p id="exSci"></p>
+          <p class="simple"><strong data-i18n="simpleHead">Nói cho dễ hiểu</strong><span id="exSimple"></span></p>
+        </div>
+      </aside>
+    </div>
+
+    <div class="lower">
+      <div class="card">
+        <h2 data-i18n="graphTitle">Đồ thị nhiệt độ theo thời gian</h2>
+        <div class="cv-wrap" id="wg1"><canvas id="g1" aria-label="Đồ thị nhiệt độ"></canvas></div>
+        <div class="legend">
+          <span><i style="background:var(--solid)"></i><span data-i18n="solidS">Rắn</span></span>
+          <span><i style="background:var(--liquid)"></i><span data-i18n="liquidS">Lỏng</span></span>
+          <span><i style="background:var(--gas)"></i><span data-i18n="gasS">Khí</span></span>
+          <span><i style="background:var(--ink)"></i><span data-i18n="transS">Đang chuyển thể</span></span>
+        </div>
+        <p class="note" data-i18n="graphNote"></p>
+      </div>
+      <div class="card">
+        <h2 data-i18n="statesTitle">So sánh ba thể</h2>
+        <div class="tablewrap">
+          <table class="cmp" id="statesTable">
+            <thead><tr><th></th>
+              <th data-col="0"><span class="dot" style="background:var(--solid)"></span><span data-i18n="solid">Thể rắn</span></th>
+              <th data-col="1"><span class="dot" style="background:var(--liquid)"></span><span data-i18n="liquid">Thể lỏng</span></th>
+              <th data-col="2"><span class="dot" style="background:var(--gas)"></span><span data-i18n="gas">Thể khí</span></th></tr></thead>
+            <tbody id="statesBody"></tbody>
+          </table>
+        </div>
+        <p class="note" data-i18n="sizeNote"></p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 data-i18n="pqeTitle">Dự đoán · Quan sát · Giải thích</h2>
+      <div class="pqe">
+        <div class="step"><span class="tag" data-i18n="pqe1tag">1 · DỰ ĐOÁN</span><p data-i18n="p1"></p></div>
+        <div class="step"><span class="tag" data-i18n="pqe2tag">2 · QUAN SÁT</span><p data-i18n="o1"></p></div>
+        <div class="step"><span class="tag" data-i18n="pqe3tag">3 · GIẢI THÍCH</span><p data-i18n="e1q"></p>
+          <details><summary data-i18n="hint">Xem gợi ý giải thích</summary><p data-i18n="e1a"></p></details></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= TAB 2 ================= -->
+  <section class="panel" id="panel-evap" role="tabpanel" aria-labelledby="tab-evap" hidden>
+    <div class="stage">
+      <div class="card">
+        <div class="cv-wrap" id="w2"><canvas id="c2" aria-label="Mô phỏng bay hơi"></canvas></div>
+        <div class="transport">
+          <button class="btn primary" id="run2" data-i18n="pause">Tạm dừng</button>
+          <button class="btn" id="reset2" data-i18n="refill">Đổ đầy lại</button>
+          <div class="seg" id="spd2" role="group" aria-label="speed">
+            <button data-v="0.5" aria-pressed="false">×0,5</button><button data-v="1" aria-pressed="true">×1</button><button data-v="2" aria-pressed="false">×2</button><button data-v="4" aria-pressed="false">×4</button>
+          </div>
+        </div>
+        <p class="assume" data-i18n="assume2"></p>
+      </div>
+
+      <aside class="card" aria-label="Các yếu tố">
+        <h3 data-i18n="factorsHead">Thay đổi các yếu tố của mỗi cốc</h3>
+        <div class="tablewrap">
+          <table class="factors">
+            <thead><tr><th data-i18n="factor">Yếu tố</th><th class="cA" data-i18n="cupA">Cốc A</th><th class="cB" data-i18n="cupB">Cốc B</th></tr></thead>
+            <tbody>
+              <tr><th data-i18n="fT">Nhiệt độ</th>
+                <td><input type="range" id="tA" min="10" max="100" step="1" value="50" aria-label="T A"><output id="tAo">50 °C</output></td>
+                <td><input type="range" id="tB" min="10" max="100" step="1" value="50" aria-label="T B"><output id="tBo">50 °C</output></td></tr>
+              <tr><th data-i18n="fWind">Gió</th>
+                <td><select id="wA"><option value="0" data-i18n="w0">Lặng gió</option><option value="1" data-i18n="w1">Gió nhẹ</option><option value="2" data-i18n="w2">Gió mạnh</option></select></td>
+                <td><select id="wB"><option value="0" data-i18n="w0">Lặng gió</option><option value="1" data-i18n="w1">Gió nhẹ</option><option value="2" data-i18n="w2">Gió mạnh</option></select></td></tr>
+              <tr><th data-i18n="fArea">Diện tích mặt thoáng</th>
+                <td><select id="aA"><option value="narrow" data-i18n="narrow">Hẹp (cốc)</option><option value="wide" data-i18n="wide">Rộng (đĩa)</option></select></td>
+                <td><select id="aB"><option value="narrow" data-i18n="narrow">Hẹp (cốc)</option><option value="wide" data-i18n="wide">Rộng (đĩa)</option></select></td></tr>
+              <tr><th data-i18n="fLiq">Chất lỏng</th>
+                <td><select id="lA"><option value="water" data-i18n="sub_water">Nước</option><option value="ethanol" data-i18n="sub_ethanol">Rượu etylic</option></select></td>
+                <td><select id="lB"><option value="water" data-i18n="sub_water">Nước</option><option value="ethanol" data-i18n="sub_ethanol">Rượu etylic</option></select></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="fair" id="fair"></p>
+        <div class="tablewrap secret">
+          <table class="factors">
+            <thead><tr><th data-i18n="result">Kết quả</th><th class="cA" data-i18n="cupA">Cốc A</th><th class="cB" data-i18n="cupB">Cốc B</th></tr></thead>
+            <tbody>
+              <tr><th data-i18n="left">Chất lỏng còn lại</th><td class="num" id="rA1">100 %</td><td class="num" id="rB1">100 %</td></tr>
+              <tr><th data-i18n="net">Phân tử đã bay hơi (thực)</th><td class="num" id="rA2">0</td><td class="num" id="rB2">0</td></tr>
+              <tr><th data-i18n="outBack">Thoát ra / quay lại</th><td class="num" id="rA3">0 / 0</td><td class="num" id="rB3">0 / 0</td></tr>
+              <tr><th data-i18n="status">Hiện tượng</th><td id="rA4"></td><td id="rB4"></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="hide-hint" data-i18n="hiddenHint">Số liệu đang ẩn để học sinh dự đoán.</p>
+      </aside>
+    </div>
+
+    <div class="lower">
+      <div class="card secret">
+        <h2 data-i18n="graph2Title">Lượng chất lỏng còn lại theo thời gian</h2>
+        <div class="cv-wrap" id="wg2"><canvas id="g2" aria-label="Đồ thị lượng chất lỏng"></canvas></div>
+        <div class="legend"><span><i style="background:var(--serA)"></i><span data-i18n="cupA">Cốc A</span></span><span><i style="background:var(--serB)"></i><span data-i18n="cupB">Cốc B</span></span></div>
+      </div>
+      <div class="card">
+        <h2 data-i18n="cmp2Title">Bay hơi và sôi khác nhau thế nào?</h2>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th></th><th data-i18n="evap">Sự bay hơi</th><th data-i18n="boil">Sự sôi</th></tr></thead>
+            <tbody id="evapBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 data-i18n="pqeTitle">Dự đoán · Quan sát · Giải thích</h2>
+      <div class="pqe">
+        <div class="step"><span class="tag" data-i18n="pqe1tag">1 · DỰ ĐOÁN</span><p data-i18n="p2"></p></div>
+        <div class="step"><span class="tag" data-i18n="pqe2tag">2 · QUAN SÁT</span><p data-i18n="o2"></p></div>
+        <div class="step"><span class="tag" data-i18n="pqe3tag">3 · GIẢI THÍCH</span><p data-i18n="e2q"></p>
+          <details><summary data-i18n="hint">Xem gợi ý giải thích</summary><p data-i18n="e2a"></p></details></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= TAB 3 ================= -->
+  <section class="panel" id="panel-cond" role="tabpanel" aria-labelledby="tab-cond" hidden>
+    <div class="stage">
+      <div class="card">
+        <div class="cv-wrap" id="w3"><canvas id="c3" aria-label="Mô phỏng ngưng tụ"></canvas></div>
+        <div class="transport">
+          <button class="btn primary" id="run3" data-i18n="pause">Tạm dừng</button>
+          <button class="btn" id="reset3" data-i18n="reset">Đặt lại</button>
+          <div class="seg" id="spd3" role="group" aria-label="speed"><button data-v="0.5" aria-pressed="false">×0,5</button><button data-v="1" aria-pressed="true">×1</button><button data-v="2" aria-pressed="false">×2</button><button data-v="4" aria-pressed="false">×4</button></div>
+        </div>
+        <p class="assume" data-i18n="assume3"></p>
+      </div>
+      <aside class="card" aria-label="Điều kiện">
+        <h3 data-i18n="condHead">Thay đổi điều kiện của mỗi bộ thí nghiệm</h3>
+        <div class="tablewrap">
+          <table class="factors">
+            <thead><tr><th data-i18n="factor">Yếu tố</th><th class="cA" data-i18n="setA">Bộ A</th><th class="cB" data-i18n="setB">Bộ B</th></tr></thead>
+            <tbody>
+              <tr><th data-i18n="fTp">Nhiệt độ tấm kính</th>
+                <td><input type="range" id="tpA" min="-10" max="90" step="1" value="5" aria-label="Tp A"><output id="tpAo">5 °C</output></td>
+                <td><input type="range" id="tpB" min="-10" max="90" step="1" value="50" aria-label="Tp B"><output id="tpBo">50 °C</output></td></tr>
+              <tr><th data-i18n="fTw">Nhiệt độ nước (lượng hơi bốc lên)</th>
+                <td><input type="range" id="twA" min="30" max="95" step="1" value="80" aria-label="Tw A"><output id="twAo">80 °C</output></td>
+                <td><input type="range" id="twB" min="30" max="95" step="1" value="80" aria-label="Tw B"><output id="twBo">80 °C</output></td></tr>
+              <tr><th data-i18n="fPA">Diện tích tấm kính</th>
+                <td><select id="paA"><option value="narrow" data-i18n="pSmall">Nhỏ</option><option value="wide" data-i18n="pLarge">Lớn</option></select></td>
+                <td><select id="paB"><option value="narrow" data-i18n="pSmall">Nhỏ</option><option value="wide" data-i18n="pLarge">Lớn</option></select></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="fair" id="fair3"></p>
+        <div class="tablewrap secret">
+          <table class="factors">
+            <thead><tr><th data-i18n="result">Kết quả</th><th class="cA" data-i18n="setA">Bộ A</th><th class="cB" data-i18n="setB">Bộ B</th></tr></thead>
+            <tbody>
+              <tr><th data-i18n="rateC">Tốc độ ngưng tụ (phân tử/s)</th><td class="num" id="cA1">0</td><td class="num" id="cB1">0</td></tr>
+              <tr><th data-i18n="netC">Đã ngưng tụ (thực)</th><td class="num" id="cA2">0</td><td class="num" id="cB2">0</td></tr>
+              <tr><th data-i18n="inOut">Bám vào kính / bay hơi lại</th><td class="num" id="cA3">0 / 0</td><td class="num" id="cB3">0 / 0</td></tr>
+              <tr><th data-i18n="drips">Giọt nước đã rơi</th><td class="num" id="cA4">0</td><td class="num" id="cB4">0</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="hide-hint" data-i18n="hiddenHint">Số liệu đang ẩn để học sinh dự đoán.</p>
+      </aside>
+    </div>
+
+    <div class="lower">
+      <div class="card secret">
+        <h2 data-i18n="graph3Title">Số phân tử đã ngưng tụ theo thời gian</h2>
+        <div class="cv-wrap" id="wg3"><canvas id="g3" aria-label="Đồ thị ngưng tụ"></canvas></div>
+        <div class="legend"><span><i style="background:var(--serA)"></i><span data-i18n="setA">Bộ A</span></span><span><i style="background:var(--serB)"></i><span data-i18n="setB">Bộ B</span></span></div>
+        <p class="note" data-i18n="graph3Note"></p>
+      </div>
+      <div class="card">
+        <h2 data-i18n="ex3Head">Vì sao tấm kính lạnh đọng nhiều nước?</h2>
+        <div class="explain">
+          <p data-i18n="ex3"></p>
+          <p class="simple"><strong data-i18n="simpleHead">Nói cho dễ hiểu</strong><span data-i18n="si3"></span></p>
+        </div>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th data-i18n="factor">Yếu tố</th><th data-i18n="fasterWhen">Ngưng tụ nhanh hơn khi</th><th data-i18n="why">Vì sao</th></tr></thead>
+            <tbody id="condBody"></tbody>
+          </table>
+        </div>
+        <p class="note" data-i18n="condEx"></p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 data-i18n="pqeTitle">Dự đoán · Quan sát · Giải thích</h2>
+      <div class="pqe">
+        <div class="step"><span class="tag" data-i18n="pqe1tag">1 · DỰ ĐOÁN</span><p data-i18n="p3"></p></div>
+        <div class="step"><span class="tag" data-i18n="pqe2tag">2 · QUAN SÁT</span><p data-i18n="o3"></p></div>
+        <div class="step"><span class="tag" data-i18n="pqe3tag">3 · GIẢI THÍCH</span><p data-i18n="e3q"></p>
+          <details><summary data-i18n="hint">Xem gợi ý giải thích</summary><p data-i18n="e3a"></p></details></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+/* ============================== I18N ============================== */
+const I18N = {
+vi:{
+ req:'Yêu cầu cần đạt (KHTN 6): Trình bày được một số đặc điểm cơ bản ba thể (rắn, lỏng, khí); nêu được khái niệm và trình bày được quá trình diễn ra sự nóng chảy, đông đặc, bay hơi, ngưng tụ, sôi. Liên hệ KHTN 8: khi vật nóng lên, các phân tử chuyển động nhanh hơn.',
+ eyebrow:'KHTN 6 · Các thể của chất và sự chuyển thể', title:'Phân tử và sự chuyển thể',
+ hideNum:'Ẩn số liệu', tabModel:'Mô hình phân tử và chuyển thể', tabEvap:'Sôi và bay hơi',
+ run:'Chạy', pause:'Tạm dừng', step:'Bước', reset:'Đặt lại', refill:'Đổ đầy lại',
+ trail:'Vết 1 phân tử', arrows:'Mũi tên vận tốc',
+ assume1:'Giả thiết mô phỏng: mô hình 2D với rất ít phân tử được phóng to; áp suất trong bình luôn là 1 atm (nắp có van xả); nhiệt dung và nhiệt chuyển thể lấy gần đúng cho 1 kg chất thật và coi như không đổi (thực tế nhiệt dung giảm mạnh ở nhiệt độ rất thấp; ở nhiệt độ rất cao phân tử có thể bị phân huỷ); phân tử bay hơi, ngưng tụ, đông đặc và nóng chảy một cách ngẫu nhiên, còn số phân tử ở mỗi thể được giữ trung bình phù hợp với nhiệt độ; thời gian được thu nhỏ. Mô hình không thể hiện tính chất riêng của nước (nước đá nhẹ hơn nước lỏng).',
+ substance:'Chất', sub_water:'Nước', sub_naph:'Băng phiến', sub_ethanol:'Rượu etylic',
+ heatSrc:'Nguồn nhiệt', cool:'◂ Làm lạnh', warm:'Đun nóng ▸', heatOff:'Tắt nguồn nhiệt',
+ jumpTo:'Đưa nhanh mẫu về', solid:'Thể rắn', liquid:'Thể lỏng', gas:'Thể khí',
+ solidS:'Rắn', liquidS:'Lỏng', gasS:'Khí', transS:'Đang chuyển thể',
+ temp:'Nhiệt độ mẫu', tm:'Nhiệt độ nóng chảy', tb:'Nhiệt độ sôi (1 atm)', vrel:'Tốc độ TB phân tử (so với ở 0 °C)',
+ countHead:'Số phân tử trong khung (72)', explainHead:'Điều gì đang xảy ra?', simpleHead:'Nói cho dễ hiểu',
+ hiddenHint:'Số liệu đang ẩn để học sinh dự đoán.',
+ graphTitle:'Đồ thị nhiệt độ theo thời gian',
+ graphNote:'Hai đoạn nằm ngang là lúc chuyển thể: nhiệt vẫn được cung cấp nhưng nhiệt độ không đổi. Đoạn sôi dài hơn đoạn nóng chảy vì cần nhiều nhiệt hơn để tách hẳn các phân tử ra xa nhau.',
+ statesTitle:'So sánh ba thể',
+ sizeNote:'Lưu ý: khi chuyển thể, bản thân phân tử không to ra hay nhỏ đi. Chỉ khoảng cách, cách sắp xếp và cách chuyển động của chúng thay đổi.',
+ r_arr:'Cách sắp xếp', r_dist:'Khoảng cách', r_move:'Chuyển động', r_force:'Lực liên kết', r_shape:'Hình dạng', r_vol:'Thể tích', r_comp:'Nén được không?',
+ s_arr:'Trật tự, theo hàng lớp xác định', l_arr:'Không trật tự, xếp lộn xộn', g_arr:'Hoàn toàn hỗn loạn',
+ s_dist:'Rất gần nhau', l_dist:'Gần nhau', g_dist:'Rất xa nhau',
+ s_move:'Dao động quanh một vị trí cố định', l_move:'Chuyển động hỗn loạn, trượt lên nhau', g_move:'Chuyển động hỗn loạn, rất nhanh, theo mọi hướng',
+ s_force:'Mạnh', l_force:'Yếu hơn', g_force:'Rất yếu',
+ s_shape:'Xác định', l_shape:'Theo hình bình chứa', g_shape:'Theo hình bình chứa',
+ s_vol:'Xác định', l_vol:'Xác định', g_vol:'Chiếm toàn bộ bình chứa',
+ s_comp:'Rất khó nén', l_comp:'Rất khó nén', g_comp:'Dễ nén',
+ st_solid:'Thể rắn', st_melt:'Đang nóng chảy', st_freeze:'Đang đông đặc', st_meltEq:'Rắn và lỏng cùng tồn tại',
+ st_liquid:'Thể lỏng', st_boil:'Đang sôi', st_cond:'Đang ngưng tụ', st_boilEq:'Lỏng và hơi cùng tồn tại', st_gas:'Thể khí (hơi)',
+ ex_solid:'Các phân tử xếp có trật tự, rất gần nhau, chỉ dao động quanh vị trí cân bằng. Lực liên kết mạnh giữ chúng tại chỗ, nên chất rắn có hình dạng và thể tích xác định. Nhiệt độ càng cao, chúng dao động càng mạnh.',
+ ex_melt:'Đang nóng chảy ở {T}. Nhiệt nhận vào được dùng để phá vỡ liên kết, giúp các phân tử rời khỏi vị trí cố định, chứ không làm chúng chuyển động nhanh hơn. Vì vậy nhiệt độ giữ nguyên cho tới khi chất rắn nóng chảy hết.',
+ ex_freeze:'Đang đông đặc ở {T}. Các phân tử toả nhiệt, chậm lại và bị lực hút giữ vào vị trí cố định. Tinh thể bắt đầu từ các phân tử ở đáy bình lạnh hoặc cạnh những tinh thể đã có, rồi lớn dần. Các phân tử gần nhau kết lại ngay tại chỗ, nên khối chất rắn giữ hình dạng của khối chất lỏng trước đó. Nhiệt độ giữ nguyên trong suốt quá trình.',
+ ex_meltEq:'Không cấp và không lấy nhiệt: phần rắn và phần lỏng cùng tồn tại ở {T}. Hãy đun nóng hoặc làm lạnh để quá trình tiếp tục.',
+ ex_liquid:'Các phân tử vẫn ở gần nhau nhưng không còn vị trí cố định. Chúng trượt lên nhau nên chất lỏng chảy được, có thể tích xác định và có hình dạng của bình chứa. Ở mặt thoáng, thỉnh thoảng một phân tử bất kì có đủ năng lượng để thoát ra: đó là sự bay hơi, xảy ra ở mọi nhiệt độ. Phân tử hơi chuyển động hỗn loạn; khi va trở lại mặt thoáng, nó bị giữ lại và ngưng tụ thành chất lỏng. Nhiệt độ càng cao, số lần bay hơi càng nhiều.',
+ ex_boil:'Đang sôi ở {T}. Chất lỏng hoá hơi cả ở mặt thoáng và trong lòng chất lỏng (các bọt hơi nổi lên). Nhiệt nhận vào dùng để tách các phân tử ra xa nhau, nên nhiệt độ không đổi. Một số phân tử hơi vẫn va vào mặt thoáng và ngưng tụ lại, nhưng số phân tử hoá hơi nhiều hơn.',
+ ex_cond:'Đang ngưng tụ ở {T}. Phân tử hơi toả nhiệt, chậm lại và bị lực hút kéo lại gần nhau, trở thành chất lỏng. Nhiệt độ không đổi trong suốt quá trình.',
+ ex_boilEq:'Không cấp và không lấy nhiệt: phần lỏng và phần hơi cùng tồn tại ở {T}. Bay hơi và ngưng tụ vẫn diễn ra liên tục, số phân tử thoát ra bằng số phân tử quay lại (cân bằng động), nên lượng hơi trông như không đổi.',
+ ex_gas:'Các phân tử ở rất xa nhau, chuyển động hỗn loạn và rất nhanh theo mọi hướng, va chạm vào nhau và vào thành bình. Vì vậy chất khí không có hình dạng và thể tích riêng: nó chiếm toàn bộ bình chứa.',
+ ex_limit:' (Đã tới nhiệt độ giới hạn của mô phỏng.)',
+ si_solid:'Giống học sinh đứng xếp hàng chào cờ: mỗi bạn một chỗ, chỉ đung đưa tại chỗ.',
+ si_melt:'Nhiệt giống như "vé ra khỏi hàng": các bạn dùng nó để rời chỗ đứng, chưa dùng để chạy nhanh hơn.',
+ si_freeze:'Các bạn chạy chậm lại và nắm tay ngay những bạn đang đứng cạnh mình, ở đâu đứng đấy, nên cả nhóm giữ nguyên hình dạng lúc đang đứng.',
+ si_meltEq:'Một nửa lớp vẫn đứng trong hàng, một nửa đã rời hàng, và không ai thay đổi nữa.',
+ si_liquid:'Giống sân trường đông học sinh giờ ra chơi: vẫn đứng sát nhau nhưng len lỏi, đổi chỗ cho nhau. Thỉnh thoảng một bạn bất kì ở rìa sân chạy ra ngoài cổng; chạy một lúc, có bạn lại quay về sân.',
+ si_boil:'Cả sân trường ùa ra cổng cùng lúc, kể cả các bạn ở giữa sân, không chỉ các bạn đứng gần cổng.',
+ si_cond:'Các bạn chạy xa mệt dần, đi chậm lại và tụm lại gần nhau.',
+ si_boilEq:'Một phần ở trong sân, một phần ở ngoài cổng. Vẫn có bạn ra, có bạn vào, nhưng số ra bằng số vào nên nhìn tổng thể không đổi.',
+ si_gas:'Giống học sinh tan trường chạy tản ra khắp nơi: ở xa nhau, chạy rất nhanh, va vào nhau rồi đổi hướng.',
+ setTemp:'Đặt nhiệt độ mẫu (°C)', setBtn:'Đặt', rangeNote:'Từ −270 °C (gần độ không tuyệt đối −273,15 °C) đến 1000 °C. Khi đặt nhiệt độ, nguồn nhiệt tự tắt để giữ mẫu ở nhiệt độ đó.', exch:'Bay hơi / ngưng tụ (10 s gần nhất)',
+ st_solidCold:'Thể rắn (rất lạnh)', st_liquidHot:'Thể lỏng (sắp sôi)', st_gasHot:'Thể khí (rất nóng)',
+ ex_solidCold:'Ở {T}, gần độ không tuyệt đối (−273,15 °C), các phân tử dao động rất yếu, gần như đứng yên. Không thể làm lạnh một vật xuống dưới nhiệt độ này.',
+ ex_liquidHot:'Gần nhiệt độ sôi ({T}), các phân tử chuyển động rất nhanh. Không chỉ ở mặt thoáng, một số phân tử trong lòng chất lỏng cũng đủ năng lượng để hoá hơi, tạo thành bọt hơi và nổi dần lên. Phân tử hơi vẫn liên tục va vào mặt thoáng và ngưng tụ trở lại. (Trong thực tế, trước khi sôi nhiều bọt hơi nhỏ ngưng tụ lại khi nổi lên lớp nước phía trên còn nguội hơn, gây ra tiếng nước "reo".)',
+ ex_gasHot:'Ở {T}, các phân tử khí chuyển động cực nhanh, va chạm rất mạnh vào nhau và vào thành bình.',
+ si_solidCold:'Cả hàng đứng im phăng phắc, gần như không nhúc nhích.',
+ si_liquidHot:'Sân trường náo nhiệt: không chỉ các bạn ở rìa, cả các bạn ở giữa sân cũng bắt đầu chen ra cổng.',
+ si_gasHot:'Học sinh chạy hết tốc lực, va vào nhau rất mạnh rồi bật ra.',
+ pqeTitle:'Dự đoán · Quan sát · Giải thích', pqe1tag:'1 · DỰ ĐOÁN', pqe2tag:'2 · QUAN SÁT', pqe3tag:'3 · GIẢI THÍCH', hint:'Xem gợi ý giải thích',
+ p1:'Đun nóng đều một cục nước đá từ −20 °C. Nhiệt độ sẽ tăng liên tục, hay có lúc đứng yên? Nếu đứng yên thì ở những nhiệt độ nào?',
+ o1:'Bật "Ẩn số liệu" để cả lớp dự đoán trước, rồi tắt đi và quan sát đồ thị. Ghi lại nhiệt độ khi nước đá đang tan và khi nước đang sôi. Theo dõi phân tử có vết: nó chuyển động thế nào ở mỗi thể?',
+ e1q:'Vì sao trong lúc nóng chảy và lúc sôi, ta vẫn đun mà nhiệt độ không tăng?',
+ e1a:'Trong lúc chuyển thể, nhiệt nhận vào được dùng để thay đổi cách sắp xếp và khoảng cách giữa các phân tử (thắng lực liên kết giữa chúng), không làm tốc độ chuyển động trung bình của phân tử tăng lên. Nhiệt độ phản ánh tốc độ chuyển động đó, nên nhiệt độ giữ nguyên cho đến khi chuyển thể xong.',
+ cupA:'Cốc A', cupB:'Cốc B', factor:'Yếu tố', factorsHead:'Thay đổi các yếu tố của mỗi cốc',
+ fT:'Nhiệt độ', fWind:'Gió', fArea:'Diện tích mặt thoáng', fLiq:'Chất lỏng',
+ w0:'Lặng gió', w1:'Gió nhẹ', w2:'Gió mạnh', narrow:'Hẹp (cốc)', wide:'Rộng (đĩa)',
+ fn_T:'nhiệt độ', fn_wind:'gió', fn_area:'diện tích mặt thoáng', fn_liq:'loại chất lỏng',
+ fair0:'Hai cốc giống hệt nhau. Kết quả gần như bằng nhau, chỉ lệch chút ít do chuyển động ngẫu nhiên của phân tử.',
+ fair1:'Thí nghiệm công bằng: hai cốc chỉ khác nhau về {f}. Mọi khác biệt về tốc độ bay hơi là do {f}.',
+ fairN:'Hai cốc khác nhau ở {n} yếu tố ({f}). Chưa thể kết luận yếu tố nào làm bay hơi nhanh hơn. Hãy chỉ thay đổi một yếu tố.',
+ result:'Kết quả', left:'Chất lỏng còn lại', net:'Phân tử đã bay hơi (thực)', outBack:'Thoát ra / quay lại', status:'Hiện tượng',
+ isBoil:'Đang sôi', isEvap:'Bay hơi', isEmpty:'Đã cạn', boilT:'nhiệt độ sôi',
+ graph2Title:'Lượng chất lỏng còn lại theo thời gian',
+ assume2:'Giả thiết mô phỏng: áp suất khí quyển 1 atm; nhiệt độ mỗi cốc được giữ không đổi; hai cốc chứa cùng lượng chất lỏng; số phân tử thoát ra tỉ lệ với diện tích mặt thoáng và áp suất hơi bão hoà của chất lỏng ở nhiệt độ đó; thời gian được thu nhỏ.',
+ cmp2Title:'Bay hơi và sôi khác nhau thế nào?', evap:'Sự bay hơi', boil:'Sự sôi',
+ c_where:'Xảy ra ở đâu', c_temp:'Nhiệt độ', c_sign:'Dấu hiệu', c_speed:'Tốc độ', c_dep:'Phụ thuộc vào', c_ex:'Ví dụ đời sống',
+ e_where:'Chỉ ở mặt thoáng chất lỏng', b_where:'Cả ở mặt thoáng và trong lòng chất lỏng',
+ e_temp:'Ở mọi nhiệt độ', b_temp:'Ở một nhiệt độ xác định (nhiệt độ sôi), không đổi trong khi sôi',
+ e_sign:'Khó thấy, chất lỏng cạn dần', b_sign:'Bọt hơi tạo ra trong lòng chất lỏng, nổi lên và vỡ ở mặt thoáng',
+ e_speed:'Chậm', b_speed:'Nhanh',
+ e_dep:'Nhiệt độ, gió, diện tích mặt thoáng, loại chất lỏng', b_dep:'Loại chất lỏng và áp suất trên mặt thoáng',
+ e_ex:'Quần áo phơi khô dần, vũng nước cạn dần', b_ex:'Nồi nước sôi khi nấu ăn',
+ p2:'Cốc A hẹp, cốc B rộng; cùng lượng nước, cùng nhiệt độ, lặng gió. Cốc nào cạn nhanh hơn? Nếu thay bằng "cùng cốc, một cốc có gió" thì sao?',
+ o2:'Mỗi lần chỉ đổi một yếu tố (nhiệt độ, gió, diện tích mặt thoáng, loại chất lỏng). So sánh đường đồ thị của hai cốc. Sau đó kéo nhiệt độ một cốc tới nhiệt độ sôi: điều gì xuất hiện trong lòng chất lỏng?',
+ e2q:'Vì sao gió, nhiệt độ cao và mặt thoáng rộng làm chất lỏng bay hơi nhanh hơn? Sôi khác bay hơi ở đâu?',
+ e2a:'Chỉ những phân tử ở mặt thoáng có tốc độ đủ lớn mới thắng được lực hút của các phân tử xung quanh để thoát ra. Nhiệt độ cao: nhiều phân tử chuyển động nhanh hơn. Mặt thoáng rộng: nhiều phân tử ở mặt thoáng hơn. Gió: đưa các phân tử hơi vừa thoát ra đi xa, ít phân tử quay lại chất lỏng. Rượu bay hơi nhanh hơn nước vì lực hút giữa các phân tử rượu yếu hơn. Sôi là sự bay hơi đặc biệt: ở nhiệt độ sôi, hơi được tạo ra cả trong lòng chất lỏng thành các bọt hơi.',
+ cvZoom:'Phóng to hàng triệu lần (mô hình)', cvSealed:'bình kín', cvHeat:'Đun nóng', cvCool:'Làm lạnh', cvOff:'Tắt nguồn nhiệt',
+ cvSurface:'mặt thoáng', cvWind:'gió',
+ tabCond:'Sự ngưng tụ', setA:'Bộ A', setB:'Bộ B', condHead:'Thay đổi điều kiện của mỗi bộ thí nghiệm',
+ fTp:'Nhiệt độ tấm kính', fTw:'Nhiệt độ nước (lượng hơi bốc lên)', fPA:'Diện tích tấm kính', pSmall:'Nhỏ', pLarge:'Lớn',
+ fn_Tp:'nhiệt độ tấm kính', fn_Tw:'lượng hơi nước bốc lên (nhiệt độ nước)', fn_PA:'diện tích tấm kính',
+ fair0c:'Hai bộ giống hệt nhau. Kết quả gần như bằng nhau, chỉ lệch chút ít do chuyển động ngẫu nhiên của phân tử.',
+ fair1c:'Thí nghiệm công bằng: hai bộ chỉ khác nhau về {f}. Mọi khác biệt về tốc độ ngưng tụ là do {f}.',
+ fairNc:'Hai bộ khác nhau ở {n} yếu tố ({f}). Chưa thể kết luận yếu tố nào làm ngưng tụ nhanh hơn. Hãy chỉ thay đổi một yếu tố.',
+ rateC:'Tốc độ ngưng tụ (phân tử/s)', netC:'Đã ngưng tụ (thực)', inOut:'Bám vào kính / bay hơi lại', drips:'Phân tử rơi xuống theo giọt',
+ isCond:'Đang ngưng tụ', isNoCond:'Hầu như không đọng nước',
+ graph3Title:'Số phân tử đã ngưng tụ theo thời gian',
+ graph3Note:'Độ dốc của đường là tốc độ ngưng tụ: đường càng dốc, nước đọng trên kính càng nhanh.',
+ assume3:'Giả thiết mô phỏng: nước trong cốc được giữ ở nhiệt độ không đổi và luôn đầy; tấm kính được giữ ở nhiệt độ đã chọn (đặt đá lên trên khi kính dưới 5 °C); không khí lặng gió, hơi nóng bốc lên nhẹ; phân tử hơi chạm mặt dưới tấm kính thì bám lại, còn phân tử trong các giọt nước trên kính có thể bay hơi trở lại, nhanh hơn khi kính nóng hơn; thời gian được thu nhỏ.',
+ ex3Head:'Vì sao tấm kính lạnh đọng nhiều nước?',
+ ex3:'Ngưng tụ là quá trình ngược của bay hơi. Phân tử hơi va vào tấm kính lạnh, truyền bớt năng lượng cho kính, chuyển động chậm lại và bị lực hút của các phân tử nước khác giữ lại thành giọt. Cùng lúc đó, một số phân tử trong giọt lại đủ nhanh để bay hơi trở lại. Tốc độ ngưng tụ ta quan sát được là số phân tử bám vào trừ số phân tử bay hơi lại. Kính càng lạnh thì càng ít phân tử bay hơi lại; hơi càng nhiều hoặc kính càng rộng thì càng nhiều phân tử va vào kính mỗi giây.',
+ si3:'Giống học sinh chạy từ sân nắng vào phòng máy lạnh: ngoài sân thì chạy nhảy khắp nơi, vào phòng lạnh thì chậm lại và ngồi tụm vào nhau. Phòng càng lạnh, càng ít bạn muốn chạy ra ngoài lại. Sân càng đông người, cửa phòng càng rộng thì càng nhiều bạn vào phòng mỗi phút.',
+ fasterWhen:'Ngưng tụ nhanh hơn khi', why:'Vì sao',
+ k1f:'Nhiệt độ bề mặt (hoặc không khí)', k1w:'Thấp hơn', k1y:'Phân tử hơi mất bớt năng lượng nên dễ bị giữ lại; ít phân tử trong giọt nước bay hơi trở lại',
+ k2f:'Lượng hơi trong không khí', k2w:'Nhiều hơn', k2y:'Nhiều phân tử hơi va vào bề mặt mỗi giây',
+ k3f:'Diện tích bề mặt lạnh', k3w:'Lớn hơn', k3y:'Có nhiều chỗ để phân tử hơi va vào và bám lại',
+ condEx:'Ví dụ đời sống: giọt nước đọng bên ngoài cốc nước đá, hơi nước đọng trên nắp vung, sương đọng trên lá lúc sáng sớm, kính xe bị mờ khi trời lạnh.',
+ p3:'Hai cốc nước nóng 80 °C giống nhau. Bộ A đậy tấm kính có đá lạnh (5 °C), bộ B đậy tấm kính ấm (50 °C). Tấm kính nào đọng nước nhanh hơn? Nếu kính nóng bằng nước (80 °C) thì sao?',
+ o3:'Quan sát vòng sáng nhấp nháy mỗi khi một phân tử hơi bám vào kính, và các phân tử bay hơi lại từ giọt nước. So sánh tốc độ ngưng tụ và độ dốc đồ thị của hai bộ. Sau đó lần lượt đổi từng yếu tố: nhiệt độ kính, nhiệt độ nước, diện tích kính.',
+ e3q:'Vì sao kính càng lạnh thì nước đọng càng nhanh? Vì sao khi kính nóng bằng nước thì hầu như không đọng nước?',
+ e3a:'Phân tử hơi chạm kính lạnh thì truyền năng lượng cho kính, chậm lại và bị giữ lại thành giọt. Kính càng lạnh, các phân tử trong giọt chuyển động càng chậm nên rất ít phân tử bay hơi trở lại, nước đọng nhanh. Khi kính nóng bằng nước, phân tử trong giọt bay hơi trở lại nhanh gần bằng tốc độ chúng bám vào, nên giọt không lớn lên được.',
+ cvPlate:'tấm kính', cvIce:'đá', cvGlass:'Kính', cvWater:'Nước',
+},
+en:{
+ req:'Learning outcomes (Science 6): describe basic features of the three states (solid, liquid, gas); state and describe melting, freezing, evaporation, condensation and boiling. Link to Science 8: when an object is heated, its particles move faster.',
+ eyebrow:'Science 6 · States of matter and changes of state', title:'Molecules and changes of state',
+ hideNum:'Hide numbers', tabModel:'Particle model and changes of state', tabEvap:'Boiling and evaporation',
+ run:'Run', pause:'Pause', step:'Step', reset:'Reset', refill:'Refill',
+ trail:'Track 1 particle', arrows:'Velocity arrows',
+ assume1:'Model assumptions: 2D model with very few, magnified particles; pressure in the jar stays at 1 atm (the lid has a vent); heat capacities and latent heats are approximate values for 1 kg of the real substance, taken as constant (in reality heat capacity drops sharply at very low temperatures, and molecules may break down at very high temperatures); particles evaporate, condense, freeze and melt at random, while the average number in each state is kept consistent with the temperature; time is compressed. This general model does not show water\'s special behaviour (ice is less dense than liquid water).',
+ substance:'Substance', sub_water:'Water', sub_naph:'Naphthalene', sub_ethanol:'Ethanol',
+ heatSrc:'Heat source', cool:'◂ Cool', warm:'Heat ▸', heatOff:'Turn heat off',
+ jumpTo:'Jump sample to', solid:'Solid', liquid:'Liquid', gas:'Gas',
+ solidS:'Solid', liquidS:'Liquid', gasS:'Gas', transS:'Changing state',
+ temp:'Sample temperature', tm:'Melting point', tb:'Boiling point (1 atm)', vrel:'Mean particle speed (vs 0 °C)',
+ countHead:'Particles in view (72)', explainHead:'What is happening?', simpleHead:'In simple words',
+ hiddenHint:'Numbers are hidden so students can predict.',
+ graphTitle:'Temperature against time',
+ graphNote:'The two flat sections are changes of state: heat is still supplied but the temperature stays constant. The boiling section is longer than the melting one because it takes much more heat to pull the particles far apart.',
+ statesTitle:'Comparing the three states',
+ sizeNote:'Note: particles themselves do not grow or shrink when the state changes. Only their spacing, arrangement and motion change.',
+ r_arr:'Arrangement', r_dist:'Spacing', r_move:'Motion', r_force:'Forces between particles', r_shape:'Shape', r_vol:'Volume', r_comp:'Compressible?',
+ s_arr:'Regular, in fixed rows and layers', l_arr:'Irregular, jumbled', g_arr:'Completely random',
+ s_dist:'Very close', l_dist:'Close', g_dist:'Very far apart',
+ s_move:'Vibrate about fixed positions', l_move:'Move randomly, slide past each other', g_move:'Move randomly and very fast in all directions',
+ s_force:'Strong', l_force:'Weaker', g_force:'Very weak',
+ s_shape:'Fixed', l_shape:'Takes the container\'s shape', g_shape:'Takes the container\'s shape',
+ s_vol:'Fixed', l_vol:'Fixed', g_vol:'Fills the whole container',
+ s_comp:'Very hard', l_comp:'Very hard', g_comp:'Easy',
+ st_solid:'Solid', st_melt:'Melting', st_freeze:'Freezing', st_meltEq:'Solid and liquid together',
+ st_liquid:'Liquid', st_boil:'Boiling', st_cond:'Condensing', st_boilEq:'Liquid and vapour together', st_gas:'Gas (vapour)',
+ ex_solid:'The particles are packed in a regular pattern, very close together, and only vibrate about fixed positions. Strong forces hold them in place, so a solid has a fixed shape and volume. The hotter it is, the more strongly they vibrate.',
+ ex_melt:'Melting at {T}. The heat taken in is used to break the bonds so particles can leave their fixed positions, not to make them move faster. So the temperature stays the same until all the solid has melted.',
+ ex_freeze:'Freezing at {T}. The particles give out heat, slow down and are held in fixed positions by attractive forces. Crystals start from particles at the cold bottom of the jar or next to existing crystal, then grow. Neighbouring particles lock together where they are, so the solid keeps the shape the liquid had. The temperature stays constant throughout.',
+ ex_meltEq:'No heat in or out: solid and liquid exist together at {T}. Heat or cool the sample to continue.',
+ ex_liquid:'The particles are still close together but no longer in fixed positions. They slide past each other, so a liquid can flow, has a fixed volume and takes the shape of its container. Now and then a random particle at the surface has enough energy to escape: that is evaporation, and it happens at any temperature. The vapour particle moves randomly; when it hits the surface again it is held and condenses back into liquid. The higher the temperature, the more often particles evaporate.',
+ ex_boil:'Boiling at {T}. The liquid turns into vapour both at the surface and inside the liquid (rising vapour bubbles). The heat taken in is used to pull the particles far apart, so the temperature does not change. Some vapour particles still hit the surface and condense, but more particles evaporate.',
+ ex_cond:'Condensing at {T}. Vapour particles give out heat, slow down and are pulled close together again by attractive forces, forming a liquid. The temperature stays constant throughout.',
+ ex_boilEq:'No heat in or out: liquid and vapour exist together at {T}. Evaporation and condensation continue all the time, with as many particles escaping as returning (dynamic equilibrium), so the amount of vapour looks constant.',
+ ex_gas:'The particles are very far apart and move randomly and very fast in all directions, colliding with each other and the walls. So a gas has no shape or volume of its own: it fills the whole container.',
+ ex_limit:' (The simulation\'s temperature limit has been reached.)',
+ si_solid:'Like students standing in lines at assembly: everyone has a place and only sways on the spot.',
+ si_melt:'Heat is like a "ticket to leave the line": students use it to leave their places, not to run faster.',
+ si_freeze:'Students slow down and hold hands with whoever is standing right next to them, staying where they are, so the group keeps the shape it had.',
+ si_meltEq:'Half the class is still in line, half has left, and nothing is changing.',
+ si_liquid:'Like a crowded schoolyard at break time: still close together, but weaving around and swapping places. Now and then a random student at the edge runs out of the gate; after a while some come back into the yard.',
+ si_boil:'The whole schoolyard rushes out at once, including students in the middle, not just those near the gate.',
+ si_cond:'Students who ran far away get tired, slow down and gather close together again.',
+ si_boilEq:'Some students are in the yard, some outside the gate. Students still go out and come in, but as many leave as return, so overall nothing seems to change.',
+ si_gas:'Like students running off in every direction after school: far apart, very fast, bumping into each other and changing direction.',
+ setTemp:'Set sample temperature (°C)', setBtn:'Set', rangeNote:'From −270 °C (close to absolute zero, −273.15 °C) to 1000 °C. Setting a temperature turns the heat source off so the sample stays at that temperature.', exch:'Evaporated / condensed (last 10 s)',
+ st_solidCold:'Solid (very cold)', st_liquidHot:'Liquid (near boiling)', st_gasHot:'Gas (very hot)',
+ ex_solidCold:'At {T}, close to absolute zero (−273.15 °C), the particles vibrate very weakly and are almost still. Nothing can be cooled below this temperature.',
+ ex_liquidHot:'Near the boiling point ({T}) the particles move very fast. Not only at the surface: some particles inside the liquid also have enough energy to turn into vapour, forming bubbles that rise slowly. Vapour particles keep hitting the surface and condensing back. (In reality, before boiling many small bubbles condense again as they rise into the cooler water above, which makes the "singing" sound of a kettle.)',
+ ex_gasHot:'At {T} the gas particles move extremely fast and collide very hard with each other and the walls.',
+ si_solidCold:'The whole line stands perfectly still, hardly moving at all.',
+ si_liquidHot:'A lively schoolyard: not only students at the edge, but also those in the middle start pushing towards the gate.',
+ si_gasHot:'Students run flat out, crashing into each other and bouncing off.',
+ pqeTitle:'Predict · Observe · Explain', pqe1tag:'1 · PREDICT', pqe2tag:'2 · OBSERVE', pqe3tag:'3 · EXPLAIN', hint:'Show a suggested explanation',
+ p1:'An ice cube at −20 °C is heated steadily. Will its temperature rise all the time, or will it stop rising at some points? If so, at which temperatures?',
+ o1:'Turn on "Hide numbers" so the class predicts first, then turn it off and watch the graph. Note the temperature while the ice melts and while the water boils. Watch the tracked particle: how does it move in each state?',
+ e1q:'Why does the temperature stop rising during melting and boiling, even though we keep heating?',
+ e1a:'During a change of state, the heat taken in is used to change the arrangement and spacing of the particles (to overcome the forces between them), not to raise their average speed. Temperature reflects that speed, so it stays constant until the change of state is complete.',
+ cupA:'Cup A', cupB:'Cup B', factor:'Factor', factorsHead:'Change the factors for each cup',
+ fT:'Temperature', fWind:'Wind', fArea:'Surface area', fLiq:'Liquid',
+ w0:'No wind', w1:'Light wind', w2:'Strong wind', narrow:'Narrow (cup)', wide:'Wide (dish)',
+ fn_T:'temperature', fn_wind:'wind', fn_area:'surface area', fn_liq:'type of liquid',
+ fair0:'The two cups are identical. Results will be almost equal, differing only slightly because of random particle motion.',
+ fair1:'Fair test: the cups differ only in {f}. Any difference in evaporation rate is caused by {f}.',
+ fairN:'The cups differ in {n} factors ({f}). We cannot tell which factor makes evaporation faster. Change only one factor.',
+ result:'Result', left:'Liquid remaining', net:'Particles evaporated (net)', outBack:'Escaped / returned', status:'What happens',
+ isBoil:'Boiling', isEvap:'Evaporating', isEmpty:'Dried up', boilT:'boiling point',
+ graph2Title:'Liquid remaining over time',
+ assume2:'Model assumptions: atmospheric pressure 1 atm; each cup is kept at a constant temperature; both cups hold the same amount of liquid; the number of particles escaping is proportional to the surface area and to the liquid\'s saturated vapour pressure at that temperature; time is compressed.',
+ cmp2Title:'How do evaporation and boiling differ?', evap:'Evaporation', boil:'Boiling',
+ c_where:'Where', c_temp:'Temperature', c_sign:'What you see', c_speed:'Rate', c_dep:'Depends on', c_ex:'Everyday example',
+ e_where:'Only at the liquid surface', b_where:'At the surface and inside the liquid',
+ e_temp:'At any temperature', b_temp:'At one definite temperature (the boiling point), constant while boiling',
+ e_sign:'Hard to see; the liquid slowly dries up', b_sign:'Vapour bubbles form inside the liquid, rise and burst at the surface',
+ e_speed:'Slow', b_speed:'Fast',
+ e_dep:'Temperature, wind, surface area, type of liquid', b_dep:'Type of liquid and pressure above the surface',
+ e_ex:'Washing drying on a line, puddles drying up', b_ex:'A pot of water boiling on the stove',
+ p2:'Cup A is narrow and cup B is wide; same amount of water, same temperature, no wind. Which dries up faster? What if both are the same cup but one has wind?',
+ o2:'Change one factor at a time (temperature, wind, surface area, type of liquid). Compare the two lines on the graph. Then drag one cup\'s temperature to the boiling point: what appears inside the liquid?',
+ e2q:'Why do wind, higher temperature and a larger surface make a liquid evaporate faster? How does boiling differ from evaporation?',
+ e2a:'Only particles at the surface that are fast enough can overcome the attraction of their neighbours and escape. Higher temperature: more particles move fast. Larger surface: more particles are at the surface. Wind: carries escaped vapour particles away, so fewer return to the liquid. Ethanol evaporates faster than water because the forces between ethanol particles are weaker. Boiling is a special kind of evaporation: at the boiling point, vapour also forms inside the liquid as bubbles.',
+ cvZoom:'Magnified millions of times (model)', cvSealed:'sealed jar', cvHeat:'Heating', cvCool:'Cooling', cvOff:'Heat off',
+ cvSurface:'surface', cvWind:'wind',
+ tabCond:'Condensation', setA:'Set A', setB:'Set B', condHead:'Change the conditions for each set-up',
+ fTp:'Glass plate temperature', fTw:'Water temperature (amount of vapour rising)', fPA:'Glass plate area', pSmall:'Small', pLarge:'Large',
+ fn_Tp:'glass plate temperature', fn_Tw:'amount of vapour rising (water temperature)', fn_PA:'glass plate area',
+ fair0c:'The two set-ups are identical. Results will be almost equal, differing only slightly because of random particle motion.',
+ fair1c:'Fair test: the set-ups differ only in {f}. Any difference in condensation rate is caused by {f}.',
+ fairNc:'The set-ups differ in {n} factors ({f}). We cannot tell which factor makes condensation faster. Change only one factor.',
+ rateC:'Condensation rate (particles/s)', netC:'Condensed so far (net)', inOut:'Stuck to glass / evaporated again', drips:'Particles dripped off as drops',
+ isCond:'Condensing', isNoCond:'Hardly any condensation',
+ graph3Title:'Particles condensed over time',
+ graph3Note:'The slope of each line is the condensation rate: the steeper the line, the faster water collects on the glass.',
+ assume3:'Model assumptions: the water in the cup is kept at a constant temperature and always full; the glass plate is kept at the chosen temperature (ice is placed on top below 5 °C); still air, with warm vapour rising gently; vapour particles that touch the underside of the glass stick to it, while particles in the droplets on the glass can evaporate again, faster when the glass is warmer; time is compressed.',
+ ex3Head:'Why does a cold glass plate collect more water?',
+ ex3:'Condensation is the reverse of evaporation. A vapour particle that hits the cold glass gives some of its energy to the glass, slows down and is held by the attraction of other water particles, forming a droplet. At the same time, some particles in the droplets are fast enough to evaporate again. The condensation rate we see is the number of particles sticking minus the number evaporating again. The colder the glass, the fewer particles evaporate again; the more vapour there is or the larger the glass, the more particles hit it each second.',
+ si3:'Like students running in from a sunny yard to an air-conditioned room: outside they run everywhere, in the cold room they slow down and sit close together. The colder the room, the fewer want to run back out. The more crowded the yard and the wider the door, the more students come in each minute.',
+ fasterWhen:'Faster condensation when', why:'Why',
+ k1f:'Surface (or air) temperature', k1w:'Lower', k1y:'Vapour particles lose energy and are held more easily; fewer particles in the droplets evaporate again',
+ k2f:'Amount of vapour in the air', k2w:'Larger', k2y:'More vapour particles hit the surface each second',
+ k3f:'Area of the cold surface', k3w:'Larger', k3y:'More places for vapour particles to hit and stick',
+ condEx:'Everyday examples: drops forming on the outside of a glass of iced water, steam collecting on a pot lid, dew on leaves in the early morning, car windows misting up on cold days.',
+ p3:'Two identical cups of hot water at 80 °C. Set A is covered with a glass plate holding ice (5 °C), set B with a warm plate (50 °C). Which plate collects water faster? What if the plate is as hot as the water (80 °C)?',
+ o3:'Watch the flashing ring each time a vapour particle sticks to the glass, and the particles evaporating again from the droplets. Compare the condensation rates and the slopes of the two lines. Then change one factor at a time: glass temperature, water temperature, glass area.',
+ e3q:'Why does a colder plate collect water faster? Why does hardly any water collect when the plate is as hot as the water?',
+ e3a:'A vapour particle that touches cold glass gives energy to the glass, slows down and is held in a droplet. The colder the glass, the slower the particles in the droplet move, so very few evaporate again and water builds up quickly. When the glass is as hot as the water, particles in the droplets evaporate again almost as fast as they arrive, so the droplets cannot grow.',
+ cvPlate:'glass plate', cvIce:'ice', cvGlass:'Glass', cvWater:'Water',
+}};
+let lang='vi';
+function t(k,vars){let s=(I18N[lang][k]??I18N.vi[k]??k);if(vars)for(const[a,b]of Object.entries(vars))s=s.split('{'+a+'}').join(b);return s;}
+const nf={};
+function fmt(x,d=0){const key=lang+d;if(!nf[key])nf[key]=new Intl.NumberFormat(lang==='vi'?'vi-VN':'en-US',{maximumFractionDigits:d,minimumFractionDigits:d});return nf[key].format(x).replace('-','−');}
+const fT=x=>fmt(Math.round(x))+' °C';
+const $=s=>document.querySelector(s);
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+function randn(){let u=0;while(!u)u=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(6.283185307*Math.random());}
+
+/* ============================== @core-start ============================== */
+const TMIN=-270,TMAX=1000;
+const SUB={
+ water:  {T0:-20, Tm:0,    Tb:100, cs:2.1, Lf:334, cl:4.18, Lv:2257, cg:2.0,  B:4895},
+ naph:   {T0:25,  Tm:80,   Tb:218, cs:1.3, Lf:147, cl:1.7,  Lv:337,  cg:1.3,  B:5196},
+ ethanol:{T0:-135,Tm:-114, Tb:78,  cs:1.0, Lf:107, cl:2.44, Lv:838,  cg:1.42, B:4643}
+};
+for(const s of Object.values(SUB)){s.Tmin=TMIN;s.Tmax=TMAX;}
+function segs(s){const H1=s.cs*(s.Tm-s.Tmin),H2=H1+s.Lf,H3=H2+s.cl*(s.Tb-s.Tm),H4=H3+s.Lv,H5=H4+s.cg*(s.Tmax-s.Tb);return{H1,H2,H3,H4,H5};}
+function thermo(s,H){const g=segs(s);
+ if(H<=g.H1)return{T:s.Tmin+H/s.cs,fs:1,fl:0,fg:0,stage:'solid'};
+ if(H<g.H2){const f=(H-g.H1)/s.Lf;return{T:s.Tm,fs:1-f,fl:f,fg:0,stage:'melt'};}
+ if(H<=g.H3)return{T:s.Tm+(H-g.H2)/s.cl,fs:0,fl:1,fg:0,stage:'liquid'};
+ if(H<g.H4){const f=(H-g.H3)/s.Lv;return{T:s.Tb,fs:0,fl:1-f,fg:f,stage:'boil'};}
+ return{T:s.Tb+(H-g.H4)/s.cg,fs:0,fl:0,fg:1,stage:'gas'};}
+function HofT(s,T){const g=segs(s);if(T<s.Tm)return s.cs*(T-s.Tmin);if(T<s.Tb)return g.H2+s.cl*(T-s.Tm);return g.H4+s.cg*(T-s.Tb);}
+const pvRel=(B,T,Tb)=>Math.min(1,Math.exp(-B*(1/(T+273.15)-1/(Tb+273.15))));
+const vGas=T=>140*Math.sqrt((T+273.15)/300);
+
+/* Particle model: 72 particles; solid particles sit on sites of one fixed square lattice (19 x 15) covering the jar,
+   so a crystal grows wherever the liquid was. Evaporation / condensation / freezing / melting are random events;
+   their rates are steered so the average numbers match the enthalpy (temperature) bookkeeping above. */
+const BW=380,BH=300,R=9,N1=72,SP=2*R+0.6,TRK=40,CG=19,RG=15;
+const KREP=4000,KATT=150,KS=900,G1=500,GAM=6,FCAP=3000,BUOY=2600,TAU=2.5,G0=0.12;
+class ModelSim{
+ constructor(){
+  this.sub='water';this.P=40;this.speed=1;this.running=true;
+  this.sites=[];for(let r=0;r<RG;r++)for(let c=0;c<CG;c++)this.sites.push({x:BW/2+(c-(CG-1)/2)*SP,y:BH-R-0.5-r*SP,r,c,occ:-1});
+  this.reset();
+ }
+ site(r,c){return(r<0||c<0||r>=RG||c>=CG)?null:this.sites[r*CG+c];}
+ reset(){
+  const s=SUB[this.sub];this.H=HofT(s,s.T0);this.time=0;this.hist=[];this.histAcc=0;this.n=0;this.atLimit=false;this.evT=[];this.cdT=[];
+  for(const st of this.sites)st.occ=-1;
+  this.p=[];
+  for(let r=0;r<8;r++)for(let c=5;c<14;c++){const k=r*CG+c,st=this.sites[k];st.occ=this.p.length;
+   this.p.push({x:st.x,y:st.y,vx:randn()*5,vy:randn()*5,ph:0,site:k,fx:0,fy:0,nc:0,ns:0,cov:false,cool:0,stuck:0});}
+  this.trail=[];this.th=thermo(s,this.H);this.pushHist();
+ }
+ pushHist(){this.hist.push({t:this.time,T:this.th.T,st:this.th.stage});if(this.hist.length>2400)this.hist.shift();}
+ counts(){let a=0,b=0,c=0;for(const q of this.p){if(q.ph===0)a++;else if(q.ph===1)b++;else c++;}return[a,b,c];}
+ targets(){const s=SUB[this.sub],th=this.th;const nS=Math.round(N1*th.fs);let nG=0;
+  if(th.stage==='liquid'||th.stage==='melt')nG=N1*G0*Math.sqrt(pvRel(s.B,th.T,s.Tb));
+  else if(th.stage==='boil')nG=N1*(G0+(1-G0)*th.fg);
+  else if(th.stage==='gas')nG=N1;
+  return{nS,nG:Math.min(nG,N1-nS)};}
+ pick(list){let W=0;for(const e of list)W+=e[1];let r=Math.random()*W,k=0;while(k<list.length-1&&r>=list[k][1]){r-=list[k][1];k++;}return list[k][0];}
+ vaporize(q,inner){q.ph=2;q.cool=0.25;q.stuck=0;const vg=Math.max(vGas(this.th.T),110);q.vy=-vg*(inner?0.4:0.6+0.4*Math.random());q.vx=randn()*vg*(inner?0.15:0.4);this.evT.push(this.time);}
+ condense(q){q.ph=1;q.vx*=0.25;q.vy*=0.25;this.cdT.push(this.time);}
+ exchange(dt,tg){
+  const s=SUB[this.sub],th=this.th;let cG=0;const surf=[],intr=[];
+  for(const q of this.p){if(q.ph===2)cG++;else if(q.ph===1)(q.cov?intr:surf).push(q);}
+  const err=tg.nG-cG,mult=Math.exp(clamp(0.9*err,-6,3));
+  if(surf.length+intr.length){
+   const pv=pvRel(s.B,th.T,s.Tb),share=(th.stage==='boil'||th.stage==='gas')?0.6:0.6*pv**4;
+   const F=Math.max(tg.nG,0.4)/TAU*mult;let Fi=intr.length?F*share:0,Fs=F-Fi;if(!surf.length){Fi=F;Fs=0;}
+   for(const q of surf)if(Math.random()<Fs/surf.length*dt)this.vaporize(q,false);
+   for(const q of intr)if(Math.random()<Fi/intr.length*dt)this.vaporize(q,true);
+  }
+  const pSt=clamp(0.35/Math.sqrt(mult),0.02,1);
+  for(const q of this.p){if(q.ph!==2)continue;
+   if(q.nc===0){q.cool-=dt;q.stuck=0;}else q.stuck+=dt;
+   if((q.cool<=0||q.stuck>2)&&q.nc>0&&Math.random()<pSt)this.condense(q);
+   else if(err<-0.5&&(q.y>BH-R-1.5||(err<-2&&(q.x<R+1.5||q.x>BW-R-1.5||q.y<R+1.5)))&&Math.random()<0.3)this.condense(q);
+  }
+ }
+ solidify(tg){let cS=0;for(const q of this.p)if(q.ph===0)cS++;if(cS>tg.nS)this.meltOne();else if(cS<tg.nS)this.freezeOne();}
+ freezeOne(){
+  const c=[];this.p.forEach((q,i)=>{if(q.ph===1)c.push([i,1+8*(q.ns>0)+4*(q.y>BH-R-4)]);});
+  if(!c.length)return;const i=this.pick(c),q=this.p[i];
+  let best=-1,bs=Infinity;
+  this.sites.forEach((st,j)=>{if(st.occ>=0)return;const b=this.site(st.r-1,st.c),sup=st.r===0||(b&&b.occ>=0);
+   const sc=(q.x-st.x)**2+(q.y-st.y)**2+(sup?0:9*SP*SP);if(sc<bs){bs=sc;best=j;}});
+  if(best<0)return;q.ph=0;q.site=best;this.sites[best].occ=i;
+ }
+ meltOne(){
+  const c=[];this.p.forEach((q,i)=>{if(q.ph!==0)return;const st=this.sites[q.site];let n=0;
+   for(const[dr,dc]of[[1,0],[-1,0],[0,1],[0,-1]]){const o=this.site(st.r+dr,st.c+dc);if(o&&o.occ>=0)n++;}c.push([i,(5-n)**2]);});
+  if(!c.length)return;const q=this.p[this.pick(c)];this.sites[q.site].occ=-1;q.site=-1;q.ph=1;
+ }
+ physics(dt){
+  const vT=vGas(this.th.T),vth=0.42*vT,vg=Math.max(vT,110),p=this.p,n=p.length,D=2*R,AT=2.6*R,AT2=AT*AT,DC=D+2,DS=1.35*D,R6=0.6*R,R15=1.5*R;
+  for(const q of p){q.fx=0;q.fy=0;q.nc=0;q.ns=0;q.cov=false;}
+  for(let i=0;i<n;i++){const a=p[i];for(let j=i+1;j<n;j++){const b=p[j];const dx=b.x-a.x,dy=b.y-a.y;
+   if(dx>AT||dx<-AT||dy>AT||dy<-AT)continue;const d2=dx*dx+dy*dy;if(d2>=AT2||d2<1e-6)continue;const d=Math.sqrt(d2);
+   if(d<DC){if(a.ph===2&&b.ph<2)a.nc++;else if(b.ph===2&&a.ph<2)b.nc++;}
+   if(d<DS){if(a.ph===1&&b.ph===0)a.ns++;else if(b.ph===1&&a.ph===0)b.ns++;}
+   if(a.ph===1&&b.ph<2&&dy<-R6&&dx<R15&&dx>-R15)a.cov=true;
+   if(b.ph===1&&a.ph<2&&dy>R6&&dx<R15&&dx>-R15)b.cov=true;
+   let f=0;
+   if(d<D)f=-KREP*(D-d);else if(a.ph<2&&b.ph<2&&(a.ph===1||b.ph===1))f=KATT*Math.min(d-D,AT-d);
+   if(f===0)continue;const ux=dx/d,uy=dy/d;a.fx+=f*ux;a.fy+=f*uy;b.fx-=f*ux;b.fy-=f*uy;}}
+  const sq=vth*Math.sqrt(2*GAM*dt),damp=1-GAM*dt;
+  for(const q of p){
+   if(q.ph===0){const st=this.sites[q.site];let sx=-KS*(q.x-st.x),sy=-KS*(q.y-st.y);const m=Math.hypot(sx,sy);if(m>FCAP){sx*=FCAP/m;sy*=FCAP/m;}q.fx+=sx;q.fy+=sy;}
+   else if(q.ph===1)q.fy+=G1;
+   else if(q.nc>=2)q.fy-=BUOY;
+   q.vx+=q.fx*dt;q.vy+=q.fy*dt;
+   if(q.ph<2){q.vx=q.vx*damp+sq*randn();q.vy=q.vy*damp+sq*randn();}
+   q.x+=q.vx*dt;q.y+=q.vy*dt;
+   const e=q.ph===2?1:0.3;
+   if(q.x<R){q.x=R;q.vx=Math.abs(q.vx)*e;}else if(q.x>BW-R){q.x=BW-R;q.vx=-Math.abs(q.vx)*e;}
+   if(q.y<R){q.y=R;q.vy=Math.abs(q.vy)*e;}else if(q.y>BH-R){q.y=BH-R;q.vy=-Math.abs(q.vy)*e;}
+  }
+  let sum=0,cnt=0;for(const q of p)if(q.ph===2){const s=Math.hypot(q.vx,q.vy);if(s<0.3*vg){const a=Math.random()*6.2832;q.vx=vg*Math.cos(a);q.vy=vg*Math.sin(a);}sum+=Math.hypot(q.vx,q.vy);cnt++;}
+  if(cnt){const k=1+(vg/(sum/cnt)-1)*0.03;for(const q of p)if(q.ph===2){q.vx*=k;q.vy*=k;}}
+ }
+ step(dt){
+  const s=SUB[this.sub],g=segs(s);
+  this.H+=this.P/100*(g.H5/60)*dt;this.atLimit=false;
+  if(this.H>g.H5){this.H=g.H5;this.atLimit=this.P>0;}if(this.H<0){this.H=0;this.atLimit=this.P<0;}
+  this.th=thermo(s,this.H);this.time+=dt;this.histAcc+=dt;if(this.histAcc>=0.1){this.histAcc-=0.1;this.pushHist();}
+  this.physics(dt);const tg=this.targets();this.exchange(dt,tg);this.solidify(tg);
+  if((++this.n)%2===0){const q=this.p[TRK];this.trail.push(q.x,q.y);if(this.trail.length>180)this.trail.splice(0,2);}
+  if(this.n%240===0){const t0=this.time-10;while(this.evT.length&&this.evT[0]<t0)this.evT.shift();while(this.cdT.length&&this.cdT[0]<t0)this.cdT.shift();}
+ }
+ rates(){const t0=this.time-10;return[this.evT.filter(x=>x>=t0).length,this.cdT.filter(x=>x>=t0).length];}
+ setT(T){const s=SUB[this.sub];T=clamp(T,TMIN,TMAX);this.H=HofT(s,T);this.P=0;this.th=thermo(s,this.H);}
+ jump(kind){const s=SUB[this.sub];this.setT(kind==='solid'?s.Tm-20:kind==='liquid'?(s.Tm+s.Tb)/2:s.Tb+40);}
+}
+
+const PW=320,D2=7,N0=196,CUP_BOT=282,RIM=172,FLOOR=292,KE=0.07;
+const LIQ={water:{Tb:100,B:4895},ethanol:{Tb:78,B:4643}};
+class Cup{
+ constructor(cfg){this.cfg=cfg;this.jit=Array.from({length:N0},()=>({a:Math.random()*6.28,b:Math.random()*6.28,f:3+Math.random()*4}));this.reset();}
+ reset(){this.n=N0;this.vap=[];this.bub=[];this.escaped=0;this.returned=0;this.acc=0;this.bacc=0;}
+ get wI(){return this.cfg.area==='wide'?220:100;}
+ get cols(){return Math.floor(this.wI/D2);}
+ get left(){return PW/2-this.cols*D2/2;}
+ get Tb(){return LIQ[this.cfg.liq].Tb;}
+ get boiling(){return this.cfg.T>=this.Tb-0.05&&this.n>0;}
+ surfY(){return CUP_BOT-Math.ceil(this.n/this.cols)*D2;}
+ spawn(x,y){this.vap.push({x,y,vx:randn()*30,vy:-(30+Math.random()*40),age:0,in:true});}
+ step(dt){
+  const L=LIQ[this.cfg.liq],pv=pvRel(L.B,this.cfg.T,L.Tb),iL=PW/2-this.wI/2,iR=PW/2+this.wI/2;
+  if(this.n>0){this.acc+=KE*this.wI*pv*dt;while(this.acc>=1&&this.n>0){this.acc-=1;this.n--;this.escaped++;this.spawn(this.left+Math.random()*this.cols*D2,this.surfY()-3);}}else this.acc=0;
+  if(this.boiling){this.bacc+=2.5*this.wI/100*dt;while(this.bacc>=1){this.bacc-=1;this.bub.push({x:iL+6+Math.random()*(this.wI-12),y:CUP_BOT-3,r:1.5});}}
+  for(let i=this.bub.length-1;i>=0;i--){const b=this.bub[i];b.y-=(40+b.r*6)*dt;b.r=Math.min(7,b.r+4*dt);
+   if(b.y-b.r<=this.surfY()||this.n===0){const k=Math.min(1,this.n);this.n-=k;this.escaped+=k;for(let j=0;j<k;j++)this.spawn(b.x+randn()*3,this.surfY()-3);this.bub.splice(i,1);}}
+  const wv=[0,45,120][this.cfg.wind],sig=40*Math.sqrt(dt);
+  for(let i=this.vap.length-1;i>=0;i--){const v=this.vap[i];const w=v.y<RIM-4?wv:wv*0.6;
+   v.vx+=-2*(v.vx-w)*dt+sig*randn();v.vy+=-2*v.vy*dt+sig*randn();
+   const py=v.y;v.x+=v.vx*dt;v.y+=v.vy*dt;v.age+=dt;
+   if(v.x<-4||v.x>PW+4||v.y<-4){this.vap.splice(i,1);continue;}
+   if(v.y<=RIM){v.in=false;continue;}
+   if(!v.in&&py<=RIM&&v.x>iL&&v.x<iR)v.in=true;
+   if(v.in){
+    if(v.x<iL+3){v.x=iL+3;v.vx=Math.abs(v.vx);}else if(v.x>iR-3){v.x=iR-3;v.vx=-Math.abs(v.vx);}
+    const sy=this.surfY();
+    if(v.y>=sy-1){if(v.age>0.25&&this.n<N0){this.n++;this.returned++;this.vap.splice(i,1);continue;}v.y=sy-1;v.vy=-Math.abs(v.vy);}
+   }else{
+    if(v.x>iL-6&&v.x<iR+6){if(v.x<PW/2){v.x=iL-6;v.vx=-Math.abs(v.vx);}else{v.x=iR+6;v.vx=Math.abs(v.vx);}}
+    if(v.y>FLOOR-3){v.y=FLOOR-3;v.vy=-Math.abs(v.vy);}
+   }
+  }
+ }
+}
+const C_PL=70,C_RIM=196,C_WS=214,C_BOT=282,C_CW=140,KE3=0.38,DROP_M=12,SITE=22;const C_UP=12,CSIG=70,WETM=3,VDOWN=60;
+const dropR=m=>m>0?2.4*Math.sqrt(m)+2:0;
+class Condenser{
+ constructor(cfg){this.cfg=cfg;this.jit=Array.from({length:240},()=>({a:Math.random()*6.28,b:Math.random()*6.28,f:3+Math.random()*4}));this.reset();}
+ get wP(){return this.cfg.area==='wide'?260:120;}
+ reset(){this.vap=[];this.fall=[];this.flash=[];this.acc=0;this.racc=0;this.cond=0;this.reev=0;this.dripped=0;this.events=[];this.time=0;
+  const n=Math.max(1,Math.floor(this.wP/SITE)),x0=PW/2-n*SITE/2+SITE/2;this.drops=[];for(let i=0;i<n;i++)this.drops.push({x:x0+i*SITE,m:0,acc:0});}
+ rate(){const t0=this.time-5;let s=0;for(const e of this.events)if(e[0]>=t0)s+=e[1];return s/Math.max(0.5,Math.min(5,this.time));}
+ step(dt){
+  this.time+=dt;const c=this.cfg,pvW=pvRel(4895,c.Tw,100),pvP=pvRel(4895,c.Tp,100);
+  const cL=PW/2-C_CW/2,cR=PW/2+C_CW/2,pL=PW/2-this.wP/2,pR=PW/2+this.wP/2;
+  this.acc+=KE3*C_CW*pvW*dt;while(this.acc>=1){this.acc-=1;this.vap.push({x:cL+4+Math.random()*(C_CW-8),y:C_WS-3,vx:randn()*20,vy:-(30+Math.random()*30),age:0,in:true});}
+  let tot=0;for(const d of this.drops)tot+=d.m;
+  if(tot>0){const wet=Math.min(1,tot/(this.drops.length*WETM));this.racc+=KE3*this.wP*wet*pvP*dt;
+   while(this.racc>=1&&tot>0){this.racc-=1;let k=0,r=Math.random()*tot;while(r>=this.drops[k].m){r-=this.drops[k].m;k++;}const d=this.drops[k];d.m--;tot--;this.reev++;this.events.push([this.time,-1]);
+    this.vap.push({x:d.x+randn()*4,y:C_PL+dropR(d.m)+3,vx:randn()*30,vy:VDOWN+Math.random()*30,age:0,in:false});}}else this.racc=0;
+  for(const d of this.drops)if(d.m>=DROP_M){this.fall.push({x:d.x,y:C_PL+dropR(d.m),vy:0,m:d.m});this.dripped+=d.m;d.m=0;}
+  const sig=CSIG*Math.sqrt(dt);
+  for(let i=this.vap.length-1;i>=0;i--){const v=this.vap[i];const py=v.y;
+   v.vx+=-2*v.vx*dt+sig*randn();v.vy+=-2*(v.vy+C_UP)*dt+sig*randn();v.x+=v.vx*dt;v.y+=v.vy*dt;v.age+=dt;
+   if(v.x<-4||v.x>PW+4||v.y<-4){this.vap.splice(i,1);continue;}
+   if(v.x>pL&&v.x<pR){
+    if(py>C_PL&&v.y<=C_PL){if(v.age>0.15){let k=Math.round((v.x-this.drops[0].x)/SITE);k=clamp(k,0,this.drops.length-1);this.drops[k].m++;this.cond++;this.events.push([this.time,1]);this.flash.push({x:v.x,a:0.6});this.vap.splice(i,1);continue;}v.y=C_PL+1;v.vy=Math.abs(v.vy);}
+    else if(py<C_PL-7&&v.y>=C_PL-7){v.y=C_PL-8;v.vy=-Math.abs(v.vy);}
+   }
+   if(v.y<=C_RIM){v.in=false;}
+   else{if(!v.in&&py<=C_RIM&&v.x>cL&&v.x<cR)v.in=true;
+    if(v.in){if(v.x<cL+3){v.x=cL+3;v.vx=Math.abs(v.vx);}else if(v.x>cR-3){v.x=cR-3;v.vx=-Math.abs(v.vx);}
+     if(v.y>=C_WS-1){if(v.age>0.25){this.vap.splice(i,1);continue;}v.y=C_WS-1;v.vy=-Math.abs(v.vy);}}
+    else{if(v.x>cL-6&&v.x<cR+6){if(v.x<PW/2){v.x=cL-6;v.vx=-Math.abs(v.vx);}else{v.x=cR+6;v.vx=Math.abs(v.vx);}}
+     if(v.y>FLOOR-3){v.y=FLOOR-3;v.vy=-Math.abs(v.vy);}}}
+  }
+  for(let i=this.fall.length-1;i>=0;i--){const f=this.fall[i];f.vy+=400*dt;f.y+=f.vy*dt;if((f.x>cL&&f.x<cR&&f.y>=C_WS)||f.y>=FLOOR-2)this.fall.splice(i,1);}
+  for(let i=this.flash.length-1;i>=0;i--){this.flash[i].a-=dt;if(this.flash[i].a<=0)this.flash.splice(i,1);}
+  while(this.events.length&&this.events[0][0]<this.time-5)this.events.shift();
+ }
+}
+
+/* ============================== @core-end ============================== */
+
+/* ============================== state ============================== */
+const sim1=new ModelSim();
+const sim2={A:new Cup({T:50,wind:0,area:'narrow',liq:'water'}),B:new Cup({T:50,wind:0,area:'wide',liq:'water'}),time:0,hist:[],hAcc:0,running:true,speed:1};
+sim2.hist.push({t:0,a:100,b:100});
+const sim3={A:new Condenser({Tp:5,Tw:80,area:'narrow'}),B:new Condenser({Tp:50,Tw:80,area:'narrow'}),time:0,hist:[{t:0,a:0,b:0}],hAcc:0,running:true,speed:1};
+let activeTab='model',hideNum=false,showTrail=true,showArrows=false;
+
+/* ============================== colors ============================== */
+let C={};
+function readColors(){const cs=getComputedStyle(document.documentElement);for(const k of['bg','surface','surface2','ink','muted','line','solid','liquid','liquid2','gas','heat','cold','glass','serA','serB','accent'])C[k]=cs.getPropertyValue('--'+k).trim();}
+function alpha(hex,a){const h=hex.replace('#','');const n=parseInt(h.length===3?h.split('').map(c=>c+c).join(''):h,16);return`rgba(${n>>16&255},${n>>8&255},${n&255},${a})`;}
+function mix(h1,h2,f){const p=h=>{const n=parseInt(h.replace('#',''),16);return[n>>16&255,n>>8&255,n&255];};const a=p(h1),b=p(h2);return`rgb(${a.map((v,i)=>Math.round(v+(b[i]-v)*f)).join(',')})`;}
+readColors();
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',readColors);
+new MutationObserver(readColors).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme','class','style']});
+
+/* ============================== canvas helpers ============================== */
+function sizeCanvas(cv,w,h){const dpr=window.devicePixelRatio||1;cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);cv.style.width=w+'px';cv.style.height=h+'px';const ctx=cv.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);return ctx;}
+const FD='"IBM Plex Mono", ui-monospace, monospace',FB='"Be Vietnam Pro", system-ui, sans-serif',FX='"Be Vietnam Pro", system-ui, sans-serif';
+function rr(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+
+let L1=null,ctx1=null,ctxG1=null,L2=null,ctx2=null,ctxG2=null,G1W=0,G2W=0,L3=null,ctx3=null,ctxG3=null,G3W=0;
+function layout1(w){
+ if(w<640){const jarH=Math.round(w*0.62),bw=w-24,bh=bw*BH/BW;return{w,h:Math.round(jarH+bh+40),jar:{x:0,y:0,w,h:jarH},box:{x:12,y:jarH+26,w:bw,h:bh},portrait:true};}
+ const pad=16,bw=Math.min(w*0.6,640),bh=bw*BH/BW,h=Math.round(bh+pad*2+22);
+ return{w,h,jar:{x:pad,y:pad,w:w-bw-pad*3,h:h-pad*2},box:{x:w-bw-pad,y:pad+22,w:bw,h:bh},portrait:false};
+}
+function layout2(w){
+ if(w<620){const pw=w,ph=pw*300/PW;return{w,h:Math.round(ph*2+12),panels:[{x:0,y:0,w:pw,h:ph},{x:0,y:ph+12,w:pw,h:ph}]};}
+ const gap=12,pw=(w-gap)/2,ph=pw*300/PW;return{w,h:Math.round(ph),panels:[{x:0,y:0,w:pw,h:ph},{x:pw+gap,y:0,w:pw,h:ph}]};
+}
+function resizeAll(){
+ const w1=$('#w1').clientWidth;if(w1>0){L1=layout1(w1);ctx1=sizeCanvas($('#c1'),w1,L1.h);}
+ const wg1=$('#wg1').clientWidth;if(wg1>0){G1W=wg1;ctxG1=sizeCanvas($('#g1'),wg1,240);}
+ const w2=$('#w2').clientWidth;if(w2>0){L2=layout2(w2);ctx2=sizeCanvas($('#c2'),w2,L2.h);}
+ const wg2=$('#wg2').clientWidth;if(wg2>0){G2W=wg2;ctxG2=sizeCanvas($('#g2'),wg2,220);}
+ const w3=$('#w3').clientWidth;if(w3>0){L3=layout2(w3);ctx3=sizeCanvas($('#c3'),w3,L3.h);}
+ const wg3=$('#wg3').clientWidth;if(wg3>0){G3W=wg3;ctxG3=sizeCanvas($('#g3'),wg3,220);}
+ drawGraph1();drawGraph2();drawGraph3();
+}
+const ro=new ResizeObserver(()=>resizeAll());['#w1','#wg1','#w2','#wg2','#w3','#wg3'].forEach(s=>ro.observe($(s)));
+
+/* ============================== render tab 1 ============================== */
+const hazePts=Array.from({length:70},()=>({u:Math.random(),v:Math.random(),s:0.3+Math.random()}));
+function phaseColor(ph){return ph===0?C.solid:ph===1?C.liquid:C.gas;}
+function drawJar(ctx,r,clk){
+ const s=SUB[sim1.sub],th=sim1.th,[cS,cL,cG]=sim1.counts(),P=sim1.P;
+ const cx=r.x+r.w/2,jw=Math.min(r.w*0.5,r.h*0.42),jh=r.h*0.52,jx=cx-jw/2,jy=r.y+r.h*0.1,base=jy+jh;
+ const ix=jx+5,iy=jy+10,iw=jw-10,ih=jh-14;
+ // stand plate
+ const plateY=base+2;
+ ctx.fillStyle=P<0?alpha(C.cold,0.85):C.muted;rr(ctx,jx-12,plateY,jw+24,6,3);ctx.fill();
+ const burnTop=plateY+6,burnBot=r.y+r.h*0.86;
+ if(P>0){ // spirit lamp + flame
+  const lw=jw*0.34,ly=burnBot-(burnBot-burnTop)*0.38;
+  ctx.fillStyle=alpha(C.glass,0.5);ctx.strokeStyle=C.glass;ctx.lineWidth=1.5;rr(ctx,cx-lw/2,ly,lw,burnBot-ly,6);ctx.fill();ctx.stroke();
+  const fh=(ly-burnTop-4)*(0.35+0.65*P/100)*(0.92+0.08*Math.sin(clk*23));
+  const g=ctx.createLinearGradient(0,ly,0,ly-fh);g.addColorStop(0,alpha(C.cold,0.8));g.addColorStop(0.35,C.heat);g.addColorStop(1,alpha(C.heat,0));
+  ctx.fillStyle=g;ctx.beginPath();const fw=lw*0.28*(0.6+0.4*P/100);
+  ctx.moveTo(cx-fw,ly);ctx.quadraticCurveTo(cx-fw*1.1,ly-fh*0.5,cx+Math.sin(clk*9)*3,ly-fh);ctx.quadraticCurveTo(cx+fw*1.1,ly-fh*0.5,cx+fw,ly);ctx.fill();
+ }else if(P<0){ // cooling block
+  const ch=(burnBot-burnTop)*0.45;ctx.fillStyle=alpha(C.cold,0.18);ctx.strokeStyle=C.cold;ctx.lineWidth=1.5;rr(ctx,jx-12,burnTop,jw+24,ch,5);ctx.fill();ctx.stroke();
+  ctx.strokeStyle=alpha(C.cold,0.7);ctx.lineWidth=1.2;const k=Math.round(4+4*(-P/100));
+  for(let i=0;i<k;i++){const x=jx-6+(i+0.5)*(jw+12)/k;ctx.beginPath();ctx.moveTo(x,burnTop+4);ctx.lineTo(x,burnTop+ch-4);ctx.moveTo(x-4,burnTop+ch/2-4);ctx.lineTo(x+4,burnTop+ch/2+4);ctx.moveTo(x+4,burnTop+ch/2-4);ctx.lineTo(x-4,burnTop+ch/2+4);ctx.stroke();}
+ }
+ // jar glass
+ ctx.fillStyle=alpha(C.glass,0.12);ctx.strokeStyle=C.glass;ctx.lineWidth=2;rr(ctx,jx,jy,jw,jh,10);ctx.fill();ctx.stroke();
+ ctx.fillStyle=C.muted;rr(ctx,jx-4,jy-8,jw+8,10,3);ctx.fill();
+ ctx.fillRect(cx+jw*0.18,jy-14,6,7); // vent
+ // contents
+ ctx.save();rr(ctx,ix,iy,iw,ih,7);ctx.clip();
+ const fg=cG/N1;
+ ctx.fillStyle=C.gas;
+ const nh=Math.round(fg*hazePts.length);
+ for(let i=0;i<nh;i++){const h=hazePts[i];const x=ix+((h.u+clk*0.05*h.s)%1)*iw,y=iy+((h.v+Math.sin(clk*h.s+i)*0.02+1)%1)*ih;ctx.globalAlpha=0.55;ctx.beginPath();ctx.arc(x,y,1.8,0,6.283);ctx.fill();}
+ ctx.globalAlpha=1;
+ // same layout as the magnified box: liquid fills the free lattice cells from the bottom, solid drawn cell by cell
+ const sx=iw/BW,sy=ih/BH,rowS=new Array(RG).fill(0);
+ for(const q of sim1.p)if(q.ph===0)rowS[sim1.sites[q.site].r]++;
+ let left=cL,level=0;for(let rr2=0;rr2<RG&&left>0;rr2++){const free=CG-rowS[rr2];if(free<=0){level++;continue;}if(left>=free){left-=free;level++;}else{level+=left/free;left=0;}}
+ const lh=level*SP*sy;
+ if(lh>0.5){ctx.fillStyle=alpha(C.liquid,0.32);ctx.fillRect(ix,iy+ih-lh,iw,lh);ctx.strokeStyle=C.liquid;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(ix,iy+ih-lh);ctx.lineTo(ix+iw,iy+ih-lh);ctx.stroke();}
+ if(cS>0){ctx.fillStyle=alpha(C.solid,0.5);const cw=SP*sx,ch=SP*sy;
+  for(const q of sim1.p)if(q.ph===0){const st=sim1.sites[q.site];ctx.fillRect(ix+(st.x-SP/2)*sx-0.3,iy+(st.y-SP/2)*sy-0.3,cw+0.6,ch+0.6);}
+  ctx.strokeStyle=C.solid;ctx.lineWidth=1.4;ctx.beginPath();
+  for(const q of sim1.p)if(q.ph===0){const st=sim1.sites[q.site],x0=ix+(st.x-SP/2)*sx,y0=iy+(st.y-SP/2)*sy,x1=x0+cw,y1=y0+ch,occ=(dr,dc)=>{const o=sim1.site(st.r+dr,st.c+dc);return o&&o.occ>=0;};
+   if(!occ(1,0)){ctx.moveTo(x0,y0);ctx.lineTo(x1,y0);}if(!occ(-1,0)&&st.r>0){ctx.moveTo(x0,y1);ctx.lineTo(x1,y1);}
+   if(!occ(0,-1)){ctx.moveTo(x0,y0);ctx.lineTo(x0,y1);}if(!occ(0,1)){ctx.moveTo(x1,y0);ctx.lineTo(x1,y1);}}
+  ctx.stroke();}
+ if(th.stage==='boil'&&P>0&&lh>4){ctx.strokeStyle=C.gas;ctx.lineWidth=1.2;for(let i=0;i<7;i++){const ph=(clk*0.9+i*0.37)%1;const x=ix+iw*((i*0.29+0.08)%0.9+0.05),y=iy+ih-ph*lh;ctx.beginPath();ctx.arc(x,y,1.5+ph*3,0,6.283);ctx.stroke();}}
+ ctx.restore();
+ // thermometer
+ const tx=jx+jw-15,tTop=jy-30,tBot=base-16;
+ ctx.fillStyle=C.surface;ctx.strokeStyle=C.ink;ctx.lineWidth=1.3;rr(ctx,tx-3.5,tTop,7,tBot-tTop,3.5);ctx.fill();ctx.stroke();
+ ctx.beginPath();ctx.arc(tx,tBot,6,0,6.283);ctx.fillStyle=C.heat;ctx.fill();ctx.stroke();
+ const fr=clamp((th.T-s.Tmin)/(s.Tmax-s.Tmin),0,1);ctx.fillStyle=C.heat;ctx.fillRect(tx-1.6,tBot-(tBot-tTop-6)*(0.05+0.95*fr),3.2,(tBot-tTop-6)*(0.05+0.95*fr));
+ ctx.font=`600 13px ${FD}`;ctx.fillStyle=C.ink;ctx.textAlign='left';ctx.textBaseline='middle';
+ ctx.fillText(hideNum?'? °C':fT(th.T),tx+10,tTop+6);
+ // labels
+ ctx.font=`500 12px ${FB}`;ctx.fillStyle=C.muted;ctx.textAlign='center';ctx.textBaseline='alphabetic';
+ ctx.fillText(`${t('sub_'+sim1.sub)} · ${t('cvSealed')}`,cx,r.y+r.h-4);
+ ctx.fillStyle=P>0?C.heat:P<0?C.cold:C.muted;ctx.font=`600 11.5px ${FB}`;
+ ctx.fillText(P>0?`${t('cvHeat')} ${Math.round(P)} %`:P<0?`${t('cvCool')} ${Math.round(-P)} %`:t('cvOff'),cx,r.y+r.h-20);
+ return{mx:cx-jw*0.12,my:iy+ih*0.86,mr:Math.max(12,jw*0.13)};
+}
+function drawBox(ctx,r){
+ const s=r.w/BW,p=sim1.p;
+ ctx.fillStyle=C.surface2;ctx.strokeStyle=C.line;ctx.lineWidth=1.5;rr(ctx,r.x,r.y,r.w,r.h,10);ctx.fill();ctx.stroke();
+ ctx.font=`500 12px ${FB}`;ctx.fillStyle=C.muted;ctx.textAlign='left';ctx.textBaseline='alphabetic';ctx.fillText(t('cvZoom'),r.x+2,r.y-8);
+ ctx.save();rr(ctx,r.x,r.y,r.w,r.h,10);ctx.clip();
+ const X=x=>r.x+x*s,Y=y=>r.y+y*s;
+ // bonds between neighbouring solid particles
+ ctx.strokeStyle=alpha(C.solid,0.35);ctx.lineWidth=Math.max(1,2*s);ctx.beginPath();
+ for(const q of p){if(q.ph!==0)continue;const st=sim1.sites[q.site];
+  for(const[dr,dc]of[[0,1],[1,0]]){const ss=sim1.site(st.r+dr,st.c+dc);if(!ss)continue;const o=ss.occ;if(o>=0&&p[o].ph===0){ctx.moveTo(X(q.x),Y(q.y));ctx.lineTo(X(p[o].x),Y(p[o].y));}}}
+ ctx.stroke();
+ // trail
+ if(showTrail&&sim1.trail.length>4){const tr=sim1.trail;ctx.strokeStyle=alpha(C.ink,0.55);ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(X(tr[0]),Y(tr[1]));for(let i=2;i<tr.length;i+=2)ctx.lineTo(X(tr[i]),Y(tr[i+1]));ctx.stroke();}
+ // particles
+ const rad=R*s;
+ for(let i=0;i<p.length;i++){const q=p[i];ctx.fillStyle=phaseColor(q.ph);ctx.beginPath();ctx.arc(X(q.x),Y(q.y),rad,0,6.283);ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,0.32)';ctx.beginPath();ctx.arc(X(q.x)-rad*0.32,Y(q.y)-rad*0.32,rad*0.35,0,6.283);ctx.fill();}
+ ctx.strokeStyle=C.gas;ctx.lineWidth=1.5;for(const q of p)if(q.ph===2&&q.nc>=2){ctx.beginPath();ctx.arc(X(q.x),Y(q.y),rad+4,0,6.283);ctx.stroke();}
+ if(showTrail){const q=p[TRK];ctx.strokeStyle=C.ink;ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(X(q.x),Y(q.y),rad+2.5,0,6.283);ctx.stroke();}
+ if(showArrows){ctx.strokeStyle=C.ink;ctx.fillStyle=C.ink;ctx.lineWidth=1.3;for(const q of p){const vx=q.vx*0.13,vy=q.vy*0.13,L=Math.hypot(vx,vy);if(L<2)continue;const x0=X(q.x),y0=Y(q.y),x1=x0+vx*s,y1=y0+vy*s;ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x1,y1);ctx.stroke();const a=Math.atan2(vy,vx);ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x1-5*Math.cos(a-0.45),y1-5*Math.sin(a-0.45));ctx.lineTo(x1-5*Math.cos(a+0.45),y1-5*Math.sin(a+0.45));ctx.fill();}}
+ ctx.restore();
+}
+function renderModel(clk){
+ if(!ctx1)return;const ctx=ctx1,L=L1;ctx.clearRect(0,0,L.w,L.h);
+ const m=drawJar(ctx,L.jar,clk);
+ // magnifier
+ ctx.strokeStyle=alpha(C.muted,0.7);ctx.setLineDash([4,4]);ctx.lineWidth=1;ctx.beginPath();
+ if(L.portrait){ctx.moveTo(m.mx-m.mr,m.my);ctx.lineTo(L.box.x,L.box.y);ctx.moveTo(m.mx+m.mr,m.my);ctx.lineTo(L.box.x+L.box.w,L.box.y);}
+ else{ctx.moveTo(m.mx,m.my-m.mr);ctx.lineTo(L.box.x,L.box.y);ctx.moveTo(m.mx,m.my+m.mr);ctx.lineTo(L.box.x,L.box.y+L.box.h);}
+ ctx.stroke();ctx.setLineDash([]);
+ ctx.strokeStyle=C.ink;ctx.lineWidth=2;ctx.beginPath();ctx.arc(m.mx,m.my,m.mr,0,6.283);ctx.stroke();
+ drawBox(ctx,L.box);
+}
+function niceStep(range,n){const raw=range/n,p=Math.pow(10,Math.floor(Math.log10(raw))),f=raw/p;return(f<1.5?1:f<3?2:f<7?5:10)*p;}
+function drawGraph1(){
+ if(!ctxG1)return;const ctx=ctxG1,W=G1W,H=240,ml=hideNum?16:48,mr=12,mt=14,mb=30,s=SUB[sim1.sub],h=sim1.hist;
+ ctx.clearRect(0,0,W,H);const pw=W-ml-mr,ph=H-mt-mb;
+ const t0=h.length?h[0].t:0,t1=Math.max(t0+30,h.length?h[h.length-1].t:0);
+ let lo=Infinity,hi=-Infinity;for(const q of h){lo=Math.min(lo,q.T);hi=Math.max(hi,q.T);}if(!isFinite(lo)){lo=0;hi=1;}
+ if(hi-lo<40){const m=(hi+lo)/2;lo=m-20;hi=m+20;}const pad=(hi-lo)*0.08;lo-=pad;hi+=pad;
+ const ys=niceStep(hi-lo,6);lo=Math.floor(lo/ys)*ys;hi=Math.ceil(hi/ys)*ys;
+ const X=tt=>ml+(tt-t0)/(t1-t0)*pw,Y=T=>mt+(1-(T-lo)/(hi-lo))*ph;
+ ctx.font=`500 11px ${FD}`;ctx.lineWidth=1;
+ ctx.textAlign='right';ctx.textBaseline='middle';
+ for(let v=lo;v<=hi+1e-9;v+=ys){ctx.strokeStyle=alpha(C.line,0.9);ctx.beginPath();ctx.moveTo(ml,Y(v));ctx.lineTo(W-mr,Y(v));ctx.stroke();if(!hideNum){ctx.fillStyle=C.muted;ctx.fillText(fmt(v),ml-6,Y(v));}}
+ const xs=niceStep(t1-t0,6);ctx.textAlign='center';ctx.textBaseline='top';
+ for(let v=Math.ceil(t0/xs)*xs;v<=t1;v+=xs){ctx.fillStyle=C.muted;if(!hideNum)ctx.fillText(fmt(v),X(v),H-mb+6);}
+ ctx.textAlign='right';ctx.fillText(lang==='vi'?'t (s)':'t (s)',W-mr,H-mb+18>H-12?H-12:H-mb+18);
+ if(!hideNum){ctx.save();ctx.translate(11,mt+ph/2);ctx.rotate(-Math.PI/2);ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('T (°C)',0,0);ctx.restore();}
+ for(const[T,key]of[[s.Tm,'tm'],[s.Tb,'tb']]){if(T<lo||T>hi)continue;ctx.strokeStyle=C.muted;ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(ml,Y(T));ctx.lineTo(W-mr,Y(T));ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle=C.muted;ctx.font=`500 11px ${FB}`;ctx.textAlign='left';ctx.textBaseline='bottom';ctx.fillText(t(key).replace(' (1 atm)','')+(hideNum?'':' · '+fT(T)),ml+6,Y(T)-3);}
+ ctx.strokeStyle=C.ink;ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(ml,mt);ctx.lineTo(ml,mt+ph);ctx.lineTo(W-mr,mt+ph);ctx.stroke();
+ if(h.length>1){ctx.lineWidth=2.6;ctx.lineJoin='round';ctx.lineCap='round';
+  for(let i=1;i<h.length;i++){const a=h[i-1],b=h[i];const st=b.st;ctx.strokeStyle=st==='solid'?C.solid:st==='liquid'?C.liquid:st==='gas'?C.gas:C.ink;ctx.beginPath();ctx.moveTo(X(a.t),Y(a.T));ctx.lineTo(X(b.t),Y(b.T));ctx.stroke();}
+  const e=h[h.length-1];ctx.fillStyle=C.heat;ctx.beginPath();ctx.arc(X(e.t),Y(e.T),4.5,0,6.283);ctx.fill();}
+}
+
+/* ============================== render tab 2 ============================== */
+function drawCup(ctx,r,cup,name,col,clk){
+ const s=r.w/PW,X=x=>r.x+x*s,Y=y=>r.y+y*s,iL=PW/2-cup.wI/2,iR=PW/2+cup.wI/2,c=cup.cfg,liqCol=c.liq==='water'?C.liquid:C.liquid2;
+ ctx.fillStyle=C.surface2;ctx.strokeStyle=C.line;ctx.lineWidth=1.5;rr(ctx,r.x,r.y,r.w,r.h,10);ctx.fill();ctx.stroke();
+ ctx.save();rr(ctx,r.x,r.y,r.w,r.h,10);ctx.clip();
+ // wind streaks
+ if(c.wind>0){const wv=[0,45,120][c.wind],k=c.wind*5;ctx.strokeStyle=alpha(C.muted,0.55);ctx.lineWidth=1.4;
+  for(let i=0;i<k;i++){const y=48+((i*41)%(RIM-70));const x=((clk*wv*1.3+i*83)%(PW+60))-30;ctx.beginPath();ctx.moveTo(X(x),Y(y));ctx.lineTo(X(x+26),Y(y));ctx.lineTo(X(x+21),Y(y-3));ctx.moveTo(X(x+26),Y(y));ctx.lineTo(X(x+21),Y(y+3));ctx.stroke();}}
+ // floor + hot plate
+ ctx.strokeStyle=C.muted;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(r.x,Y(FLOOR));ctx.lineTo(r.x+r.w,Y(FLOOR));ctx.stroke();
+ const hf=clamp((c.T-10)/(cup.Tb-10),0,1);ctx.fillStyle=mix(C.muted,C.heat,hf);rr(ctx,X(iL-10),Y(CUP_BOT+4),(cup.wI+20)*s,(FLOOR-CUP_BOT-4)*s,2);ctx.fill();
+ // liquid particles
+ const Tk=c.T+273.15,amp=0.35+0.9*Math.sqrt(Tk/373),sp=Math.sqrt(Tk/300),cols=cup.cols,left=cup.left,rad=Math.max(1.4,3.1*s);
+ ctx.fillStyle=liqCol;
+ for(let i=0;i<cup.n;i++){const row=Math.floor(i/cols),cl=i%cols,j=cup.jit[i];const x=left+D2/2+cl*D2+amp*Math.sin(clk*j.f*sp+j.a),y=CUP_BOT-D2/2-row*D2+amp*Math.sin(clk*j.f*sp*1.1+j.b);ctx.beginPath();ctx.arc(X(x),Y(y),rad,0,6.283);ctx.fill();}
+ // bubbles
+ ctx.strokeStyle=C.gas;ctx.lineWidth=1.3;for(const b of cup.bub){ctx.fillStyle=alpha(C.surface2,0.85);ctx.beginPath();ctx.arc(X(b.x),Y(b.y),b.r*s,0,6.283);ctx.fill();ctx.stroke();}
+ // cup walls
+ ctx.strokeStyle=C.glass;ctx.lineWidth=Math.max(2,4*s);ctx.lineJoin='round';ctx.beginPath();ctx.moveTo(X(iL-2),Y(RIM));ctx.lineTo(X(iL-2),Y(CUP_BOT+2));ctx.lineTo(X(iR+2),Y(CUP_BOT+2));ctx.lineTo(X(iR+2),Y(RIM));ctx.stroke();
+ // vapour
+ for(const v of cup.vap){ctx.fillStyle=C.gas;ctx.globalAlpha=v.age<0.5?1:0.75;ctx.beginPath();ctx.arc(X(v.x),Y(v.y),rad,0,6.283);ctx.fill();
+  if(v.age<0.45){ctx.globalAlpha=1;ctx.strokeStyle=C.ink;ctx.lineWidth=1;ctx.beginPath();ctx.arc(X(v.x),Y(v.y),rad+2,0,6.283);ctx.stroke();}}
+ ctx.globalAlpha=1;
+ // surface label
+ if(cup.n>0){const sy=cup.surfY();ctx.strokeStyle=C.muted;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(X(iR+8),Y(sy));ctx.lineTo(X(iR+18),Y(sy));ctx.stroke();ctx.font=`500 ${Math.max(10,11*s)}px ${FB}`;ctx.fillStyle=C.muted;ctx.textAlign='left';ctx.textBaseline='middle';if(iR+20<PW-40)ctx.fillText(t('cvSurface'),X(iR+21),Y(sy));}
+ ctx.restore();
+ // header
+ ctx.textBaseline='alphabetic';ctx.textAlign='left';ctx.font=`600 14px ${FX}`;ctx.fillStyle=col;ctx.fillText(name,r.x+12,r.y+22);
+ ctx.fillStyle=C.ink;
+ ctx.font=`600 14px ${FX}`;const nw=ctx.measureText(name).width;ctx.font=`500 12px ${FD}`;
+ ctx.fillText(hideNum?'? °C':fT(c.T),r.x+20+nw,r.y+22);
+ const st=cup.n===0?t('isEmpty'):cup.boiling?t('isBoil'):t('isEvap');ctx.font=`600 12px ${FB}`;ctx.textAlign='right';ctx.fillStyle=cup.boiling?C.heat:C.muted;ctx.fillText(st,r.x+r.w-12,r.y+22);
+}
+function renderEvap(clk){
+ if(!ctx2)return;ctx2.clearRect(0,0,L2.w,L2.h);
+ drawCup(ctx2,L2.panels[0],sim2.A,t('cupA'),C.serA,clk);
+ drawCup(ctx2,L2.panels[1],sim2.B,t('cupB'),C.serB,clk);
+}
+function drawGraph2(){
+ if(!ctxG2)return;const ctx=ctxG2,W=G2W,H=220,ml=42,mr=12,mt=12,mb=28,h=sim2.hist;ctx.clearRect(0,0,W,H);
+ const pw=W-ml-mr,ph=H-mt-mb,t0=h[0].t,t1=Math.max(t0+30,h[h.length-1].t);
+ const X=tt=>ml+(tt-t0)/(t1-t0)*pw,Y=v=>mt+(1-v/100)*ph;
+ ctx.font=`500 11px ${FD}`;ctx.textAlign='right';ctx.textBaseline='middle';ctx.lineWidth=1;
+ for(let v=0;v<=100;v+=25){ctx.strokeStyle=C.line;ctx.beginPath();ctx.moveTo(ml,Y(v));ctx.lineTo(W-mr,Y(v));ctx.stroke();ctx.fillStyle=C.muted;ctx.fillText(fmt(v)+' %',ml-6,Y(v));}
+ const xs=niceStep(t1-t0,6);ctx.textAlign='center';ctx.textBaseline='top';for(let v=Math.ceil(t0/xs)*xs;v<=t1;v+=xs)ctx.fillText(fmt(v),X(v),H-mb+6);
+ ctx.textAlign='right';ctx.fillText('t (s)',W-mr,H-14);
+ for(const[k,col]of[['a',C.serA],['b',C.serB]]){ctx.strokeStyle=col;ctx.lineWidth=2.4;ctx.lineJoin='round';ctx.beginPath();h.forEach((p,i)=>{const x=X(p.t),y=Y(p[k]);i?ctx.lineTo(x,y):ctx.moveTo(x,y);});ctx.stroke();
+  const e=h[h.length-1];ctx.fillStyle=col;ctx.beginPath();ctx.arc(X(e.t),Y(e[k]),4,0,6.283);ctx.fill();}
+}
+
+/* ============================== render tab 3 ============================== */
+const DROP_PTS=(()=>{const pts=[],sp=5.2;for(let r=0;r<7;r++)for(let c=-7;c<=7;c++){const x=c*sp+(r%2?sp/2:0),y=r*sp*0.87+2.6;pts.push({x,y,d:Math.hypot(x,y*1.2)});}return pts.sort((a,b)=>a.d-b.d);})();
+function drawCond(ctx,r,st,name,col,clk){
+ const s=r.w/PW,X=x=>r.x+x*s,Y=y=>r.y+y*s,c=st.cfg,cL=PW/2-C_CW/2,cR=PW/2+C_CW/2,pL=PW/2-st.wP/2,pR=PW/2+st.wP/2,rad=Math.max(1.4,3.1*s);
+ ctx.fillStyle=C.surface2;ctx.strokeStyle=C.line;ctx.lineWidth=1.5;rr(ctx,r.x,r.y,r.w,r.h,10);ctx.fill();ctx.stroke();
+ ctx.save();rr(ctx,r.x,r.y,r.w,r.h,10);ctx.clip();
+ ctx.strokeStyle=C.muted;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(r.x,Y(FLOOR));ctx.lineTo(r.x+r.w,Y(FLOOR));ctx.stroke();
+ ctx.fillStyle=mix(C.muted,C.heat,clamp((c.Tw-30)/65,0,1));rr(ctx,X(cL-10),Y(C_BOT+4),(C_CW+20)*s,(FLOOR-C_BOT-4)*s,2);ctx.fill();
+ // water in cup
+ const cols=Math.floor(C_CW/D2),rows=Math.floor((C_BOT-C_WS)/D2),left=PW/2-cols*D2/2,Tk=c.Tw+273.15,amp=0.35+0.9*Math.sqrt(Tk/373),sp=Math.sqrt(Tk/300);
+ ctx.fillStyle=C.liquid;
+ for(let i=0;i<cols*rows;i++){const row=Math.floor(i/cols),cl=i%cols,j=st.jit[i%st.jit.length];ctx.beginPath();ctx.arc(X(left+D2/2+cl*D2+amp*Math.sin(clk*j.f*sp+j.a)),Y(C_BOT-D2/2-row*D2+amp*Math.sin(clk*j.f*sp*1.1+j.b)),rad,0,6.283);ctx.fill();}
+ ctx.strokeStyle=C.glass;ctx.lineWidth=Math.max(2,4*s);ctx.lineJoin='round';ctx.beginPath();ctx.moveTo(X(cL-2),Y(C_RIM));ctx.lineTo(X(cL-2),Y(C_BOT+2));ctx.lineTo(X(cR+2),Y(C_BOT+2));ctx.lineTo(X(cR+2),Y(C_RIM));ctx.stroke();
+ // glass plate
+ const pf=clamp((c.Tp+10)/100,0,1);
+ ctx.fillStyle=alpha(C.glass,0.35);ctx.strokeStyle=mix(C.cold,C.heat,pf);ctx.lineWidth=2;rr(ctx,X(pL),Y(C_PL-7),st.wP*s,7*s,2);ctx.fill();ctx.stroke();
+ if(c.Tp<=5){ctx.fillStyle=alpha(C.cold,0.3);ctx.strokeStyle=C.cold;ctx.lineWidth=1.3;const n=st.wP>200?5:3;for(let i=0;i<n;i++){const x=pL+st.wP*(i+0.5)/n-8;rr(ctx,X(x),Y(C_PL-23),16*s,15*s,3*s);ctx.fill();ctx.stroke();}}
+ // droplets as clusters of molecules
+ ctx.fillStyle=C.liquid;
+ for(const d of st.drops){for(let k=0;k<d.m&&k<DROP_PTS.length;k++){const q=DROP_PTS[k];ctx.beginPath();ctx.arc(X(d.x+q.x),Y(C_PL+q.y),rad*0.85,0,6.283);ctx.fill();}}
+ for(const f of st.fall){ctx.beginPath();ctx.arc(X(f.x),Y(f.y),dropR(f.m)*0.7*s,0,6.283);ctx.fill();}
+ // vapour
+ ctx.fillStyle=C.gas;for(const v of st.vap){ctx.globalAlpha=v.in===false&&v.age<0.5?1:0.8;ctx.beginPath();ctx.arc(X(v.x),Y(v.y),rad,0,6.283);ctx.fill();
+  if(v.in===false&&v.age<0.5&&v.y>C_PL){ctx.strokeStyle=C.cold;ctx.lineWidth=1;ctx.beginPath();ctx.arc(X(v.x),Y(v.y),rad+2,0,6.283);ctx.stroke();}}
+ ctx.globalAlpha=1;
+ for(const f of st.flash){ctx.strokeStyle=alpha(C.ink,Math.min(1,f.a*1.6));ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(X(f.x),Y(C_PL+3),(4+(0.6-f.a)*14)*s,0,6.283);ctx.stroke();}
+ ctx.font=`500 ${Math.max(10,11*s)}px ${FB}`;ctx.fillStyle=C.muted;ctx.textAlign=pR+70<PW?'left':'right';ctx.textBaseline='middle';
+ ctx.fillText(t('cvPlate'),pR+70<PW?X(pR+6):X(pR-4),Y(pR+70<PW?C_PL-4:C_PL-30));
+ ctx.restore();
+ ctx.textBaseline='alphabetic';ctx.textAlign='left';ctx.font=`600 14px ${FX}`;ctx.fillStyle=col;ctx.fillText(name,r.x+12,r.y+22);
+ const nw=ctx.measureText(name).width;ctx.font=`500 11.5px ${FD}`;ctx.fillStyle=C.ink;
+ ctx.fillText(hideNum?'':`${t('cvGlass')} ${fT(c.Tp)} · ${t('cvWater')} ${fT(c.Tw)}`,r.x+20+nw,r.y+22);
+}
+function renderCond(clk){
+ if(!ctx3)return;ctx3.clearRect(0,0,L3.w,L3.h);
+ drawCond(ctx3,L3.panels[0],sim3.A,t('setA'),C.serA,clk);
+ drawCond(ctx3,L3.panels[1],sim3.B,t('setB'),C.serB,clk);
+}
+function drawGraph3(){
+ if(!ctxG3)return;const ctx=ctxG3,W=G3W,H=220,ml=46,mr=12,mt=12,mb=28,h=sim3.hist;ctx.clearRect(0,0,W,H);
+ const pw=W-ml-mr,ph=H-mt-mb,t0=h[0].t,t1=Math.max(t0+30,h[h.length-1].t);
+ let ymax=50;for(const p of h)ymax=Math.max(ymax,p.a,p.b);const ys=niceStep(ymax,4);ymax=Math.ceil(ymax/ys)*ys;
+ const X=tt=>ml+(tt-t0)/(t1-t0)*pw,Y=v=>mt+(1-v/ymax)*ph;
+ ctx.font=`500 11px ${FD}`;ctx.textAlign='right';ctx.textBaseline='middle';ctx.lineWidth=1;
+ for(let v=0;v<=ymax;v+=ys){ctx.strokeStyle=C.line;ctx.beginPath();ctx.moveTo(ml,Y(v));ctx.lineTo(W-mr,Y(v));ctx.stroke();ctx.fillStyle=C.muted;ctx.fillText(fmt(v),ml-6,Y(v));}
+ const xs=niceStep(t1-t0,6);ctx.textAlign='center';ctx.textBaseline='top';for(let v=Math.ceil(t0/xs)*xs;v<=t1;v+=xs)ctx.fillText(fmt(v),X(v),H-mb+6);
+ ctx.textAlign='right';ctx.fillText('t (s)',W-mr,H-14);
+ for(const[k,col]of[['a',C.serA],['b',C.serB]]){ctx.strokeStyle=col;ctx.lineWidth=2.4;ctx.lineJoin='round';ctx.beginPath();h.forEach((p,i)=>{const x=X(p.t),y=Y(Math.max(0,p[k]));i?ctx.lineTo(x,y):ctx.moveTo(x,y);});ctx.stroke();
+  const e=h[h.length-1];ctx.fillStyle=col;ctx.beginPath();ctx.arc(X(e.t),Y(Math.max(0,e[k])),4,0,6.283);ctx.fill();}
+}
+
+/* ============================== UI text ============================== */
+const STATE_ROWS=[['r_arr','arr'],['r_dist','dist'],['r_move','move'],['r_force','force'],['r_shape','shape'],['r_vol','vol'],['r_comp','comp']];
+const EVAP_ROWS=[['c_where','where'],['c_temp','temp'],['c_sign','sign'],['c_speed','speed'],['c_dep','dep'],['c_ex','ex']];
+function buildTables(){
+ $('#statesBody').innerHTML=STATE_ROWS.map(([h,k])=>`<tr><th>${t(h)}</th><td data-col="0">${t('s_'+k)}</td><td data-col="1">${t('l_'+k)}</td><td data-col="2">${t('g_'+k)}</td></tr>`).join('');
+ $('#condBody').innerHTML=['k1','k2','k3'].map(k=>`<tr><th>${t(k+'f')}</th><td>${t(k+'w')}</td><td>${t(k+'y')}</td></tr>`).join('');
+ $('#evapBody').innerHTML=EVAP_ROWS.map(([h,k])=>`<tr><th>${t(h)}</th><td>${t('e_'+k)}</td><td>${t('b_'+k)}</td></tr>`).join('');
+}
+function applyLang(){
+ document.documentElement.lang=lang;
+ document.querySelectorAll('[data-i18n]').forEach(el=>{el.textContent=t(el.dataset.i18n);});
+ $('#langBtn').textContent=lang==='vi'?'EN':'VI';
+ document.querySelectorAll('#presetSeg button').forEach(b=>b.textContent=fmt(+b.dataset.v));
+ document.querySelectorAll('.seg[aria-label="speed"] button').forEach(b=>b.textContent='×'+fmt(+b.dataset.v,b.dataset.v==='0.5'?1:0));
+ $('#run1').textContent=sim1.running?t('pause'):t('run');$('#run2').textContent=sim2.running?t('pause'):t('run');$('#run3').textContent=sim3.running?t('pause'):t('run');
+ buildTables();updateModelUI(true);updateEvapUI();updateCondUI();drawGraph1();drawGraph2();drawGraph3();
+}
+let lastCol=-1;
+function stageKey(){const st=sim1.th.stage,P=sim1.P,T=sim1.th.T,s=SUB[sim1.sub];if(st==='melt')return P>0?'melt':P<0?'freeze':'meltEq';if(st==='boil')return P>0?'boil':P<0?'cond':'boilEq';
+ if(st==='solid'&&T<-200)return'solidCold';if(st==='liquid'&&pvRel(s.B,T,s.Tb)>0.55)return'liquidHot';if(st==='gas'&&T>500)return'gasHot';return st;}
+function updateModelUI(force){
+ const s=SUB[sim1.sub],th=sim1.th,[a,b,c]=sim1.counts(),k=stageKey();
+ $('#tVal').textContent=fT(th.T);$('#tmVal').textContent=fT(s.Tm);$('#tbVal').textContent=fT(s.Tb);
+ $('#vVal').textContent='×'+fmt(Math.sqrt((th.T+273.15)/273.15),2);
+ const ex=sim1.rates();$('#exVal').textContent=fmt(ex[0])+' / '+fmt(ex[1]);
+ $('#nS').textContent=a;$('#nL').textContent=b;$('#nG').textContent=c;
+ $('#bS').style.width=(a/N1*100)+'%';$('#bL').style.width=(b/N1*100)+'%';$('#bG').style.width=(c/N1*100)+'%';
+ const chip=$('#stateChip');const col=k.startsWith('solid')?C.solid:k.startsWith('liquid')?C.liquid:k.startsWith('gas')?C.gas:C.ink;chip.querySelector('i').style.background=col;chip.querySelector('span').textContent=t('st_'+k);
+ const Tstr=hideNum?'…':fT(th.T);
+ $('#exSci').textContent=t('ex_'+k,{T:Tstr})+(sim1.atLimit?t('ex_limit'):'');$('#exSimple').textContent=' '+t('si_'+k);
+ const ho=$('#heatOut');ho.textContent=(sim1.P>0?'+':sim1.P<0?'−':'')+Math.abs(Math.round(sim1.P))+' %';
+ const colIdx=th.stage==='solid'?[0]:th.stage==='melt'?[0,1]:th.stage==='liquid'?[1]:th.stage==='boil'?[1,2]:[2];const key=colIdx.join();
+ if(force||key!==lastCol){lastCol=key;document.querySelectorAll('#statesTable [data-col]').forEach(el=>el.classList.toggle('on',colIdx.includes(+el.dataset.col)));}
+}
+function updateEvapUI(){
+ for(const[K,cup]of[['A',sim2.A],['B',sim2.B]]){
+  $('#r'+K+'1').textContent=fmt(cup.n/N0*100)+' %';$('#r'+K+'2').textContent=fmt(N0-cup.n);
+  $('#r'+K+'3').textContent=fmt(cup.escaped)+' / '+fmt(cup.returned);
+  $('#r'+K+'4').textContent=cup.n===0?t('isEmpty'):cup.boiling?t('isBoil'):t('isEvap');
+  $('#t'+K+'o').textContent=fT(cup.cfg.T)+(cup.cfg.T>=cup.Tb?' · '+t('boilT'):'');
+ }
+ const a=sim2.A.cfg,b=sim2.B.cfg,d=[];
+ if(a.T!==b.T)d.push('fn_T');if(a.wind!==b.wind)d.push('fn_wind');if(a.area!==b.area)d.push('fn_area');if(a.liq!==b.liq)d.push('fn_liq');
+ const el=$('#fair');const list=d.map(x=>t(x)).join(', ');
+ el.textContent=d.length===0?t('fair0'):d.length===1?t('fair1',{f:list}):t('fairN',{n:d.length,f:list});
+ el.className='fair '+(d.length===1?'ok':d.length>1?'bad':'');
+}
+
+function updateCondUI(){
+ for(const[K,st]of[['A',sim3.A],['B',sim3.B]]){
+  const rate=st.rate();$('#c'+K+'1').textContent=fmt(Math.max(0,rate),1);$('#c'+K+'2').textContent=fmt(st.cond-st.reev);
+  $('#c'+K+'3').textContent=fmt(st.cond)+' / '+fmt(st.reev);$('#c'+K+'4').textContent=fmt(st.dripped);
+  $('#tp'+K+'o').textContent=fT(st.cfg.Tp);$('#tw'+K+'o').textContent=fT(st.cfg.Tw);
+ }
+ const a=sim3.A.cfg,b=sim3.B.cfg,d=[];
+ if(a.Tp!==b.Tp)d.push('fn_Tp');if(a.Tw!==b.Tw)d.push('fn_Tw');if(a.area!==b.area)d.push('fn_PA');
+ const el=$('#fair3'),list=d.map(x=>t(x)).join(', ');
+ el.textContent=d.length===0?t('fair0c'):d.length===1?t('fair1c',{f:list}):t('fairNc',{n:d.length,f:list});
+ el.className='fair '+(d.length===1?'ok':d.length>1?'bad':'');
+}
+
+/* ============================== controls ============================== */
+function segSelect(seg,v){seg.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===v)));}
+$('#langBtn').onclick=()=>{lang=lang==='vi'?'en':'vi';applyLang();};
+$('#hideBtn').onclick=e=>{hideNum=!hideNum;e.currentTarget.setAttribute('aria-pressed',String(hideNum));document.body.classList.toggle('hide-num',hideNum);updateModelUI(true);drawGraph1();};
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{activeTab=b.dataset.tab;document.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected',String(x===b)));
+ for(const k of['model','evap','cond'])$('#panel-'+k).hidden=activeTab!==k;resizeAll();});
+$('#subSeg').onclick=e=>{const b=e.target.closest('button');if(!b)return;sim1.sub=b.dataset.v;segSelect($('#subSeg'),b.dataset.v);sim1.reset();updateModelUI(true);drawGraph1();};
+const heat=$('#heat');heat.oninput=()=>{sim1.P=+heat.value;segSelect($('#jumpSeg'),'');updateModelUI();};
+function applySetT(v){if(!isFinite(v))return;v=clamp(Math.round(v),TMIN,TMAX);$('#setT').value=v;sim1.setT(v);heat.value=0;segSelect($('#jumpSeg'),'');updateModelUI(true);}
+$('#setTBtn').onclick=()=>applySetT(parseFloat($('#setT').value));
+$('#setT').onkeydown=e=>{if(e.key==='Enter')applySetT(parseFloat($('#setT').value));};
+$('#presetSeg').onclick=e=>{const b=e.target.closest('button');if(b)applySetT(+b.dataset.v);};
+$('#heatOff').onclick=()=>{sim1.P=0;heat.value=0;updateModelUI();};
+$('#jumpSeg').onclick=e=>{const b=e.target.closest('button');if(!b)return;sim1.jump(b.dataset.v);heat.value=0;segSelect($('#jumpSeg'),b.dataset.v);updateModelUI(true);};
+$('#run1').onclick=()=>{sim1.running=!sim1.running;$('#run1').textContent=sim1.running?t('pause'):t('run');};
+$('#step1').onclick=()=>{sim1.running=false;$('#run1').textContent=t('run');for(let i=0;i<24;i++)sim1.step(DT);updateModelUI();drawGraph1();};
+$('#reset1').onclick=()=>{sim1.reset();updateModelUI(true);drawGraph1();};
+$('#spd1').onclick=e=>{const b=e.target.closest('button');if(!b)return;sim1.speed=+b.dataset.v;segSelect($('#spd1'),b.dataset.v);};
+$('#trailBtn').onclick=e=>{showTrail=!showTrail;e.currentTarget.setAttribute('aria-pressed',String(showTrail));sim1.trail=[];};
+$('#arrowBtn').onclick=e=>{showArrows=!showArrows;e.currentTarget.setAttribute('aria-pressed',String(showArrows));};
+for(const K of['A','B']){const cup=sim2[K];
+ const tr=$('#t'+K);tr.oninput=()=>{cup.cfg.T=+tr.value;updateEvapUI();};
+ $('#w'+K).onchange=e=>{cup.cfg.wind=+e.target.value;updateEvapUI();};
+ $('#a'+K).onchange=e=>{cup.cfg.area=e.target.value;cup.reset();updateEvapUI();};
+ $('#l'+K).onchange=e=>{cup.cfg.liq=e.target.value;tr.max=cup.Tb;if(+tr.value>cup.Tb)tr.value=cup.Tb;cup.cfg.T=+tr.value;updateEvapUI();};
+}
+$('#aA').value='narrow';$('#aB').value='wide';
+$('#run2').onclick=()=>{sim2.running=!sim2.running;$('#run2').textContent=sim2.running?t('pause'):t('run');};
+$('#reset2').onclick=()=>{sim2.A.reset();sim2.B.reset();sim2.time=0;sim2.hAcc=0;sim2.hist=[{t:0,a:100,b:100}];updateEvapUI();drawGraph2();};
+$('#spd2').onclick=e=>{const b=e.target.closest('button');if(!b)return;sim2.speed=+b.dataset.v;segSelect($('#spd2'),b.dataset.v);};
+
+for(const K of['A','B']){const st=sim3[K];
+ const tp=$('#tp'+K),tw=$('#tw'+K);
+ tp.oninput=()=>{st.cfg.Tp=+tp.value;updateCondUI();};
+ tw.oninput=()=>{st.cfg.Tw=+tw.value;updateCondUI();};
+ $('#pa'+K).onchange=e=>{st.cfg.area=e.target.value;st.reset();updateCondUI();};
+}
+$('#run3').onclick=()=>{sim3.running=!sim3.running;$('#run3').textContent=sim3.running?t('pause'):t('run');};
+$('#reset3').onclick=()=>{sim3.A.reset();sim3.B.reset();sim3.time=0;sim3.hAcc=0;sim3.hist=[{t:0,a:0,b:0}];updateCondUI();drawGraph3();};
+$('#spd3').onclick=e=>{const b=e.target.closest('button');if(!b)return;sim3.speed=+b.dataset.v;segSelect($('#spd3'),b.dataset.v);};
+
+/* ============================== loop ============================== */
+const DT=1/240;let acc1=0,acc2=0,acc3=0,clk3=0,last=performance.now(),uiT=0,gT=0,clk1=0,clk2=0;
+function loop(now){
+ const dt=Math.min((now-last)/1000,0.1);last=now;uiT+=dt;gT+=dt;
+ if(activeTab==='model'){
+  if(sim1.running){acc1+=dt*sim1.speed;let k=0;while(acc1>=DT&&k<48){sim1.step(DT);acc1-=DT;k++;}if(k>=48)acc1=0;clk1+=dt*sim1.speed;}
+  renderModel(clk1);
+  if(uiT>0.1){uiT=0;updateModelUI();}
+  if(gT>0.2){gT=0;drawGraph1();}
+ }else if(activeTab==='cond'){
+  if(sim3.running){acc3+=dt*sim3.speed;let k=0;while(acc3>=1/120&&k<24){sim3.A.step(1/120);sim3.B.step(1/120);sim3.time+=1/120;sim3.hAcc+=1/120;acc3-=1/120;k++;
+    if(sim3.hAcc>=0.25){sim3.hAcc=0;sim3.hist.push({t:sim3.time,a:sim3.A.cond-sim3.A.reev,b:sim3.B.cond-sim3.B.reev});if(sim3.hist.length>2400)sim3.hist.shift();}}
+   if(k>=24)acc3=0;clk3+=dt*sim3.speed;}
+  renderCond(clk3);
+  if(uiT>0.1){uiT=0;updateCondUI();}
+  if(gT>0.25){gT=0;drawGraph3();}
+ }else{
+  if(sim2.running){acc2+=dt*sim2.speed;let k=0;while(acc2>=1/120&&k<24){sim2.A.step(1/120);sim2.B.step(1/120);sim2.time+=1/120;sim2.hAcc+=1/120;acc2-=1/120;k++;
+    if(sim2.hAcc>=0.25){sim2.hAcc=0;sim2.hist.push({t:sim2.time,a:sim2.A.n/N0*100,b:sim2.B.n/N0*100});if(sim2.hist.length>2400)sim2.hist.shift();}}
+   if(k>=24)acc2=0;clk2+=dt*sim2.speed;}
+  renderEvap(clk2);
+  if(uiT>0.1){uiT=0;updateEvapUI();}
+  if(gT>0.25){gT=0;drawGraph2();}
+ }
+ requestAnimationFrame(loop);
+}
+applyLang();resizeAll();requestAnimationFrame(loop);
+</script>
+
+</body></html>
