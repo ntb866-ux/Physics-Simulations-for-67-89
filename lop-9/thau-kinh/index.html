@@ -143,6 +143,7 @@ footer p{margin:0 0 4px;max-width:120ch}
   <nav class="tabs" role="tablist">
     <button role="tab" data-tab="1" data-i18n="tab1"></button>
     <button role="tab" data-tab="2" data-i18n="tab2"></button>
+    <button role="tab" data-tab="7" data-i18n="tab7"></button>
     <button role="tab" data-tab="3" data-i18n="tab3"></button>
     <button role="tab" data-tab="4" data-i18n="tab4"></button>
     <button role="tab" data-tab="5" data-i18n="tab5"></button>
@@ -421,6 +422,61 @@ footer p{margin:0 0 4px;max-width:120ch}
     </div>
   </section>
 
+  <!-- ===================== TAB 7: Vẽ tia sáng ===================== -->
+  <section id="t7" class="col" hidden>
+    <p class="req" data-i18n-html="req7"></p>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" id="hint7"></p>
+        <canvas id="cv7" aria-label="ray drawing"></canvas>
+        <p class="status" id="st7"></p>
+        <div class="controls">
+          <div class="seg" id="mode7"><button class="btn" data-v="three" data-i18n="md7_three"></button><button class="btn" data-v="any" data-i18n="md7_any"></button><button class="btn" data-v="focal" data-i18n="md7_focal"></button><button class="btn" data-v="beam" data-i18n="md7_beam"></button><button class="btn" data-v="try" data-i18n="md7_try"></button></div>
+        </div>
+        <div class="controls" id="anyc7">
+          <div class="seg" id="met7"><button class="btn" data-v="1" data-i18n="met7_1"></button><button class="btn" data-v="2" data-i18n="met7_2"></button></div>
+          <button class="btn primary" id="next7" data-i18n="next7"></button>
+          <button class="btn" id="all7" data-i18n="all7"></button>
+          <button class="btn" id="rst7" data-i18n="rst7"></button>
+        </div>
+        <ol class="steps" id="stepList7"></ol>
+        <div class="controls" id="nc7">
+          <div class="fld" style="flex:1 1 260px"><span><span id="nLab7"></span> <span class="val" id="nTxt7"></span></span>
+            <input type="range" id="rngN7" min="0" max="12" step="1" value="0"></div>
+        </div>
+        <div class="controls" id="beamc7">
+          <div class="fld" style="flex:1 1 260px"><span><span data-i18n="ang7"></span> <span class="val" id="a7Txt"></span></span>
+            <input type="range" id="rngA7" min="-25" max="25" step="1" value="12"></div>
+        </div>
+        <div class="controls" id="tryc7">
+          <button class="btn primary" id="chk7" data-i18n="chk7"></button>
+          <button class="btn" id="hintbtn7" data-i18n="hintbtn7"></button>
+          <button class="btn" id="new7" data-i18n="new7"></button>
+        </div>
+        <p class="fb" id="fb7" hidden></p>
+        <p class="hint" id="score7"></p>
+      </div>
+      <aside class="col">
+        <div class="card" id="cmn7">
+          <h2 data-i18n="cSetup"></h2>
+          <div class="seg full" id="typ7"><button class="btn" data-v="conv" data-i18n="conv"></button><button class="btn" data-v="div" data-i18n="div"></button></div>
+          <div class="fld"><span><span data-i18n="focal"></span> <span class="val" id="f7Txt"></span></span>
+            <input type="range" id="rngF7" min="5" max="12" step="0.5" value="8"></div>
+          <label class="chk" id="planesRow7"><input type="checkbox" id="planes7" checked> <span data-i18n="planes7"></span></label>
+        </div>
+        <div class="card">
+          <h2 data-i18n="cRules7"></h2>
+          <ul class="rules" id="rules7"></ul>
+        </div>
+        <div class="card">
+          <h2 data-i18n="cObs"></h2>
+          <div class="obs" id="obs7"></div>
+          <dl class="kv" id="kv7"></dl>
+        </div>
+      </aside>
+    </div>
+  </section>
+
   <footer id="foot"></footer>
 </div>
 
@@ -429,7 +485,7 @@ footer p{margin:0 0 4px;max-width:120ch}
 const I18N = {
 vi:{
   eyebrow:'KHTN 9 · Ánh sáng', title:'Thấu kính và sự tạo ảnh', lvQual:'Định tính', lvQuant:'Định lượng',
-  tab1:'1. Lăng kính → thấu kính', tab2:'2. Đường đi tia sáng', tab3:'3. Sự tạo ảnh', tab4:'4. Đo tiêu cự', tab5:'5. Kính lúp và ứng dụng', tab6:'6. Luyện vẽ ảnh',
+  tab1:'1. Lăng kính → thấu kính', tab2:'2. Đường đi tia sáng', tab3:'4. Sự tạo ảnh', tab4:'5. Đo tiêu cự', tab5:'6. Kính lúp và ứng dụng', tab6:'7. Luyện vẽ ảnh',
   req1:'<b>Yêu cầu cần đạt:</b> Giải thích được nguyên lí hoạt động của thấu kính bằng việc sử dụng sự khúc xạ của một số các lăng kính nhỏ. Nêu được các khái niệm: quang tâm, trục chính, tiêu điểm chính và tiêu cự của thấu kính.',
   req2:'<b>Yêu cầu cần đạt:</b> Tiến hành thí nghiệm rút ra được đường đi một số tia sáng qua thấu kính (tia qua quang tâm, tia song song quang trục chính).',
   req3:'<b>Yêu cầu cần đạt:</b> Vẽ được ảnh qua thấu kính. Thực hiện thí nghiệm khẳng định được: ảnh thật là ảnh hứng được trên màn; ảnh ảo là ảnh không hứng được trên màn.',
@@ -465,6 +521,35 @@ vi:{
   o1slab:'Tia đang đi qua phần giữa (hai mặt song song): tia ló song song với tia tới.',
   concl1:'<b>Kết luận.</b> Thấu kính giống như rất nhiều lăng kính nhỏ ghép lại. Thấu kính hội tụ (rìa mỏng) có đáy các lăng kính quay vào trục chính: chùm tia song song với trục chính hội tụ tại tiêu điểm F′. Thấu kính phân kì (rìa dày) có đáy quay ra ngoài: chùm tia ló loe ra, đường kéo dài đi qua tiêu điểm F. Quang tâm O là điểm giữa thấu kính, tia qua O truyền thẳng. Tiêu cự f = OF = OF′. Mặt thấu kính càng cong thì tiêu cự càng ngắn.',
   /* tab 2 */
+  /* tab 7 */
+  nEx7:'Số tia tới thêm (tia ló tương ứng):', nBm7:'Số tia tới (và tia ló):', cRules7:'Quy tắc vẽ tia', tab7:'3. Vẽ tia sáng', req7:'<b>Yêu cầu cần đạt:</b> Tiến hành thí nghiệm rút ra được đường đi một số tia sáng qua thấu kính (tia qua quang tâm, tia song song quang trục chính, tia qua tiêu điểm). Vẽ được ảnh qua thấu kính.',
+  md7_three:'Ba tia đặc biệt', md7_any:'Tia bất kì', md7_focal:'Điểm trên tiêu diện', md7_beam:'Chùm song song xiên', md7_try:'Tự vẽ',
+  met7_1:'Cách 1: tiêu điểm phụ', met7_2:'Cách 2: tiêu diện vật', next7:'Bước tiếp ▶', all7:'Hiện tất cả', rst7:'Làm lại', ang7:'Góc nghiêng của chùm:', planes7:'Hiện tiêu diện',
+  chk7:'Kiểm tra tia ló', hintbtn7:'Xem cách dựng', new7:'Tia mới', planeImg:'tiêu diện ảnh', planeObj:'tiêu diện vật', sReal:'S′ (ảnh thật)', sVirt:'S′ (ảnh ảo)',
+  note7inf:'S ở tiêu diện vật: tia qua F không tới thấu kính, các tia ló song song, ảnh ở vô cực', note7axis:'S nằm trên trục chính: ba tia trùng nhau, hãy kéo S lên cao hơn',
+  hint7_three:'Kéo điểm sáng S đến bất cứ đâu để xem ba tia đặc biệt và ảnh S′.', hint7_any:'Kéo đèn để dời, kéo núm tròn để đổi hướng. Bấm "Bước tiếp" để dựng tia ló.',
+  hint7_focal:'Kéo điểm P lên xuống trên tiêu diện.', hint7_beam:'Kéo thanh trượt để nghiêng chùm tia song song.', hint7_try:'Kéo núm tròn ở bên phải thấu kính để vẽ tia ló, rồi bấm "Kiểm tra tia ló".',
+  st7_three:c=>c?'Thấu kính hội tụ: ba tia đặc biệt gặp nhau tại ảnh S′ (nếu là ảnh ảo thì đường kéo dài của chúng gặp nhau).':'Thấu kính phân kì: đường kéo dài của ba tia ló gặp nhau tại ảnh ảo S′.',
+  st7_any:c=>c?'Thấu kính hội tụ: tia bất kì cũng đi qua điểm trên tiêu diện ảnh nằm trên trục phụ.':'Thấu kính phân kì: đường kéo dài của tia ló đi qua điểm trên tiêu diện nằm trên trục phụ.',
+  st7_focal:c=>c?'Các tia xuất phát từ P trên tiêu diện vật ló ra song song với nhau, song song với PO.':'Các tia hướng tới P trên tiêu diện ló ra song song với nhau, song song với PO.',
+  st7_beam:c=>c?'Chùm tia song song hội tụ tại tiêu điểm phụ F′₁ trên tiêu diện ảnh.':'Đường kéo dài của chùm tia ló gặp nhau tại tiêu điểm phụ F₁ trên tiêu diện.',
+  st7_try:c=>c?'Thấu kính hội tụ. Vẽ tia ló của tia xanh.':'Thấu kính phân kì. Vẽ tia ló của tia xanh.',
+  rules7:{
+    1:c=>'Tia qua quang tâm O truyền thẳng, không đổi hướng.',
+    2:c=>c?'Tia song song với trục chính → tia ló đi qua tiêu điểm F′.':'Tia song song với trục chính → tia ló loe ra, đường kéo dài đi qua tiêu điểm F.',
+    3:c=>c?'Tia qua tiêu điểm F → tia ló song song với trục chính.':'Tia (hoặc đường kéo dài của tia) hướng tới tiêu điểm F′ → tia ló song song với trục chính.',
+    4:c=>c?'Các tia song song nhau → tia ló cùng đi qua một điểm trên tiêu diện ảnh: tiêu điểm phụ F′₁, nằm trên trục phụ (đường qua O, song song với các tia tới).':'Các tia tới song song nhau → đường kéo dài của các tia ló cùng đi qua một điểm trên tiêu diện: tiêu điểm phụ F₁, nằm trên trục phụ (đường qua O, song song với các tia tới).',
+    5:c=>c?'Các tia xuất phát từ một điểm P trên tiêu diện vật → tia ló song song với nhau, và song song với trục phụ PO.':'Các tia tới hướng về một điểm P trên tiêu diện → tia ló song song với nhau, và song song với trục phụ PO.'},
+  m_o:'Tia qua O: lệch hướng', m_par:'Tia ló cách tiêu điểm', m_f:'Góc giữa tia ló và trục chính', m_any:'Tia ló cách tiêu điểm phụ', m_any1:'Góc giữa tia tới và trục phụ', m_any2:'Góc giữa tia ló và trục phụ PO', m_bm:'Tia ló cách tiêu điểm phụ (lớn nhất)', m_foc:'Góc giữa tia ló và PO (lớn nhất)',
+  stepNames7:{1:['Kẻ trục phụ: qua O, song song với tia tới','Vẽ tiêu diện ảnh (mặt phẳng qua tiêu điểm, vuông góc trục chính)','Trục phụ cắt tiêu diện tại tiêu điểm phụ','Tia ló đi qua tiêu điểm phụ (thấu kính phân kì: đường kéo dài đi qua)'],2:['Vẽ tiêu diện vật','Kéo dài tia tới cho cắt tiêu diện tại P','Nối P với O: được trục phụ PO','Tia ló song song với trục phụ PO']},
+  try7ok:'Đúng! Tia ló của em trùng với tia ló đúng.', try7no:'Chưa đúng.',
+  try7hint:(k,c)=>k==='par'?'Gợi ý: đây là tia song song trục chính.':k==='o'?'Gợi ý: đây là tia qua quang tâm O.':k==='f'?'Gợi ý: đây là tia '+(c?'qua tiêu điểm F.':'hướng tới tiêu điểm F′.'):'Gợi ý: kẻ trục phụ qua O song song với tia tới, tìm điểm nó cắt tiêu diện, tia ló đi qua điểm đó.',
+  obs7_three:c=>`<p>Chỉ cần hai trong ba tia là xác định được ảnh S′; tia thứ ba để kiểm tra.</p><p><b>Nói với học sinh:</b> thấu kính bẻ tia sáng ở mặt giữa. Tia qua O đi thẳng vì ngay giữa kính, hai mặt gần như song song nên tia không bị bẻ. Hai tia còn lại có đường đi "biết trước" nhờ tiêu điểm.</p><p>Thử đặt S đúng trên tiêu diện vật: tia qua F không gặp thấu kính, các tia ló song song nhau, ảnh ở vô cực.</p>`,
+  obs7_any:c=>`<p>Tia bất kì không phải một trong ba tia đặc biệt, nên dựng tia ló nhờ <b>trục phụ</b> và <b>tiêu điểm phụ</b>.</p><p><b>Nói với học sinh:</b> tưởng tượng cả chùm tia song song cùng hướng với tia của em. Chùm đó hội tụ trên tiêu diện, đúng tại chỗ tia qua O (không bị bẻ) cắt tiêu diện. Tia của em thuộc chùm ấy nên cũng đi qua điểm đó. Cách 2 làm ngược lại: tia tới cắt tiêu diện vật ở P, tia ló song song với PO.</p>`,
+  obs7_focal:c=>`<p>Ngược với chùm song song: ánh sáng phát ra từ một điểm trên tiêu diện thì ló ra thành chùm song song, nghiêng theo hướng PO.</p><p><b>Nói với học sinh:</b> như đèn pin, đèn pha ô tô: bóng đèn đặt đúng ở tiêu điểm thì chùm sáng ra là chùm song song. Đặt lệch lên xuống trên tiêu diện thì chùm vẫn song song nhưng nghiêng.</p>`,
+  obs7_beam:c=>`<p>Mọi tia của chùm song song xiên đều gặp nhau tại tiêu điểm phụ, nằm trên tiêu diện và trên trục phụ.</p><p><b>Nói với học sinh:</b> mỗi hướng của chùm sáng có một "điểm riêng" trên "bức tường tiêu diện". Máy ảnh nhờ đó thu được ảnh đủ mọi chi tiết: mỗi điểm của vật ở xa gửi tới một chùm gần song song, mỗi chùm hội tụ ở một điểm khác nhau.</p>`,
+  obs7_try:c=>`<p>Nhớ ba bước: (1) kẻ trục phụ qua O, song song với tia tới; (2) tìm điểm nó cắt tiêu diện; (3) tia ló đi qua điểm đó. Nếu tia tới là một trong ba tia đặc biệt thì dùng ngay quy tắc.</p>`,
+  foot7:'<b>Giả thiết mô phỏng.</b> Thấu kính mỏng lí tưởng: tia sáng khúc xạ một lần tại mặt phẳng giữa thấu kính, tia ló có độ dốc u′ = u − y/F (F &gt; 0: hội tụ; F &lt; 0: phân kì). Mọi quy tắc vẽ tia đều suy ra từ công thức này nên các tia không thể vẽ sai. Hình đúng tỉ lệ, không phóng đại chiều cao. Thấu kính được kí hiệu bằng một đường thẳng dài vô hạn (mặt phẳng thấu kính), tia nào cũng gặp nó. Quy ước: F ở bên trái, F′ ở bên phải thấu kính, cho cả hai loại.',
   hint2:'Kéo thân đèn laser để dời đèn, kéo nút tròn trên tia để đổi hướng chiếu. Bấm "Giữ tia này" để so sánh nhiều tia.',
   prePar:'Tia song song trục chính', preO:'Tia qua quang tâm', preFc:'Tia qua tiêu điểm F', preFd:'Tia hướng tới F′',
   keep:'Giữ tia này', clearKept:'Xoá các tia đã giữ', cRules:'Quy luật em tìm được',
@@ -571,7 +656,7 @@ vi:{
 },
 en:{
   eyebrow:'Natural Science 9 · Light', title:'Lenses and image formation', lvQual:'Qualitative', lvQuant:'Quantitative',
-  tab1:'1. Prisms → lens', tab2:'2. Ray paths', tab3:'3. Image formation', tab4:'4. Measuring f', tab5:'5. Magnifier & uses', tab6:'6. Ray-drawing practice',
+  tab1:'1. Prisms → lens', tab2:'2. Ray paths', tab3:'4. Image formation', tab4:'5. Measuring f', tab5:'6. Magnifier & uses', tab6:'7. Ray-drawing practice',
   req1:'<b>Learning outcome:</b> Explain how a lens works using refraction through a set of small prisms. State the terms optical centre, principal axis, principal focus and focal length.',
   req2:'<b>Learning outcome:</b> Carry out an experiment to find the paths of some rays through a lens (the ray through the optical centre, the ray parallel to the principal axis).',
   req3:'<b>Learning outcome:</b> Draw the image formed by a lens. Show by experiment that a real image can be caught on a screen and a virtual image cannot.',
@@ -605,6 +690,35 @@ en:{
   o1dev:d=>`Deviation between incoming and outgoing ray: ${d}°.`,
   o1slab:'The ray passes through the middle (parallel faces): it comes out parallel to the incoming ray.',
   concl1:'<b>Conclusion.</b> A lens behaves like very many small prisms. A converging lens (thin rim) has its prism bases facing the axis: a beam parallel to the axis converges at focus F′. A diverging lens (thick rim) has its bases facing outwards: the beam spreads, and the extensions pass through focus F. The optical centre O is the middle of the lens; a ray through O goes straight. Focal length f = OF = OF′. More curved surfaces give a shorter focal length.',
+  /* tab 7 */
+  nEx7:'Extra incoming rays (and outgoing):', nBm7:'Number of incoming (and outgoing) rays:', cRules7:'Ray-drawing rules', tab7:'3. Drawing rays', req7:'<b>Learning outcome:</b> Carry out an experiment to find the paths of some rays through a lens (through the optical centre, parallel to the axis, through the focus). Draw the image formed by a lens.',
+  md7_three:'Three key rays', md7_any:'Any ray', md7_focal:'Point on focal plane', md7_beam:'Slanted parallel beam', md7_try:'Draw it',
+  met7_1:'Method 1: secondary focus', met7_2:'Method 2: object focal plane', next7:'Next step ▶', all7:'Show all', rst7:'Reset', ang7:'Beam angle:', planes7:'Show focal planes',
+  chk7:'Check outgoing ray', hintbtn7:'Show construction', new7:'New ray', planeImg:'image focal plane', planeObj:'object focal plane', sReal:'S′ (real image)', sVirt:'S′ (virtual image)',
+  note7inf:'S is on the object focal plane: the ray through F never reaches the lens, outgoing rays are parallel, image at infinity', note7axis:'S is on the principal axis: the three rays coincide, drag S higher',
+  hint7_three:'Drag the light point S anywhere to see the three key rays and the image S′.', hint7_any:'Drag the lamp to move it, drag the round knob to aim. Press "Next step" to build the outgoing ray.',
+  hint7_focal:'Drag point P up and down on the focal plane.', hint7_beam:'Drag the slider to tilt the parallel beam.', hint7_try:'Drag the round knob on the right of the lens to draw the outgoing ray, then press "Check outgoing ray".',
+  st7_three:c=>c?'Converging lens: the three key rays meet at the image S′ (if it is virtual, their extensions meet).':'Diverging lens: the extensions of the three outgoing rays meet at the virtual image S′.',
+  st7_any:c=>c?'Converging lens: any ray passes through the point on the image focal plane that lies on the secondary axis.':'Diverging lens: the extension of the outgoing ray passes through the point on the focal plane that lies on the secondary axis.',
+  st7_focal:c=>c?'Rays from P on the object focal plane leave parallel to each other, and parallel to PO.':'Rays aimed at P on the focal plane leave parallel to each other, and parallel to PO.',
+  st7_beam:c=>c?'The parallel beam converges at the secondary focus F′₁ on the image focal plane.':'The extensions of the outgoing beam meet at the secondary focus F₁ on the focal plane.',
+  st7_try:c=>c?'Converging lens. Draw the outgoing ray of the blue ray.':'Diverging lens. Draw the outgoing ray of the blue ray.',
+  rules7:{
+    1:c=>'A ray through the optical centre O goes straight on.',
+    2:c=>c?'A ray parallel to the axis → leaves through the focus F′.':'A ray parallel to the axis → spreads out; its extension passes through the focus F.',
+    3:c=>c?'A ray through the focus F → leaves parallel to the axis.':'A ray (or its extension) aimed at the focus F′ → leaves parallel to the axis.',
+    4:c=>c?'Parallel rays → outgoing rays all pass through one point on the image focal plane: the secondary focus F′₁, on the secondary axis (through O, parallel to the incoming rays).':'Parallel incoming rays → the extensions of the outgoing rays all pass through one point on the focal plane: the secondary focus F₁, on the secondary axis (through O, parallel to the incoming rays).',
+    5:c=>c?'Rays starting from one point P on the object focal plane → outgoing rays are parallel to each other and to the secondary axis PO.':'Incoming rays aimed at one point P on the focal plane → outgoing rays are parallel to each other and to the secondary axis PO.'},
+  m_o:'Ray through O: change of direction', m_par:'Outgoing ray misses the focus by', m_f:'Angle of outgoing ray to the axis', m_any:'Outgoing ray misses the secondary focus by', m_any1:'Angle between ray and secondary axis', m_any2:'Angle between outgoing ray and PO', m_bm:'Outgoing rays miss the secondary focus by (max)', m_foc:'Angle between outgoing rays and PO (max)',
+  stepNames7:{1:['Draw the secondary axis: through O, parallel to the incoming ray','Draw the image focal plane (through the focus, perpendicular to the axis)','The secondary axis meets the focal plane at the secondary focus','The outgoing ray passes through the secondary focus (diverging lens: its extension does)'],2:['Draw the object focal plane','Extend the incoming ray to meet the focal plane at P','Join P to O: the secondary axis PO','The outgoing ray is parallel to PO']},
+  try7ok:'Correct! Your outgoing ray matches the true one.', try7no:'Not quite.',
+  try7hint:(k,c)=>k==='par'?'Hint: this is a ray parallel to the axis.':k==='o'?'Hint: this is a ray through the optical centre O.':k==='f'?'Hint: this is a ray '+(c?'through the focus F.':'aimed at the focus F′.'):'Hint: draw the secondary axis through O parallel to the incoming ray, find where it meets the focal plane; the outgoing ray goes through that point.',
+  obs7_three:c=>`<p>Two of the three rays are enough to find the image S′; the third is a check.</p><p><b>For students:</b> a lens bends light at its middle plane. A ray through O goes straight because at the very centre the two faces are almost parallel. The other two rays have "known" paths thanks to the foci.</p><p>Try putting S exactly on the object focal plane: the ray through F never meets the lens, the outgoing rays are parallel, the image is at infinity.</p>`,
+  obs7_any:c=>`<p>An arbitrary ray is none of the three key rays, so we build its outgoing ray with the <b>secondary axis</b> and a <b>secondary focus</b>.</p><p><b>For students:</b> imagine a whole beam of parallel rays pointing the same way as your ray. That beam meets on the focal plane exactly where the ray through O (which is not bent) crosses it. Your ray belongs to that beam, so it passes through that point too. Method 2 works backwards: the incoming ray meets the object focal plane at P, and the outgoing ray is parallel to PO.</p>`,
+  obs7_focal:c=>`<p>The reverse of a parallel beam: light from one point on the focal plane leaves as a parallel beam, tilted along PO.</p><p><b>For students:</b> like a torch or a car headlamp: a bulb placed exactly at the focus gives a parallel beam. Moving it up or down along the focal plane keeps the beam parallel but tilts it.</p>`,
+  obs7_beam:c=>`<p>Every ray of a slanted parallel beam meets at the secondary focus, which lies on the focal plane and on the secondary axis.</p><p><b>For students:</b> each beam direction has its own "spot" on the "focal-plane wall". That is how a camera records every detail: each point of a distant object sends an almost-parallel beam, and each beam focuses at a different spot.</p>`,
+  obs7_try:c=>`<p>Remember three steps: (1) draw the secondary axis through O, parallel to the incoming ray; (2) find where it meets the focal plane; (3) the outgoing ray goes through that point. If the incoming ray is one of the three key rays, use its rule directly.</p>`,
+  foot7:'<b>Model.</b> Ideal thin lens: each ray refracts once at the lens\'s middle plane and the outgoing slope is u′ = u − y/F (F &gt; 0: converging; F &lt; 0: diverging). Every ray-drawing rule follows from this one formula, so the rays cannot be drawn wrongly. Drawn to scale, heights not exaggerated. The lens is shown as one infinitely long straight line (the lens plane), so every ray meets it. Convention: F on the left, F′ on the right of the lens, for both types.',
   hint2:'Drag the laser body to move it, drag the round knob on the beam to aim. Press "Keep this ray" to compare several rays.',
   prePar:'Ray parallel to axis', preO:'Ray through centre', preFc:'Ray through focus F', preFd:'Ray aimed at F′',
   keep:'Keep this ray', clearKept:'Clear kept rays', cRules:'Rules you found',
@@ -710,7 +824,7 @@ const $ = (s, r=document) => r.querySelector(s);
 const $$ = (s, r=document) => [...r.querySelectorAll(s)];
 let lang='vi', level='quant', tab=1;
 try{ const sv=JSON.parse(localStorage.getItem('thaukinh-ui')||'{}'); if(sv.lang) lang=sv.lang; if(sv.level) level=sv.level; if(sv.tab) tab=sv.tab; }catch(e){}
-const HASH={'lang-kinh':1,'tia-sang':2,'tao-anh':3,'do-tieu-cu':4,'ung-dung':5,'luyen-ve':6};
+const HASH={'lang-kinh':1,'tia-sang':2,'tao-anh':3,'do-tieu-cu':4,'ung-dung':5,'luyen-ve':6,'ve-tia':7};
 if (HASH[location.hash.slice(1)]) tab = HASH[location.hash.slice(1)];
 function save(){ try{ localStorage.setItem('thaukinh-ui', JSON.stringify({lang,level,tab})); }catch(e){} }
 function t(k, ...a){ let v = I18N[lang][k]; if (v===undefined) v = I18N.vi[k]; if (v===undefined) return k; return typeof v==='function' ? v(...a) : v; }
@@ -866,6 +980,8 @@ function opt(ctx,V,o){
     const x0= o.farFrom!=null ? Math.max(xo,o.farFrom) : xo, y0=h+u*(x0-xo);
     L(ctx,V,x0,y0,xL,r.y,r.col,lw,null,!r.thin,al);
     if (r.k==='f' && !conv) L(ctx,V,xL,r.y,xL-F,0,r.col,1.3,[4,5],false,.6);
+    if (r.k==='par' && !conv) L(ctx,V,xL,r.y,xL+F,0,r.col,1.3,[4,5],false,.6);
+    if (r.k!=='b' && Math.abs(r.y)>H+1e-6) L(ctx,V,xL,Math.sign(r.y)*H,xL,r.y,C['glass-edge'],1.8,[3,4],false,.9);
     if (r.k==='f' && conv && d<F) L(ctx,V,xL-F,0,xo,h,r.col,1.3,[4,5],false,.6);
     if (blocked){ const px=V.X(xL)-3, py=V.Y(r.y); ctx.save(); ctx.strokeStyle=r.col; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(px-5,py-5); ctx.lineTo(px+5,py+5); ctx.moveTo(px+5,py-5); ctx.lineTo(px-5,py+5); ctx.stroke(); ctx.restore(); continue; }
     if (o.hideOut) continue;
@@ -1143,6 +1259,10 @@ function draw2(){
     L(ctx,V,lx,ly,0,r.yh,col,lw,null,true,alpha);
     L(ctx,V,0,r.yh,80,r.yh+r.u2*80,col,lw,null,true,alpha);
     if (!conv) L(ctx,V,0,r.yh,-80,r.yh-r.u2*80,col,1.2,[5,5],false,alpha*0.7);
+    const fx= conv? -f : f; // tia (hoặc đường kéo dài) hướng tới tiêu điểm
+    if (Math.abs(r.u)>0.005){ const yAtF=ly+r.u*(fx-lx);
+      if (!conv && Math.abs(yAtF)<0.3) L(ctx,V,0,r.yh,f,0,col,1.3,[4,5],false,alpha*0.7);
+      if (conv && lx>-f && Math.abs(yAtF)<0.3) L(ctx,V,lx,ly,-f,0,col,1.3,[4,5],false,alpha*0.7); }
   };
   for (const k of s2.kept) drawRay(k.lx,k.ly,k.ang,k.col,.45,2);
   drawRay(s2.lx,s2.ly,s2.ang,C.r1,1,3);
@@ -1600,7 +1720,7 @@ function draw5(){
     V5=view(D5,-7,8,2.6,false); const V=V5;
     drawAxis(ctx,V);
     ctx.save(); ctx.strokeStyle=C.muted; ctx.lineWidth=2; ctx.strokeRect(V.X(0.3),V.Y(2.3),V.X(ss+0.4)-V.X(0.3),V.Y(-2.3)-V.Y(2.3)); ctx.restore();
-    drawLens(ctx,V,0,H,true,{plane:false}); drawPt(ctx,V,5,'F′',C.accent);
+    drawLens(ctx,V,0,H,true,{plane:false}); drawPt(ctx,V,5,'F′',C.accent); drawPt(ctx,V,-5,'F',C.accent);
     opt(ctx,V,{xL:0,F:5,H,xo:-Dc,h:170,obj:'arrow',special:true,only:['o','f'],beam:true,nb:5,stopX:ss,farFrom:-7,labels:false,ghost:true});
     ctx.save(); ctx.fillStyle=C.ink; ctx.fillRect(V.X(ss)-2,V.Y(1.2),5,V.Y(-1.2)-V.Y(1.2)); ctx.restore();
     label(ctx,t('farObj')+' ('+fmtLen(Dc)+')',8,18,C.muted,'left',13,600);
@@ -1737,9 +1857,9 @@ function drawProjZoom(ctx,w,h){
   ctx.save(); ctx.strokeStyle=C.muted; ctx.lineWidth=2; ctx.strokeRect(V.X(-d)-5,V.Y(2.9),10,V.Y(-2.9)-V.Y(2.9)); ctx.restore();
   sideGlyph(ctx,V,'F',-d,h0,C.obj,{lw:3});
   // vật kính
-  ctx.save(); ctx.fillStyle=C.muted; ctx.globalAlpha=.5; ctx.fillRect(V.X(-1.2),V.Y(2.9),V.X(1.2)-V.X(-1.2),V.Y(2.4)-V.Y(2.9)); ctx.fillRect(V.X(-1.2),V.Y(-2.4),V.X(1.2)-V.X(-1.2),V.Y(-2.9)-V.Y(-2.4)); ctx.restore();
-  drawLens(ctx,V,0,2.3,true,{plane:false}); drawPt(ctx,V,-10,'F',C.accent); drawPt(ctx,V,10,'F′',C.accent);
-  opt(ctx,V,{xL:0,F:10,H:2.3,xo:-d,h:h0,obj:'F',special:true,only:['par','o'],beam:false,labels:false,ghost:false,showImg:false});
+  ctx.save(); ctx.fillStyle=C.muted; ctx.globalAlpha=.5; ctx.fillRect(V.X(-1.2),V.Y(3.2),V.X(1.2)-V.X(-1.2),V.Y(2.7)-V.Y(3.2)); ctx.fillRect(V.X(-1.2),V.Y(-2.7),V.X(1.2)-V.X(-1.2),V.Y(-3.2)-V.Y(-2.7)); ctx.restore();
+  drawLens(ctx,V,0,2.7,true,{plane:false}); drawPt(ctx,V,-10,'F',C.accent); drawPt(ctx,V,10,'F′',C.accent);
+  opt(ctx,V,{xL:0,F:10,H:2.7,xo:-d,h:h0,obj:'F',special:true,only:['par','o'],beam:false,labels:false,ghost:false,showImg:false});
   // chú thích
   label(ctx,t('pLamp'),V.X(-24),V.Y(-1.6),C.ink,'center',12,700,C.panel);
   label(ctx,t('pMirror'),Math.max(4,V.X(-29.3)),V.Y(4.4),C.ink,'left',12,700,C.panel);
@@ -1813,7 +1933,7 @@ function draw6(){
     if (k==='f' && !conv) L(ctx,V,0,r.y,-P.F,0,col[k],1.2,[4,5],false,.6);
     if (k==='f' && conv && P.d<P.f) L(ctx,V,-P.f,0,-P.d,P.h,col[k],1.2,[4,5],false,.6);
     L(ctx,V,0,r.y,40,r.y+u2*40,col[k],lw,null,true,alpha);
-    L(ctx,V,0,r.y,-40,r.y-u2*40,col[k],1.2,[5,5],false,alpha*0.6);
+    if (!P.im.real) L(ctx,V,0,r.y,-40,r.y-u2*40,col[k],1.2,[5,5],false,alpha*0.6);
   };
   for (const k of s6.rays){ const r=in6(k); drawR(k,r.u2,1,2.6); }
   if (s6.cur){ drawR(s6.cur.k,s6.cur.u2,.9,2.6); const r=in6(s6.cur.k); const px=V.X(4), py=V.Y(r.y+s6.cur.u2*4); ctx.save(); ctx.fillStyle=C.panel; ctx.strokeStyle=col[s6.cur.k]; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(px,py,9,0,7); ctx.fill(); ctx.stroke(); ctx.restore(); }
@@ -1871,6 +1991,232 @@ function setup6(){
   const up=()=>{ drag6=null; ui6(); }; cv.addEventListener('pointerup',up); cv.addEventListener('pointercancel',up);
 }
 
+/* ============ TAB 7: Vẽ tia sáng (mọi tia đều theo một định luật: u′ = u − y/F) ============ */
+const H7=7, XR7=34, XL7=-34;
+const s7={type:'conv', f:8, mode:'three', S:{x:-20,y:3.5}, lamp:{x:-24,y:4}, ang:-0.1, method:1, step:0, P:{y:4}, bang:12, planes:true,
+  nx:0, nb:5, tr:null, trOut:0, trRight:0, trShow:false, trFails:0, trDone:false, trScore:0, trRes:null};
+function msg7(){ const R=s7.trRes; if (!R) return ''; const e=quant()?` (${nf(R.e,1)}°)`:''; return R.ok? t('try7ok')+e : t('try7no')+e+' '+t('try7hint',s7.tr.kind,s7.tr.type==='conv'); }
+let D7=null, V7=null, drag7=null;
+const F7=()=> s7.type==='conv'? s7.f : -s7.f;
+/* Tia bắt đầu tại (x0,y0), độ dốc u. Tại thấu kính (x=0) tia ở độ cao yL; tia ló có độ dốc u2 = u − yL/F (F<0: phân kì). */
+function mkRay(k,col,x0,y0,u,F){ const yL=y0+u*(0-x0); return {k,col,x0,y0,u,yL,u2:u-yL/F}; }
+function finishRay(r,o={}){ // các đoạn thẳng sẽ được vẽ (cũng là dữ liệu để kiểm thử)
+  r.segIn=[r.x0,r.y0,0,r.yL];
+  r.segOut=[0,r.yL,XR7,r.yL+r.u2*XR7];
+  r.segInExt= o.inExt? [0,r.yL,o.inExt[0],o.inExt[1]] : null;
+  r.segInBack= o.inBack? [r.x0,r.y0,o.inBack[0],o.inBack[1]] : null;
+  r.segBack= o.back? [0,r.yL,o.back[0],o.back[1]] : null;
+  r.ext=false;
+  return r;
+}
+function geo7(){
+  const F=F7(), conv=F>0, f=s7.f, G={F,conv,f,rays:[],aux:[],planes:[],mode:s7.mode};
+  const pImg={seg:[F,-16,F,16],role:'img'}, pObj={seg:[-F,-16,-F,16],role:'obj'};
+  if (s7.mode==='three'){
+    const {x:sx,y:sy}=s7.S, d=-sx, im=imageOf(d,F);
+    G.S=[sx,sy]; if (s7.planes) G.planes=[pImg,pObj];
+    if (Math.abs(sy)<0.15){ G.note='axis'; G.rays.push(finishRay(mkRay('o',C.r2,sx,0,0,F))); return G; }
+    const par=finishRay(mkRay('par',C.r1,sx,sy,0,F),{back: conv? null:[-f,0]});
+    const o=finishRay(mkRay('o',C.r2,sx,sy,(0-sy)/(0-sx),F));
+    G.rays.push(par,o);
+    if (Math.abs(d-F)>0.06){
+      const yL=sy+(-sy/(d-F))*d, u=(yL-sy)/d;
+      G.rays.push(finishRay(mkRay('f',C.r3,sx,sy,u,F),{ inBack:(conv&&d<f)?[-f,0]:null, inExt:(!conv)?[f,0]:null }));
+    } else G.note='inf';
+    for (let i=0;i<s7.nx;i++){ const yL=s7.nx===1?9:-13+26*i/(s7.nx-1), u=(yL-sy)/d; G.rays.push(finishRay(mkRay('ex',C.beam,sx,sy,u,F))); }
+    if (!im.inf){ G.img=[im.dp,im.m*sy]; G.imReal=im.real;
+      if (!im.real) for (const r of G.rays) if (!(r.k==='par'&&!conv)) r.segBack=[0,r.yL,im.dp,im.m*sy]; }
+    return G;
+  }
+  if (s7.mode==='any'){
+    const {x:lx,y:ly}=s7.lamp, u=Math.tan(s7.ang), st=s7.step, m=s7.method;
+    const r=mkRay('any',C.r1,lx,ly,u,F); finishRay(r); G.rays.push(r); G.lamp=[lx,ly];
+    if (m===1){
+      if (st>=1) G.aux.push({seg:[-32,-32*u,32,32*u]});
+      if (st>=2) G.planes=[pImg];
+      if (st>=3) G.F1=[F,u*F];
+    } else {
+      const py=ly+u*(-F-lx), sp=py/(-F);
+      if (st>=1) G.planes=[pObj];
+      if (st>=2){ G.P=[-F,py];
+        if (-F>0) r.segInExt=[0,r.yL,-F,py]; else if (-F<lx) r.segInBack=[lx,ly,-F,py]; }
+      if (st>=3) G.aux.push({seg:[-32,-32*sp,32,32*sp]});
+    }
+    if (!conv || lx>-f) r.segBack=[0,r.yL,-32,r.yL-r.u2*32];
+    G.stepOut = st>=4;
+    const d=-lx, im=imageOf(d,F); G.lampImg= im.inf? null : [im.dp,im.m*ly];
+    for (let i=0;i<s7.nx;i++){ const a=s7.ang+(s7.nx===1?0.3:-0.35+0.7*i/(s7.nx-1)); if (Math.abs(a)>1.2) continue;
+      const e=finishRay(mkRay('ex',C.beam,lx,ly,Math.tan(a),F)); if (G.lampImg && !im.real) e.segBack=[0,e.yL,G.lampImg[0],G.lampImg[1]]; else if (!G.lampImg) e.segBack=null; G.rays.push(e); }
+    return G;
+    return G;
+  }
+  if (s7.mode==='focal'){
+    const py=s7.P.y, px=-F, N=s7.nb; G.P=[px,py]; G.planes=[pImg,pObj];
+    for (let i=0;i<N;i++){ const yL=N===1?6:-14+28*i/(N-1), u=(yL-py)/(0-px);
+      let r;
+      if (conv) r=finishRay(mkRay('foc',C.beam,px,py,u,F));
+      else { r=mkRay('foc',C.beam,XL7,yL+u*XL7,u,F); finishRay(r,{inExt:[px,py]}); }
+      G.rays.push(r); }
+    G.aux.push({seg:[-32,-32*py/px,32,32*py/px]});
+    return G;
+  }
+  if (s7.mode==='beam'){
+    const u=Math.tan(s7.bang*Math.PI/180), N=s7.nb; G.planes=[pImg,pObj];
+    for (let i=0;i<N;i++){ const yL=N===1?6:-12+24*i/(N-1);
+      const r=mkRay('bm',C.beam,XL7+2,yL+u*(XL7+2),u,F); finishRay(r,{back: conv? null:[F,u*F]}); G.rays.push(r); }
+    G.F1=[F,u*F]; G.aux.push({seg:[-32,-32*u,32,32*u]});
+    return G;
+  }
+  if (s7.mode==='try'){
+    const T=s7.tr, Ft=T.type==='conv'? T.f : -T.f, u=Math.tan(T.ang);
+    G.F=Ft; G.conv=Ft>0; G.f=T.f; G.planes=[{seg:[Ft,-16,Ft,16],role:'img'},{seg:[-Ft,-16,-Ft,16],role:'obj'}];
+    const r=mkRay('try',C.r1,T.lx,T.ly,u,Ft); r.u2=s7.trOut; finishRay(r); G.rays.push(r);
+    if (s7.trShow){ G.aux.push({seg:[-32,-32*u,32,32*u]}); G.F1=[Ft,u*Ft]; G.good=finishRay(mkRay('ok',C.ok,T.lx,T.ly,u,Ft)); }
+  }
+  return G;
+}
+/* ---- đo lại các quy tắc ngay trên những đoạn thẳng đã vẽ ---- */
+function dist2line(px,py,s){ const dx=s[2]-s[0], dy=s[3]-s[1], n=Math.hypot(dx,dy)||1; return Math.abs((px-s[0])*dy-(py-s[1])*dx)/n; }
+function angOf(s){ return Math.atan2(s[3]-s[1],s[2]-s[0]); }
+function angBetween(a,b){ let d=Math.abs(angOf(a)-angOf(b))*180/Math.PI; d=d%180; return Math.min(d,180-d); } // góc giữa hai đường thẳng
+function rule7(G){
+  const out=[], F=G.F;
+  for (const r of G.rays){
+    if (r.k==='o') out.push(['o',angBetween(r.segIn,r.segOut),'°']);
+    if (r.k==='par') out.push(['par',dist2line(F,0,r.segOut),'cm']);
+    if (r.k==='f') out.push(['f',angBetween([0,0,1,0],r.segOut),'°']);
+  }
+  if (G.mode==='any'){ const r=G.rays[0];
+    if (G.F1 && G.stepOut) { out.push(['any',dist2line(G.F1[0],G.F1[1],r.segOut),'cm']); }
+    if (G.aux[0] && G.stepOut){ out.push(G.P? ['any2',angBetween(G.aux[0].seg,r.segOut),'°'] : ['any1',angBetween(G.aux[0].seg,r.segIn),'°']); } }
+  if (G.mode==='beam'){ let m=0; for (const r of G.rays) m=Math.max(m,dist2line(G.F1[0],G.F1[1],r.segOut)); out.push(['bm',m,'cm']); }
+  if (G.mode==='focal'){ let m=0; for (const r of G.rays) m=Math.max(m,angBetween(G.aux[0].seg,r.segOut)); out.push(['foc',m,'°']); }
+  return out;
+}
+function dot7(ctx,V,x,y,col,txt,dx=10,dy=-10,al='left'){
+  const px=V.X(x), py=V.Y(y); ctx.save(); ctx.fillStyle=col; ctx.strokeStyle=C.panel; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(px,py,5,0,7); ctx.fill(); ctx.stroke(); ctx.restore();
+  if (txt) label(ctx,txt,px+dx,py+dy,col,al,13,800,C.panel);
+}
+function knob7(ctx,V,x,y,col){ ctx.save(); ctx.fillStyle=C.panel; ctx.strokeStyle=col; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(V.X(x),V.Y(y),10,0,7); ctx.fill(); ctx.stroke(); ctx.restore(); }
+function draw7(){
+  const {ctx,w,h}=D7; ctx.clearRect(0,0,w,h);
+  V7=view(D7,XL7,XR7,15,true); const V=V7, G=geo7(), conv=G.conv, f=G.f;
+  for (const p of G.planes){ const s=p.seg; ctx.save(); ctx.strokeStyle=C.accent; ctx.globalAlpha=.55; ctx.setLineDash([7,6]); ctx.lineWidth=1.6; ctx.beginPath(); ctx.moveTo(V.X(s[0]),V.Y(s[1])); ctx.lineTo(V.X(s[2]),V.Y(s[3])); ctx.stroke(); ctx.restore();
+    label(ctx,t(p.role==='img'?'planeImg':'planeObj'),V.X(s[0])+(s[0]>=0?6:-6),V.Y(-13),C.accent,s[0]>=0?'left':'right',11,700,C.panel); }
+  drawAxis(ctx,V);
+  ctx.save(); ctx.strokeStyle=C['glass-edge']; ctx.lineWidth=3.5; ctx.beginPath(); ctx.moveTo(V.X(0),0); ctx.lineTo(V.X(0),h); ctx.stroke(); ctx.restore();
+  label(ctx,t(conv?'conv':'div'),V.X(0)+8,16,C['glass-edge'],'left',12,700,C.panel);
+  drawPt(ctx,V,-f,'F',C.accent); drawPt(ctx,V,f,'F′',C.accent);
+  label(ctx,'O',V.X(0)+10,V.Y(0)+14,C.ink,'left',14,800,C.panel);
+  for (const a of G.aux){ const s=a.seg; ctx.save(); ctx.strokeStyle=C.r2; ctx.setLineDash([2,5]); ctx.lineWidth=2.4; ctx.lineCap='round'; ctx.beginPath(); ctx.moveTo(V.X(s[0]),V.Y(s[1])); ctx.lineTo(V.X(s[2]),V.Y(s[3])); ctx.stroke(); ctx.restore(); }
+  const lwOf=r=>(r.k==='ex'||G.mode==='focal'||G.mode==='beam')?1.6:2.6, alOf=r=>(r.k==='ex'||G.mode==='focal'||G.mode==='beam')?.85:1;
+  const seg=(s,col,w_,dash,arrow,a)=>{ if (s) L(ctx,V,s[0],s[1],s[2],s[3],col,w_,dash,arrow,a); };
+  const showOut = G.mode!=='any' || G.stepOut;
+  for (const r of G.rays){
+    if (G.mode==='try') continue;
+    const lw=lwOf(r), al=alOf(r); seg(r.segIn,r.col,lw,null,true,al); seg(r.segInBack,r.col,1.3,[4,5],false,.6); seg(r.segInExt,r.col,1.3,[4,5],false,.6);
+    if (showOut){ seg(r.segOut,r.col,lw,null,true,al); seg(r.segBack,r.col,1.3,[4,5],false,.7); }
+  }
+  if (G.mode==='three'){
+    const [sx,sy]=G.S; dot7(ctx,V,sx,sy,C.obj,'S',-10,-10,'right');
+    if (G.img){ const [ix,iy]=G.img; if (Math.abs(ix)<33 && Math.abs(iy)<15){ ctx.save(); ctx.setLineDash(G.imReal?[]:[5,4]); ctx.strokeStyle=C.img; ctx.lineWidth=1.4; ctx.globalAlpha=.6; ctx.beginPath(); ctx.moveTo(V.X(ix),V.Y(0)); ctx.lineTo(V.X(ix),V.Y(iy)); ctx.stroke(); ctx.restore(); dot7(ctx,V,ix,iy,C.img,t(G.imReal?'sReal':'sVirt'),10,-10); } }
+    if (G.note==='inf') label(ctx,t('note7inf'),w/2,20,C.warn,'center',14,800,C.panel);
+    if (G.note==='axis') label(ctx,t('note7axis'),w/2,20,C.warn,'center',14,800,C.panel);
+  }
+  if (G.mode==='any'){
+    const [lx,ly]=G.lamp;
+    if (G.stepOut && s7.nx>0 && G.lampImg && Math.abs(G.lampImg[0])<33 && Math.abs(G.lampImg[1])<15) dot7(ctx,V,G.lampImg[0],G.lampImg[1],C.img,'',0,0);
+    ctx.save(); ctx.translate(V.X(lx),V.Y(ly)); ctx.rotate(-s7.ang); ctx.fillStyle=C.ink; ctx.fillRect(-34,-8,34,16); ctx.fillStyle=C.r1; ctx.fillRect(-4,-4,5,8); ctx.restore();
+    dot7(ctx,V,lx,ly,C.obj,'',0,0);
+    knob7(ctx,V,lx+Math.cos(s7.ang)*7,ly+Math.sin(s7.ang)*7,C.accent);
+    if (G.F1) dot7(ctx,V,G.F1[0],G.F1[1],C.r2,conv?'F′₁':'F₁',8,-12);
+    if (G.P) dot7(ctx,V,G.P[0],G.P[1],C.r3,'P',8,-12);
+  }
+  if (G.mode==='focal'){ dot7(ctx,V,G.P[0],G.P[1],C.obj,'P',10,-12); knob7(ctx,V,G.P[0],G.P[1],C.accent); }
+  if (G.mode==='beam' && G.F1) dot7(ctx,V,G.F1[0],G.F1[1],C.r2,conv?'F′₁':'F₁',8,-12);
+  if (G.mode==='try'){
+    const r=G.rays[0]; seg(r.segIn,C.r1,3,null,true,1); seg(r.segOut,C.accent,3,null,true,1);
+    if (G.good) seg(G.good.segOut,C.ok,2.6,[8,5],false,.95);
+    if (G.F1) dot7(ctx,V,G.F1[0],G.F1[1],C.r2,conv?'F′₁':'F₁',8,-12);
+    dot7(ctx,V,s7.tr.lx,s7.tr.ly,C.obj,'S',-10,-10,'right');
+    knob7(ctx,V,7,r.yL+s7.trOut*7,C.accent);
+  }
+  dot7(ctx,V,0,0,C.ink,'',0,0);
+}
+function ui7(){
+  const m=s7.mode, conv=(m==='try'? s7.tr.type : s7.type)==='conv';
+  $$('#typ7 .btn').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===s7.type)));
+  $$('#mode7 .btn').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===m)));
+  $$('#met7 .btn').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.v===s7.method)));
+  $('#f7Txt').textContent=nf(s7.f,1)+' cm'; $('#rngF7').value=s7.f; $('#a7Txt').textContent=nf(s7.bang,0)+'°'; $('#rngA7').value=s7.bang;
+  $('#planes7').checked=s7.planes;
+  $('#nc7').hidden= m==='try'; const ex=(m==='three'||m==='any'), nv= ex? s7.nx : s7.nb; $('#rngN7').min= ex?0:1; $('#rngN7').max= ex?12:15; $('#rngN7').value=nv; $('#nTxt7').textContent=nv; $('#nLab7').textContent=t(ex?'nEx7':'nBm7');
+  $('#stepList7').hidden= m!=='any'; $('#cmn7').hidden= m==='try'; $('#anyc7').hidden= m!=='any'; $('#beamc7').hidden= m!=='beam'; $('#tryc7').hidden= m!=='try'; $('#planesRow7').hidden= m!=='three';
+  $('#st7').textContent= t('st7_'+m, conv);
+  $('#hint7').textContent= t('hint7_'+m);
+  const R=t('rules7'), use={three:['1','2','3'],any:s7.method===2?['5']:['4'],focal:['5'],beam:['4'],try:['4']}[m];
+  $('#rules7').innerHTML= ['1','2','3','4','5'].map(k=>`<li class="${use.includes(k)?'done':''}"><span class="mk">${k}</span><span>${R[k](conv)}</span></li>`).join('');
+  const kv=$('#kv7'); kv.hidden=!quant()||m==='try';
+  if (!kv.hidden){ const nm={o:t('m_o'),par:t('m_par'),f:t('m_f'),any:t('m_any'),any1:t('m_any1'),any2:t('m_any2'),bm:t('m_bm'),foc:t('m_foc')};
+    kv.innerHTML= rule7(geo7()).map(([k,v,u])=>`<dt>${nm[k]}</dt><dd>${nf(v,2,2)} ${u}</dd>`).join(''); }
+  if (m==='any'){ const names=t('stepNames7')[s7.method];
+    $('#stepList7').innerHTML= names.map((x,i)=>`<li class="${s7.step>i?'done':s7.step===i?'cur':''}">${x}</li>`).join('');
+    $('#next7').disabled= s7.step>=4; }
+  $('#obs7').innerHTML= t('obs7_'+m, conv);
+  $('#score7').textContent= m==='try'? t('score',s7.trScore):'';
+  const fb=$('#fb7'); fb.hidden= !(m==='try' && s7.trRes); if (!fb.hidden){ fb.className='fb '+(s7.trRes.ok?'good':'bad'); fb.textContent=msg7(); }
+}
+function newTry7(){
+  const type=Math.random()<.5?'conv':'div', f=[6,7,8,10][Math.floor(Math.random()*4)], F=type==='conv'?f:-f;
+  const kind=['gen','gen','gen','par','o','f'][Math.floor(Math.random()*6)];
+  const lx=-(16+Math.random()*10), ly=(Math.random()<.5?-1:1)*(2.5+Math.random()*3);
+  let ang;
+  if (kind==='par') ang=0; else if (kind==='o') ang=Math.atan2(-ly,-lx); else if (kind==='f') ang=Math.atan2(-ly,-F-lx); else ang=(Math.random()-.5)*0.5;
+  const r=mkRay('t',C.r1,lx,ly,Math.tan(ang),F);
+  s7.tr={type,f,lx,ly,ang,kind}; s7.trRight=r.u2; s7.trOut=r.u+(Math.random()<.5?-1:1)*0.18;
+  s7.trShow=false; s7.trFails=0; s7.trDone=false; s7.trRes=null;
+}
+function setup7(){
+  const cv=$('#cv7'); newTry7();
+  $$('#typ7 .btn').forEach(b=>b.onclick=()=>{ s7.type=b.dataset.v; ui7(); });
+  $('#rngF7').oninput=e=>{ s7.f=+e.target.value; ui7(); };
+  $('#rngN7').oninput=e=>{ const v=+e.target.value; if (s7.mode==='three'||s7.mode==='any') s7.nx=v; else s7.nb=v; ui7(); };
+  $('#rngA7').oninput=e=>{ s7.bang=+e.target.value; ui7(); };
+  $('#planes7').onchange=e=>{ s7.planes=e.target.checked; };
+  $$('#mode7 .btn').forEach(b=>b.onclick=()=>{ s7.mode=b.dataset.v; if (s7.mode==='any') s7.step=0; ui7(); });
+  $$('#met7 .btn').forEach(b=>b.onclick=()=>{ s7.method=+b.dataset.v; s7.step=0; ui7(); });
+  $('#next7').onclick=()=>{ s7.step=Math.min(4,s7.step+1); ui7(); };
+  $('#all7').onclick=()=>{ s7.step=4; ui7(); };
+  $('#rst7').onclick=()=>{ s7.step=0; ui7(); };
+  $('#new7').onclick=()=>{ newTry7(); ui7(); };
+  $('#hintbtn7').onclick=()=>{ s7.trShow=true; ui7(); };
+  $('#chk7').onclick=()=>{
+    const T=s7.tr, e=Math.abs(Math.atan(s7.trOut)-Math.atan(s7.trRight))*180/Math.PI;
+    if (e<=2.5){ s7.trRes={ok:true,e}; s7.trShow=true; if (!s7.trDone){ s7.trDone=true; s7.trScore++; } }
+    else { s7.trRes={ok:false,e}; s7.trFails++; if (s7.trFails>=2) s7.trShow=true; }
+    ui7(); };
+  const mv=(x,y)=>{
+    if (drag7==='S') s7.S={x:clamp(x,-32,-1.5), y:clamp(y,-13,13)};
+    else if (drag7==='lamp'){ s7.lamp={x:clamp(x,-32,-2), y:clamp(y,-13,13)}; }
+    else if (drag7==='aim'){ const wx=x-s7.lamp.x, wy=y-s7.lamp.y; if (wx>0.3){ let a=Math.atan2(wy,wx); if (Math.abs(a)<0.012) a=0; s7.ang=clamp(a,-0.9,0.9); } }
+    else if (drag7==='P') s7.P.y=clamp(y,-8,8);
+    else if (drag7==='out'){ const T=s7.tr, F=T.type==='conv'?T.f:-T.f, r=mkRay('t',C.r1,T.lx,T.ly,Math.tan(T.ang),F); if (x>0.8) s7.trOut=clamp((y-r.yL)/x,-3,3); s7.trRes=null; }
+    ui7();
+  };
+  cv.addEventListener('pointerdown',e=>{
+    if (!V7) return; const p=ptr(cv,e), x=V7.ix(p.x), y=V7.iy(p.y), m=s7.mode;
+    if (m==='three'){ if (Math.hypot(p.x-V7.X(s7.S.x),p.y-V7.Y(s7.S.y))<28) drag7='S'; }
+    else if (m==='any'){
+      const kx=s7.lamp.x+Math.cos(s7.ang)*7, ky=s7.lamp.y+Math.sin(s7.ang)*7;
+      if (Math.hypot(p.x-V7.X(kx),p.y-V7.Y(ky))<26) drag7='aim'; else if (Math.hypot(p.x-V7.X(s7.lamp.x),p.y-V7.Y(s7.lamp.y))<32) drag7='lamp'; }
+    else if (m==='focal'){ if (Math.abs(p.x-V7.X(-F7()))<26) drag7='P'; }
+    else if (m==='try'){ if (x>0.8) drag7='out'; }
+    if (drag7){ cv.setPointerCapture(e.pointerId); mv(x,y); }
+  });
+  cv.addEventListener('pointermove',e=>{ if (!drag7) return; const p=ptr(cv,e); mv(V7.ix(p.x),V7.iy(p.y)); });
+  const up=()=>{ drag7=null; }; cv.addEventListener('pointerup',up); cv.addEventListener('pointercancel',up);
+}
+
 /* ============ Chung ============ */
 function applyLang(){
   document.documentElement.lang=lang;
@@ -1882,10 +2228,10 @@ function applyLang(){
 function renderAll(){
   $('#lvQual').setAttribute('aria-pressed',String(level==='qual')); $('#lvQuant').setAttribute('aria-pressed',String(level==='quant'));
   $$('nav.tabs button').forEach(b=>{ const on=+b.dataset.tab===tab; b.classList.toggle('on',on); b.setAttribute('aria-selected',String(on)); });
-  for (const i of [1,2,3,4,5,6]) $('#t'+i).hidden = i!==tab;
+  for (const i of [1,2,3,4,5,6,7]) $('#t'+i).hidden = i!==tab;
   $('#foot').innerHTML=`<p>${t('foot'+tab)}</p>`;
   resize();
-  ui1(); ui2(); ui3(); ui4(); ui5(); ui6();
+  ui1(); ui2(); ui3(); ui4(); ui5(); ui6(); ui7();
 }
 function resize(){
   if (tab===1) D1=fit($('#cv1'),0.5,250,470);
@@ -1897,6 +2243,7 @@ function resize(){
     D5=fit($('#cv5'),sb==='mc'?0.56:0.5,260,460); if (two) D5z=fit($('#cv5z'),0.56,270,460);
     D5v= sb==='kl'? fit($('#cv5v'),0.85,230,320) : fit($('#cv5v'),0.6,170,240); }
   if (tab===6) D6=fit($('#cv6'),0.5,260,520);
+  if (tab===7) D7=fit($('#cv7'),0.46,260,500);
 }
 function loop(){
   try{
@@ -1906,6 +2253,7 @@ function loop(){
     if (tab===4 && D4){ draw4(); drawScreen4(); }
     if (tab===5 && D5){ draw5(); if (D5z && !$('#cv5z').hidden) draw5z(); drawView5(); }
     if (tab===6 && D6) draw6();
+    if (tab===7 && D7) draw7();
   }catch(err){ console.error(err); }
   requestAnimationFrame(loop);
 }
@@ -1913,7 +2261,7 @@ function init(){
   readColors();
   matchMedia('(prefers-color-scheme: dark)').addEventListener('change',readColors);
   new MutationObserver(readColors).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
-  setup1(); setup2(); setup3(); setup4(); setup5(); setup6();
+  setup1(); setup2(); setup3(); setup4(); setup5(); setup6(); setup7();
   $('#langBtn').onclick=()=>{ lang= lang==='vi'?'en':'vi'; save(); applyLang(); };
   $('#lvQual').onclick=()=>{ level='qual'; save(); renderAll(); };
   $('#lvQuant').onclick=()=>{ level='quant'; save(); renderAll(); };
