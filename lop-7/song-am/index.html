@@ -288,6 +288,7 @@ ul.vids span{display:block;font-size:12px;color:var(--muted)}
       </div>
       <div id="p3matBox" class="stack">
         <div class="chips" id="p3presets"></div>
+        <div class="seg wide" id="p3freqSeg"></div>
         <canvas id="p3cv" aria-label="sóng âm gặp vật liệu"></canvas>
         <div class="legend" id="p3legend"></div>
         <div class="controls">
@@ -295,14 +296,7 @@ ul.vids span{display:block;font-size:12px;color:var(--muted)}
           <div class="seg" id="p3speed"><button class="btn" data-s="0.5">×0,5</button><button class="btn" data-s="1" aria-pressed="true">×1</button></div>
         </div>
         <div class="ebars" id="p3bars"></div>
-        <details class="custom">
-          <summary data-i18n="p3custom"></summary>
-          <div class="sliders">
-            <div class="slider"><div class="top"><span data-i18n="p3Z"></span><b class="num" id="p3Zv"></b></div><input type="range" id="p3Z" min="0" max="1000" step="1" value="1000"></div>
-            <div class="slider"><div class="top"><span data-i18n="p3G"></span><b class="num" id="p3Gv"></b></div><input type="range" id="p3G" min="0" max="40" step="1" value="0"></div>
-            <div class="slider"><div class="top"><span data-i18n="p3Th"></span><b class="num" id="p3Thv"></b></div><input type="range" id="p3Th" min="1" max="16" step="1" value="8"></div>
-          </div>
-        </details>
+        <p class="hint" data-i18n="p3hintMat"></p>
       </div>
       <div id="p3echoBox" class="stack" hidden>
         <canvas id="p4cv" aria-label="tiếng vang"></canvas>
@@ -327,6 +321,12 @@ ul.vids span{display:block;font-size:12px;color:var(--muted)}
         <p id="p3whyMat"></p>
         <details><summary data-i18n="p3mechTitle"></summary><ul id="p3mech"></ul></details>
         <details><summary data-i18n="p3simpleTitle"></summary><ul id="p3simple"></ul></details>
+      </div>
+      <div class="card" id="p3dataCard">
+        <h2 data-i18n="dataTitle"></h2>
+        <table><tbody id="p3data"></tbody></table>
+        <p class="hint" id="p3rule"></p>
+        <details><summary data-i18n="srcTitle"></summary><ul id="p3src"></ul></details>
       </div>
       <div class="card" id="p4echoRead" hidden>
         <h2 data-i18n="readTitle"></h2>
@@ -401,7 +401,7 @@ const I18N = {
     q2bad:'Hãy nhìn lại vòng tròn nét đứt: đó là chỗ cũ của hạt đỏ. Sau khi xung đi qua, hạt quay về đúng chỗ đó. Hạt không đi theo âm, chỉ dao động rồi truyền dao động cho hạt bên cạnh.',
     envTitle:'Điều kiện môi trường', temp:'Nhiệt độ (chất khí, nước, nước muối)', sal:'Độ mặn của nước muối',
     envNote:'Nước biển có độ mặn khoảng 35 g muối trong 1 kg nước. Tốc độ trong chất rắn và cồn lấy ở nhiệt độ phòng.',
-    tShade:'Tô vùng nén và vùng dãn', tBonds:'Vẽ liên kết giữa các hạt chất rắn', tTherm:'Chuyển động nhiệt (minh hoạ)',
+    tShade:'Tô vùng nén, vùng dãn và vẽ các lớp chất (vạch đứt)', tBonds:'Vẽ liên kết giữa các hạt chất rắn', tTherm:'Chuyển động nhiệt của phân tử (tất cả các tab)',
     lgSolid:'hạt chất rắn', lgLiquid:'phân tử chất lỏng', lgGas:'phân tử chất khí', lgNa:'ion Na⁺', lgCl:'ion Cl⁻', lgMark:'hạt đánh dấu', lgComp:'vùng nén', lgRare:'vùng dãn',
     conclTitle:'Kết luận (mở sau khi thảo luận)',
     concl:[
@@ -417,7 +417,7 @@ const I18N = {
       'Lực tương tác giữa các lớp hạt được mô hình bằng lò xo. Độ cứng lò xo được chọn để tốc độ xung trên hình tỉ lệ đúng với tốc độ âm thật.',
       'Thời gian được làm chậm theo hệ số đã chọn. Đồng hồ hiển thị thời gian thực tương ứng.',
       'Để dễ so sánh, xung "gõ một cái" có cùng bề rộng trên hình ở mọi làn. Thực tế, cùng một cú gõ thì xung trong môi trường truyền nhanh dài hơn. Chế độ phát liên tục dùng cùng một tần số cho mọi làn, nên bước sóng λ = v/f khác nhau thật.',
-      'Chuyển động nhiệt chỉ minh hoạ. Thực tế phân tử khí chuyển động hỗn loạn rất nhanh (cỡ vài trăm m/s) và truyền dao động qua va chạm.',
+      'Mô hình động học phân tử: mọi hạt luôn chuyển động không ngừng (kể cả khi sóng dừng). Khí: bay thẳng, va chạm rồi đổi hướng; lỏng: xô đẩy, trượt quanh chỗ; rắn: dao động quanh vị trí cố định. Sóng âm là phần chuyển động chung (tới – lui có trật tự) chồng lên chuyển động hỗn loạn đó. Trên hình, dao động do sóng được vẽ LỚN HƠN chuyển động nhiệt (gấp khoảng 4 lần trở lên) để dễ quan sát. Thực tế thì ngược lại: với tiếng nói bình thường, mỗi lớp không khí chỉ dịch tới – lui khoảng vài phần triệu milimét, chậm hơn chuyển động nhiệt (vài trăm m/s) hàng triệu lần; sóng âm chỉ là một "nhịp" có trật tự rất nhỏ chồng lên chuyển động hỗn loạn.',
       'Chỉ xét sóng dọc, bỏ qua sự suy giảm của âm theo quãng đường.',
       'Số liệu: chất khí theo công thức khí lí tưởng v = √(γRT/M); nước và nước muối theo công thức thực nghiệm Medwin (1975); chất rắn là sóng dọc trong khối vật liệu lớn ở khoảng 20 °C (gỗ dọc thớ, giá trị gần đúng).'
     ],
@@ -452,7 +452,7 @@ const I18N = {
     q2bad:'Look at the dashed circle: that is the red particle\'s rest position. After the pulse passes it returns exactly there. Particles are not carried along; they vibrate and pass the vibration on.',
     envTitle:'Conditions', temp:'Temperature (gases, water, salt water)', sal:'Salinity of the salt water',
     envNote:'Seawater has about 35 g of salt per kg of water. Speeds in solids and ethanol are taken at room temperature.',
-    tShade:'Shade compressions and rarefactions', tBonds:'Draw bonds between solid particles', tTherm:'Thermal motion (illustrative)',
+    tShade:'Shade compressions and rarefactions, draw layers (dashed)', tBonds:'Draw bonds between solid particles', tTherm:'Thermal motion of molecules (all tabs)',
     lgSolid:'solid particle', lgLiquid:'liquid molecule', lgGas:'gas molecule', lgNa:'Na⁺ ion', lgCl:'Cl⁻ ion', lgMark:'marked particle', lgComp:'compression', lgRare:'rarefaction',
     conclTitle:'Conclusions (open after discussion)',
     concl:[
@@ -468,7 +468,7 @@ const I18N = {
       'Forces between layers are modelled as springs, with stiffness chosen so the pulse speed on screen is proportional to the real speed of sound.',
       'Time is slowed by the chosen factor. The clock shows the corresponding real time.',
       'For a fair comparison, the "strike" pulse has the same width on screen in every lane. In reality the same strike makes a longer pulse in a faster medium. The continuous tone uses the same frequency in all lanes, so the wavelengths λ = v/f really differ.',
-      'Thermal motion is only illustrative. Real gas molecules move randomly at hundreds of m/s and pass vibrations on by collisions.',
+      'Kinetic molecular model: every particle is always moving (even when no wave passes). Gas: flies straight, collides, changes direction; liquid: jostles and slides around; solid: vibrates about a fixed site. Sound is the shared, ordered back-and-forth motion added on top of this random motion. On screen the wave motion is drawn LARGER than thermal motion (about 4 times or more) so it is easy to see. In reality it is the opposite: for normal speech each layer of air moves back and forth only a few millionths of a millimetre, millions of times slower than thermal motion (hundreds of m/s); sound is a tiny ordered rhythm on top of random motion.',
       'Only longitudinal waves are shown; attenuation is ignored.',
       'Data: gases from the ideal-gas formula v = √(γRT/M); water and salt water from Medwin\'s empirical formula (1975); solids are bulk longitudinal waves at about 20 °C (wood along the grain, approximate).'
     ],
@@ -525,6 +525,17 @@ const S = { tempC:20, sal:35, slow:3000, play:1, running:true, cont:false, f:500
   t:0, tStrike:null, drag:null, dragU:0, ret:null, tj:0, shade:true, bonds:true, therm:true, hide:false,
   pred:null, predDone:false, q2:null };
 
+// Chuyển động nhiệt theo mô hình động học phân tử (đơn vị: khoảng cách hạt). Mỗi hạt có tham số riêng p = {p1,p2,w1,w2}.
+// Khí: bay thẳng, va chạm bật lại (đường gấp khúc), biên độ lớn; lỏng: xô đẩy, trượt quanh chỗ; rắn: dao động nhanh quanh nút mạng.
+const tri = x => { const f = x - Math.floor(x); return 4*Math.abs(f - 0.5) - 1; };
+function thermal(g, p, t){
+  // Biên độ chuyển động nhiệt theo phương truyền sóng (x) được giữ nhỏ hơn biên độ dao động do sóng khoảng 4 lần trở lên,
+  // để thấy rõ dao động do sóng truyền tới (xem giả thiết: thực tế ngược lại, đây là phóng đại có chủ ý).
+  if (g === 'gas') return [0.11*tri(p.p1/6.283 + p.w1*t*2.2), 0.2*tri(p.p2/6.283 + p.w2*t*1.6)];
+  if (g === 'liquid'){ const a = p.w1*t*2.6, b = p.w2*t*2.4; return [0.07*(0.65*Math.sin(p.p1 + a) + 0.35*Math.sin(p.p2 + 1.73*a)), 0.1*(0.65*Math.sin(p.p2 + b) + 0.35*Math.sin(p.p1 + 1.61*b))]; }
+  return [0.035*Math.sin(p.p1 + p.w1*t*13), 0.035*Math.sin(p.p2 + p.w2*t*13)];
+}
+function thermParams(n, seed){ const r = rng(seed), a = []; for (let i = 0; i < n; i++) a.push({ p1:r()*6.283, p2:r()*6.283, w1:0.8 + r()*1.4, w2:0.8 + r()*1.4, ox:r() - 0.5, oy:r() - 0.5, vis:r() }); return a; }
 function rng(seed){ let x = seed >>> 0 || 1; return () => (x = (x * 1664525 + 1013904223) >>> 0) / 4294967296; }
 function makeLane(key, idx){
   const r = rng(1234 + idx*977);
@@ -600,8 +611,7 @@ function particleXY(l, p, li){
   if (m === 'liquid'){ ox = p.ox*0.45; oy = p.oy*0.55; }
   if (m === 'gas'){ ox = p.ox*0.9; oy = p.oy*0.9; }
   if (S.therm){
-    const J = m === 'gas' ? 0.22 : m === 'liquid' ? 0.09 : 0.035;
-    jx = J * Math.sin(p.p1 + p.w1*S.tj*3); jy = J * Math.sin(p.p2 + p.w2*S.tj*3);
+    [jx, jy] = thermal(m, p, S.tj);
   }
   const eqx = G.x0 + (p.i + ox) * G.aPx, eqy = y0 + (p.k + 0.5 + oy) * rh;
   return { x: eqx + (l.u[p.i] + jx) * G.aPx, y: eqy + jy * rh, eqx, eqy, rh };
@@ -621,6 +631,12 @@ function render(){
         const xa = G.x0 + (i + l.u[i]) * G.aPx, xb = G.x0 + (i + 1 + l.u[i+1]) * G.aPx;
         c.fillStyle = `rgba(${e < 0 ? colors.comp : colors.rare},${a})`; c.fillRect(xa, y0-2, xb-xa, yb-y0+2);
       }
+    }
+    // các lớp chất lỏng / khí: vạch đứt dịch chuyển theo dao động chung của lớp
+    if (S.shade && (m === 'gas' || m === 'liquid')){
+      c.setLineDash([4, 3]); c.lineWidth = 1.2; c.strokeStyle = 'rgba(215,38,61,0.4)'; c.beginPath();
+      for (let i = 3; i < N; i += 6){ const x = G.x0 + (i + l.u[i]) * G.aPx; c.moveTo(x, y0); c.lineTo(x, yb); }
+      c.stroke(); c.setLineDash([]);
     }
     // micrô
     const xd = G.x0 + DET * G.aPx;
@@ -830,10 +846,11 @@ let last = performance.now(), acc = 0;
 function loop(now){
   const fdt = Math.min((now - last)/1000, 0.1); last = now;
   if (S.running && curTab === 1){
-    acc += fdt * S.play; S.tj += fdt * S.play;
+    acc += fdt * S.play;
     let n = 0; while (acc >= DT && n < 2000){ step(DT); acc -= DT; n++; }
     if (n >= 2000) acc = 0;
   }
+  S.tj += fdt; // chuyển động nhiệt không bao giờ dừng (kể cả khi tạm dừng sóng)
   lanes.forEach(l => { if (l.lit && Math.abs(l.u[DET]) < 0.05*AMP) l.lit = Math.max(0, l.lit - fdt*1.5); });
   // đồng hồ thời gian thực
   let tr = 0;
@@ -855,7 +872,7 @@ Object.assign(I18N.vi, {
   p2f:'Tần số', p2a:'Biên độ', p2slow:'Quay chậm',
   p2hint:'Bấm "Giữ vết" rồi đổi tần số hoặc biên độ để so sánh đường cũ (nét đứt) với đường mới.',
   blur:'Màng loa dao động quá nhanh, mắt chỉ thấy vệt mờ. Bấm "Quay chậm".', slowBy:'Đang quay chậm {n} lần', gen:'máy phát âm',
-  rowF:'Tần số f', rowT:'Chu kì T = 1/f', rowN:'Số dao động trong 1 s', rowA:'Biên độ (so với mức lớn nhất)', rowLam:'Bước sóng trong không khí λ = v/f',
+  rowF:'Tần số f', rowT:'Chu kì T = 1/f', rowN:'Số dao động trong 1 s', rowA:'Biên độ (so với mức lớn nhất)', rowCone:'Biên độ dao động của màng loa (minh hoạ: 100% = 1 mm)', coneAmp:'biên độ màng loa', prAxis:'áp suất', prHigh:'cao hơn', prLow:'thấp hơn', layerNote:'▼ một lớp không khí: chỉ dao động tới – lui quanh chỗ cũ, đẩy lớp bên cạnh', layerNoteS:'▼ 1 lớp không khí', rowLam:'Bước sóng trong không khí λ = v/f',
   zInfra:'Dưới 20 Hz là hạ âm: tai người không nghe được.', zUltra:'Trên 20 000 Hz là siêu âm: tai người không nghe được.',
   pLow:'Âm trầm', pMid:'Âm cao vừa', pHigh:'Âm bổng (cao)', lSoft:'nhỏ', lMid:'vừa', lLoud:'to', zAud:'{p}, {l}.', noSoundOut:'Loa không phát vì tai người không nghe được tần số này.',
   p2pq:'Giữ nguyên tần số, tăng biên độ. Âm nghe được sẽ thay đổi thế nào?',
@@ -934,7 +951,7 @@ Object.assign(I18N.vi, {
   ],
   p4d:'Khoảng cách từ người đến vật cản', p4mat:'Vật cản', p4clap:'Vỗ tay', p4slowLbl:'Làm chậm hình',
   p4tlTitle:'Âm đến tai người theo thời gian', p4hint:'Kéo bức tường để đổi khoảng cách. Âm phản xạ đến tai sau âm gốc ít nhất 1/15 giây thì ta nghe thấy tiếng vang tách riêng.',
-  mats:{concrete:'Tường bê tông', rock:'Vách đá', glass:'Cửa kính', wood:'Tấm gỗ', carpet:'Thảm dày', curtain:'Rèm vải dày', foam:'Mút xốp tiêu âm'},
+  mats:{concrete:'Tường bê tông', rock:'Tường gạch', glass:'Cửa kính', wood:'Tấm gỗ', carpet:'Thảm trên sàn bê tông', curtain:'Rèm vải dày', foam:'Mút xốp 5 cm'},
   rowTe:'Thời gian âm đi và về t = 2d/v', rowV:'Tốc độ âm trong không khí', rowRefl:'Phần năng lượng âm bị phản xạ', rowLe:'Độ to của âm phản xạ tại tai',
   vEcho:'Nghe được tiếng vang: âm phản xạ đến sau âm gốc {t}, lâu hơn 1/15 s.',
   vMix:'Không nghe được tiếng vang riêng: âm phản xạ đến sau chỉ {t}, ngắn hơn 1/15 s, nên hoà vào âm gốc làm âm nghe to và kéo dài hơn.',
@@ -965,7 +982,7 @@ Object.assign(I18N.en, {
   p2f:'Frequency', p2a:'Amplitude', p2slow:'Slow motion',
   p2hint:'Press "Hold trace", then change the frequency or amplitude to compare the old trace (dashed) with the new one.',
   blur:'The speaker cone moves too fast for the eye: you only see a blur. Press "Slow motion".', slowBy:'Slowed down {n} times', gen:'signal generator',
-  rowF:'Frequency f', rowT:'Period T = 1/f', rowN:'Oscillations per second', rowA:'Amplitude (of maximum)', rowLam:'Wavelength in air λ = v/f',
+  rowF:'Frequency f', rowT:'Period T = 1/f', rowN:'Oscillations per second', rowA:'Amplitude (of maximum)', rowCone:'Speaker cone amplitude (illustrative: 100% = 1 mm)', coneAmp:'cone amplitude', prAxis:'pressure', prHigh:'higher', prLow:'lower', layerNote:'▼ one layer of air: only moves back and forth about its place, pushing the next layer', layerNoteS:'▼ 1 layer of air', rowLam:'Wavelength in air λ = v/f',
   zInfra:'Below 20 Hz is infrasound: humans cannot hear it.', zUltra:'Above 20 000 Hz is ultrasound: humans cannot hear it.',
   pLow:'Low pitch', pMid:'Medium pitch', pHigh:'High pitch', lSoft:'quiet', lMid:'medium loudness', lLoud:'loud', zAud:'{p}, {l}.', noSoundOut:'The speaker is silent because humans cannot hear this frequency.',
   p2pq:'Keep the frequency, increase the amplitude. How does the sound change?',
@@ -1043,7 +1060,7 @@ Object.assign(I18N.en, {
   ],
   p4d:'Distance from person to obstacle', p4mat:'Obstacle', p4clap:'Clap', p4slowLbl:'Animation slowed',
   p4tlTitle:'Sound reaching the ear over time', p4hint:'Drag the wall to change the distance. If the reflected sound arrives at least 1/15 s after the original, we hear a separate echo.',
-  mats:{concrete:'Concrete wall', rock:'Cliff face', glass:'Glass window', wood:'Wooden board', carpet:'Thick carpet', curtain:'Heavy curtain', foam:'Acoustic foam'},
+  mats:{concrete:'Concrete wall', rock:'Brick wall', glass:'Glass window', wood:'Wooden board', carpet:'Thick carpet', curtain:'Heavy curtain', foam:'Acoustic foam'},
   rowTe:'Round-trip time t = 2d/v', rowV:'Speed of sound in air', rowRefl:'Fraction of sound energy reflected', rowLe:'Echo level at the ear',
   vEcho:'Echo heard: the reflected sound arrives {t} after the original, longer than 1/15 s.',
   vMix:'No separate echo: the reflection arrives only {t} later, less than 1/15 s, so it merges with the original and makes it sound louder and longer.',
@@ -1179,7 +1196,7 @@ const gain2 = () => (P2.f >= 20 && P2.f <= 20000) ? 0.3 * P2.a/100 : 0;
 function upd2(){
   const f = P2.f;
   $('p2fv').textContent = fmtF(f); $('p2av').textContent = `${fmt(P2.a)} %`;
-  rows('p2read', [[T('rowF'), fmtF(f)], [T('rowT'), fmtT(1/f)], [T('rowN'), fmt(f, f < 100 ? 1 : 0)], [T('rowA'), `${fmt(P2.a)} %`], [T('rowLam'), fmtLen(speedOf('air')/f)], [T('rowNote'), noteName(f)]]);
+  rows('p2read', [[T('rowF'), fmtF(f)], [T('rowT'), fmtT(1/f)], [T('rowN'), fmt(f, f < 100 ? 1 : 0)], [T('rowA'), `${fmt(P2.a)} %`], [T('rowCone'), `±${fmt(P2.a/100, 2)} mm`], [T('rowLam'), fmtLen(speedOf('air')/f)], [T('rowNote'), noteName(f)]]);
   const z = $('p2zone');
   if (f < 20) z.textContent = T('zInfra');
   else if (f > 20000) z.textContent = T('zUltra');
@@ -1189,35 +1206,84 @@ function upd2(){
   $('p2slow').setAttribute('aria-pressed', P2.slow);
 }
 function drawSource2(dt){
-  const cv = $('p2cv'), small = cv.clientWidth < 560, { c, w, h } = fit(cv, small ? 170 : 210);
+  const cv = $('p2cv'), small = cv.clientWidth < 560, { c, w, h } = fit(cv, small ? 240 : 290);
   c.fillStyle = colors.lane; c.fillRect(0, 0, w, h);
   const f = P2.f, FVIS = 1.2, blur = !P2.slow && f > 8;
   P2.t += dt;
   const ph = P2.slow ? Math.sin(2*Math.PI*FVIS*P2.t) : Math.sin(2*Math.PI*Math.min(f, 8)*P2.t);
   c.font = `600 ${small ? 12 : 14}px ${FONT}`; c.textBaseline = 'top'; c.textAlign = 'left'; c.fillStyle = colors.muted;
   c.fillText(blur ? T('blur') : P2.slow ? tpl(T('slowBy'), { n: fmtSig(f/FVIS, 3) }) : '', 10, 8);
-  const bx = 14, by = h*0.32, bw = Math.min(170, w*0.34), bh = h*0.42;
+  const sy = small ? 102 : 126, bx = small ? 6 : 14, bw = small ? Math.min(110, w*0.24) : Math.min(170, w*0.34), bh = small ? 60 : 88, by = sy - bh/2;
   c.fillStyle = colors.panel; c.strokeStyle = colors.muted; c.lineWidth = 1.5; c.fillRect(bx, by, bw, bh); c.strokeRect(bx, by, bw, bh);
-  c.fillStyle = colors.ink; c.font = `600 ${small ? 16 : 22}px ${MONO}`; c.textAlign = 'center'; c.textBaseline = 'middle';
+  c.fillStyle = colors.ink; c.font = `600 ${small ? 13 : 22}px ${MONO}`; c.textAlign = 'center'; c.textBaseline = 'middle';
   c.fillText(S.hide ? '???? Hz' : fmtF(f), bx + bw/2, by + bh/2);
   c.font = `500 12px ${FONT}`; c.fillStyle = colors.muted; c.fillText(T('gen'), bx + bw/2, by + bh + 12);
-  const sx = bx + bw + Math.min(110, w*0.18), sy = h*0.55, A = 16 * P2.a/100, d = (blur ? 0 : ph) * A;
+  const lamPx = Math.max(70, Math.min(200, 150 * Math.pow(440/f, 0.35)));
+  // biên độ dịch chuyển trên hình: màng loa và lớp không khí sát loa dao động như nhau; giới hạn để các lớp không chồng lên nhau
+  const sx = bx + bw + (small ? 42 : Math.min(110, w*0.18)), A = Math.min(24, 0.85*lamPx/(2*Math.PI)) * P2.a/100, d = (blur ? 0 : ph) * A;
   c.strokeStyle = colors.muted; c.lineWidth = 2; c.beginPath(); c.moveTo(bx + bw, by + bh/2); c.bezierCurveTo(bx + bw + 40, by + bh, sx - 70, sy, sx - 34, sy); c.stroke();
   c.fillStyle = colors.solid; c.fillRect(sx - 34, sy - 20, 20, 40);
   const cone = (dx, alpha) => { c.globalAlpha = alpha; c.beginPath(); c.moveTo(sx - 14 + dx*0.3, sy - 20); c.lineTo(sx + 36 + dx, sy - 56); c.lineTo(sx + 36 + dx, sy + 56); c.lineTo(sx - 14 + dx*0.3, sy + 20); c.closePath(); c.fill(); c.globalAlpha = 1; };
   c.fillStyle = colors.solid;
   if (blur && A > 0.5){ cone(A, 0.3); cone(-A, 0.3); c.fillStyle = rgba(colors.comp, 0.3); c.fillRect(sx + 36 - A, sy - 56, 2*A, 112); }
-  else cone(d, 0.85);
-  // phân tử không khí trước loa: nén – dãn (minh hoạ, bước sóng trên hình không theo tỉ lệ)
-  const x0 = sx + 50, sp = small ? 9 : 11, lamPx = Math.max(26, Math.min(160, 120 * Math.pow(440/f, 0.35)));
-  const tw = P2.slow ? FVIS*P2.t : 0.6*P2.t;
-  for (let row = -3; row <= 3; row++){
-    for (let x = x0; x < w - 6; x += sp){
-      const disp = 0.45 * sp * (P2.a/100) * Math.sin(2*Math.PI*(tw - (x - x0)/lamPx));
-      c.fillStyle = colors.gas; c.globalAlpha = 0.9;
-      c.beginPath(); c.arc(x + disp + ((row*5) % 4), sy + row*(small ? 12 : 15), small ? 2.2 : 2.6, 0, 6.283); c.fill();
+  else { cone(-A, 0.12); cone(A, 0.12); cone(d, 0.85); }
+  // thước biên độ màng loa: hai vạch ở hai vị trí xa nhất, mũi tên ↔
+  if (A > 0.5){
+    const xm = sx + 36, yb = sy - 64;
+    c.strokeStyle = colors.mark; c.fillStyle = colors.mark; c.lineWidth = 2;
+    c.setLineDash([3, 3]); c.beginPath(); c.moveTo(xm - A, sy - 58); c.lineTo(xm - A, yb - 4); c.moveTo(xm + A, sy - 58); c.lineTo(xm + A, yb - 4); c.stroke(); c.setLineDash([]);
+    c.beginPath(); c.moveTo(xm - A, yb); c.lineTo(xm + A, yb); c.stroke();
+    if (A > 5){ [[xm - A, 1], [xm + A, -1]].forEach(([x, k]) => { c.beginPath(); c.moveTo(x, yb); c.lineTo(x + 6*k, yb - 4); c.lineTo(x + 6*k, yb + 4); c.closePath(); c.fill(); }); }
+    c.font = `600 ${small ? 11 : 13}px ${FONT}`; c.textAlign = 'center'; c.textBaseline = 'bottom';
+    c.fillText(S.hide ? T('coneAmp') : `${T('coneAmp')}: ${fmt(P2.a/100, 2)} mm`, Math.min(w - 80, Math.max(80, xm)), yb - 6);
+  }
+  // không khí trước loa: mỗi LỚP không khí dao động tới – lui (sóng dọc), chồng lên chuyển động hỗn loạn của từng phân tử
+  const x0 = sx + 36, sp = small ? 9 : 11, tw = P2.slow ? FVIS*P2.t : 0.6*P2.t;
+  const rowH = small ? 11 : 14, yTop = sy - 3.5*rowH, yBot = sy + 3.5*rowH;
+  const U = x => A * Math.sin(2*Math.PI*(tw - (x - x0)/lamPx));
+  const E = x => -A * 2*Math.PI/lamPx * Math.cos(2*Math.PI*(tw - (x - x0)/lamPx));
+  const eRef = Math.min(0.9, 24*2*Math.PI/lamPx);
+  for (let x = x0 + d; x < w - 4; x += 4){
+    const e = E(x), al = Math.min(1, Math.abs(e)/eRef) * 0.42; if (al < 0.02) continue;
+    c.fillStyle = rgba(e < 0 ? colors.comp : colors.rare, al); c.fillRect(x, yTop - 4, 4.5, yBot - yTop + 8);
+  }
+  const layerSp = Math.max(sp*2, lamPx/6);
+  c.lineWidth = 1.5;
+  let li = 0;
+  for (let xl = x0 + layerSp*0.5; xl < w - 6; xl += layerSp, li++){
+    const xx = xl + U(xl), hl = li === 2;
+    c.setLineDash([4, 3]); c.strokeStyle = rgba('215,38,61', hl ? 0.95 : 0.4); c.beginPath(); c.moveTo(xx, yTop - 4); c.lineTo(xx, yBot + 4); c.stroke(); c.setLineDash([]);
+    if (hl){
+      c.fillStyle = colors.mark; c.beginPath(); c.moveTo(xx, yTop - 5); c.lineTo(xx - 5, yTop - 12); c.lineTo(xx + 5, yTop - 12); c.closePath(); c.fill();
+      c.strokeStyle = colors.mark; c.lineWidth = 1; c.beginPath(); c.moveTo(xl - A, yBot + 7); c.lineTo(xl + A, yBot + 7); c.moveTo(xl - A, yBot + 4); c.lineTo(xl - A, yBot + 10); c.moveTo(xl + A, yBot + 4); c.lineTo(xl + A, yBot + 10); c.stroke(); c.lineWidth = 1.5;
     }
   }
+  const cols = Math.ceil((w - 6 - x0)/sp) + 1;
+  if (!P2.th || P2.th.length < 7*cols) P2.th = thermParams(7*cols + 50, 11);
+  P2.tj = (P2.tj || 0) + dt;
+  let n = 0;
+  for (let row = -3; row <= 3; row++){
+    for (let x = x0 + sp*0.5; x < w - 6; x += sp){
+      const q = P2.th[n++], [jx, jy] = S.therm ? thermal('gas', q, P2.tj) : [0, 0];
+      const px = x + U(x) + jx*sp, py = sy + row*rowH + jy*rowH;
+      if (px < x0 + d + 2) continue;
+      c.fillStyle = colors.gas; c.globalAlpha = 0.9;
+      c.beginPath(); c.arc(px, py, small ? 2.2 : 2.6, 0, 6.283); c.fill();
+    }
+  }
+  c.globalAlpha = 1;
+  const gy = yBot + (small ? 50 : 62), gH = small ? 20 : 28;
+  c.strokeStyle = colors.muted; c.lineWidth = 1; c.setLineDash([3, 3]); c.beginPath(); c.moveTo(x0, gy); c.lineTo(w - 6, gy); c.stroke(); c.setLineDash([]);
+  c.strokeStyle = colors.accent; c.lineWidth = 2.2; c.beginPath();
+  let first = true;
+  for (let x = x0 + d; x < w - 6; x += 2){ const y = gy - gH * Math.max(-1.1, Math.min(1.1, -E(x)/eRef)); first ? c.moveTo(x, y) : c.lineTo(x, y); first = false; }
+  c.stroke();
+  c.font = `600 ${small ? 11 : 13}px ${FONT}`; c.fillStyle = colors.accent; c.textAlign = 'right'; c.textBaseline = 'middle';
+  c.fillText(T('prAxis'), x0 - 8, gy);
+  c.font = `500 ${small ? 10 : 12}px ${FONT}`; c.fillStyle = colors.muted;
+  c.fillText(T('prHigh'), x0 - 8, gy - gH); c.fillText(T('prLow'), x0 - 8, gy + gH);
+  c.textAlign = 'left'; c.textBaseline = 'top'; c.fillStyle = colors.mark;
+  c.fillText(T(small ? 'layerNoteS' : 'layerNote'), x0 + 4, yBot + 14);
   c.globalAlpha = 1;
 }
 function drawScope2(){
@@ -1241,157 +1307,287 @@ function lang2(){
   list('p2concl', T('p2concl')); list('p2assume', T('p2assume')); list('p2yccd', T('p2yccd')); upd2();
 }
 
-/* ================= TAB 3a: âm gặp vật liệu ================= */
-// Chuỗi hạt: không khí | vật liệu | không khí. Cùng tốc độ trên hình, khác trở kháng Z (m và k cùng nhân Z),
-// vật liệu xốp có ma sát −γv. Đo năng lượng phản xạ (về nguồn), truyền qua (ra đầu kia), hấp thụ (công ma sát).
-const PRESETS = {
-  concrete:{ Z:20000, g:0, th:8, look:'solid' }, water:{ Z:3600, g:0, th:12, look:'liquid' }, wood:{ Z:5000, g:0, th:2, look:'solid' },
-  curtain:{ Z:2, g:0.6, th:2, look:'cloth' }, foam:{ Z:1.3, g:2.5, th:14, look:'foam' }, foamwall:{ Z:1.3, g:2.5, th:10, wall:4, look:'foam' },
-  custom:{ Z:20000, g:0, th:8, look:'auto' }
+/* ================= TAB 3a: âm gặp vật liệu (số liệu đo thực tế) ================= */
+// Mỗi vật liệu: α = hệ số hấp thụ âm (đo trong phòng vang, bảng tổng hợp sengpielaudio) ở 125 / 500 / 2000 Hz;
+// TL = độ cách âm (dB) → T = 10^(−TL/10). Phản xạ R = 1 − α; hấp thụ A = α − T; truyền qua T.
+// Hình vẽ là xung âm dựng theo đúng các tỉ lệ đó (biên độ ∝ căn bậc hai của năng lượng).
+const FREQS = [125, 500, 2000];
+const MASS_LAW = (m, f) => 20*Math.log10(m*f) - 47;            // định luật khối lượng (sóng tới mọi hướng), dB
+const LIMP = (m, f) => 1 / (1 + (2*Math.PI*f*m / (2*413))**2);  // tấm rất mỏng, nhẹ: hệ số truyền qua
+const MATDATA = {
+  concrete:{ look:'solid', th:8, alpha:[0.01, 0.015, 0.02], TL:FREQS.map(f => MASS_LAW(345, f)), info:'m ≈ 345 kg/m²' },
+  glass:{ look:'glass', th:2, alpha:[0.35, 0.18, 0.07], TL:[18, 29, 30], info:'m ≈ 15 kg/m²' },
+  plywood:{ look:'wood', th:2, alpha:[0.28, 0.17, 0.10], TL:FREQS.map(f => MASS_LAW(6, f)), info:'m ≈ 6 kg/m²' },
+  water:{ look:'liquid', th:14, alpha:[0.008, 0.013, 0.020], tau:[0.0011, 0.0011, 0.0011] },
+  carpet:{ look:'carpet', th:3, wall:5, alpha:[0.02, 0.14, 0.60], tau:[0, 0, 0] },
+  curtain:{ look:'cloth', th:2, gap:4, wall:4, alpha:[0.14, 0.55, 0.70], tau:[0, 0, 0] },
+  foam:{ look:'foam', th:8, wall:4, alpha:[0.06, 0.56, 0.90], tau:[0, 0, 0] },
+  thin:{ look:'cloth', th:1, limp:0.1 },
+  open:{ look:'open', th:6, open:true }
 };
-const M3 = { D:34, R:30, cs:12, W:12, AMP:0.5, ROWS:5 };
-const P3 = { preset:'concrete', mode:'mat', speed:1, pred:null, sim:null };
-function lookOf(p){ if (p.look !== 'auto') return p.look; if (p.g > 0.3) return p.Z > 50 ? 'solid' : 'foam'; return p.Z > 50 ? 'solid' : p.Z > 1.05 ? 'cloth' : 'air'; }
-function buildSim(){
-  const p = PRESETS[P3.preset], th = p.th, wall = p.wall || 0, N = M3.D + th + wall + M3.R, cs = M3.cs;
-  const m = new Float64Array(N+1).fill(1), k = new Float64Array(N+1).fill(cs*cs), gam = new Float64Array(N+1), kind = new Uint8Array(N+1);
-  for (let i = M3.D; i < M3.D + th; i++){ m[i] = p.Z; k[i] = p.Z*cs*cs; gam[i] = p.g*p.Z; kind[i] = 1; }
-  for (let i = M3.D + th; i < M3.D + th + wall; i++){ m[i] = 20000; k[i] = 20000*cs*cs; kind[i] = 2; }
-  const ks = new Float64Array(N); for (let i = 0; i < N; i++) ks[i] = 2*k[i]*k[i+1]/(k[i] + k[i+1]);
-  const r = rng(77), P = [];
-  for (let i = 0; i <= N; i++) for (let q = 0; q < M3.ROWS; q++) P.push({ i, q, ox:r()-0.5, oy:r()-0.5, vis:r(), p1:r()*6.28, w1:1+r() });
-  P3.sim = { N, th, wall, m, ks, gam, kind, P, u:new Float64Array(N+1), v:new Float64Array(N+1), a:new Float64Array(N+1), heat:new Float64Array(N+1),
-    t:0, t0:null, El:0, Er:0, Ea:0, Ein:0, done:false, look:lookOf(p), hmax:1e-9 };
+function pctOf(k, fi){
+  const d = MATDATA[k], f = FREQS[fi];
+  if (d.open) return { R:0, A:0, T:1 };
+  if (d.limp){ const T = LIMP(d.limp, f); return { R:1 - T, A:0, T }; }
+  const a = d.alpha[fi], T = d.tau ? d.tau[fi] : Math.pow(10, -d.TL[fi]/10);
+  return { R:1 - a, A:Math.max(0, a - T), T };
 }
-function send3(){ const s = P3.sim; s.u.fill(0); s.v.fill(0); s.heat.fill(0); s.El = s.Er = s.Ea = 0; s.t0 = s.t; s.done = false; s.hmax = 1e-9; }
-function step3(dt){
-  const s = P3.sim, N = s.N, cs = M3.cs, tau = M3.W/cs, u = s.u, v = s.v, a = s.a;
-  s.t += dt;
-  const driven = s.t0 !== null && s.t - s.t0 < tau;
-  for (let i = 0; i <= N; i++){
-    let f = 0; if (i > 0) f += s.ks[i-1]*(u[i-1] - u[i]); if (i < N) f += s.ks[i]*(u[i+1] - u[i]);
-    f -= s.gam[i]*v[i]; if (i === N) f -= cs*v[i]; if (i === 0 && !driven) f -= cs*v[i];
-    a[i] = f / s.m[i];
+Object.assign(I18N.vi, {
+  p3freq:'Loại âm', fband:['Âm trầm 125 Hz','Âm trung 500 Hz','Âm cao 2 000 Hz'],
+  presets:{ concrete:'Tường bê tông 15 cm', glass:'Kính cửa sổ 6 mm', plywood:'Vách gỗ dán 1 cm', water:'Mặt nước', carpet:'Thảm trên sàn bê tông', curtain:'Rèm vải dày treo cách tường', foam:'Mút xốp 5 cm dán tường', thin:'Rèm voan mỏng treo giữa phòng', open:'Ô cửa mở' },
+  dataTitle:'Số liệu thật dùng cho vật liệu này', rowAlpha:'Hệ số hấp thụ âm α (đo)', rowTL:'Độ cách âm (giảm bao nhiêu dB khi đi qua)', rowRule:'Cách tính', rowMass:'Khối lượng 1 m² rèm',
+  rule:'Phản xạ = 1 − α; truyền qua = 10^(−dB/10); hấp thụ = α − truyền qua', ruleLimp:'Tấm rất mỏng nhẹ (100 g/m²): truyền qua = 1/(1 + (πfm/ρc)²), coi như không hấp thụ',
+  ruleOpen:'Ô trống: âm đi thẳng qua hết (α = 1 theo định nghĩa)', ruleWater:'Truyền qua mặt nước tính từ trở kháng âm: 4Z₁Z₂/(Z₁+Z₂)² ≈ 0,11%',
+  ruleBack:'Phía sau là tường hoặc sàn bê tông nên phần truyền qua coi như bằng 0',
+  measured:'đo', computed:'tính', assumed:'giả định',
+  air:'không khí', airBehind:'không khí phía sau', eR:'Phản xạ', eA:'Hấp thụ (thành nhiệt)', eT:'Truyền qua',
+  lgAir:'phân tử không khí', lgMat:'vật liệu', lgHeat:'nóng lên (hấp thụ)', lgFrame:'khung xốp', lgWall:'tường phía sau',
+  p3hintMat:'Chọn vật liệu và loại âm rồi bấm "Gửi xung âm". Độ lớn xung phản xạ và xung truyền qua trên hình vẽ đúng theo % ở bảng; phần hấp thụ hiện thành màu đỏ (nóng lên).',
+  why:{
+    concrete:'Bê tông rất nặng và cứng so với không khí, lớp không khí đẩy vào không làm nó nhúc nhích, nên gần như toàn bộ âm bị dội lại (khoảng 98–99%). Phần đi xuyên qua bức tường dày chỉ bằng một phần trăm nghìn hoặc nhỏ hơn.',
+    glass:'Kính nặng hơn không khí rất nhiều nên phần lớn âm bị dội lại. Nhưng tấm kính mỏng còn rung theo âm trầm, nên âm trầm bị "mất" khá nhiều (35%) và lọt qua nhiều hơn âm cao. Vì vậy tiếng xe tải ầm ầm vẫn lọt qua cửa kính.',
+    plywood:'Vách gỗ dán nhẹ hơn tường nhiều nên rung theo âm, nhất là âm trầm: khoảng 9% âm trầm lọt sang phòng bên. Âm cao gần như bị chặn hết. Vách càng nặng thì càng cách âm tốt (định luật khối lượng).',
+    water:'Nước nặng và khó nén hơn không khí khoảng 3 600 lần (trở kháng âm). Âm từ không khí gặp mặt nước bị dội lại gần hết, chỉ khoảng 0,1% đi vào nước. Vì vậy người lặn gần như không nghe thấy người trên bờ nói.',
+    carpet:'Thảm gồm nhiều sợi mềm, giữa các sợi có không khí. Âm cao chui vào các khe nhỏ, cọ xát vào sợi và biến thành nhiệt (hấp thụ 60%). Âm trầm có bước sóng dài, lớp thảm mỏng gần như không giữ được, nên vẫn bị sàn bê tông dội lại.',
+    curtain:'Rèm vải dày treo cách tường một khoảng hấp thụ tốt âm trung và âm cao (55–70%): không khí dao động xuyên qua lớp vải dày bị ma sát với sợi vải. Âm trầm phần lớn vẫn bị tường phía sau dội lại.',
+    foam:'Mút xốp có vô số lỗ khí nhỏ thông nhau. Âm đi vào các lỗ, không khí dao động cọ xát vào thành lỗ, năng lượng biến thành nhiệt: hấp thụ đến 90% âm cao. Nhưng lớp mút 5 cm quá mỏng so với bước sóng âm trầm (khoảng 2,7 m ở 125 Hz) nên âm trầm vẫn bị tường dội lại gần hết.',
+    thin:'Rèm voan mỏng rất nhẹ (khoảng 100 g/m²), âm đẩy là nó rung theo và đẩy tiếp không khí phía sau, nên âm truyền qua gần hết, nhất là âm trầm. Rèm mỏng gần như không cản được tiếng ồn.',
+    open:'Ô cửa mở không có gì cản: âm đi thẳng qua hết. Vì vậy khe hở dưới cửa, cửa sổ mở là đường tiếng ồn lọt vào nhiều nhất, dù tường có dày đến đâu.'
+  },
+  p3mech:[
+    'Số liệu: hệ số hấp thụ α là phần năng lượng âm KHÔNG bị dội lại, đo trong phòng vang theo tiêu chuẩn (ISO 354), ở từng tần số. Độ cách âm TL (dB) cho biết âm yếu đi bao nhiêu khi đi xuyên qua; phần truyền qua = 10^(−TL/10).',
+    'Phản xạ mạnh khi trở kháng âm Z = ρ·v của hai chất chênh lệch nhiều: R = ((Z₂ − Z₁)/(Z₂ + Z₁))². Không khí Z ≈ 413 kg/(m²·s); nước ≈ 1,5 triệu; bê tông ≈ 8 triệu.',
+    'Truyền qua tường, vách: tấm bị âm đẩy rung như một khối lượng. TL ≈ 20·lg(m·f) − 47 dB (m: khối lượng trên 1 m², f: tần số). Nặng gấp đôi hoặc tần số gấp đôi thì cách âm thêm khoảng 6 dB, nên âm trầm dễ lọt qua hơn âm cao.',
+    'Hấp thụ: trong vật liệu xốp, sợi (mút, thảm, vải, bông), không khí dao động trong khe nhỏ chịu ma sát nhớt và trao đổi nhiệt với thành khe. Lớp xốp chỉ hấp thụ tốt khi dày cỡ 1/4 bước sóng trở lên, nên mút mỏng hút âm cao tốt hơn âm trầm.',
+    'Phản xạ + hấp thụ + truyền qua = 100% năng lượng âm tới (bảo toàn năng lượng).'
+  ],
+  p3simple:[
+    'Âm gặp vật thì bị chia làm ba phần: một phần dội lại (phản xạ), một phần biến thành nhiệt trong vật (hấp thụ), một phần đi sang bên kia (truyền qua).',
+    'Vật cứng, nặng, nhẵn (tường, đá, kính, mặt nước): âm dội lại gần hết, như bóng bàn đập vào tường.',
+    'Vật mềm, xốp, nhiều sợi (mút, thảm, rèm dày): âm chui vào khe nhỏ, cọ xát rồi tắt dần thành nhiệt.',
+    'Vật mỏng, nhẹ (rèm voan, giấy) hoặc khe hở: âm đi qua gần hết. Muốn chống ồn phải dùng vật nặng và bịt kín khe hở.',
+    'Âm trầm "khó trị" hơn âm cao: dễ lọt qua tường mỏng, khó bị mút mỏng hấp thụ.'
+  ],
+  p3assume:[
+    'Hệ số hấp thụ α lấy từ bảng tổng hợp số liệu đo (sengpielaudio): bê tông trơn, kính cửa sổ, gỗ dán 3/8 inch, mặt nước, thảm trên bê tông, vải molleton 610 g/m² treo cách tường, mút Sonex 5 cm.',
+    'Độ cách âm: tường bê tông 15 cm và vách gỗ dán 1 cm tính theo định luật khối lượng; kính đơn 6 mm lấy theo chỉ số cách âm STC 29 dB (Engineering ToolBox), âm trầm khoảng 18 dB, âm cao khoảng 30 dB.',
+    'Rèm voan mỏng tính theo công thức tấm mỏng nhẹ, bỏ qua lỗ hở giữa các sợi (thực tế âm còn lọt qua nhiều hơn).',
+    'Với vật dán trên tường hoặc sàn bê tông (thảm, mút, rèm treo cách tường), phần âm xuyên qua tường bê tông phía sau rất nhỏ, coi như 0.',
+    'Số liệu đo trong phòng vang ứng với âm tới từ mọi hướng; thực tế còn phụ thuộc cách lắp đặt. Trên hình, xung âm chỉ minh hoạ, tốc độ trong vật liệu không theo tỉ lệ.',
+    'Tiếng vang: thời gian lưu âm của tai lấy 1/15 s theo sách giáo khoa; vật cản dùng hệ số hấp thụ ở 1 000 Hz trong cùng bảng số liệu.'
+  ],
+  srcTitle:'Nguồn số liệu'
+});
+Object.assign(I18N.en, {
+  p3freq:'Sound', fband:['Low 125 Hz','Mid 500 Hz','High 2 000 Hz'],
+  presets:{ concrete:'Concrete wall 15 cm', glass:'Window glass 6 mm', plywood:'Plywood partition 1 cm', water:'Water surface', carpet:'Carpet on concrete', curtain:'Heavy curtain off the wall', foam:'5 cm foam on a wall', thin:'Sheer curtain mid-room', open:'Open window' },
+  dataTitle:'Real data for this material', rowAlpha:'Absorption coefficient α (measured)', rowTL:'Sound insulation (dB lost passing through)', rowRule:'How the % are found', rowMass:'Mass per m²',
+  rule:'Reflected = 1 − α; transmitted = 10^(−dB/10); absorbed = α − transmitted', ruleLimp:'Very thin, light sheet (100 g/m²): transmitted = 1/(1 + (πfm/ρc)²), absorption ignored',
+  ruleOpen:'Opening: all sound passes (α = 1 by definition)', ruleWater:'Transmission into water from acoustic impedance: 4Z₁Z₂/(Z₁+Z₂)² ≈ 0.11%',
+  ruleBack:'A concrete wall or floor is behind it, so transmission is taken as 0',
+  measured:'measured', computed:'calculated', assumed:'assumed',
+  air:'air', airBehind:'air behind', eR:'Reflected', eA:'Absorbed (to heat)', eT:'Transmitted',
+  lgAir:'air molecules', lgMat:'material', lgHeat:'warming (absorption)', lgFrame:'foam frame', lgWall:'wall behind',
+  p3hintMat:'Choose a material and a sound, then press "Send a sound pulse". The reflected and transmitted pulses are drawn to the percentages in the table; absorption shows as red (heating).',
+  why:{
+    concrete:'Concrete is far heavier and stiffer than air; the air cannot move it, so almost all the sound is reflected (98–99%). What gets through a thick wall is a hundred-thousandth or less.',
+    glass:'Glass is much heavier than air, so most sound is reflected. But a thin pane vibrates with low sounds, so a lot of bass is "lost" (35%) and more bass than treble gets through. That is why rumbling lorries are heard through windows.',
+    plywood:'A plywood partition is much lighter than a wall, so it vibrates with sound, especially bass: about 9% of low sound leaks into the next room. High sound is almost fully blocked. Heavier partitions insulate better (mass law).',
+    water:'In acoustic impedance water is about 3 600 times "stiffer and heavier" than air. Sound in air hitting water is almost all reflected; only about 0.1% enters the water, so divers barely hear people on the shore.',
+    carpet:'Carpet is made of soft fibres with air between them. High sound gets into the gaps, rubs on the fibres and turns into heat (60% absorbed). Low sound has a long wavelength; the thin carpet hardly affects it and the concrete floor reflects it.',
+    curtain:'A heavy curtain hung away from the wall absorbs mid and high sound well (55–70%): air moving through the thick fabric rubs against the fibres. Most low sound is still reflected by the wall behind.',
+    foam:'Foam has countless tiny connected pores. Air vibrating in them rubs against the walls and the energy becomes heat: up to 90% of high sound is absorbed. But 5 cm is far thinner than a bass wavelength (about 2.7 m at 125 Hz), so the wall still reflects most bass.',
+    thin:'A sheer curtain is very light (about 100 g/m²). Sound makes it vibrate and it pushes the air behind, so nearly all sound passes, especially bass. Thin curtains hardly block noise.',
+    open:'An open window has nothing in the way: all sound passes. Gaps under doors and open windows let in the most noise, however thick the walls are.'
+  },
+  p3mech:[
+    'Data: the absorption coefficient α is the fraction of sound energy NOT reflected, measured in a reverberation room (ISO 354) at each frequency. Sound insulation TL (dB) says how much weaker sound becomes passing through; transmitted fraction = 10^(−TL/10).',
+    'Reflection is strong when the acoustic impedances Z = ρ·v differ a lot: R = ((Z₂ − Z₁)/(Z₂ + Z₁))². Air Z ≈ 413 kg/(m²·s); water ≈ 1.5 million; concrete ≈ 8 million.',
+    'Through walls and partitions: the panel is driven like a mass. TL ≈ 20·lg(m·f) − 47 dB (m: mass per m², f: frequency). Doubling the mass or the frequency adds about 6 dB, so bass leaks through more easily than treble.',
+    'Absorption: in porous and fibrous materials (foam, carpet, fabric, wool) air moving in narrow gaps suffers viscous friction and heat exchange with the walls. A porous layer absorbs well only when it is at least about a quarter-wavelength thick, so thin foam absorbs treble better than bass.',
+    'Reflected + absorbed + transmitted = 100% of the incident energy (conservation of energy).'
+  ],
+  p3simple:[
+    'When sound meets an object it splits three ways: some bounces back (reflection), some becomes heat inside (absorption), some goes through (transmission).',
+    'Hard, heavy, smooth things (walls, rock, glass, water): almost all sound bounces back, like a ping-pong ball off a wall.',
+    'Soft, porous, fibrous things (foam, carpet, heavy curtains): sound gets into tiny gaps, rubs and fades into heat.',
+    'Thin, light things (sheer curtains, paper) and gaps: almost all sound passes. To block noise you need heavy materials and sealed gaps.',
+    'Bass is harder to deal with than treble: it leaks through thin walls and thin foam hardly absorbs it.'
+  ],
+  p3assume:[
+    'Absorption coefficients α come from a compiled table of measurements (sengpielaudio): plain concrete, window glass, 3/8 inch plywood, water surface, carpet on concrete, 610 g/m² molleton hung away from the wall, 5 cm Sonex foam.',
+    'Insulation: the 15 cm concrete wall and 1 cm plywood use the mass law; single 6 mm glass follows its STC 29 dB rating (Engineering ToolBox), about 18 dB for bass and 30 dB for treble.',
+    'The sheer curtain uses the thin-sheet formula and ignores gaps between fibres (in reality even more sound leaks through).',
+    'For things mounted on a concrete wall or floor (carpet, foam, curtain off the wall), sound passing through the concrete behind is tiny and taken as 0.',
+    'Reverberation-room data apply to sound arriving from all directions; real results also depend on installation. The pulse on screen is illustrative; speeds inside materials are not to scale.',
+    'Echoes: the ear\'s persistence is 1/15 s as in Vietnamese textbooks; obstacles use the 1 000 Hz absorption coefficients from the same table.'
+  ],
+  srcTitle:'Data sources'
+});
+const SOURCES = [
+  ['sengpielaudio: bảng hệ số hấp thụ âm của vật liệu (125–4 000 Hz)', 'sengpielaudio: absorption coefficients of materials (125–4 000 Hz)', 'https://sengpielaudio.com/calculator-RT60Coeff.htm'],
+  ['Engineering ToolBox: cách âm của tường, kính (STC, hiệu chỉnh theo tần số)', 'Engineering ToolBox: sound transmission through walls and glazing (STC, frequency corrections)', 'https://www.engineeringtoolbox.com/sound-transmission-massive-walls-d_1409.html'],
+  ['Thử nghiệm rèm "cách âm" 1 200 g/m²: chỉ giảm 1–4 dBA', 'Test of a 1 200 g/m² "soundproof" curtain: only 1–4 dBA reduction', 'https://realtimesoundmeter.org/blog/soundproof-curtains-decibel-reality-check']
+];
+const M3 = { D:30, R:30, cs:28, W:10, AMP:0.55, ROWS:5 };
+const P3 = { preset:'concrete', fi:1, mode:'mat', speed:1, pred:null, t:0, t0:null, glow:null, geo:null };
+function zone3(){
+  const d = MATDATA[P3.preset], th = d.th, gap = d.gap || 0, wall = d.wall || 0;
+  const liq = d.look === 'liquid';
+  return { th, gap, wall, a:M3.D, b:M3.D + th + gap, end:M3.D + th + gap + wall, N:M3.D + th + gap + wall + (liq ? 0 : M3.R) };
+}
+const pulse = s => (s > 0 && s < M3.W) ? M3.AMP * Math.sin(Math.PI*s/M3.W)**2 : 0;
+// Dịch chuyển tại cột i (đơn vị: khoảng cách cột), dựng giải tích theo R, A, T
+function disp3(i, s, z, p){
+  const d = MATDATA[P3.preset], absorber = d.wall && !d.tau?.some(x => x > 0) && (d.look === 'foam' || d.look === 'cloth' || d.look === 'carpet');
+  const rR = Math.sqrt(p.R), rT = Math.sqrt(p.T);
+  if (d.open) return pulse(s - i);
+  if (absorber){
+    // sóng đi vào lớp hấp thụ, tắt dần, gặp tường dội lại, ra ngoài còn √R
+    const L = z.th, k = L > 0 ? -Math.log(Math.max(rR, 1e-4)) / (2*L) : 0;
+    const depth = j => Math.min(Math.max(j - z.a, 0), L);      // quãng đường trong lớp hấp thụ
+    if (i < z.a) return pulse(s - i) - rR * pulse(s - (2*z.b - i));
+    if (i < z.b){ const dj = depth(i); return Math.exp(-k*dj) * pulse(s - i) - Math.exp(-k*(2*L - dj)) * pulse(s - (2*z.b - i)); }
+    return 0;
   }
-  for (let i = 1; i <= N; i++) v[i] += a[i]*dt;
-  if (driven){ const nu = M3.AMP * Math.sin(Math.PI*(s.t - s.t0)/tau)**2; v[0] = (nu - u[0])/dt; u[0] = nu; }
-  else { v[0] += a[0]*dt; u[0] += v[0]*dt; s.El += cs*v[0]*v[0]*dt; }
-  for (let i = 1; i <= N; i++) u[i] += v[i]*dt;
-  s.Er += cs*v[N]*v[N]*dt;
-  const decay = Math.exp(-dt/0.8);
-  for (let i = 0; i <= N; i++){ const q = s.gam[i]*v[i]*v[i]*dt; s.Ea += q; s.heat[i] = s.heat[i]*decay + q; }
-}
-function energyLeft3(){
-  const s = P3.sim; let e = 0;
-  for (let i = 1; i <= s.N; i++) e += 0.5*s.m[i]*s.v[i]*s.v[i];
-  for (let i = 0; i < s.N; i++) e += 0.5*s.ks[i]*(s.u[i+1] - s.u[i])**2;
-  return e;
-}
-function renderBars3(){
-  const s = P3.sim; if (!s) return;
-  const rem = s.t0 === null ? 0 : energyLeft3();
-  // xong khi xung phản xạ đã về hết nguồn và xung truyền qua đã ra hết; phần rất nhỏ còn dao động trong vật không tính
-  if (s.t0 !== null && !s.done && s.t - s.t0 > (Math.max(2*M3.D, s.N) + M3.W)/M3.cs + 0.8) s.done = true;
-  const tot = s.El + s.Er + s.Ea + (s.done ? 0 : rem);
-  const pc = x => tot > 0 ? x/tot*100 : 0;
-  const items = [['eR', s.El, colors.liquid], ['eA', s.Ea, colors.mark], ['eT', s.Er, colors.cl]];
-  const status = s.t0 === null ? '' : s.done ? T('done') : T('measuring');
-  $('p3bars').innerHTML = `<div class="ebhead"><span>${status}</span></div>` + items.map(([k, e, col]) =>
-    `<div class="ebar"><span>${T(k)}</span><span class="track"><i style="width:${s.t0 === null ? 0 : pc(e).toFixed(1)}%;background:${col}"></i></span><b class="num sec">${s.t0 === null ? '—' : fmt(pc(e)) + ' %'}</b></div>`).join('');
+  if (i < z.a) return pulse(s - i) - rR * pulse(s - (2*z.a - i));
+  if (d.look === 'liquid') return rT * pulse(s - i);
+  if (i < z.end) return (1 - rR) * pulse(s - i) * 0.6;           // hạt vật liệu nặng: gần như đứng yên
+  return rT * pulse(s - i);
 }
 function drawMat(dt){
-  const cv = $('p3cv'), small = cv.clientWidth < 560, { c, w, h } = fit(cv, small ? 190 : 230);
-  const s = P3.sim, N = s.N;
-  let sub = Math.round(dt * P3.speed * 4000); sub = Math.min(sub, 400);
-  for (let n = 0; n < sub; n++) step3(1/4000);
+  const cv = $('p3cv'), small = cv.clientWidth < 560, { c, w, h } = fit(cv, small ? 200 : 240);
+  const z = zone3(), d = MATDATA[P3.preset], p = pctOf(P3.preset, P3.fi), N = z.N;
+  P3.t += dt * P3.speed;
+  const s = P3.t0 === null ? -999 : (P3.t - P3.t0) * M3.cs;
+  if (!P3.glow || P3.glow.length !== N + 1) P3.glow = new Float64Array(N + 1);
   c.fillStyle = colors.lane; c.fillRect(0, 0, w, h);
-  const x0 = 18, aPx = (w - x0 - 6) / N, top = 30, rh = (h - top - 26) / M3.ROWS;
-  const xs = i => x0 + i*aPx, xm0 = xs(M3.D) - aPx/2, xm1 = xs(M3.D + s.th + s.wall) - aPx/2;
+  const x0 = 18, aPx = (w - x0 - 6) / N, top = 30, bot = h - 24, rh = (bot - top) / M3.ROWS;
+  const xs = i => x0 + i*aPx, xa = xs(z.a) - aPx/2, xb = xs(z.a + z.th) - aPx/2, xe = xs(z.end) - aPx/2;
+  P3.geo = { xa, xe };
+  const u = new Float64Array(N + 1); for (let i = 0; i <= N; i++) u[i] = disp3(i, s, z, p);
   // nền vật liệu
-  c.fillStyle = s.look === 'liquid' ? rgba(colors.comp, 0.18) : s.look === 'foam' ? rgba(colors.rare, 0.2) : s.look === 'cloth' ? rgba(colors.rare, 0.12) : 'rgba(0,0,0,0)';
-  c.fillRect(xm0, top - 6, xs(M3.D + s.th) - aPx/2 - xm0, h - top - 14);
-  if (s.wall){ c.fillStyle = colors.solid; c.globalAlpha = 0.25; c.fillRect(xs(M3.D + s.th) - aPx/2, top - 6, s.wall*aPx, h - top - 14); c.globalAlpha = 1; }
-  // vùng nén / dãn trong không khí
+  const bg = { solid:rgba(colors.comp, 0.08), glass:rgba(colors.comp, 0.15), wood:rgba(colors.rare, 0.3), liquid:rgba(colors.comp, 0.2), carpet:rgba(colors.rare, 0.12), cloth:rgba(colors.rare, 0.1), foam:rgba(colors.rare, 0.25), open:'rgba(0,0,0,0)' }[d.look];
+  c.fillStyle = bg; c.fillRect(xa, top - 6, (d.look === 'liquid' ? w : xb) - xa, bot - top + 12);
+  if (z.wall){ c.fillStyle = colors.solid; c.globalAlpha = 0.85; c.fillRect(xs(z.b) - aPx/2, top - 6, z.wall*aPx, bot - top + 12); c.globalAlpha = 1; }
+  if (d.open){ c.strokeStyle = colors.muted; c.lineWidth = 3; c.strokeRect(xa, 4 + 16, xb - xa, bot - top + 14); }
+  // nén – dãn trong không khí
   for (let i = 0; i < N; i++){
-    if (s.kind[i] || s.kind[i+1]) continue;
-    const e = s.u[i+1] - s.u[i], al = Math.min(1, Math.abs(e)/M3.AMP*1.5) * 0.35; if (al < 0.02) continue;
-    c.fillStyle = rgba(e < 0 ? colors.comp : colors.rare, al); c.fillRect(xs(i) + s.u[i]*aPx, top - 6, aPx*(1 + e), h - top - 14);
+    const inAir = i < z.a - 1 || i >= z.end || d.open || (d.look === 'foam' && i < z.b) || (i >= z.a + z.th && i < z.b);
+    if (!inAir) continue;
+    const e = u[i+1] - u[i], al = Math.min(1, Math.abs(e)/M3.AMP*1.6) * 0.38; if (al < 0.02) continue;
+    c.fillStyle = rgba(e < 0 ? colors.comp : colors.rare, al); c.fillRect(xs(i) + u[i]*aPx, top - 6, aPx*(1 + e), bot - top + 12);
   }
-  // nhiệt do ma sát
-  for (let i = 0; i <= N; i++){ if (s.heat[i] > s.hmax) s.hmax = s.heat[i]; }
-  for (let i = 0; i <= N; i++){ if (!s.kind[i] || s.heat[i] <= 0) continue; const al = Math.min(0.6, s.heat[i]/s.hmax*0.6); if (al < 0.03) continue; c.fillStyle = rgba('215,38,61', al); c.fillRect(xs(i) - aPx/2, top - 6, aPx, h - top - 14); }
-  // khung xốp đứng yên
-  if (s.look === 'foam'){
-    c.strokeStyle = colors.muted; c.lineWidth = 1.2;
-    for (let i = M3.D; i < M3.D + s.th; i += 2) for (let q = 0; q < M3.ROWS; q++){ c.beginPath(); c.arc(xs(i) + aPx/2, top + (q + 0.5)*rh, Math.min(aPx*0.95, rh*0.45), 0, 6.283); c.stroke(); }
+  // các lớp không khí: mỗi lớp dao động quanh chỗ của nó và đẩy lớp bên cạnh
+  c.setLineDash([4, 3]); c.lineWidth = 1.3; c.strokeStyle = rgba('215,38,61', 0.45);
+  for (let i = 1; i < N; i += 3){
+    const inAir = d.open || i < z.a - 1 || (i >= z.end && d.look !== 'liquid');
+    if (!inAir) continue;
+    const x = xs(i) + u[i]*aPx; c.beginPath(); c.moveTo(x, top - 4); c.lineTo(x, bot + 4); c.stroke();
   }
+  c.setLineDash([]);
+  // nóng lên: tỉ lệ với phần hấp thụ A
+  const dec = Math.exp(-dt*P3.speed/1.2);
+  for (let i = z.a; i < z.a + z.th; i++){
+    const inst = p.A * Math.min(1, Math.abs(u[i]) / M3.AMP * 1.5 + (s > i && s < i + M3.W ? 0.6 : 0));
+    P3.glow[i] = Math.max(P3.glow[i]*dec, inst);
+    if (P3.glow[i] > 0.02){ c.fillStyle = rgba('215,38,61', Math.min(0.75, P3.glow[i]*0.85)); c.fillRect(xs(i) - aPx/2, top - 6, aPx, bot - top + 12); }
+  }
+  // khung xốp
+  if (d.look === 'foam'){ c.strokeStyle = colors.muted; c.lineWidth = 1.2; for (let i = z.a; i < z.a + z.th; i += 2) for (let q = 0; q < M3.ROWS; q++){ c.beginPath(); c.arc(xs(i) + aPx/2, top + (q + 0.5)*rh, Math.min(aPx*0.95, rh*0.45), 0, 6.283); c.stroke(); } }
   // hạt
   const rad = Math.max(1.6, Math.min(4.5, aPx*0.32));
-  for (const p of s.P){
-    const kd = s.kind[p.i];
-    let x = xs(p.i) + s.u[p.i]*aPx, y = top + (p.q + 0.5)*rh, col = colors.gas, r = rad;
-    if (kd === 0 || (kd === 1 && s.look === 'foam')){ if (p.vis > 0.45) continue; x += p.ox*aPx*0.8 + 0.08*aPx*Math.sin(p.p1 + p.w1*s.t*3); y += p.oy*rh*0.8; }
-    else if (kd === 2 || s.look === 'solid'){ col = colors.solid; r = rad*1.1; }
-    else if (s.look === 'liquid'){ col = colors.liquid; x += p.ox*aPx*0.4; y += p.oy*rh*0.5; }
-    else if (s.look === 'cloth'){ col = colors.na; }
-    c.fillStyle = col; c.beginPath();
-    if (kd === 1 && s.look === 'cloth'){ c.fillRect(x - 1.5, y - rh*0.45, 3, rh*0.9); continue; }
-    c.arc(x, y, r, 0, 6.283); c.fill();
+  if (!P3.th || P3.th.length < (N + 1)*M3.ROWS) P3.th = thermParams((N + 1)*M3.ROWS + 20, 77);
+  P3.tj = (P3.tj || 0) + dt;
+  for (let i = 0; i <= N; i++) for (let q = 0; q < M3.ROWS; q++){
+    const tp = P3.th[i*M3.ROWS + q], ox = tp.ox, oy = tp.oy, vis = tp.vis;
+    const inMat = !d.open && i >= z.a && (d.look === 'liquid' || i < z.a + z.th), inGap = i >= z.a + z.th && i < z.b, inWall = i >= z.b && i < z.end;
+    const g = inWall || (inMat && !['liquid','foam'].includes(d.look)) ? 'solid' : inMat && d.look === 'liquid' ? 'liquid' : 'gas';
+    const [jx, jy] = S.therm ? thermal(g, tp, P3.tj) : [0, 0];
+    let x = xs(i) + (u[i] + jx)*aPx, y = top + (q + 0.5)*rh + jy*rh*(g === 'gas' ? 0.9 : 1);
+    if (inWall){ c.fillStyle = colors.panel; c.globalAlpha = 0.5; c.beginPath(); c.arc(x, y, rad*0.9, 0, 6.283); c.fill(); c.globalAlpha = 1; continue; }
+    if (!inMat || d.look === 'foam'){ if (vis > 0.45) continue; c.fillStyle = colors.gas; c.beginPath(); c.arc(x + ox*aPx*0.8, y + oy*rh*0.8, rad, 0, 6.283); c.fill(); continue; }
+    if (d.look === 'cloth' || d.look === 'carpet'){ c.fillStyle = d.look === 'carpet' ? colors.mark : colors.na; c.fillRect(x - 1.5, y - rh*0.45, 3, rh*0.9); continue; }
+    c.fillStyle = d.look === 'liquid' ? colors.liquid : d.look === 'glass' ? colors.accent : d.look === 'wood' ? colors.gas : colors.solid;
+    if (d.look === 'liquid'){ x += ox*aPx*0.4; y += oy*rh*0.5; }
+    c.beginPath(); c.arc(x, y, rad*1.1, 0, 6.283); c.fill();
   }
-  // pít-tông nguồn
-  const xp = x0 + s.u[0]*aPx; c.fillStyle = colors.solid; c.fillRect(xp - 10, top - 6, 8, h - top - 14);
+  // nguồn
+  const xp = x0 + u[0]*aPx; c.fillStyle = colors.solid; c.fillRect(xp - 10, top - 6, 8, bot - top + 12);
   // nhãn
-  c.font = `600 ${small ? 11 : 13}px ${FONT}`; c.textBaseline = 'top'; c.fillStyle = colors.ink;
-  c.textAlign = 'center'; c.fillText(T('air'), (x0 + xm0)/2, 6); c.fillText(T('airBehind'), (xm1 + w)/2, 6);
-  { const lb = T('presets')[P3.preset], half = c.measureText(lb).width/2 + 4, cx = Math.max(half, Math.min(w - half, (xm0 + xm1)/2));
-    c.textBaseline = 'bottom'; c.fillStyle = colors.accent; c.fillText(lb, cx, h - 2); }
-  renderBars3();
+  c.font = `600 ${small ? 11 : 13}px ${FONT}`; c.textBaseline = 'top'; c.fillStyle = colors.ink; c.textAlign = 'center';
+  c.fillText(T('air'), (x0 + xa)/2, 4); if (d.look !== 'liquid') c.fillText(T('airBehind'), (xe + w)/2, 4);
+  const lb = T('presets')[P3.preset], half = c.measureText(lb).width/2 + 4, cx = Math.max(half, Math.min(w - half, (xa + xe)/2));
+  c.textBaseline = 'bottom'; c.fillStyle = colors.accent; c.fillText(lb, cx, h - 2);
+  // nhãn % sau khi xung tới vật
+  const hit = s > z.a;
+  if (hit && !S.hide){
+    c.font = `700 ${small ? 13 : 16}px ${MONO}`; c.textBaseline = 'top';
+    const fp = v => v < 0.001 && v > 0 ? `${fmtSig(v*100, 1)}%` : `${fmt(v*100, v < 0.0995 && v > 0 ? 1 : 0)}%`;
+    c.fillStyle = colors.liquid; c.textAlign = 'left'; c.fillText(`← ${fp(p.R)}`, x0 + 14, 20);
+    c.fillStyle = colors.cl; c.textAlign = 'right'; c.fillText(`${fp(p.T)} →`, w - 8, 20);
+    if (p.A > 0.004){ c.fillStyle = colors.mark; if (d.look === 'liquid'){ c.textAlign = 'left'; c.fillText(fp(p.A), xa + 6, 20); } else { c.textAlign = 'center'; c.fillText(fp(p.A), (xa + xb)/2, 20); } }
+  }
+  renderBars3(hit ? Math.min(1, (s - z.a) / (M3.W + 2*(z.b - z.a))) : 0);
+}
+function renderBars3(prog){
+  const p = pctOf(P3.preset, P3.fi);
+  const items = [['eR', p.R, colors.liquid], ['eA', p.A, colors.mark], ['eT', p.T, colors.cl]];
+  const fp = v => v < 0.001 && v > 0 ? `${fmtSig(v*100, 1)} %` : `${fmt(v*100, v < 0.0995 && v > 0 ? 1 : 0)} %`;
+  $('p3bars').innerHTML = items.map(([k, v, col]) =>
+    `<div class="ebar"><span>${T(k)}</span><span class="track"><i style="width:${(v*100*prog).toFixed(1)}%;background:${col}"></i></span><b class="num sec">${fp(v)}</b></div>`).join('');
+}
+function renderData3(){
+  const k = P3.preset, d = MATDATA[k], fi = P3.fi, rws = [];
+  if (d.alpha) rws.push([T('rowAlpha'), `${fmt(d.alpha[fi], 3)} (${T('measured')})`]);
+  if (d.limp) rws.push([T('rowMass'), `${fmt(d.limp*1000)} g/m² (${T('assumed')})`]);
+  if (d.open) rws.push([T('rowAlpha'), '1']);
+  if (d.TL) rws.push([T('rowTL'), `${fmt(d.TL[fi], 0)} dB${d.info ? ' · ' + d.info : ''}`]);
+  const rule = d.open ? T('ruleOpen') : d.limp ? T('ruleLimp') : k === 'water' ? T('rule') + '. ' + T('ruleWater') : d.wall ? T('rule') + '. ' + T('ruleBack') : T('rule');
+  rows('p3data', rws);
+  $('p3rule').textContent = rule;
 }
 function legend3(){
-  const s = P3.sim; if (!s) return;
-  let h = `<span><i class="dot" style="background:var(--gas)"></i>${T('lgAir')}</span>`;
-  if (s.look === 'solid' || s.wall) h += `<span><i class="dot" style="background:var(--solid)"></i>${T('lgMat')}</span>`;
-  if (s.look === 'liquid') h += `<span><i class="dot" style="background:var(--liquid)"></i>${T('lgMat')}</span>`;
-  if (s.look === 'cloth') h += `<span><i class="dot" style="border-radius:2px;background:var(--na)"></i>${T('lgMat')}</span>`;
-  if (s.look === 'foam') h += `<span><i class="dot" style="background:none;border:1.5px solid var(--muted)"></i>${T('lgFrame')}</span>`;
-  if (s.gam.some(g => g > 0)) h += `<span><i class="dot" style="border-radius:2px;background:rgba(215,38,61,.5)"></i>${T('lgHeat')}</span>`;
-  h += `<span><i class="dot" style="border-radius:2px;background:rgba(var(--compress),.45)"></i>${T('lgComp')}</span><span><i class="dot" style="border-radius:2px;background:rgba(var(--rare),.45)"></i>${T('lgRare')}</span>`;
-  $('p3legend').innerHTML = h;
+  const d = MATDATA[P3.preset];
+  let hh = `<span><i class="dot" style="background:var(--gas)"></i>${T('lgAir')}</span>`;
+  if (!d.open){
+    const col = { solid:'--solid', glass:'--accent', wood:'--gas', liquid:'--liquid', carpet:'--mark', cloth:'--na', foam:'--muted' }[d.look];
+    hh += d.look === 'foam' ? `<span><i class="dot" style="background:none;border:1.5px solid var(--muted)"></i>${T('lgFrame')}</span>` : `<span><i class="dot" style="background:var(${col})"></i>${T('lgMat')}</span>`;
+  }
+  if (d.wall) hh += `<span><i class="dot" style="border-radius:2px;background:var(--solid)"></i>${T('lgWall')}</span>`;
+  hh += `<span><i class="dot" style="border-radius:2px;background:rgba(215,38,61,.55)"></i>${T('lgHeat')}</span>`;
+  hh += `<span><i class="dot" style="border-radius:2px;background:rgba(var(--compress),.45)"></i>${T('lgComp')}</span><span><i class="dot" style="border-radius:2px;background:rgba(var(--rare),.45)"></i>${T('lgRare')}</span>`;
+  $('p3legend').innerHTML = hh;
 }
+function send3(){ P3.t0 = P3.t; if (P3.glow) P3.glow.fill(0); }
 function setPreset(k, go){
-  P3.preset = k; const p = PRESETS[k];
-  if (k !== 'custom'){ PRESETS.custom.Z = p.Z; PRESETS.custom.g = p.g; PRESETS.custom.th = p.th; syncCustom(); }
-  buildSim(); if (go) send3();
+  P3.preset = k; P3.glow = null;
+  if (go) send3(); else P3.t0 = null;
   document.querySelectorAll('#p3presets .btn').forEach(b => b.setAttribute('aria-pressed', b.dataset.k === k));
-  $('p3whyMat').textContent = T('why')[k]; legend3(); renderBars3();
-}
-function syncCustom(){
-  const p = PRESETS.custom;
-  $('p3Z').value = Math.round(Math.log(p.Z)/Math.log(30000)*1000); $('p3G').value = Math.round(p.g*10); $('p3Th').value = p.th;
-  $('p3Zv').textContent = `Z ≈ ${fmtSig(p.Z, 2)} × Z_kk`; $('p3Gv').textContent = fmt(p.g, 1); $('p3Thv').textContent = fmt(p.th);
+  $('p3whyMat').textContent = T('why')[k]; legend3(); renderData3(); renderBars3(0);
 }
 function bind3(){
   document.querySelectorAll('#p3mode .btn').forEach(b => b.onclick = () => { P3.mode = b.dataset.v; upd3(); });
   $('p3send').onclick = send3;
   document.querySelectorAll('#p3speed .btn').forEach(b => b.onclick = () => { P3.speed = +b.dataset.s; setSeg('p3speed', b.dataset.s, 's'); });
-  const cust = () => { const p = PRESETS.custom; p.Z = Math.pow(30000, $('p3Z').value/1000); p.g = $('p3G').value/10; p.th = +$('p3Th').value; syncCustom(); setPreset('custom', true); };
-  ['p3Z','p3G','p3Th'].forEach(id => $(id).oninput = cust);
   bind4echo();
 }
 function upd3(){
   setSeg('p3mode', P3.mode);
   $('p3matBox').hidden = P3.mode !== 'mat'; $('p3echoBox').hidden = P3.mode !== 'echo';
-  $('p3why').hidden = P3.mode !== 'mat'; $('p4echoRead').hidden = P3.mode !== 'echo';
+  $('p3why').hidden = P3.mode !== 'mat'; $('p3dataCard').hidden = P3.mode !== 'mat'; $('p4echoRead').hidden = P3.mode !== 'echo';
   upd4echo();
 }
 function lang3(){
-  $('p3presets').innerHTML = Object.keys(PRESETS).filter(k => k !== 'custom').map(k => `<button class="btn" data-k="${k}">${T('presets')[k]}</button>`).join('');
+  $('p3presets').innerHTML = Object.keys(MATDATA).map(k => `<button class="btn" data-k="${k}">${T('presets')[k]}</button>`).join('');
   document.querySelectorAll('#p3presets .btn').forEach(b => b.onclick = () => setPreset(b.dataset.k, true));
-  setPreset(P3.preset, false);
-  if (!P3.sim || P3.sim.t0 === null) {} // giữ trạng thái
-  syncCustom();
+  $('p3freqSeg').innerHTML = T('fband').map((s, i) => `<button class="btn" data-v="${i}">${s}</button>`).join('');
+  document.querySelectorAll('#p3freqSeg .btn').forEach(b => b.onclick = () => { P3.fi = +b.dataset.v; setSeg('p3freqSeg', P3.fi); renderData3(); send3(); });
+  setSeg('p3freqSeg', P3.fi);
+  setPreset(P3.preset, P3.t0 !== null);
   predCard('p3pred', P3, 'p3pq', 'p3o', 0, 'p3good', 'p3bad');
   list('p3mech', T('p3mech')); list('p3simple', T('p3simple'));
+  $('p3src').innerHTML = SOURCES.map(([vi, en, url]) => `<li><a href="${url}" target="_blank" rel="noopener">${lang === 'vi' ? vi : en}</a></li>`).join('');
   $('p3vid').innerHTML = vidHTML('p3');
   $('p4mat').innerHTML = Object.keys(MATS).map(k => `<option value="${k}">${T('mats')[k]}</option>`).join(''); $('p4mat').value = P4.mat;
   $('p4ref').innerHTML = T('p4ref').map(s => `<li>${s}</li>`).join('');
@@ -1399,7 +1595,7 @@ function lang3(){
 }
 
 /* ================= TAB 3b: tiếng vang ================= */
-const MATS = { concrete:0.02, rock:0.03, glass:0.05, wood:0.1, carpet:0.45, curtain:0.6, foam:0.9 }; // hệ số hấp thụ ~1 kHz
+const MATS = { concrete:0.02, rock:0.04, glass:0.12, wood:0.09, carpet:0.37, curtain:0.72, foam:0.81 }; // hệ số hấp thụ ở 1 000 Hz (sengpielaudio)
 const P4 = { d:5, mat:'concrete', slow:30, t:0, tClap:null, drag:false, shipX:0.3, pings:[], ping:null, show:false, lastT:null };
 function echoInfo(){
   const v = speedOf('air'), te = 2*P4.d/v, refl = 1 - MATS[P4.mat];
@@ -1549,7 +1745,7 @@ function showTab(n){
   try { history.replaceState(null, '', '#' + TAB_IDS[n-1]); } catch(e){}
 }
 document.querySelectorAll('nav.tabs button').forEach((b, i) => b.onclick = () => showTab(i + 1));
-buildSim(); bind2(); bind3(); bind4();
+bind2(); bind3(); bind4();
 const mq = window.matchMedia('(prefers-color-scheme: dark)');
 mq.addEventListener?.('change', readColors);
 new MutationObserver(readColors).observe(document.documentElement, { attributes:true, attributeFilter:['data-theme'] });

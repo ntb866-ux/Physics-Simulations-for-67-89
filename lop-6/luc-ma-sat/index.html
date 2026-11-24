@@ -242,36 +242,22 @@ details ul{padding-left:20px}
           <button class="btn" id="rst3" data-i18n="reset"></button>
           <div class="seg" role="group" id="spd3"></div>
         </div>
-        <div id="zoomBox" class="col" style="gap:6px">
-          <h3 data-i18n="zoomT"></h3>
-          <canvas id="cz3" aria-label="close-up of tyre and road, and a walker"></canvas>
-          <div class="legend">
-            <span><i style="background:var(--force)"></i><span data-i18n="lgTyreRoad"></span></span>
-            <span><i style="background:var(--fric)"></i><span data-i18n="lgRoadTyre"></span></span>
-            <span><i style="background:var(--react)"></i><span data-i18n="lgMark"></span></span>
-          </div>
-        </div>
         <canvas id="g3" aria-label="graph"></canvas>
         <p class="fine" data-i18n="assume3"></p>
       </div>
       <div class="col">
         <div class="card">
           <div class="sl"><div class="top"><span data-i18n="roadT"></span></div><select id="road3"></select></div>
-          <div class="sl"><div class="top"><span id="spdLbl3"></span><span class="val" id="vV"></span></div>
+          <div id="startBox" class="sl"><div class="seg" id="who3"><button class="btn" data-w="car" data-i18n="whoCar"></button><button class="btn" data-w="walk" data-i18n="whoMan"></button></div><div class="seg" id="eff3"></div></div>
+          <div class="sl" id="vBox"><div class="top"><span id="spdLbl3"></span><span class="val" id="vV"></span></div>
             <input type="range" id="v3" min="10" max="100" step="5" value="50"></div>
           <div class="sl" id="trBox"><div class="top"><span data-i18n="react"></span><span class="val" id="trV"></span></div>
             <input type="range" id="tr3" min="0.5" max="2.5" step="0.1" value="1"></div>
-          <div id="startBox" class="col" style="gap:10px">
-            <div class="sl"><div class="top"><span data-i18n="aw3"></span><span class="val" id="awV"></span></div>
-              <input type="range" id="aw3" min="0.5" max="8" step="0.5" value="3">
-              <div class="ends"><span data-i18n="awLo"></span><span data-i18n="awHi"></span></div></div>
-            <div class="sl"><div class="top"><span data-i18n="fricT"></span></div>
-              <div class="seg" id="nf3" style="flex-wrap:wrap"><button class="btn" data-n="0" data-i18n="fricOn"></button><button class="btn" data-n="1" data-i18n="fricOff"></button></div></div>
-          </div>
         </div>
         <div class="card">
           <h2 data-i18n="obs"></h2>
           <dl class="kv" id="o3"></dl>
+          <div id="o3b"></div>
         </div>
         <div class="card" id="p3"></div>
         <div class="card" id="p3b"></div>
@@ -393,38 +379,33 @@ simple2:`<ul><li><b>Ma sát nghỉ</b> = ma sát “giữ”: em đẩy cái t�
 <li>Muốn đo lực ma sát trượt: kéo vật bằng lực kế cho nó trượt <b>đều</b>; lúc đó số chỉ lực kế bằng lực ma sát trượt.</li></ul>`,
 /* tab 3 */
 req3:'<b>Yêu cầu cần đạt:</b> Nêu được tác dụng cản trở và tác dụng thúc đẩy chuyển động của lực ma sát. Lấy được ví dụ về một số ảnh hưởng của lực ma sát trong an toàn giao thông đường bộ.',
-modeBrake:'Phanh gấp',modeStart:'Khởi hành',
+modeBrake:'Phanh gấp',modeStart:'Khởi hành, bước đi',whoCar:'Xe ô tô',whoMan:'Người đi bộ',effSoft:'Ga nhẹ',effHard:'Ga mạnh',effMax:'Ga hết cỡ',effWalk:'Đi bộ',effRun:'Chạy nước rút',lbFmsMan:'F ms đẩy người',
+zTitleCar:'Phóng to chỗ lốp chạm đường (chậm lại 20 lần)',zTitleMan:'Phóng to chỗ đế giày chạm đường',
+zGripCar:'BÁM: chỗ lốp chạm đất đứng yên trên mặt đường',zSlipCar:'TRƯỢT: lốp quay nhanh hơn xe chạy, chà xát mặt đường',
+zGripMan:'BÁM: đế giày đứng yên trên mặt đường',zSlipMan:'TRƯỢT: đế giày bị lùi lại, chà xát trên mặt đường',zMark:'chỗ đặt chân',zLeg:'cẳng chân',
+zFwdCar:'mặt đường đẩy lốp về trước (F ms)',zBackCar:'lốp đẩy mặt đường về sau',zFwdMan:'mặt đường đẩy chân về trước (F ms)',zBackMan:'chân đẩy mặt đường về sau',zIdle:'Bấm Chạy để xem',
+st3Slip:'Chân bị trượt: ma sát không đủ, người khó đi tới và dễ ngã.',st3Step:'Mỗi bước, chân đẩy mặt đường về sau; lực ma sát nghỉ đẩy người về trước.',st3WalkDone:'Xong 6 giây. Đổi mặt đường hoặc chọn chạy nước rút để so sánh.',
+o3feet:'Bàn chân',slipMan:'trượt',o3need:'Lực ma sát cần để tăng tốc',o3max:'Lực ma sát lớn nhất mặt đường cho được',o3ok:'Cần nhỏ hơn mức lớn nhất: bám đường (ma sát nghỉ)',o3no:'Cần lớn hơn mức lớn nhất: bị trượt (ma sát trượt)',
 hint3Brake:'Chọn mặt đường và tốc độ, kéo thả người đi đường tới vị trí muốn thử, rồi bấm Chạy. Người lái thấy người đi đường thì phanh hết sức.',
-hint3Start:'Chọn mặt đường và mức nhấn ga rồi bấm Chạy (đang chạy vẫn kéo được thanh nhấn ga). Nhìn ô phóng to để thấy chiều lực ma sát ở bánh xe, rồi thử chọn “Không có ma sát”.',
-zoomT:'Phóng to: vì sao ma sát đẩy được xe đi tới?',aw3:'Mức nhấn ga (gia tốc người lái muốn có)',awLo:'nhẹ',awHi:'rồ ga hết cỡ',
-fricT:'Ma sát giữa lốp (chân) và mặt đường',fricOn:'Có ma sát',fricOff:'Không có ma sát (đường bôi dầu)',
-lzTitle:'Phóng to chỗ lốp chạm đất',lzNote:'hình minh hoạ, không theo tỉ lệ',lzTyre:'Đường đẩy lốp về trước',lzRoad:'Lốp đẩy đường về sau',
-lzGrip:'Gai lốp “cài” vào mặt đường, không trượt: ma sát nghỉ',lzSpin:'Lốp trượt về sau trên mặt đường: ma sát trượt, nhỏ hơn ma sát nghỉ lớn nhất',lzNone:'Không có ma sát: lốp quay tít, không “đạp” được vào đường',
-lzReady:'Bấm Chạy để xem bánh xe quay',lzCruise:'Đã đạt tốc độ: không cần đẩy thêm (bỏ qua sức cản)',lzCar:'xe đi',lzRot:'bánh quay',
-lwTitle:'Người đi bộ cũng vậy',lwFoot:'Chân đẩy đất về sau',lwGround:'Đất đẩy chân về trước',lwSlip:'Chân trượt về sau, người không tiến lên',
-lbNeed:'Lực cần để tăng tốc (m·a)',lbMax:'Ma sát nghỉ lớn nhất (μ·m·g)',lbOver:'Vượt giới hạn: bánh quay trượt',lbOk:'Trong giới hạn: bánh bám đường',
-lgTyreRoad:'Lốp đẩy mặt đường',lgRoadTyre:'Mặt đường đẩy lốp (lực ma sát)',lgMark:'Gai lốp được đánh dấu',
-o3need:'Lực cần để tăng tốc',o3fmax:'Ma sát nghỉ lớn nhất',o3fric:'Lực ma sát đẩy xe lúc này',
-st3NoFric:'Không có ma sát: bánh xe quay tít tại chỗ, xe không nhúc nhích.',lbNoPush:'không có ma sát: không có lực đẩy xe',
+hint3Start:'Chọn xe hoặc người, mức ga hoặc cách bước, mặt đường, rồi bấm Chạy. Nhìn khung phóng to: chỗ lốp (đế giày) chạm đất đứng yên trên mặt đường (bám) hay chà xát trên mặt đường (trượt)?',
 roadT:'Mặt đường',spdBrake:'Tốc độ xe lúc thấy người đi đường',spdStart:'Tốc độ muốn đạt',react:'Thời gian phản ứng của người lái',
 rDry:'Đường nhựa khô',rWet:'Đường nhựa ướt mưa',rGravel:'Đường có sỏi, cát',rIce:'Đường đóng băng',
 o3v:'Tốc độ lúc này',o3s1:'Quãng đường đi trong lúc phản ứng',o3s2:'Quãng đường phanh',o3tot:'Tổng quãng đường dừng xe',o3res:'Kết quả',o3t:'Thời gian đạt tốc độ',o3d:'Quãng đường đã đi',o3slip:'Bánh xe',
-resSafe:'Dừng kịp, cách người đi đường {d} m',resHit:'Không dừng kịp! Húc vào người đi đường ở {v} km/h',grip:'bám đường',spin:'quay trượt (bị “bốc đầu” tại chỗ)',
+resSafe:'Dừng kịp, cách người đi đường {d} m',resHit:'Không dừng kịp! Húc vào người đi đường ở {v} km/h',grip:'bám đường',spin:'quay trượt tại chỗ',
 st3Ready:'Bấm Chạy để bắt đầu.',st3React:'Người lái đang phản ứng: xe vẫn chạy với tốc độ cũ.',st3Brake:'Đang phanh: lực ma sát giữa lốp và đường cản trở chuyển động.',st3Stop:'Xe đã dừng.',st3Hit:'Va chạm!',
-st3Go:'Lực ma sát giữa lốp và mặt đường đẩy xe tiến lên.',st3Spin:'Ma sát quá nhỏ, bánh xe quay trượt, xe tăng tốc rất chậm.',st3Done:'Đã đạt tốc độ.',
+st3Go:'Lực ma sát giữa lốp và mặt đường đẩy xe tiến lên.',st3Spin:'Lực ma sát cần lớn hơn mức mặt đường cho được: bánh xe quay trượt, xe tăng tốc chậm hơn mong muốn.',st3Done:'Đã đạt tốc độ.',
 lbObst:'người đi đường',lbReact:'phản ứng',lbBrake:'phanh',lbFmsFwd:'F ms đẩy xe',lbFmsBack:'F ms cản xe',
-assume3:'Giả thiết: xe nặng 1200 kg, coi động cơ kéo cả bốn bánh nên ma sát nghỉ lớn nhất ≈ μ·m·g; xe có phanh chống bó cứng; hệ số bám (gần đúng): khô 0,8; ướt 0,5; sỏi cát 0,35; băng 0,1; khi bánh quay trượt, ma sát trượt bằng khoảng 0,75 lần ma sát nghỉ lớn nhất; bỏ qua sức cản không khí và lực cản lăn. Xe và người vẽ to hơn tỉ lệ thật để dễ nhìn.',
+assume3:'Giả thiết: xe có phanh chống bó cứng; hệ số bám (gần đúng): khô 0,8; ướt 0,5; sỏi cát 0,35; băng 0,1; khi khởi hành: ga nhẹ, ga mạnh, ga hết cỡ ứng với gia tốc 1,5; 3; 5,5 m/s² (xe 1200 kg); người 50 kg đi bộ cần gia tốc khoảng 2 m/s² ở mỗi bước, chạy nước rút khoảng 4,5 m/s²; khi trượt, ma sát trượt bằng 0,75 lần ma sát nghỉ lớn nhất; bỏ qua sức cản không khí. Xe và người vẽ to hơn tỉ lệ thật để dễ nhìn.',
 p3q:'Xe đang chạy 30 km/h thì phanh. Nếu xe chạy 60 km/h (gấp đôi), quãng đường PHANH (sau khi đạp phanh) sẽ…',p3a:'Gấp đôi',p3b:'Gấp bốn',p3c:'Không đổi',
 p3e:'Đáp án: gấp bốn. Quãng đường phanh tỉ lệ với bình phương tốc độ. Thử 30 rồi 60 km/h trên đường khô: khoảng 4,4 m thành khoảng 17,7 m. Vì vậy chạy nhanh rất nguy hiểm, nhất là khi đường ướt.',
 p3bq:'Khi xe khởi hành và chạy nhanh dần, lực ma sát của mặt đường tác dụng lên bánh xe chủ động hướng về đâu?',p3ba:'Ngược chiều chuyển động (cản xe lại)',p3bb:'Cùng chiều chuyển động (đẩy xe đi tới)',p3bc:'Không có ma sát',
 p3be:'Đáp án: cùng chiều chuyển động. Bánh xe quay, đẩy mặt đường về phía sau; mặt đường đẩy lại bánh xe về phía trước bằng lực ma sát. Không có ma sát (đường băng) thì bánh chỉ quay tít tại chỗ. Bước chân đi bộ cũng vậy.',
-mech3:`<p><b>Ma sát thúc đẩy chuyển động.</b> Động cơ làm bánh xe quay. Chỗ lốp chạm đất bị kéo về phía sau, nên lốp <b>đẩy mặt đường về phía sau</b>. Mặt đường đẩy lại lốp một lực lớn bằng như thế nhưng <b>hướng về phía trước</b> (hai vật tác dụng lực lên nhau thì lực đi thành cặp, ngược chiều nhau; lớp 10 gọi là định luật III Newton). Lực mặt đường đẩy lốp chính là lực ma sát, và là lực từ bên ngoài duy nhất đẩy xe tiến lên: động cơ nằm bên trong xe, tự nó không đẩy được cả chiếc xe. Khi lốp bám đường, chỗ lốp chạm đất đứng yên so với mặt đường trong lúc chạm (xem gai lốp màu vàng), nên đây là ma sát <i>nghỉ</i>.</p>
-<p><b>Giới hạn bám đường.</b> Ma sát nghỉ chỉ lớn tới khoảng μ·m·g (μ là hệ số bám, tuỳ mặt đường). Nếu nhấn ga đòi lực m·a lớn hơn, lốp trượt về sau trên mặt đường, ma sát chuyển thành ma sát trượt (nhỏ hơn), xe tăng tốc chậm hơn và dễ mất lái. Không có ma sát thì bánh chỉ quay tít tại chỗ. Người đi bộ cũng thế: chân đạp đất về sau, đất đẩy người về trước; trên sàn trơn chân trượt về sau, người không đi được.</p>
+mech3:`<p><b>Ma sát thúc đẩy chuyển động.</b> Khi động cơ làm bánh xe quay, chỗ lốp chạm đất có xu hướng trượt về phía sau. Ma sát nghỉ giữa lốp và mặt đường chống lại xu hướng đó nên hướng về phía trước và đẩy xe đi. Người đi bộ cũng thế: chân đạp đất về sau, ma sát đẩy người về trước. Ma sát nghỉ chỉ lớn tới một giới hạn; nếu xe đòi lực lớn hơn (đường băng, nhấn ga quá mạnh) thì bánh quay trượt.</p>
+<p><b>Bám đường hay trượt?</b> Khi bám, chỗ lốp (hoặc đế giày) chạm đất <i>đứng yên so với mặt đường</i>, giống như bánh xe “đặt” từng điểm của lốp xuống đường rồi nhấc lên. Ma sát lúc này là ma sát nghỉ. Khi lực ma sát cần để tăng tốc lớn hơn mức lớn nhất mà mặt đường cho được, chỗ chạm bắt đầu chà xát trên mặt đường: lốp quay tít, chân bị lùi lại. Đó là ma sát trượt, lại nhỏ hơn ma sát nghỉ lớn nhất, nên càng trượt càng khó lấy lại độ bám.</p>
+<p><b>Mỗi loại mặt đường.</b> Nhựa đường khô có nhiều hạt đá nhỏ nhô lên, gai lốp và đế giày bám vào rất tốt. Nước mưa tạo một lớp đệm mỏng giữa lốp và đường, làm giảm số chỗ chạm thật. Sỏi cát rời giống như các viên bi lăn dưới bánh xe và bị hất ra sau. Băng rất nhẵn và có lớp nước mỏng trên mặt, gần như không có gờ để bám.</p>
 <p><b>Ma sát cản trở chuyển động.</b> Khi phanh, ma sát giữa lốp và mặt đường hướng ngược chiều chuyển động và làm xe chậm dần rồi dừng. Ma sát càng lớn, xe dừng càng nhanh.</p>
 <p><b>An toàn giao thông.</b> Tổng quãng đường dừng xe gồm quãng đi trong lúc người lái phản ứng (tỉ lệ với tốc độ) và quãng đường phanh (tỉ lệ với bình phương tốc độ, tỉ lệ nghịch với độ bám). Nước mưa, sỏi cát, dầu loang hay băng làm giảm số chỗ bám giữa lốp và đường, nên quãng đường phanh dài ra nhiều lần. Lốp mòn hết rãnh không thoát được nước nên trơn hơn. Người lái mệt, dùng điện thoại hay uống rượu bia thì phản ứng chậm.</p>`,
-simple3:`<ul><li>Bánh xe không tự đi được: nó phải “đạp” mặt đường về phía sau, giống chân em đạp đất khi chạy. Mặt đường “đạp” lại bánh xe về phía trước: đó chính là lực ma sát đẩy xe đi.</li>
-<li>Không có ma sát thì xe không chạy được và cũng không dừng được: bánh xe chỉ quay tít như trên mặt băng.</li>
-<li>Rồ ga quá mạnh trên đường trơn thì lốp trượt, xe không đi nhanh hơn mà còn dễ mất lái: đường trơn phải nhấn ga nhẹ.</li>
+simple3:`<ul><li>Không có ma sát thì xe không chạy được và cũng không dừng được: bánh xe chỉ quay tít như trên mặt băng.</li>
 <li>Ma sát có lợi: giúp ta đi, giúp xe chạy, giúp phanh xe. Ma sát có hại: làm mòn lốp, mòn phanh, tốn nhiên liệu.</li>
 <li>Trời mưa đường trơn: phải đi chậm, giữ khoảng cách xa hơn với xe trước.</li>
 <li>Chạy nhanh gấp đôi thì cần đoạn đường phanh dài gấp bốn!</li></ul>`,
@@ -512,38 +493,33 @@ simple2:`<ul><li><b>Static friction</b> = “holding” friction: you push a war
 <li>You strain to get the wardrobe moving, then it gets easier: maximum static friction is larger than kinetic friction.</li>
 <li>To measure kinetic friction: pull with a spring scale so the object slides <b>steadily</b>; the reading then equals the kinetic friction.</li></ul>`,
 req3:'<b>Learning outcome:</b> State that friction can hinder and can drive motion. Give examples of how friction affects road safety.',
-modeBrake:'Emergency stop',modeStart:'Pulling away',
+modeBrake:'Emergency stop',modeStart:'Pulling away, walking',whoCar:'Car',whoMan:'Pedestrian',effSoft:'Gentle throttle',effHard:'Firm throttle',effMax:'Full throttle',effWalk:'Walk',effRun:'Sprint start',lbFmsMan:'friction pushes person',
+zTitleCar:'Close-up: tyre on road (slowed 20×)',zTitleMan:'Close-up: shoe sole on road',
+zGripCar:'GRIP: the tyre patch is still relative to the road',zSlipCar:'SLIP: the tyre turns faster than the car moves and scrubs the road',
+zGripMan:'GRIP: the sole stays put on the road',zSlipMan:'SLIP: the sole is pushed back and scrubs the road',zMark:'where the foot landed',zLeg:'lower leg',
+zFwdCar:'road pushes tyre forward (friction)',zBackCar:'tyre pushes road backward',zFwdMan:'road pushes foot forward (friction)',zBackMan:'foot pushes road backward',zIdle:'Press Run to watch',
+st3Slip:'The feet slip: not enough friction, hard to move forward and easy to fall.',st3Step:'Each step the foot pushes the road back; static friction pushes the person forward.',st3WalkDone:'6 seconds done. Change the road or choose sprint start to compare.',
+o3feet:'Feet',slipMan:'slipping',o3need:'Friction needed to speed up',o3max:'Largest friction the road can give',o3ok:'Needed is less than the maximum: grip (static friction)',o3no:'Needed is more than the maximum: slipping (kinetic friction)',
 hint3Brake:'Choose the road and speed, drag the pedestrian where you want, then press Run. The driver brakes as hard as possible on seeing them.',
-hint3Start:'Choose the road and how hard to accelerate, then press Run (you can move the throttle while it runs). Watch the close-up to see which way friction acts on the tyre, then try “No friction”.',
-zoomT:'Close-up: how can friction push a car forward?',aw3:'Throttle (acceleration the driver wants)',awLo:'gentle',awHi:'floored',
-fricT:'Friction between tyre (foot) and road',fricOn:'With friction',fricOff:'No friction (oiled road)',
-lzTitle:'Close-up of the tyre on the road',lzNote:'illustration, not to scale',lzTyre:'Road pushes tyre forward',lzRoad:'Tyre pushes road back',
-lzGrip:'Tread blocks grip the road without slipping: static friction',lzSpin:'Tyre slides backwards over the road: kinetic friction, below the static maximum',lzNone:'No friction: the tyre spins and cannot push on the road',
-lzReady:'Press Run to see the wheel turn',lzCruise:'Target speed reached: no extra push needed (drag ignored)',lzCar:'car moves',lzRot:'wheel turns',
-lwTitle:'Walking works the same way',lwFoot:'Foot pushes ground back',lwGround:'Ground pushes foot forward',lwSlip:'Feet slip backwards, the person goes nowhere',
-lbNeed:'Force needed to accelerate (m·a)',lbMax:'Maximum static friction (μ·m·g)',lbOver:'Over the limit: wheelspin',lbOk:'Within the limit: tyres grip',
-lgTyreRoad:'Tyre pushes road',lgRoadTyre:'Road pushes tyre (friction)',lgMark:'Marked tread block',
-o3need:'Force needed to accelerate',o3fmax:'Maximum static friction',o3fric:'Friction pushing the car now',
-st3NoFric:'No friction: the wheels spin on the spot and the car does not move.',lbNoPush:'no friction: nothing pushes the car',
+hint3Start:'Choose car or person, throttle or gait, and the road, then press Run. Watch the close-up: does the tyre (sole) stay put on the road (grip) or scrub along it (slip)?',
 roadT:'Road surface',spdBrake:'Speed when the pedestrian is seen',spdStart:'Target speed',react:'Driver reaction time',
 rDry:'Dry asphalt',rWet:'Wet asphalt',rGravel:'Gravel and sand',rIce:'Icy road',
 o3v:'Speed now',o3s1:'Distance during reaction',o3s2:'Braking distance',o3tot:'Total stopping distance',o3res:'Result',o3t:'Time to reach speed',o3d:'Distance travelled',o3slip:'Wheels',
 resSafe:'Stopped in time, {d} m before the pedestrian',resHit:'Too late! Hit the pedestrian at {v} km/h',grip:'gripping',spin:'spinning (wheelspin)',
 st3Ready:'Press Run to start.',st3React:'Driver reacting: the car keeps its speed.',st3Brake:'Braking: tyre–road friction opposes the motion.',st3Stop:'The car has stopped.',st3Hit:'Collision!',
-st3Go:'Tyre–road friction pushes the car forward.',st3Spin:'Friction too small: wheels spin, the car speeds up very slowly.',st3Done:'Target speed reached.',
+st3Go:'Tyre–road friction pushes the car forward.',st3Spin:'Needed friction exceeds what the road can give: the wheels spin and the car speeds up more slowly than wanted.',st3Done:'Target speed reached.',
 lbObst:'pedestrian',lbReact:'reaction',lbBrake:'braking',lbFmsFwd:'friction pushes car',lbFmsBack:'friction slows car',
-assume3:'Assumptions: 1200 kg car, all four wheels driven so maximum static friction ≈ μ·m·g; anti-lock brakes; grip coefficients (approx.): dry 0.8, wet 0.5, gravel 0.35, ice 0.1; in wheelspin, kinetic friction is about 0.75 of the maximum static friction; air and rolling resistance ignored. Car and person drawn larger than scale.',
+assume3:'Assumptions: anti-lock brakes; grip coefficients (approx.): dry 0.8, wet 0.5, gravel 0.35, ice 0.1; pulling away: gentle, firm, full throttle mean 1.5, 3, 5.5 m/s² (1200 kg car); a 50 kg walker needs about 2 m/s² each step, a sprint start about 4.5 m/s²; when slipping, kinetic friction is 0.75 of maximum static friction; air resistance ignored. Car and person drawn larger than scale.',
 p3q:'A car brakes from 30 km/h. At 60 km/h (twice as fast), the BRAKING distance (after the brake is pressed) will be…',p3a:'Twice as long',p3b:'Four times as long',p3c:'The same',
 p3e:'Answer: four times. Braking distance grows with the square of speed. Try 30 then 60 km/h on a dry road: about 4.4 m becomes about 17.7 m. That is why speeding is so dangerous, especially in the wet.',
 p3bq:'As a car pulls away and speeds up, which way does the road’s friction on the driven wheels point?',p3ba:'Against the motion (slowing the car)',p3bb:'Along the motion (pushing the car forward)',p3bc:'There is no friction',
 p3be:'Answer: along the motion. The turning wheel pushes the road backwards; the road pushes the wheel forwards through friction. With no friction (ice) the wheel just spins. Walking works the same way.',
-mech3:`<p><b>Friction drives motion.</b> The engine turns the wheel. The part of the tyre touching the road is dragged backwards, so the tyre <b>pushes the road backwards</b>. The road pushes back on the tyre with an equal force <b>pointing forwards</b> (forces between two objects come in opposite pairs: Newton’s third law). That push from the road is friction, and it is the only outside force driving the car forward: the engine is inside the car and cannot push the whole car by itself. While the tyre grips, the patch touching the road is momentarily at rest on the road (watch the yellow tread block), so this is <i>static</i> friction.</p>
-<p><b>The grip limit.</b> Static friction can only reach about μ·m·g (μ is the grip coefficient of the road). Demand a bigger m·a and the tyre slides backwards over the road; friction becomes kinetic (smaller), the car accelerates less and is harder to control. With no friction the wheel just spins. Walking is the same: your foot pushes the ground back, the ground pushes you forward; on a slippery floor your foot slides back and you go nowhere.</p>
+mech3:`<p><b>Friction drives motion.</b> When the engine turns the wheel, the tyre patch on the road tends to slip backwards. Static friction opposes that tendency, so it points forwards and pushes the car. Walking is the same: your foot pushes the ground back, friction pushes you forward. Static friction has a limit; demand more (ice, flooring the pedal) and the wheels spin.</p>
+<p><b>Grip or slip?</b> With grip, the tyre (or sole) patch touching the ground is <i>at rest relative to the road</i>: the wheel “sets down” each bit of tyre and lifts it again. That is static friction. When the friction needed to speed up exceeds the maximum the road can give, the patch starts scrubbing along the road: the wheel spins, the foot slides back. That is kinetic friction, smaller than maximum static friction, so once slipping it is hard to regain grip.</p>
+<p><b>Each surface.</b> Dry asphalt has many small stones sticking up for tread and soles to grip. Rainwater forms a thin cushion between tyre and road, reducing real contact. Loose gravel and sand act like marbles rolling under the wheel and get flung back. Ice is very smooth with a thin water film, with almost no bumps to grip.</p>
 <p><b>Friction hinders motion.</b> When braking, tyre–road friction points against the motion and slows the car to a stop. More friction, shorter stop.</p>
 <p><b>Road safety.</b> Stopping distance = distance during the driver’s reaction (proportional to speed) + braking distance (proportional to speed squared, inversely to grip). Rain, gravel, spilled oil or ice reduce grip, so braking distance becomes several times longer. Bald tyres cannot clear water. Tired, distracted or drunk drivers react later.</p>`,
-simple3:`<ul><li>A wheel cannot move by itself: it has to “kick” the road backwards, like your foot when you run. The road “kicks” the wheel forwards: that is the friction that drives the car.</li>
-<li>Without friction a car could neither go nor stop: the wheels would just spin, as on ice.</li>
-<li>Flooring the pedal on a slippery road makes the tyres spin: the car goes no faster and is easy to lose control of. Accelerate gently in the wet.</li>
+simple3:`<ul><li>Without friction a car could neither go nor stop: the wheels would just spin, as on ice.</li>
 <li>Helpful friction: lets us walk, lets cars move and brake. Harmful friction: wears tyres and brakes, wastes fuel.</li>
 <li>Wet roads are slippery: drive slower and keep a bigger gap.</li>
 <li>Twice the speed needs four times the braking distance!</li></ul>`,
@@ -867,18 +843,16 @@ $('rst2').onclick=reset2;
 
 /* ================= TAB 3: giao thông ================= */
 const ROADS=[{k:'rDry',mu:.8},{k:'rWet',mu:.5},{k:'rGravel',mu:.35},{k:'rIce',mu:.1}];
-const CARL=4.2,M_CAR=1200,SLIP_V=12,T_NOFRIC=4;
-const S3={mode:'brake',ri:0,vk:50,tr:1,D:30,speed:1,running:false,aw:3,nf:false};
-// Khởi hành: lực cần m·a so với ma sát nghỉ lớn nhất μ·m·g. Vượt giới hạn thì bánh quay trượt, ma sát trượt ≈ 0,75·μ·m·g.
-function drive3(){const mu=S3.nf?0:ROADS[S3.ri].mu,fmax=mu*M_CAR*g,need=M_CAR*S3.aw,grip=need<=fmax,a=grip?S3.aw:.75*mu*g;return {mu,fmax,need,grip,a,fr:M_CAR*a};}
-function startL(){const a=drive3().a,v=S3.vk/3.6;return a<.05?30:v*v/(2*a)+15;}
-function reset3(){Object.assign(S3,{t:0,x:0,v:S3.mode==='brake'?S3.vk/3.6:0,phase:'ready',hist:[],done:false,hit:null,spin:false,wheel:0,tread:0,fr:0,running:false,s1:null,lastRec:-1,tReach:null,ped:null});S3.L0=startL();upd3();}
+const A_WANT=3,CARL=4.2;
+const S3={mode:'brake',ri:0,vk:50,tr:1,D:30,speed:1,running:false};
+function reset3(){if(typeof resetStart==='function')resetStart();Object.assign(S3,{t:0,x:0,v:S3.mode==='brake'?S3.vk/3.6:0,phase:'ready',hist:[],done:false,hit:null,spin:false,wheel:0,running:false,s1:null,lastRec:-1,tReach:null,ped:null});upd3();}
 function plan3(){const mu=ROADS[S3.ri].mu,v=S3.vk/3.6;if(S3.mode==='brake'){const s1=v*S3.tr,s2=v*v/(2*mu*g);return {s1,s2,tot:s1+s2,L:S3.Lfix||Math.max(S3.D+12,s1+s2+12,30)};}
-  return {L:Math.max(S3.L0||startL(),S3.x+CARL+8)};}
+  const grip=A_WANT<=mu*g,a=grip?A_WANT:.75*mu*g;return {a,grip,L:v*v/(2*a)+15};}
 // người bị xe húc: văng lên theo kiểu ném xiên (minh hoạ), rơi xuống thì nằm trên đường
 function stepPed(dt){const P=S3.ped;if(!P||P.land)return;P.vy-=g*dt;P.x+=P.vx*dt;P.y+=P.vy*dt;P.rot+=P.w*dt;
   if(P.y<=0&&P.vy<0){P.y=0;P.land=true;P.rot=Math.PI/2;}}
 function step3(dt){
+  if(S3.mode==='start'){if(!S3.done)stepStart(dt);return;}
   if(S3.done){stepPed(dt);S3.t+=dt;if(!S3.ped||S3.ped.land){S3.running=false;upd3();}return;}
   const mu=ROADS[S3.ri].mu,front=()=>S3.x+CARL;
   if(S3.mode==='brake'){
@@ -888,12 +862,10 @@ function step3(dt){
     S3.x+=S3.v*dt;stepPed(dt);
     if(S3.hit==null&&front()>=S3.D&&S3.v>0){S3.hit=S3.v;const vy=.6*S3.v+3,T2=2*vy/g;S3.ped={x:S3.D,y:0,vx:Math.min(.5*S3.v,Math.max(0,(plan3().L-3-S3.D)/T2)),vy,rot:0,w:5+S3.v*.3,land:false};}
   }else{
-    S3.phase='go';const D=drive3();S3.spin=!D.grip;S3.fr=D.fr;
-    S3.v+=D.a*dt;S3.x+=S3.v*dt;if(S3.v>=S3.vk/3.6){S3.v=S3.vk/3.6;S3.done=true;S3.tReach=S3.t;S3.running=false;S3.fr=0;}
-    else if(S3.nf&&S3.t>=T_NOFRIC){S3.done=true;S3.running=false;}
+    S3.phase='go';const grip=A_WANT<=mu*g,a=grip?A_WANT:.75*mu*g;S3.spin=!grip;
+    S3.v+=a*dt;S3.x+=S3.v*dt;if(S3.v>=S3.vk/3.6){S3.v=S3.vk/3.6;S3.done=true;S3.tReach=S3.t;S3.running=false;}
   }
-  const vt=S3.spin&&!S3.done?S3.v+SLIP_V:S3.v; // tốc độ của mặt lốp; bám đường thì bằng tốc độ xe
-  S3.wheel+=vt/.32*dt;S3.tread+=vt*dt;S3.t+=dt;
+  S3.wheel+=(S3.spin?S3.v+12:S3.v)/.32*dt;S3.t+=dt;
   if(S3.t-S3.lastRec>=1/20){S3.lastRec=S3.t;S3.hist.push([S3.t,S3.v*3.6]);}
   if(S3.done){S3.hist.push([S3.t,S3.v*3.6]);upd3();}
 }
@@ -910,13 +882,14 @@ function drawPerson(ctx,x,y,s){ctx.strokeStyle=C.warn;ctx.fillStyle=C.warn;ctx.l
   ctx.beginPath();ctx.arc(x,y-s*.88,s*.12,0,7);ctx.fill();ctx.beginPath();ctx.moveTo(x,y-s*.75);ctx.lineTo(x,y-s*.38);ctx.lineTo(x-s*.18,y);ctx.moveTo(x,y-s*.38);ctx.lineTo(x+s*.18,y);
   ctx.moveTo(x-s*.22,y-s*.6);ctx.lineTo(x+s*.22,y-s*.6);ctx.stroke();}
 function renderT3(){
+  if(S3.mode==='start'){renderStart();return;}
+  $('o3b').innerHTML='';
   const cv=$('cv3');const {ctx,w,h}=size(cv,R(.28,.62),innerHeight*.48);const pl=plan3();
   const L=pl.L,off0=15+Math.max(0,56-CARL*(w-30)/L),PX=(w-off0-15)/L,X=m=>off0+m*PX,ry=h*.62;S3.PX=PX;S3.off0=off0;
   ctx.fillStyle=C.sky;ctx.fillRect(0,0,w,ry-22);ctx.fillStyle=C.grass;ctx.fillRect(0,ry-26,w,6);
   const rc=[C.road,'#4b5560','#8b7b62','#b9d4e3'][S3.ri];ctx.fillStyle=rc;ctx.fillRect(0,ry-20,w,34);
   if(S3.ri===1){ctx.fillStyle='rgba(120,170,230,.35)';for(let x=10;x<w;x+=46)ctx.fillRect(x,ry-6,24,4);}
   if(S3.ri===2){ctx.fillStyle='#c9b48e';for(let x=5;x<w;x+=9)ctx.fillRect(x,ry-12+((x*7)%13),3,3);}
-  if(S3.mode==='start'&&S3.nf){ctx.fillStyle=C.oil;ctx.fillRect(0,ry-20,w,34);}
   ctx.fillStyle=C.mark;for(let m=0;m<L;m+=6)ctx.fillRect(X(m),ry-4,Math.max(2,3*PX),3);
   // vạch thước
   const tick=niceStep(L,R(8,5));for(let m=0;m<=L;m+=tick){ctx.fillStyle=C.muted;ctx.fillRect(X(m),ry+14,1.5,6);txt(ctx,nf(m,0)+' m',X(m),ry+28,C.muted,11,500,'center');}
@@ -935,126 +908,35 @@ function renderT3(){
   // lực ma sát ở bánh
   const wy=ry-2;
   if(S3.mode==='brake'&&S3.phase==='brake'){arrow(ctx,cx+cl*.5,wy,cx+cl*.5-60,wy,C.fric,5);pill(ctx,T('lbFmsBack'),cx+cl*.5-30,wy+20,C.fric,12);}
-  if(S3.mode==='start'&&S3.phase==='go'&&!S3.done){
-    if(S3.fr>0){const len=14+80*S3.fr/(M_CAR*g*.8);arrow(ctx,cx+cl*.2,wy,cx+cl*.2+len,wy,C.fric,5);pill(ctx,T('lbFmsFwd'),cx+cl*.2+30,wy+20,C.fric,12);}
-    else pill(ctx,T('lbNoPush'),Math.max(10,cx),wy+20,C.warn,12,'left');}
+  if(S3.mode==='start'&&S3.phase==='go'&&!S3.done){const len=S3.spin?18:60;arrow(ctx,cx+cl*.2,wy,cx+cl*.2+len,wy,C.fric,5);pill(ctx,T('lbFmsFwd'),cx+cl*.2+30,wy+20,C.fric,12);}
   // đồ thị
   const tmax=Math.max(4,S3.t*1.1),vmax=Math.max(S3.vk*1.1,10);
   graph($('g3'),[{d:S3.hist,c:C.vel,lw:3}],{x0:0,x1:tmax,y0:0,y1:vmax,xl:T('gt'),yl:T('gvk')});
   // trạng thái
   let st=T('st3Ready');if(S3.mode==='brake'){if(S3.hit!=null)st=T('st3Hit');else if(S3.phase==='react')st=T('st3React');else if(S3.phase==='brake')st=T('st3Brake');else if(S3.phase==='stop')st=T('st3Stop');else if(S3.phase==='hit')st=T('st3Hit');}
-  else if(S3.phase==='go')st=S3.nf?T('st3NoFric'):S3.done?T('st3Done'):S3.spin?T('st3Spin'):T('st3Go');
+  else if(S3.phase==='go')st=S3.done?T('st3Done'):S3.spin?T('st3Spin'):T('st3Go');
   $('st3').textContent=st;
   const kv=[];const fv=v=>nf(v*3.6,0)+' km/h';
   if(S3.mode==='brake'){kv.push(['o3v',fv(S3.v)]);
     if(S3.done){const p=plan3();kv.push(['o3s1',nf(p.s1,1)+' m'],['o3s2',nf(p.s2,1)+' m'],['o3tot',nf(p.tot,1)+' m']);
       kv.push(['o3res',S3.hit!=null?T('resHit').replace('{v}',nf(S3.hit*3.6,0)):T('resSafe').replace('{d}',nf(S3.D-CARL-S3.x,1))]);}
     else kv.push(['o3s1','—'],['o3s2','—'],['o3tot','—']);}
-  else{const D=drive3(),fN=x=>nf(Math.round(x),0)+' N';
-    kv.push(['o3v',fv(S3.v)],['o3need',fN(D.need)],['o3fmax',fN(D.fmax)],['o3fric',S3.phase==='go'&&!S3.done?fN(S3.fr):'—'],
-      ['o3slip',S3.phase==='go'?T(S3.spin?'spin':'grip'):'—'],['o3d',nf(S3.x,1)+' m'],['o3t',S3.tReach!=null?nf(S3.tReach,1)+' s':'—']);
-    renderZoom3();}
+  else{kv.push(['o3v',fv(S3.v)],['o3slip',S3.phase==='go'?T(S3.spin?'spin':'grip'):'—'],['o3d',nf(S3.x,1)+' m'],['o3t',S3.tReach!=null?nf(S3.tReach,1)+' s':'—']);}
   $('o3').innerHTML=kv.map(([k,v])=>`<dt>${T(k)}</dt><dd>${v}</dd>`).join('');
-}
-/* Ô phóng to: lốp – mặt đường (trái) và người đi bộ (phải), thanh giới hạn ma sát (dưới). Chỉ để minh hoạ, không theo tỉ lệ. */
-function renderZoom3(){
-  const cv=$('cz3'),wide=cv.clientWidth>=560;const {ctx,w,h}=size(cv,wide?.5:1.95,wide?innerHeight*.6:1000);
-  const barH=wide?86:104,top=h-barH,D=drive3();
-  if(wide){lens3(ctx,0,0,w*.58,top);walker3(ctx,w*.58,0,w*.42,top);}
-  else{const hl=top*.6;lens3(ctx,0,0,w,hl);walker3(ctx,0,hl,w,top-hl);}
-  // thanh so sánh lực cần với ma sát nghỉ lớn nhất
-  const bx=14,bw=w-28,by=top+(wide?30:48),FS=Math.max(10000,D.need*1.05);
-  ctx.strokeStyle=C.line;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,top+4);ctx.lineTo(w,top+4);ctx.stroke();
-  txt(ctx,T('lbNeed')+': '+nf(Math.round(D.need),0)+' N',bx,top+18,D.grip?C.ok:C.warn,13,700);
-  if(!wide)txt(ctx,T(D.grip?'lbOk':'lbOver'),bx,top+36,D.grip?C.ok:C.warn,13,700);
-  ctx.fillStyle=C.line;ctx.beginPath();ctx.roundRect(bx,by,bw,16,8);ctx.fill();
-  ctx.fillStyle=D.grip?C.ok:C.warn;ctx.beginPath();ctx.roundRect(bx,by,Math.max(8,bw*D.need/FS),16,8);ctx.fill();
-  const lx=bx+bw*D.fmax/FS;ctx.strokeStyle=C.ink;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(lx,by-6);ctx.lineTo(lx,by+22);ctx.stroke();
-  const ml=T('lbMax')+' = '+nf(Math.round(D.fmax),0)+' N';ctx.font=`600 12px ${FONT}`;const mw=ctx.measureText(ml).width;
-  txt(ctx,ml,clamp(lx,bx+mw/2,bx+bw-mw/2),by+34,C.ink,12,600,'center');
-  if(wide)txt(ctx,T(D.grip?'lbOk':'lbOver'),bx+bw,top+18,D.grip?C.ok:C.warn,13,700,'right');
-}
-function lens3(ctx,x0,y0,W,H){
-  const going=S3.phase==='go'&&!S3.done;
-  txt(ctx,T('lzTitle'),x0+12,y0+14,C.ink,14,700);
-  const nar=W<420,cx=x0+W/2,Rl2=Math.max(50,Math.min((H-(nar?70:50))/2,W/2-12)),ccy=y0+(nar?46:26)+Rl2;
-  const roadY=ccy+Rl2*.42,Rz=Rl2*.8,wcy=roadY-Rz,LS=Rz/3.2; // LS: px trên mỗi mét quãng đường (làm chậm để mắt theo kịp)
-  ctx.save();ctx.beginPath();ctx.arc(cx,ccy,Rl2,0,7);ctx.clip();
-  ctx.fillStyle=C.sky;ctx.fillRect(cx-Rl2,ccy-Rl2,2*Rl2,2*Rl2);
-  // mặt đường có gờ nhỏ, trôi về sau khi xe chạy
-  const rc=[C.road,'#4b5560','#8b7b62','#b9d4e3'][S3.ri];ctx.fillStyle=rc;ctx.fillRect(cx-Rl2,roadY,2*Rl2,Rl2*2);
-  if(S3.nf){ctx.fillStyle=C.oil;ctx.fillRect(cx-Rl2,roadY-3,2*Rl2,Rl2*2);}
-  const sp=22,off=((S3.x*LS)%sp+sp)%sp;
-  ctx.fillStyle=rc;for(let x=cx-Rl2-sp-off;x<cx+Rl2+sp;x+=sp){ctx.beginPath();ctx.moveTo(x,roadY+1);ctx.lineTo(x+5,roadY-5);ctx.lineTo(x+10,roadY+1);ctx.fill();}
-  ctx.fillStyle=C.mark;ctx.globalAlpha=.55;for(let x=cx-Rl2-sp*3-off*3%(sp*3);x<cx+Rl2+sp*3;x+=sp*3)ctx.fillRect(x,roadY+10,6,3);ctx.globalAlpha=1;
-  // lốp: chỉ vẽ phần trên mặt đường (chỗ chạm bị ép phẳng)
-  ctx.save();ctx.beginPath();ctx.rect(cx-Rl2,ccy-Rl2,2*Rl2,roadY-(ccy-Rl2)+1);ctx.clip();
-  const tb=Math.max(6,Rz*.09),Rt=Rz-tb; // Rt: thân lốp, các gai nhô ra tới Rz
-  ctx.fillStyle='#262626';ctx.beginPath();ctx.arc(cx,wcy,Rt,0,7);ctx.fill();
-  ctx.fillStyle='#9aa1a7';ctx.beginPath();ctx.arc(cx,wcy,Rt*.66,0,7);ctx.fill();
-  ctx.fillStyle='#6b7278';ctx.beginPath();ctx.arc(cx,wcy,Rt*.14,0,7);ctx.fill();
-  const ang=S3.tread*LS/Rz,NB=24,bw=Rz*2*Math.PI/NB*.55;
-  for(let k=0;k<NB;k++){const a=ang+k*2*Math.PI/NB+Math.PI/2;ctx.save();ctx.translate(cx+Math.cos(a)*Rt,wcy+Math.sin(a)*Rt);ctx.rotate(a);
-    ctx.fillStyle=k===0?C.react:'#3b3b3b';ctx.beginPath();ctx.roundRect(-2,-bw/2,tb+2,bw,2);ctx.fill();ctx.restore();}
-  ctx.strokeStyle='#5c6268';ctx.lineWidth=4;for(let k=0;k<5;k++){const a=ang+k*1.2566;ctx.beginPath();ctx.moveTo(cx+Math.cos(a)*Rt*.14,wcy+Math.sin(a)*Rt*.14);ctx.lineTo(cx+Math.cos(a)*Rt*.64,wcy+Math.sin(a)*Rt*.64);ctx.stroke();}
-  ctx.restore();
-  // trượt: vệt khói / vệt trượt sau chỗ chạm
-  if(going&&S3.spin){ctx.fillStyle=C.muted;ctx.globalAlpha=.35;for(let k=0;k<5;k++){ctx.beginPath();ctx.arc(cx-18-k*14-Math.random()*6,roadY-6-k*4,5+k*2.5,0,7);ctx.fill();}ctx.globalAlpha=1;
-    ctx.strokeStyle=C.warn;ctx.lineWidth=2;ctx.setLineDash([6,5]);ctx.beginPath();ctx.moveTo(cx+10,roadY+3);ctx.lineTo(cx-60,roadY+3);ctx.stroke();ctx.setLineDash([]);}
-  // cặp lực ở chỗ chạm: cùng độ lớn, ngược chiều, đặt lên hai vật khác nhau
-  if(going&&S3.fr>0){const L=18+Rl2*.7*S3.fr/(M_CAR*g*.8);
-    arrow(ctx,cx-4,roadY-9,cx-4+L,roadY-9,C.fric,5);arrow(ctx,cx+4,roadY+20,cx+4-L,roadY+20,C.force,5);}
-  ctx.restore();
-  ctx.strokeStyle=C.ink;ctx.lineWidth=3;ctx.beginPath();ctx.arc(cx,ccy,Rl2,0,7);ctx.stroke();
-  if(going&&S3.fr>0){pill(ctx,T('lzTyre'),cx+8,roadY-26,C.fric,12,'left');pill(ctx,T('lzRoad'),cx-8,roadY+40,C.force,12,'right');}
-  // chiều xe đi, chiều quay
-  const ax=nar?x0+W-60:Math.min(cx+Rl2-46,x0+W-58),ay=nar?y0+34:y0+14;arrow(ctx,ax,ay,ax+44,ay,C.vel,3);txt(ctx,T('lzCar'),ax-6,ay,C.vel,12,700,'right');
-  // mũi tên cong chỉ chiều quay (theo chiều kim đồng hồ khi xe đi sang phải)
-  const rr=Rz*.45,ea=-1.15,ex=cx+Math.cos(ea)*rr,ey=wcy+Math.sin(ea)*rr,tx=-Math.sin(ea),ty=Math.cos(ea);
-  if(ey>ccy-Rl2+8){ctx.strokeStyle=C.muted;ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(cx,wcy,rr,-2.2,ea-.08);ctx.stroke();
-    arrow(ctx,ex-tx*12,ey-ty*12,ex+tx*2,ey+ty*2,C.muted,2.5);txt(ctx,T('lzRot'),cx,wcy-rr+16,'#3d4247',12,700,'center');}
-  // dòng trạng thái
-  let s=S3.phase!=='go'?T('lzReady'):S3.done&&!S3.nf?T('lzCruise'):S3.nf?T('lzNone'):S3.spin?T('lzSpin'):T('lzGrip');
-  const col=S3.phase!=='go'?C.muted:S3.nf||S3.spin?C.warn:C.ok;
-  txt(ctx,s,cx,Math.min(y0+H-8,ccy+Rl2+14),col,12,700,'center');
-}
-function walker3(ctx,x0,y0,W,H){
-  txt(ctx,T('lwTitle'),x0+12,y0+14,C.ink,14,700);
-  const gy=y0+H-34,s=Math.min(H-70,W*.7,150),bx=x0+W*.42,leg=s*.48,hipY=gy-leg*1.04;
-  const now=performance.now()/1000,Tw=1.1,stride=leg*.75,vw=stride/(Tw/2);
-  ctx.fillStyle=S3.nf?C.oil:C.matA;ctx.fillRect(x0+8,gy,W-16,10);
-  const goff=S3.nf?0:((now*vw)%24+24)%24;ctx.fillStyle=C.matA2;for(let x=x0+8-goff;x<x0+W-8;x+=24)if(x>x0+8)ctx.fillRect(x,gy+3,8,3);
-  const foot=ph=>{const p=((ph%1)+1)%1;if(p<.5){return {x:bx+stride/2-p*2*stride,y:gy,st:true};}const q=(p-.5)*2;return {x:bx-stride/2+q*stride,y:gy-Math.sin(q*Math.PI)*leg*.22,st:false};};
-  const ph=now/Tw,F=[foot(ph),foot(ph+.5)],bob=Math.abs(Math.sin(ph*2*Math.PI))*3,hy=hipY-bob;
-  // chân hai đoạn (đùi, cẳng), đầu gối gập về phía trước
-  const seg=leg*.56,legDraw=(f,col)=>{const fx=f.x,fy=f.y-3,dx=fx-bx,dy=fy-hy,L0=Math.hypot(dx,dy)||1,ux=dx/L0,uy=dy/L0,d=Math.min(L0,2*seg-.01);
-    const mx=bx+ux*d/2,my=hy+uy*d/2,hh=Math.sqrt(Math.max(0,seg*seg-d*d/4));let px=-uy,py=ux;if(px<0){px=-px;py=-py;}
-    ctx.strokeStyle=col;ctx.lineWidth=Math.max(3,s*.05);ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();ctx.moveTo(bx,hy);ctx.lineTo(mx+px*hh,my+py*hh);ctx.lineTo(fx,fy);ctx.lineTo(fx+s*.08,fy);ctx.stroke();};
-  legDraw(F[1],C.muted);legDraw(F[0],C.ink);
-  ctx.strokeStyle=C.ink;ctx.lineWidth=Math.max(3,s*.05);ctx.beginPath();ctx.moveTo(bx,hy);ctx.lineTo(bx+s*.03,hy-s*.38);ctx.stroke();
-  const sw=Math.sin(ph*2*Math.PI)*s*.14;ctx.beginPath();ctx.moveTo(bx+s*.03,hy-s*.32);ctx.lineTo(bx+s*.03+sw,hy-s*.12);ctx.moveTo(bx+s*.03,hy-s*.32);ctx.lineTo(bx+s*.03-sw,hy-s*.12);ctx.stroke();
-  ctx.fillStyle=C.ink;ctx.beginPath();ctx.arc(bx+s*.04,hy-s*.47,s*.08,0,7);ctx.fill();
-  const stf=F.find(f=>f.st);
-  if(S3.nf){ctx.strokeStyle=C.warn;ctx.lineWidth=2;ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(stf.x+30,gy+2);ctx.lineTo(stf.x-10,gy+2);ctx.stroke();ctx.setLineDash([]);
-    txt(ctx,T('lwSlip'),x0+W/2,gy+24,C.warn,12,700,'center');}
-  else{const L=Math.min(56,W*.22);arrow(ctx,stf.x,gy-10,stf.x+L,gy-10,C.fric,4);arrow(ctx,stf.x,gy+16,stf.x-L,gy+16,C.force,4);
-    pill(ctx,T('lwGround'),x0+W-8,gy-30,C.fric,12,'right');
-    txt(ctx,T('lwFoot'),x0+W/2,gy+30,C.force,12,700,'center');}
 }
 function upd3(){$('run3').textContent=T(S3.running?'pause':'run');$('vV').textContent=nf(S3.vk,0)+' km/h';$('trV').textContent=nf(S3.tr,1)+' s';
   $('spdLbl3').textContent=T(S3.mode==='brake'?'spdBrake':'spdStart');$('hint3').textContent=T(S3.mode==='brake'?'hint3Brake':'hint3Start');
-  $('trBox').hidden=S3.mode!=='brake';$('mode3').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===S3.mode));
-  $('startBox').hidden=$('zoomBox').hidden=S3.mode!=='start';
-  $('awV').textContent=nf(S3.aw,1)+' m/s²';$('nf3').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',(b.dataset.n==='1')===S3.nf));}
-// kéo ga: khi xe đang chạy thì đổi ngay (thấy mũi tên ma sát dài ra, chạm giới hạn thì trượt); khi đứng yên thì đặt lại
-$('aw3').oninput=e=>{S3.aw=+e.target.value;if(S3.running||S3.phase==='go'&&!S3.done)upd3();else reset3();};
-$('nf3').querySelectorAll('button').forEach(b=>b.onclick=()=>{S3.nf=b.dataset.n==='1';reset3();});
+  $('trBox').hidden=S3.mode!=='brake';$('startBox').hidden=S3.mode!=='start';$('vBox').hidden=S3.mode==='start'&&S3.who==='walk';
+  $('who3').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.w===S3.who));
+  const EL=S3.who==='car'?CAR_EFF:WALK_EFF;if(S3.eff>=EL.length)S3.eff=EL.length-1;$('eff3').innerHTML=EL.map((e,i)=>`<button class="btn" data-e="${i}" aria-pressed="${i===S3.eff}">${T(e.k)}</button>`).join('');$('mode3').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===S3.mode));}
 $('mode3').querySelectorAll('button').forEach(b=>b.onclick=()=>{S3.mode=b.dataset.m;reset3();});
 $('road3').onchange=e=>{S3.ri=+e.target.value;reset3();};
 $('v3').oninput=e=>{S3.vk=+e.target.value;reset3();};
 $('tr3').oninput=e=>{S3.tr=+e.target.value;reset3();};
 $('run3').onclick=()=>{if(S3.done)reset3();S3.running=!S3.running;upd3();};
 $('rst3').onclick=reset3;
+$('who3').querySelectorAll('button').forEach(b=>b.onclick=()=>{S3.who=b.dataset.w;S3.eff=b.dataset.w==='car'?1:0;reset3();});
+$('eff3').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;S3.eff=+b.dataset.e;reset3();});
 (()=>{const cv=$('cv3');let on=false;
   const toM=e=>{const r=cv.getBoundingClientRect();return (e.clientX-r.left-S3.off0)/S3.PX;};
   // kéo thả người đi đường (khi xe chưa chạy hoặc đã xong); giữ nguyên tỉ lệ đường trong lúc kéo
@@ -1062,6 +944,132 @@ $('rst3').onclick=reset3;
     if(Math.abs(m-S3.D)*S3.PX<45||(S3.ped&&Math.abs(m-S3.ped.x)*S3.PX<45)){if(S3.phase!=='ready')reset3();S3.Lfix=plan3().L;on=true;cv.setPointerCapture(e.pointerId);}});
   cv.addEventListener('pointermove',e=>{if(!on)return;const L=S3.Lfix;S3.D=clamp(Math.round(toM(e)-10/S3.PX),CARL+2,L-4);});
   const up=()=>{if(!on)return;on=false;S3.Lfix=0;};cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);})();
+
+/* ---------- Tab 3, chế độ khởi hành / bước đi: bám đường và trượt ---------- */
+// Lực ma sát cần = m·a muốn có; lực ma sát lớn nhất mặt đường cho được = μ·m·g. Cần ≤ lớn nhất → bám (ma sát nghỉ, chỗ chạm đứng yên so với mặt đường);
+// cần > lớn nhất → trượt (ma sát trượt ≈ 0,75 lần, chỗ chạm chà xát trên mặt đường).
+const CAR_EFF=[{k:'effSoft',a:1.5},{k:'effHard',a:3},{k:'effMax',a:5.5}];
+const WALK_EFF=[{k:'effWalk',a:2,vt:1.4,Ls:.7,lift:.1},{k:'effRun',a:4.5,vt:6,Ls:1.3,lift:.22}];
+const M_CAR=1200,M_MAN=50,R_TYRE=.32,WALK_T=6;
+Object.assign(S3,{who:'car',eff:1});
+function effNow(){return S3.who==='car'?CAR_EFF[Math.min(S3.eff,2)]:WALK_EFF[Math.min(S3.eff,1)];}
+function startInfo(){const mu=ROADS[S3.ri].mu,E=effNow(),m=S3.who==='car'?M_CAR:M_MAN;return {mu,E,m,need:m*E.a,max:mu*m*g,grip:E.a<=mu*g};}
+function resetStart(){Object.assign(S3,{su:0,uw:0,slip:false,F:0,parts:[],stepIdx:-1,slipD:0,touchX:0});}
+function stepStart(dt){
+  const I=startInfo(),E=I.E;let a;
+  const vt=S3.who==='car'?S3.vk/3.6:E.vt*(I.grip?1:Math.min(1,I.mu*g/E.a));
+  if(I.grip){a=S3.v<vt?E.a:0;S3.slip=false;}else{a=S3.v<vt?.75*I.mu*g:0;S3.slip=true;}
+  S3.v=Math.min(vt,S3.v+a*dt);
+  // ma sát lên xe/người: lúc tăng tốc = m·a; người đi đều vẫn cần ma sát mỗi bước (≈ m·a muốn có, chia đều); trượt thì là ma sát trượt
+  S3.F=S3.slip?.75*I.max:(S3.who==='walk'?I.need:I.m*a);
+  // tốc độ "đạp": mặt lốp / chân quét về sau so với thân
+  let u;if(S3.who==='car')u=S3.slip?S3.v+6:S3.v;else{S3.uw=Math.min(E.vt,S3.uw+E.a*dt);u=S3.slip?Math.max(S3.v+.9,S3.uw):S3.v;}
+  S3.su+=u*dt;S3.x+=S3.v*dt;S3.u=u;S3.wheel=S3.su/R_TYRE;S3.t+=dt;S3.phase='go';
+  if(S3.who==='walk'){const st=Math.floor(S3.su/E.Ls);if(st!==S3.stepIdx){S3.stepIdx=st;S3.slipD=0;S3.touchX=S3.x;}S3.slipD+=(u-S3.v)*dt;}
+  if(S3.t-S3.lastRec>=1/20){S3.lastRec=S3.t;S3.hist.push([S3.t,S3.v*3.6]);}
+  const fin=S3.who==='car'?S3.v>=S3.vk/3.6-1e-9:S3.t>=WALK_T;
+  if(fin||S3.t>40){if(S3.who==='car'&&S3.tReach==null)S3.tReach=S3.t;S3.done=true;S3.running=false;S3.slip=false;S3.F=0;S3.hist.push([S3.t,S3.v*3.6]);upd3();}
+}
+// ---- vẽ mặt đường (hoa văn theo loại đường), off = độ dời hoa văn (px) ----
+const hash=n=>{const s=Math.sin(n*127.1+311.7)*43758.5453;return s-Math.floor(s);};
+function drawSurface(ctx,x0,y0,w,hh,ri,off,big){
+  const k=big?1:.45;
+  if(ri===3){ctx.fillStyle='#cfe6f3';ctx.fillRect(x0,y0,w,hh);ctx.strokeStyle='rgba(255,255,255,.9)';ctx.lineWidth=2;
+    for(let i=Math.floor(off/90)-1;i<(off+w)/90+1;i++){const x=x0+i*90-off;ctx.beginPath();ctx.moveTo(x,y0+4+hash(i)*hh*.4);ctx.lineTo(x+40,y0+6+hash(i)*hh*.4);ctx.stroke();}
+    ctx.strokeStyle='#8fbcd6';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x0+w,y0);ctx.stroke();return;}
+  const base=ri===2?'#b49a6f':'#3f444a';ctx.fillStyle=base;ctx.fillRect(x0,y0,w,hh);
+  const P=26*k+6,n0=Math.floor(off/P)-1,n1=Math.ceil((off+w)/P)+1;
+  for(let i=n0;i<n1;i++){const r=(ri===2?7:5)*k+hash(i)*(ri===2?7:4)*k,x=x0+i*P-off+hash(i+9)*P*.5;
+    ctx.fillStyle=ri===2?['#d8c39a','#9c8257','#c2a878','#7f6b4c'][i&3]:['#6b7178','#565b61','#80868c'][((i%3)+3)%3];
+    ctx.beginPath();ctx.arc(x,y0+r*(ri===2?.2:.55),r,0,7);ctx.fill();
+    if(ri!==2){ctx.fillStyle='#4a4f55';ctx.beginPath();ctx.arc(x+P*.5,y0+hh*.55,r*.7,0,7);ctx.fill();}}
+  if(ri===1){ctx.fillStyle='rgba(90,160,235,.45)';ctx.fillRect(x0,y0-7*k-2,w,7*k+4);ctx.strokeStyle='rgba(200,230,255,.9)';ctx.lineWidth=1.2;
+    for(let i=n0;i<n1;i++){const x=x0+i*P-off;ctx.beginPath();ctx.moveTo(x,y0-7*k-2);ctx.quadraticCurveTo(x+P/4,y0-7*k-5,x+P/2,y0-7*k-2);ctx.stroke();}}
+}
+function partColor(ri){return ['#777','rgba(120,180,240,.9)','#b59b6c','#ffffff'][ri];}
+function spawnParts(x,y,dir,ri,rate,dt){if(Math.random()>rate*dt)return;for(let k=0;k<3;k++)S3.parts.push({x,y,vx:-dir*(80+Math.random()*160),vy:-(40+Math.random()*140),t:.7,c:partColor(ri),r:ri===2?3+Math.random()*3:2+Math.random()*2});
+  if(S3.parts.length>160)S3.parts.splice(0,S3.parts.length-160);}
+// ---- người đi bộ (que), hông ở (hx, gy - H·S) ----
+function legIK(fx,fy,H,L){const dx=fx,dy=fy-H,d=Math.min(Math.hypot(dx,dy),2*L-1e-3),th=Math.atan2(dy,dx),al=Math.acos(d/(2*L));
+  const k1=[L*Math.cos(th+al),H+L*Math.sin(th+al)],k2=[L*Math.cos(th-al),H+L*Math.sin(th-al)];return k1[0]>k2[0]?k1:k2;}
+function walkerPose(){const E=WALK_EFF[Math.min(S3.eff,1)],p=((S3.su/(2*E.Ls))%1+1)%1;
+  const leg=q=>q<.5?{x:E.Ls/2-(q*2)*E.Ls,y:0,st:true}:{x:-E.Ls/2+(q*2-1)*E.Ls,y:E.lift*Math.sin(Math.PI*(q*2-1)),st:false};
+  return [leg(p),leg((p+.5)%1)];}
+function drawWalker(ctx,hx,gy,S,lean,flail){const H=.9,L=.47,legs=walkerPose(),col=C.warn;
+  const X=x=>hx+x*S,Y=y=>gy-y*S;ctx.strokeStyle=col;ctx.lineCap='round';ctx.lineJoin='round';
+  legs.forEach((f,i)=>{const kn=legIK(f.x,f.y,H,L);ctx.globalAlpha=i?1:.55;ctx.lineWidth=Math.max(3,S*.07);
+    ctx.beginPath();ctx.moveTo(X(0),Y(H));ctx.lineTo(X(kn[0]),Y(kn[1]));ctx.lineTo(X(f.x),Y(f.y));ctx.lineTo(X(f.x+.2),Y(f.y));ctx.stroke();});
+  ctx.globalAlpha=1;const sx=Math.sin(lean)*.55,sy=H+Math.cos(lean)*.55;ctx.lineWidth=Math.max(3,S*.08);
+  ctx.beginPath();ctx.moveTo(X(0),Y(H));ctx.lineTo(X(sx),Y(sy));ctx.stroke();
+  ctx.fillStyle=col;ctx.beginPath();ctx.arc(X(sx+Math.sin(lean)*.16),Y(sy+.16),S*.11,0,7);ctx.fill();
+  legs.forEach((f,i)=>{const hxA=flail?(i?.35:-.3):-f.x*.6,hyA=flail?sy+.25:sy-.5;ctx.lineWidth=Math.max(2.5,S*.06);ctx.globalAlpha=i?.55:1;
+    ctx.beginPath();ctx.moveTo(X(sx),Y(sy-.05));ctx.lineTo(X((sx+hxA)/2),Y((sy+hyA)/2-.08));ctx.lineTo(X(hxA),Y(hyA));ctx.stroke();});ctx.globalAlpha=1;
+}
+function renderStart(){
+  const cv=$('cv3');const {ctx,w,h}=size(cv,R(.62,1.25),innerHeight*.7);const I=startInfo(),car=S3.who==='car',ri=S3.ri,nowT=performance.now(),dtR=Math.min(.05,(nowT-(S3._last||nowT))/1000);S3._last=nowT;
+  // ---------- cảnh chính: camera đi theo xe/người ----------
+  const mh=Math.round(h*.42),gy=mh-24,PXs=car?R(30,16):R(70,48),cxs=w*.42,SX=m=>cxs+(m-S3.x)*PXs;
+  ctx.fillStyle=C.sky;ctx.fillRect(0,0,w,gy);
+  drawSurface(ctx,0,gy,w,24,ri,S3.x*PXs,false);
+  const tk=car?5:1;for(let m=Math.floor((S3.x-cxs/PXs)/tk)*tk;m<=S3.x+(w-cxs)/PXs;m+=tk){const x=SX(m);ctx.fillStyle='#fff';ctx.fillRect(x,gy+14,1.5,10);txt(ctx,nf(m,0)+' m',x+3,gy+19,'#fff',10,600);}
+  if(car){const cl=CARL*PXs,cx=cxs-cl/2;drawCar(ctx,cx,gy,cl,S3.wheel,1);
+    const rw=cx+cl*.2,Fl=S3.F/(I.m*g)*R(110,70);
+    if(S3.phase==='go'&&!S3.done){if(Fl>2)arrow(ctx,rw,gy+2,rw+Fl,gy+2,C.fric,5);pill(ctx,T('lbFmsFwd'),rw+Math.max(Fl,30)/2,gy-34,C.fric,12);}
+    if(S3.slip&&S3.running)for(let k=0;k<3;k++){ctx.fillStyle=partColor(ri);ctx.globalAlpha=.5;ctx.beginPath();ctx.arc(rw-12-k*10-Math.random()*6,gy-5-k*4-Math.random()*4,3+k*1.5,0,7);ctx.fill();ctx.globalAlpha=1;}}
+  else{const lean=S3.running&&!S3.done?Math.min(.35,(S3.slip?.75*I.mu*g:I.E.a)/g*.6):.05;drawWalker(ctx,cxs,gy,PXs,lean,S3.slip&&S3.running);
+    const st=walkerPose().find(f=>f.st);if(st&&S3.phase==='go'&&!S3.done){const fx=cxs+(st.x+.1)*PXs,Fl=S3.F/(I.m*g)*R(110,70);
+      if(Fl>2)arrow(ctx,fx,gy+2,fx+Fl,gy+2,C.fric,5);pill(ctx,T('lbFmsMan'),fx+Math.max(Fl,30)/2,gy-PXs*1.9,C.fric,12);
+      if(S3.slip&&S3.running){ctx.strokeStyle='rgba(0,0,0,.35)';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(fx-18,gy-1);ctx.lineTo(fx-4,gy-1);ctx.stroke();}}}
+  // ---------- khung phóng to ----------
+  const zx=8,zy=mh+8,zw=w-16,zh=h-zy-8;ctx.save();ctx.beginPath();ctx.roundRect(zx,zy,zw,zh,12);ctx.clip();
+  ctx.fillStyle=C.panel;ctx.fillRect(zx,zy,zw,zh);const zg=zy+zh*.7;
+  // cập nhật hạt bắn ra
+  S3.parts.forEach(p=>{p.t-=dtR;p.x+=p.vx*dtR;p.y+=p.vy*dtR;p.vy+=500*dtR;});S3.parts=S3.parts.filter(p=>p.t>0);
+  const moving=S3.running&&!S3.done;let cxC,dirLbl;
+  if(car){const SLOW=.05,Rt=Math.min(zh*.62,zw*.3),M=Rt/R_TYRE,cx=zx+zw*.5,cy=zg-Rt+4;cxC=cx;
+    drawSurface(ctx,zx,zg,zw,zh,ri,S3.x*M*SLOW,true);
+    // lốp: mép quay theo quãng đường mặt lốp (su), mặt đường dời theo quãng đường xe (x) → bám thì khớp nhau
+    const rot=S3.su*SLOW/R_TYRE;ctx.fillStyle='#1d1d1d';ctx.beginPath();ctx.arc(cx,cy,Rt,0,7);ctx.fill();
+    for(let k=0;k<40;k++){const a=k/40*Math.PI*2+rot;ctx.save();ctx.translate(cx+Math.cos(a)*(Rt-7),cy+Math.sin(a)*(Rt-7));ctx.rotate(a);ctx.fillStyle=k===0?C.bond:'#3a3a3a';ctx.fillRect(-7,-Rt*.05,14,Rt*.1);ctx.restore();}
+    ctx.fillStyle='#9aa3ab';ctx.beginPath();ctx.arc(cx,cy,Rt*.6,0,7);ctx.fill();ctx.fillStyle='#6d757c';ctx.beginPath();ctx.arc(cx,cy,Rt*.18,0,7);ctx.fill();
+    drawSurface(ctx,zx,zg,zw,zh,ri,S3.x*M*SLOW,true);
+    if(ri===1&&!S3.slip){ctx.fillStyle='rgba(90,160,235,.0)';}
+    if(S3.slip&&moving){spawnParts(cx-6,zg-4,1,ri,60,dtR);ctx.strokeStyle='rgba(20,20,20,.55)';ctx.lineWidth=4;for(let k=0;k<4;k++){ctx.beginPath();ctx.moveTo(cx-40-k*28,zg+2);ctx.lineTo(cx-20-k*28,zg+2);ctx.stroke();}}
+    dirLbl=T(S3.slip?'zSlipCar':'zGripCar');
+    pill(ctx,T('zTitleCar'),zx+12,zy+16,C.muted,12,'left');
+  }else{const M=Math.min(zw*.33/.27,zh*1.6),fx0=zx+zw*.5;cxC=fx0;
+    drawSurface(ctx,zx,zg,zw,zh,ri,S3.touchX*M,true);
+    // dấu chấm: chỗ đế giày đặt xuống; bám thì đế giày đứng yên trên dấu, trượt thì đế giày bị kéo lùi
+    const sl=clamp(S3.slipD,0,.6)*M,sx=fx0-sl,len=.27*M,th=Math.max(10,.035*M);
+    ctx.fillStyle=C.accent;ctx.beginPath();ctx.arc(fx0,zg+6,5,0,7);ctx.fill();
+    if(sl>3){ctx.fillStyle='rgba(0,0,0,.3)';ctx.fillRect(sx+len*.4,zg-2,sl,4);}
+    const E=WALK_EFF[Math.min(S3.eff,1)],hipRel=-(walkerPose().find(f=>f.st)||{x:0}).x,ang=Math.atan2(.9,hipRel+.1);
+    const ax=sx+len*.3,ay=zg-th*1.3,lg=zh*.5;ctx.strokeStyle=C.warn;ctx.lineWidth=th*1.1;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(ax+Math.cos(ang)*lg,ay-Math.sin(ang)*lg);ctx.stroke();
+    pill(ctx,T('zLeg'),ax+Math.cos(ang)*lg*.7+16,ay-Math.sin(ang)*lg*.7,C.muted,11,'left');
+    ctx.fillStyle='#333';ctx.beginPath();ctx.roundRect(sx,zg-th*1.6,len,th*1.6,[th*.8,th*.8,4,4]);ctx.fill();
+    ctx.fillStyle='#555';for(let k=0;k<8;k++)ctx.fillRect(sx+6+k*(len-12)/8,zg-4,(len-12)/16,4);
+    if(S3.slip&&moving)spawnParts(sx+len*.2,zg-3,1,ri,50,dtR);
+    dirLbl=T(S3.slip?'zSlipMan':'zGripMan');pill(ctx,T('zTitleMan'),zx+12,zy+16,C.muted,12,'left');pill(ctx,T('zMark'),fx0,zg+52,C.accent,11);}
+  S3.parts.forEach(p=>{ctx.globalAlpha=Math.max(0,p.t/.7);ctx.fillStyle=p.c;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,7);ctx.fill();});ctx.globalAlpha=1;
+  // mũi tên ở chỗ chạm: mặt đường đẩy lốp/chân về trước (ma sát), lốp/chân đẩy mặt đường về sau
+  if(S3.phase==='go'&&!S3.done){const L=clamp(S3.F/(I.m*g)*zw*.35,8,zw*.35);
+    arrow(ctx,cxC,zg-14,cxC+L,zg-14,C.fric,5);pill(ctx,T(car?'zFwdCar':'zFwdMan'),cxC+L/2,zg-30,C.fric,12);
+    arrow(ctx,cxC,zg+14,cxC-L,zg+14,C.force,5);pill(ctx,T(car?'zBackCar':'zBackMan'),cxC-L/2,zg+32,C.force,12);
+    pill(ctx,dirLbl,zx+12,zy+40,S3.slip?C.warn:C.ok,R(14,11),'left');}
+  else pill(ctx,T('zIdle'),zx+12,zy+40,C.muted,12,'left');
+  ctx.restore();ctx.strokeStyle=C.line;ctx.lineWidth=1.5;ctx.beginPath();ctx.roundRect(zx,zy,zw,zh,12);ctx.stroke();
+  // đồ thị + số liệu
+  const tmax=Math.max(car?4:WALK_T,S3.t*1.1),vmax=Math.max((car?S3.vk:I.E.vt*3.6)*1.1,5);
+  graph($('g3'),[{d:S3.hist,c:C.vel,lw:3}],{x0:0,x1:tmax,y0:0,y1:vmax,xl:T('gt'),yl:T('gvk')});
+  $('st3').textContent=S3.phase!=='go'?T('st3Ready'):S3.done?T(car?'st3Done':'st3WalkDone'):T(S3.slip?(car?'st3Spin':'st3Slip'):(car?'st3Go':'st3Step'));
+  const fN=f=>f>=1000?nf(f/1000,1)+' kN':nf(f,0)+' N',pct=f=>clamp(f/Math.max(I.need,I.max)*100,0,100);
+  $('o3').innerHTML=`<dt>${T('o3v')}</dt><dd>${nf(S3.v*3.6,1)} km/h</dd><dt>${T('o3d')}</dt><dd>${nf(S3.x,1)} m</dd>
+   <dt>${T(car?'o3slip':'o3feet')}</dt><dd>${S3.phase==='go'&&!S3.done?T(S3.slip?(car?'spin':'slipMan'):'grip'):'—'}</dd>
+   ${car?`<dt>${T('o3t')}</dt><dd>${S3.tReach!=null?nf(S3.tReach,1)+' s':'—'}</dd>`:''}`;
+  $('o3b').innerHTML=`<div style="display:flex;flex-direction:column;gap:6px"><div class="muted">${T('o3need')}: <b>${fN(I.need)}</b></div><div class="bar"><i style="width:${pct(I.need)}%;background:var(--force)"></i></div>
+   <div class="muted">${T('o3max')}: <b>${fN(I.max)}</b></div><div class="bar"><i style="width:${pct(I.max)}%;background:var(--fric)"></i></div>
+   <div style="font-weight:700;color:${I.grip?'var(--ok)':'var(--warn)'}">${T(I.grip?'o3ok':'o3no')}</div></div>`;
+}
 
 /* ================= TAB 4: lực cản ================= */
 const MED=[{k:'mVac',rho:0,eta:0},{k:'mAir',rho:1.2,eta:1.8e-5},{k:'mWater',rho:1000,eta:1.0e-3}];

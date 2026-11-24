@@ -161,14 +161,67 @@ table.log.hz th:first-child,table.log.hz td:first-child{text-align:left;position
   </header>
 
   <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="0" data-i18n="tab0"></button>
     <button role="tab" data-tab="1" data-i18n="tab1"></button>
     <button role="tab" data-tab="2" data-i18n="tab2"></button>
+    <button role="tab" data-tab="5" data-i18n="tab5"></button>
     <button role="tab" data-tab="3" data-i18n="tab3"></button>
     <button role="tab" data-tab="4" data-i18n="tab4"></button>
   </nav>
 
+  <!-- ===================== TAB 0: TỐC ĐỘ LÀ GÌ ===================== -->
+  <section id="t0" class="col">
+    <p class="req" data-i18n-html="req0"></p>
+    <div class="video" id="v0"></div>
+    <div class="lab">
+      <div class="stage">
+        <div class="seg" id="mode0"></div>
+        <p class="hint" id="hint0"></p>
+        <canvas id="cv0" aria-label="two runners racing on a track"></canvas>
+        <p class="status" id="st0"></p>
+        <div class="controls">
+          <button class="btn primary" id="run0"></button>
+          <button class="btn" id="rst0" data-i18n="reset"></button>
+          <div class="seg" id="spd0"></div>
+        </div>
+        <div class="tblwrap"><table class="log" id="tb0"></table></div>
+        <div class="controls"><button class="btn" id="calc0" data-i18n="calc0"></button></div>
+        <div class="legend">
+          <span><i style="background:var(--laneA)"></i><span data-i18n="runA"></span></span>
+          <span><i style="background:var(--laneB)"></i><span data-i18n="runB"></span></span>
+        </div>
+        <p class="fine" data-i18n="assume0"></p>
+      </div>
+      <div class="col">
+        <div class="card">
+          <h2 data-i18n="set0"></h2>
+          <div class="sl"><div class="top"><span data-i18n="vA0"></span><span class="val" id="vA0V"></span></div>
+            <input type="range" id="vA0" min="2" max="10" step="0.5" value="6"></div>
+          <div class="sl"><div class="top"><span data-i18n="vB0"></span><span class="val" id="vB0V"></span></div>
+            <input type="range" id="vB0" min="2" max="10" step="0.5" value="5"></div>
+          <button class="btn" id="sec0" data-i18n="sec0"></button>
+        </div>
+        <div class="card">
+          <h2 data-i18n="conv0T"></h2>
+          <div class="qz"><div class="row">
+            <input id="cvIn" inputmode="decimal" value="36" aria-label="value">
+            <select id="cvU" style="width:auto"></select>
+          </div></div>
+          <dl class="kv" id="cvOut"></dl>
+          <p class="muted" data-i18n="ex0T"></p>
+          <div class="places" id="ex0"></div>
+          <p class="fine" id="exSrc"></p>
+        </div>
+        <div class="card" id="p0"></div>
+        <div class="card" id="p0b"></div>
+      </div>
+    </div>
+    <details open><summary data-i18n="mechT"></summary><div data-i18n-html="mech0"></div></details>
+    <details><summary data-i18n="simpleT"></summary><div data-i18n-html="simple0"></div></details>
+  </section>
+
   <!-- ===================== TAB 1: ĐO VÀ VẼ ĐỒ THỊ ===================== -->
-  <section id="t1" class="col">
+  <section id="t1" class="col" hidden>
     <p class="req" data-i18n-html="req1"></p>
     <div class="video" id="v1"></div>
     <div class="lab">
@@ -260,6 +313,57 @@ table.log.hz th:first-child,table.log.hz td:first-child{text-align:left;position
     <details open><summary data-i18n="mechT"></summary><div data-i18n-html="mech2"></div></details>
     <details><summary data-i18n="simpleT"></summary><div data-i18n-html="simple2"></div></details>
     <details><summary data-i18n="wordT2"></summary><div data-i18n-html="word2"></div></details>
+  </section>
+
+  <!-- ===================== TAB 5: SO SÁNH HAI CHUYỂN ĐỘNG ===================== -->
+  <section id="t5" class="col" hidden>
+    <p class="req" data-i18n-html="req5"></p>
+    <div class="video" id="v5"></div>
+    <div class="lab">
+      <div class="stage">
+        <div class="seg" id="pre5"></div>
+        <p class="hint" data-i18n="hint5"></p>
+        <canvas id="cv5a" aria-label="two cars on a straight road"></canvas>
+        <canvas id="cv5b" class="drag" aria-label="distance-time graphs of two cars"></canvas>
+        <p class="status" id="st5"></p>
+        <div class="controls">
+          <button class="btn primary" id="run5"></button>
+          <button class="btn" id="rst5" data-i18n="reset"></button>
+          <div class="seg" id="spd5"></div>
+          <label class="chk"><input type="checkbox" id="full5"> <span data-i18n="full5"></span></label>
+        </div>
+        <div class="legend">
+          <span><i style="background:var(--laneA)"></i><span data-i18n="car1"></span></span>
+          <span><i style="background:var(--laneB)"></i><span data-i18n="car2"></span></span>
+        </div>
+        <p class="fine" data-i18n="assume5"></p>
+      </div>
+      <div class="col">
+        <div class="card">
+          <h2 data-i18n="set5"></h2>
+          <div class="sl"><div class="top"><span data-i18n="v51"></span><span class="val" id="v51V"></span></div>
+            <input type="range" id="v51" min="5" max="30" step="1" value="10"></div>
+          <div class="sl"><div class="top"><span data-i18n="v52"></span><span class="val" id="v52V"></span></div>
+            <input type="range" id="v52" min="5" max="30" step="1" value="20"></div>
+          <div class="sl"><div class="top"><span data-i18n="d52"></span><span class="val" id="d52V"></span></div>
+            <input type="range" id="d52" min="0" max="30" step="1" value="10"></div>
+        </div>
+        <div class="card">
+          <h2 data-i18n="obs"></h2>
+          <dl class="kv" id="o5"></dl>
+          <p class="cmp" id="o5meet"></p>
+        </div>
+        <div class="card">
+          <h2 data-i18n="ch5T"></h2>
+          <p data-i18n="ch5"></p>
+          <p class="status" id="ch5r"></p>
+        </div>
+        <div class="card" id="p5"></div>
+        <div class="card" id="p5b"></div>
+      </div>
+    </div>
+    <details open><summary data-i18n="mechT"></summary><div data-i18n-html="mech5"></div></details>
+    <details><summary data-i18n="simpleT"></summary><div data-i18n-html="simple5"></div></details>
   </section>
 
   <!-- ===================== TAB 3: ĐỒ THỊ KHÔNG PHẢI CON ĐƯỜNG ===================== -->
@@ -652,7 +756,7 @@ function person(ctx,x,y,s,col){ctx.save();ctx.translate(x,y);ctx.strokeStyle=col
 /* ================= Tabs ================= */
 let tab=1;
 function setTab(n){tab=n;document.querySelectorAll('nav.tabs button').forEach(b=>{const on=+b.dataset.tab===n;b.classList.toggle('on',on);b.setAttribute('aria-selected',on);});
-  [1,2,3,4].forEach(i=>$('t'+i).hidden=i!==n);store.set('dt-tab',n);}
+  [0,1,2,3,4,5].forEach(i=>$('t'+i).hidden=i!==n);store.set('dt-tab',n);}
 document.querySelectorAll('nav.tabs button').forEach(b=>b.onclick=()=>setTab(+b.dataset.tab));
 $('gvBtn').onclick=()=>{const on=!document.body.classList.contains('hideNums');document.body.classList.toggle('hideNums',on);$('gvBtn').setAttribute('aria-pressed',on);};
 
@@ -978,24 +1082,263 @@ function ui4(full){
     $('o4res').innerHTML=`<div class="stars" aria-label="${n}/3">${'★'.repeat(n)}${'☆'.repeat(3-n)}</div><p>${T('res'+n)}</p>`;}
   else $('o4res').innerHTML='';}
 
+/* ================= Chuỗi song ngữ cho tab “Tốc độ là gì” và “So sánh hai chuyển động” ================= */
+Object.assign(I18N.vi,{
+tab0:'1. Tốc độ là gì',tab1:'2. Đo và vẽ đồ thị',tab2:'3. Đọc đồ thị',tab5:'4. So sánh hai chuyển động',tab3:'5. Đồ thị không phải con đường',tab4:'6. Thử thách: đi theo đồ thị',
+req0:'<b>Yêu cầu cần đạt (KHTN 7):</b> Nêu được ý nghĩa vật lí của tốc độ, xác định được tốc độ qua quãng đường vật đi được trong khoảng thời gian tương ứng: tốc độ = quãng đường vật đi / thời gian đi quãng đường đó. Liệt kê được một số đơn vị đo tốc độ thường dùng.',
+mSameS:'Cùng quãng đường 60 m',mSameT:'Cùng thời gian 8 s',
+hint0S:'An và Bình cùng chạy 60 m. Đồng hồ bấm giây ghi lại lúc mỗi bạn về đích. Ai nhanh hơn?',
+hint0T:'An và Bình cùng chạy trong 8 s rồi dừng. Thước đo cho biết mỗi bạn chạy được bao xa. Ai nhanh hơn?',
+runA:'An',runB:'Bình',set0:'Tốc độ chạy (giáo viên đặt)',vA0:'Tốc độ của An',vB0:'Tốc độ của Bình',sec0:'Tốc độ bí ẩn (giấu số)',
+calc0:'Tính tốc độ v = s / t',
+assume0:'Giả thiết mô phỏng: hai bạn chạy thẳng với tốc độ không đổi ngay từ lúc xuất phát (người thật cần vài giây để tăng tốc, nên tốc độ tính được là tốc độ trung bình).',
+th0Name:'Bạn',th0s:'s (m)',th0t:'t (s)',th0v:'v = s/t (m/s)',th0k:'v (km/h)',
+st0Ready:'Bấm Chạy để bắt đầu.',st0Run:'Đang chạy…',
+st0WinS:'{w} về đích trước. Cùng quãng đường 60 m, {w} mất ít thời gian hơn nên {w} nhanh hơn.',
+st0WinT:'Trong cùng 8 s, {w} chạy được xa hơn nên {w} nhanh hơn.',
+st0Tie:'Hai bạn nhanh như nhau: cùng quãng đường, cùng thời gian.',
+conv0T:'Đổi đơn vị tốc độ',ex0T:'Chạm để xem tốc độ thật của:',
+exSnail:'Ốc sên',exWalk:'Người đi bộ',exBike:'Xe đạp',exBolt:'Usain Bolt (lúc nhanh nhất)',exTown:'Ô tô, xe máy trong khu dân cư (tối đa)',exHwy:'Ô tô trên cao tốc (tối đa)',exCheetah:'Báo săn (đo bằng GPS)',exSound:'Âm thanh trong không khí',exPlane:'Máy bay chở khách',
+exSrc:'Nguồn: Usain Bolt theo số liệu IAAF Berlin 2009 (tab 3); báo săn: Wilson và cộng sự, Nature 2013 (vòng cổ GPS, 25,9 m/s); tốc độ tối đa trên đường theo Thông tư 38/2024/TT-BGTVT (khu đông dân cư, đường hai chiều: 50 km/h); âm thanh ở 20 °C. Các số khác là giá trị điển hình.',
+p0q:'Cùng chạy 60 m: An hết 10 s, Bình hết 12 s. Ai nhanh hơn?',
+p0a:'Bình, vì Bình chạy lâu hơn',p0b:'An, vì cùng quãng đường mà An mất ít thời gian hơn',p0c:'Như nhau, vì cùng chạy 60 m',
+p0e:'Cùng quãng đường thì ai mất ít thời gian hơn người đó nhanh hơn. An: v = 60 : 10 = 6 m/s; Bình: v = 60 : 12 = 5 m/s.',
+p0bq:'Một xe máy chạy 36 km/h, một bạn đạp xe 10 m/s. Ai nhanh hơn?',
+p0ba:'Xe máy, vì 36 lớn hơn 10',p0bb:'Nhanh như nhau',p0bc:'Bạn đạp xe',
+p0be:'Phải đổi về cùng đơn vị mới so sánh được: 36 km/h = 36 000 m : 3600 s = 10 m/s. Hai tốc độ bằng nhau. (Thật ra đạp xe 10 m/s là rất nhanh, chỉ vận động viên mới đạt được!)',
+mech0:'<p><b>Tốc độ</b> cho biết vật chuyển động nhanh hay chậm. Nó bằng quãng đường vật đi được trong một đơn vị thời gian:</p><p style="font-size:18px;text-align:center"><b>v = s / t</b></p><ul><li>s là quãng đường đi được, t là thời gian đi quãng đường đó.</li><li><b>Cùng quãng đường:</b> vật nào mất ít thời gian hơn thì nhanh hơn. <b>Cùng thời gian:</b> vật nào đi được quãng đường dài hơn thì nhanh hơn. Khác cả hai: phải tính v = s/t rồi so sánh.</li><li><b>Đơn vị tốc độ</b> = đơn vị độ dài / đơn vị thời gian: m/s (đơn vị trong hệ SI), km/h, m/phút, cm/s… Muốn so sánh hai tốc độ phải đổi về cùng một đơn vị. 1 m/s = 3,6 km/h; 1 km/h ≈ 0,28 m/s.</li><li>Khi tốc độ thay đổi trên đường đi, v = s/t cho <b>tốc độ trung bình</b> trên cả quãng đường.</li></ul>',
+simple0:'<p>Tốc độ trả lời câu hỏi: “<b>mỗi giây đi được mấy mét?</b>”. An chạy 6 m/s nghĩa là cứ mỗi giây An chạy thêm 6 m.</p><p>Hai cách để biết ai nhanh hơn trong cuộc đua: cho chạy <b>cùng một đoạn đường</b> rồi xem ai về trước, hoặc cho chạy <b>cùng một khoảng thời gian</b> rồi xem ai đi xa hơn. Nhớ đổi cùng đơn vị trước khi so sánh: 36 km/h và 10 m/s là một!</p>',
+req5:'<b>Yêu cầu cần đạt (KHTN 7):</b> Từ đồ thị quãng đường – thời gian, tìm được quãng đường, tốc độ, thời gian chuyển động. Ở đây: hai xe trên cùng một đồ thị, so sánh tốc độ bằng độ dốc, tìm lúc và chỗ hai xe gặp nhau.',
+hint5:'Hai xe cùng xuất phát từ A, chạy cùng chiều trên một đường thẳng. Chỉnh tốc độ và thời điểm xuất phát rồi bấm Chạy. Kéo trên đồ thị để xem từng thời điểm.',
+pre5a:'Cùng xuất phát',pre5b:'Xe 2 đi muộn, đuổi kịp',pre5c:'Xe 2 đi muộn, không kịp',pre5d:'Cùng tốc độ',
+full5:'Hiện trước cả đồ thị',car1:'Xe 1',car2:'Xe 2',
+assume5:'Giả thiết mô phỏng: hai xe xuất phát tại A, cùng chiều, trên đường thẳng; mỗi xe chạy với tốc độ không đổi, đạt ngay tốc độ khi xuất phát. s là quãng đường mỗi xe đi được tính từ A.',
+set5:'Hai xe',v51:'Tốc độ xe 1',v52:'Tốc độ xe 2',d52:'Xe 2 xuất phát muộn hơn',
+o5t:'Thời điểm t',o5s1:'Xe 1 đã đi',o5s2:'Xe 2 đã đi',o5gap:'Khoảng cách giữa hai xe',o5lead:'Xe dẫn trước',same:'ngang nhau',
+meet:'Hai đường cắt nhau tại t = {t} s, s = {s} m: xe 2 đuổi kịp xe 1 ở cách A {s} m, sau {t} s kể từ lúc xe 1 xuất phát.',
+meetOut:'Hai đường sẽ cắt nhau tại t = {t} s, s = {s} m, ngoài khung đồ thị (đường chưa đủ dài).',
+meetNo:'Xe 2 xuất phát sau và chạy không nhanh hơn xe 1: hai đường không cắt nhau, xe 2 không bao giờ đuổi kịp.',
+meetPar:'Cùng tốc độ: hai đường song song, khoảng cách giữa hai xe giữ nguyên {g} m.',
+meetSame:'Cùng xuất phát, cùng tốc độ: hai đường trùng nhau, hai xe luôn đi cạnh nhau.',
+meetStart:'Cùng xuất phát lúc t = 0: hai đường chỉ chung điểm gốc O. Đường dốc hơn là xe nhanh hơn, càng lúc càng bỏ xa xe kia.',
+st5Ready:'Bấm Chạy, hoặc bật “Hiện trước cả đồ thị” để dự đoán.',st5Run:'Đang chạy…',st5Done:'Hết 60 s.',
+ch5T:'Thử thách',ch5:'Giữ tốc độ hai xe như màn “Xe 2 đi muộn, đuổi kịp” (10 m/s và 20 m/s). Chỉnh thời điểm xuất phát của xe 2 để hai xe gặp nhau đúng ở mốc 600 m.',
+ch5ok:'✓ Đúng rồi! Hai xe gặp nhau ở {s} m.',ch5no:'Hiện hai xe gặp nhau ở {s} m.',ch5none:'Hiện hai xe không gặp nhau.',ch5keep:'Đặt lại tốc độ 10 m/s và 20 m/s để làm thử thách.',
+p5q:'Xe 1 chạy 10 m/s, xe 2 chạy 20 m/s, cùng xuất phát. Đường đồ thị của xe nào dốc hơn?',
+p5a:'Xe 1',p5b:'Xe 2',p5c:'Như nhau, vì cùng xuất phát',
+p5e:'Xe 2 mỗi giây đi thêm 20 m, xe 1 chỉ 10 m, nên đường của xe 2 dốc gấp đôi. Đường càng dốc, tốc độ càng lớn.',
+p5bq:'Xe 2 xuất phát muộn 10 s nhưng nhanh gấp đôi xe 1. Chỗ hai đường đồ thị cắt nhau cho biết…',
+p5ba:'Hai xe có cùng tốc độ',p5bb:'Hai xe gặp nhau: cùng lúc, ở cùng một chỗ',p5bc:'Xe 2 dừng lại',
+p5be:'Tại giao điểm, hai xe có cùng t và cùng s. Vì cùng xuất phát từ A và chạy cùng chiều, cùng s nghĩa là cùng vị trí: xe 2 đuổi kịp xe 1 (lúc t = 20 s, cách A 200 m). Tốc độ hai xe vẫn khác nhau: độ dốc hai đường khác nhau.',
+mech5:'<p>Vẽ đồ thị s–t của hai vật trên cùng một hệ trục giúp so sánh chúng ngay bằng mắt:</p><ul><li><b>Đường dốc hơn</b> ứng với vật có tốc độ lớn hơn (v = Δs / Δt lớn hơn).</li><li><b>Đường bắt đầu từ điểm (t₀; 0)</b>: vật xuất phát muộn hơn t₀ giây. Trước đó đồ thị nằm trên trục thời gian (s = 0, vật đứng yên ở A).</li><li><b>Hai đường song song:</b> hai vật cùng tốc độ; khoảng cách giữa chúng không đổi.</li><li><b>Hai đường cắt nhau:</b> (khi hai vật cùng xuất phát từ một chỗ và chạy cùng chiều) hai vật gặp nhau. Hoành độ giao điểm là thời điểm gặp, tung độ là quãng đường từ A đến chỗ gặp.</li><li>Tính bằng công thức: xe 2 đuổi kịp khi v₁·t = v₂·(t − t₀), suy ra t = v₂·t₀ / (v₂ − v₁). Ví dụ 10 m/s, 20 m/s, t₀ = 10 s: t = 20 s, s = 200 m.</li></ul>',
+simple5:'<p>Hãy tưởng tượng đồ thị là <b>hai đường đua vẽ theo thời gian</b>. Đường nào leo lên nhanh hơn là xe nào chạy nhanh hơn. Hai đường chạm nhau là lúc hai xe “sát cánh” ở cùng một chỗ: xe sau đã đuổi kịp xe trước.</p><p>Xe xuất phát muộn thì đường của nó nằm “ngủ” trên trục thời gian một lúc rồi mới bắt đầu leo lên.</p>',
+vCheetah:'Video báo săn',vHunt:'Video khác'
+});
+Object.assign(I18N.en,{
+tab0:'1. What is speed?',tab1:'2. Measure and plot',tab2:'3. Read a graph',tab5:'4. Compare two motions',tab3:'5. A graph is not the path',tab4:'6. Challenge: walk the graph',
+req0:'<b>Learning outcome (Science 7):</b> State the physical meaning of speed and find speed from the distance travelled in a corresponding time: speed = distance travelled / time taken. List some common units of speed.',
+mSameS:'Same distance, 60 m',mSameT:'Same time, 8 s',
+hint0S:'An and Binh both run 60 m. A stopwatch records when each crosses the finish line. Who is faster?',
+hint0T:'An and Binh both run for 8 s, then stop. The tape shows how far each has run. Who is faster?',
+runA:'An',runB:'Binh',set0:'Running speeds (set by the teacher)',vA0:'An’s speed',vB0:'Binh’s speed',sec0:'Mystery speeds (hide numbers)',
+calc0:'Calculate speed v = s / t',
+assume0:'Model assumptions: both run in a straight line at constant speed from the start (real runners need a few seconds to speed up, so the calculated speed is the average speed).',
+th0Name:'Runner',th0s:'s (m)',th0t:'t (s)',th0v:'v = s/t (m/s)',th0k:'v (km/h)',
+st0Ready:'Press Run to start.',st0Run:'Running…',
+st0WinS:'{w} finishes first. Over the same 60 m, {w} takes less time, so {w} is faster.',
+st0WinT:'In the same 8 s, {w} runs farther, so {w} is faster.',
+st0Tie:'They are equally fast: same distance, same time.',
+conv0T:'Convert units of speed',ex0T:'Tap to see the real speed of:',
+exSnail:'Snail',exWalk:'Person walking',exBike:'Bicycle',exBolt:'Usain Bolt (top speed)',exTown:'Car or motorbike in town (limit)',exHwy:'Car on an expressway (limit)',exCheetah:'Cheetah (GPS measured)',exSound:'Sound in air',exPlane:'Passenger jet',
+exSrc:'Sources: Usain Bolt from the IAAF Berlin 2009 data (tab 3); cheetah: Wilson et al., Nature 2013 (GPS collars, 25.9 m/s); road limits from Vietnam’s Circular 38/2024/TT-BGTVT (built-up area, two-way road: 50 km/h); sound at 20 °C. Other values are typical.',
+p0q:'Both run 60 m: An takes 10 s, Binh takes 12 s. Who is faster?',
+p0a:'Binh, because Binh runs for longer',p0b:'An, because An takes less time for the same distance',p0c:'Equal, because both run 60 m',
+p0e:'For the same distance, whoever takes less time is faster. An: v = 60 ÷ 10 = 6 m/s; Binh: v = 60 ÷ 12 = 5 m/s.',
+p0bq:'A motorbike goes at 36 km/h; a cyclist goes at 10 m/s. Who is faster?',
+p0ba:'The motorbike, because 36 is bigger than 10',p0bb:'Equally fast',p0bc:'The cyclist',
+p0be:'Convert to the same unit first: 36 km/h = 36 000 m ÷ 3600 s = 10 m/s. The speeds are equal. (Cycling at 10 m/s is very fast, only athletes manage it!)',
+mech0:'<p><b>Speed</b> tells how fast or slow an object moves. It equals the distance travelled per unit of time:</p><p style="font-size:18px;text-align:center"><b>v = s / t</b></p><ul><li>s is the distance travelled, t the time taken.</li><li><b>Same distance:</b> the one taking less time is faster. <b>Same time:</b> the one going farther is faster. Neither the same: calculate v = s/t and compare.</li><li><b>Unit of speed</b> = unit of length / unit of time: m/s (SI unit), km/h, m/min, cm/s… To compare two speeds, convert them to the same unit. 1 m/s = 3.6 km/h; 1 km/h ≈ 0.28 m/s.</li><li>When speed changes along the way, v = s/t gives the <b>average speed</b> over the whole distance.</li></ul>',
+simple0:'<p>Speed answers: “<b>how many metres every second?</b>”. An running at 6 m/s covers 6 more metres every second.</p><p>Two ways to find the faster runner: run the <b>same distance</b> and see who finishes first, or run for the <b>same time</b> and see who goes farther. Convert to the same unit before comparing: 36 km/h and 10 m/s are the same!</p>',
+req5:'<b>Learning outcome (Science 7):</b> From a distance–time graph, find distance, speed and time. Here: two cars on one graph, compare speeds by slope, and find when and where they meet.',
+hint5:'Both cars start from A and travel the same way along a straight road. Set the speeds and start times, then press Run. Drag on the graph to look at any moment.',
+pre5a:'Start together',pre5b:'Car 2 late, catches up',pre5c:'Car 2 late, never catches up',pre5d:'Same speed',
+full5:'Show the whole graph first',car1:'Car 1',car2:'Car 2',
+assume5:'Model assumptions: both cars start at A and go the same way on a straight road; each moves at constant speed, reached instantly at the start. s is the distance each car has travelled from A.',
+set5:'Two cars',v51:'Car 1 speed',v52:'Car 2 speed',d52:'Car 2 starts later by',
+o5t:'Time t',o5s1:'Car 1 has gone',o5s2:'Car 2 has gone',o5gap:'Gap between the cars',o5lead:'Car in front',same:'side by side',
+meet:'The lines cross at t = {t} s, s = {s} m: car 2 catches car 1 at {s} m from A, {t} s after car 1 set off.',
+meetOut:'The lines would cross at t = {t} s, s = {s} m, outside the graph (the road is not long enough).',
+meetNo:'Car 2 starts later and is not faster than car 1: the lines never cross, car 2 never catches up.',
+meetPar:'Same speed: the lines are parallel, the gap stays at {g} m.',
+meetSame:'Same start, same speed: the lines coincide, the cars always travel side by side.',
+meetStart:'Both start at t = 0: the lines only share the origin O. The steeper line is the faster car, which pulls further and further ahead.',
+st5Ready:'Press Run, or tick “Show the whole graph first” to predict.',st5Run:'Running…',st5Done:'60 s is up.',
+ch5T:'Challenge',ch5:'Keep the speeds of “Car 2 late, catches up” (10 m/s and 20 m/s). Set car 2’s start delay so the cars meet exactly at the 600 m mark.',
+ch5ok:'✓ Well done! The cars meet at {s} m.',ch5no:'Now the cars meet at {s} m.',ch5none:'Now the cars do not meet.',ch5keep:'Set the speeds back to 10 m/s and 20 m/s for this challenge.',
+p5q:'Car 1 goes at 10 m/s, car 2 at 20 m/s, starting together. Whose line is steeper?',
+p5a:'Car 1',p5b:'Car 2',p5c:'Equal, because they start together',
+p5e:'Car 2 adds 20 m every second, car 1 only 10 m, so car 2’s line is twice as steep. The steeper the line, the greater the speed.',
+p5bq:'Car 2 starts 10 s late but is twice as fast as car 1. The point where the two lines cross shows…',
+p5ba:'The cars have the same speed',p5bb:'The cars meet: same time, same place',p5bc:'Car 2 stops',
+p5be:'At the crossing point both cars have the same t and the same s. As both start at A and go the same way, same s means same place: car 2 catches car 1 (at t = 20 s, 200 m from A). Their speeds are still different: the slopes differ.',
+mech5:'<p>Drawing the s–t graphs of two objects on the same axes lets you compare them at a glance:</p><ul><li><b>The steeper line</b> belongs to the faster object (larger v = Δs / Δt).</li><li><b>A line starting at (t₀; 0)</b>: the object sets off t₀ seconds later. Before that its graph lies on the time axis (s = 0, waiting at A).</li><li><b>Parallel lines:</b> same speed; the gap stays constant.</li><li><b>Crossing lines:</b> (when both start from the same place and go the same way) the objects meet. The t-coordinate of the crossing is the meeting time; the s-coordinate is the distance from A to the meeting point.</li><li>By formula: car 2 catches up when v₁·t = v₂·(t − t₀), so t = v₂·t₀ / (v₂ − v₁). Example 10 m/s, 20 m/s, t₀ = 10 s: t = 20 s, s = 200 m.</li></ul>',
+simple5:'<p>Imagine the graph as <b>two race tracks drawn against time</b>. The line climbing faster is the faster car. Where the lines touch, the cars are side by side at the same place: the car behind has caught up.</p><p>A car that starts late has its line “sleeping” on the time axis for a while before it starts to climb.</p>',
+vCheetah:'Cheetah video',vHunt:'Another video'
+});
+VIDEOS[0]={u:'https://www.youtube.com/watch?v=THA_5cqAfCQ',t:'Cheetahs on the Edge — Director’s Cut',get c(){return 'National Geographic · '+(lang==='en'?'length not checked':'chưa kiểm tra thời lượng');},
+  look:{vi:'Báo săn chạy hết tốc lực, quay bằng máy quay tốc độ cao. Để ý: người ta đo tốc độ của báo bằng cách nào? (Cần biết quãng đường và thời gian chạy hết quãng đường đó.) Tốc độ báo săn đo được khoảng 26 m/s, gấp đôi Usain Bolt.',
+       en:'A cheetah at full sprint, filmed with a high-speed camera. Notice: how can its speed be measured? (You need a distance and the time to cover it.) Measured cheetah speeds reach about 26 m/s, twice Usain Bolt’s.'},
+  a:{u:'https://www.youtube.com/watch?v=icFMTB0Pi0g',t:'The Science of a Cheetah’s Speed',c:'YouTube · chưa kiểm tra',l:'vAlt'}};
+VIDEOS[5]={u:'https://www.youtube.com/watch?v=DRxsP2YMaOI',t:'Cheetah Chases Gazelle',get c(){return 'YouTube · '+(lang==='en'?'channel and length not checked':'chưa kiểm tra kênh, thời lượng');},
+  look:{vi:'Linh dương chạy trước, báo săn lao theo sau và nhanh hơn. Giống xe 2 xuất phát muộn nhưng nhanh hơn: nếu chạy đủ lâu, báo đuổi kịp, tức là hai đường đồ thị s–t cắt nhau. (Ngoài đời, báo không giữ được tốc độ cao lâu, nên nhiều cuộc săn thất bại.)',
+       en:'The gazelle runs first; the cheetah follows and is faster. Like car 2 starting late but faster: if it runs long enough the cheetah catches up, meaning the two s–t lines cross. (In real life a cheetah cannot keep its top speed for long, so many hunts fail.)'},
+  a:{u:'https://www.youtube.com/watch?v=5ePuLU_NGOQ',t:'High-Speed Hunt with Gazelle',c:'YouTube · chưa kiểm tra',l:'vHunt'}};
+Object.assign(PRED,{p0:{q:'p0q',o:['p0a','p0b','p0c'],c:1,e:'p0e'},p0b:{q:'p0bq',o:['p0ba','p0bb','p0bc'],c:1,e:'p0be'},
+  p5:{q:'p5q',o:['p5a','p5b','p5c'],c:1,e:'p5e'},p5b:{q:'p5bq',o:['p5ba','p5bb','p5bc'],c:1,e:'p5be'}});
+['p0','p0b','p5','p5b'].forEach(id=>$(id).addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const P=PRED[id];
+  if(b.classList.contains('rv'))P.show=!P.show;else P.pick=+b.dataset.i;renderPred(id);}));
+
+/* ================= TAB 0: Tốc độ là gì ================= */
+const S0={mode:'S',v:[6,5],t:0,run:false,speed:1,secret:false,shown:false};
+const D0=60,T0=8,TRACK0=80;
+const tFin0=i=>D0/S0.v[i];
+const tEnd0=()=>S0.mode==='S'?Math.max(tFin0(0),tFin0(1)):T0;
+const s0At=(i,t)=>S0.mode==='S'?Math.min(D0,S0.v[i]*t):S0.v[i]*Math.min(t,T0);
+const done0=()=>S0.t>=tEnd0()-1e-9;
+function reset0(){S0.t=0;S0.run=false;S0.shown=false;}
+function setV0(){['A','B'].forEach((k,i)=>{$('v'+k+'0').value=S0.v[i];$('v'+k+'0V').textContent=S0.secret?'? m/s':nf(S0.v[i],1,1)+' m/s';});}
+['A','B'].forEach((k,i)=>$('v'+k+'0').oninput=e=>{S0.v[i]=+e.target.value;S0.secret=false;setV0();reset0();ui0(true);});
+$('sec0').onclick=()=>{let a,b;do{a=3+Math.round(Math.random()*12)/2;b=3+Math.round(Math.random()*12)/2;}while(a===b);S0.v=[a,b];S0.secret=true;setV0();reset0();ui0(true);};
+$('run0').onclick=()=>{if(done0()){reset0();S0.run=true;}else S0.run=!S0.run;ui0();};
+$('rst0').onclick=()=>{reset0();ui0(true);};
+$('calc0').onclick=()=>{S0.shown=!S0.shown;ui0(true);};
+function ui0(full){
+  if(full){seg('mode0',[{k:'S',label:T('mSameS')},{k:'T',label:T('mSameT')}],S0.mode,k=>{S0.mode=k;reset0();ui0(true);});
+    seg('spd0',speedItems([.5,1,2]),S0.speed,k=>{S0.speed=k;ui0(true);});
+    $('hint0').textContent=T(S0.mode==='S'?'hint0S':'hint0T');}
+  $('run0').textContent=S0.run?T('pause'):done0()?T('again'):T('run');
+  const fin=i=>S0.mode==='S'?S0.t>=tFin0(i)-1e-9:done0();
+  let h=`<tr><th>${T('th0Name')}</th><th>${T('th0s')}</th><th>${T('th0t')}</th><th>${T('th0v')}</th><th>${T('th0k')}</th></tr>`;
+  ['runA','runB'].forEach((k,i)=>{const f=fin(i),s=S0.mode==='S'?D0:S0.v[i]*T0,t=S0.mode==='S'?tFin0(i):T0;
+    h+=`<tr><td class="t">${T(k)}</td><td class="num">${f?nf(s,1,1):'…'}</td><td class="num">${f?nf(t,2,2):'…'}</td>`+
+      `<td class="num">${f&&S0.shown?nf(s/t,2,2):'?'}</td><td class="num">${f&&S0.shown?nf(s/t*3.6,1,1):'?'}</td></tr>`;});
+  $('tb0').innerHTML=h;
+  let st=T(S0.run?'st0Run':'st0Ready');
+  if(done0()){const a=S0.v[0],b=S0.v[1];st=a===b?T('st0Tie'):Tf(S0.mode==='S'?'st0WinS':'st0WinT',{w:T(a>b?'runA':'runB')});}
+  $('st0').textContent=st;$('calc0').textContent=T(S0.shown?'hideAns':'calc0');}
+function render0(){const cv=$('cv0'),{ctx,w,h}=size(cv,.3,230,190);
+  const x0=40,x1=w-24,X=m=>x0+m/TRACK0*(x1-x0),lane=[h*.36,h*.68];
+  for(let i=0;i<2;i++){ctx.fillStyle=C.warn;ctx.globalAlpha=.13;ctx.fillRect(x0-20,lane[i]-30,x1-x0+30,34);ctx.globalAlpha=1;
+    ctx.strokeStyle=C.line;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(x0-20,lane[i]+4);ctx.lineTo(x1+10,lane[i]+4);ctx.stroke();}
+  for(let m=0;m<=TRACK0;m+=10){const x=X(m);ctx.strokeStyle=C.ink;ctx.lineWidth=m%20?1:1.8;ctx.beginPath();ctx.moveTo(x,h-30);ctx.lineTo(x,h-(m%20?24:20));ctx.stroke();
+    if(m%20===0||w>520)txt(ctx,m+' m',x,h-10,C.muted,12,600,'center','middle',MONO);}
+  ctx.strokeStyle=C.ink;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(x0-20,h-30);ctx.lineTo(x1+10,h-30);ctx.stroke();
+  ctx.strokeStyle=C.ink;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(X(0),lane[0]-34);ctx.lineTo(X(0),lane[1]+6);ctx.stroke();
+  if(S0.mode==='S'){const xf=X(D0);ctx.setLineDash([6,4]);ctx.strokeStyle=C.ok;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(xf,lane[0]-36);ctx.lineTo(xf,lane[1]+6);ctx.stroke();ctx.setLineDash([]);
+    pill(ctx,T('finish')+' 60 m',xf,lane[0]-46,C.ok,12);}
+  const cols=[C.laneA,C.laneB],names=['runA','runB'];
+  for(let i=0;i<2;i++){const s=s0At(i,S0.t),x=X(s),moving=S0.run&&!(S0.mode==='S'?S0.t>=tFin0(i):done0());
+    const bob=moving?Math.abs(Math.sin(S0.t*S0.v[i]*1.6))*3:0;person(ctx,x,lane[i]-bob,30,cols[i]);
+    txt(ctx,T(names[i]),x0-24,lane[i]-14,cols[i],13,800,'right','middle');
+    const f=S0.mode==='S'?S0.t>=tFin0(i)-1e-9:done0();
+    if(f)pill(ctx,(S0.mode==='S'?'t = '+nf(tFin0(i),2,2)+' s':'s = '+nf(s,1,1)+' m'),Math.min(x+10,x1-60),lane[i]-22,cols[i],12,'left');}
+  pill(ctx,'⏱ '+nf(Math.min(S0.t,tEnd0()),2,2)+' s',w-8,14,C.ink,14,'right');}
+/* Đổi đơn vị */
+const UNITS0=[['m/s',1],['km/h',1/3.6],['m/phút',1/60],['cm/s',.01]];
+const uLbl=u=>lang==='en'&&u==='m/phút'?'m/min':u;
+const EX0=[['exSnail',.1,'cm/s'],['exWalk',5,'km/h'],['exBike',15,'km/h'],['exBolt',12.3,'m/s'],['exTown',50,'km/h'],['exHwy',120,'km/h'],['exCheetah',25.9,'m/s'],['exSound',343,'m/s'],['exPlane',900,'km/h']];
+function fillCv(){const sel=$('cvU'),cur=sel.value||'km/h';sel.innerHTML=UNITS0.map(u=>`<option value="${u[0]}">${uLbl(u[0])}</option>`).join('');sel.value=cur;
+  $('ex0').innerHTML=EX0.map((e,i)=>`<button class="btn" data-i="${i}">${T(e[0])}<small>${nf(e[1],1)} ${uLbl(e[2])}</small></button>`).join('');
+  $('exSrc').textContent=T('exSrc');conv0();}
+function conv0(){const x=parseFloat(String($('cvIn').value).replace(',','.')),f=UNITS0.find(u=>u[0]===$('cvU').value)[1];
+  if(!isFinite(x)){$('cvOut').innerHTML='';return;}const si=x*f;
+  $('cvOut').innerHTML=UNITS0.map(u=>{const v=si/u[1],d=Math.abs(v)>=100?1:Math.abs(v)>=1?2:4;return `<dt>${uLbl(u[0])}</dt><dd class="num">${nf(v,d)}</dd>`;}).join('');}
+$('cvIn').oninput=conv0;$('cvU').onchange=conv0;
+$('ex0').onclick=e=>{const b=e.target.closest('button');if(!b)return;const E=EX0[+b.dataset.i];$('cvIn').value=nf(E[1],1).replace(/\s/g,'');$('cvU').value=E[2];conv0();};
+
+/* ================= TAB 5: So sánh hai chuyển động ================= */
+const S5={v1:10,v2:20,d:10,t:0,run:false,speed:2,drag:false};
+const T5=60,Y5=1200;
+const s5=(v,t0,t)=>Math.max(0,v*(t-t0));
+function meet5(){const {v1,v2,d}=S5;
+  if(d===0)return v1===v2?{k:'same'}:{k:'start'};
+  if(v2<=v1)return v1===v2?{k:'par',g:v1*d}:{k:'no'};
+  const t=v2*d/(v2-v1),s=v1*t;return {k:(t<=T5&&s<=Y5)?'in':'out',t,s};}
+const PRE5={pre5a:[10,20,0],pre5b:[10,20,10],pre5c:[15,10,5],pre5d:[15,15,10]};
+function setV5(){$('v51').value=S5.v1;$('v52').value=S5.v2;$('d52').value=S5.d;
+  $('v51V').textContent=nf(S5.v1,0)+' m/s = '+nf(S5.v1*3.6,0)+' km/h';$('v52V').textContent=nf(S5.v2,0)+' m/s = '+nf(S5.v2*3.6,0)+' km/h';$('d52V').textContent=nf(S5.d,0)+' s';}
+[['v51','v1'],['v52','v2'],['d52','d']].forEach(([id,k])=>$(id).oninput=e=>{S5[k]=+e.target.value;setV5();S5.run=false;ui5();});
+$('run5').onclick=()=>{if(S5.t>=T5-1e-9)S5.t=0;S5.run=!S5.run;ui5();};
+$('rst5').onclick=()=>{S5.t=0;S5.run=false;ui5();};
+$('full5').onchange=()=>ui5();
+function ui5(full){
+  if(full){seg('pre5',Object.keys(PRE5).map(k=>({k,label:T(k)})),null,k=>{[S5.v1,S5.v2,S5.d]=PRE5[k];setV5();S5.t=0;S5.run=false;ui5();});
+    seg('spd5',speedItems([1,2,4]),S5.speed,k=>{S5.speed=k;ui5(true);});setV5();}
+  $('run5').textContent=S5.run?T('pause'):S5.t>=T5-1e-9?T('again'):T('run');
+  $('st5').textContent=T(S5.run?'st5Run':S5.t>=T5-1e-9?'st5Done':'st5Ready');
+  const a=s5(S5.v1,0,S5.t),b=s5(S5.v2,S5.d,S5.t),g=Math.abs(a-b);
+  $('o5').innerHTML=`<dt>${T('o5t')}</dt><dd class="num">${nf(S5.t,1,1)} s</dd><dt>${T('o5s1')}</dt><dd class="num">${nf(a,0)} m</dd>
+    <dt>${T('o5s2')}</dt><dd class="num">${nf(b,0)} m</dd><dt>${T('o5gap')}</dt><dd class="num">${nf(g,0)} m</dd>
+    <dt>${T('o5lead')}</dt><dd class="t">${g<.5?T('same'):T(a>b?'car1':'car2')}</dd>`;
+  const M=meet5();$('o5meet').textContent=M.k==='in'?Tf('meet',{t:nf(M.t,1),s:nf(M.s,0)}):M.k==='out'?Tf('meetOut',{t:nf(M.t,1),s:nf(M.s,0)}):
+    M.k==='par'?Tf('meetPar',{g:nf(M.g,0)}):T({no:'meetNo',same:'meetSame',start:'meetStart'}[M.k]);
+  const r=$('ch5r');
+  if(S5.v1!==10||S5.v2!==20)r.textContent=T('ch5keep');
+  else r.textContent=(M.k==='in'||M.k==='out')?(Math.abs(M.s-600)<=10?Tf('ch5ok',{s:nf(M.s,0)}):Tf('ch5no',{s:nf(M.s,0)})):T('ch5none');
+  r.style.color=r.textContent.startsWith('✓')?'var(--ok)':'';}
+function car(ctx,x,y,col,lbl){ctx.fillStyle=col;ctx.beginPath();ctx.roundRect(x-34,y-16,34,14,4);ctx.fill();ctx.beginPath();ctx.roundRect(x-26,y-24,18,10,3);ctx.fill();
+  dot(ctx,x-27,y-2,4.5,C.ink);dot(ctx,x-8,y-2,4.5,C.ink);txt(ctx,lbl,x-17,y-9,C.panel,10,800,'center','middle');}
+function render5a(){const cv=$('cv5a'),{ctx,w,h}=size(cv,.2,150,120);
+  const x0=40,x1=w-20,X=m=>x0+m/Y5*(x1-x0),ly=[h*.38,h*.68];
+  ctx.fillStyle=C.metal;ctx.globalAlpha=.3;ctx.fillRect(x0-30,ly[0]-26,x1-x0+40,ly[1]-ly[0]+30);ctx.globalAlpha=1;
+  ctx.setLineDash([12,10]);ctx.strokeStyle=C.panel;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x0-30,(ly[0]+ly[1])/2-10);ctx.lineTo(x1+10,(ly[0]+ly[1])/2-10);ctx.stroke();ctx.setLineDash([]);
+  ctx.strokeStyle=C.ink;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(x0-30,h-30);ctx.lineTo(x1+10,h-30);ctx.stroke();
+  for(let m=0;m<=Y5;m+=100){const x=X(m);ctx.lineWidth=m%200?1:1.8;ctx.beginPath();ctx.moveTo(x,h-30);ctx.lineTo(x,h-(m%200?25:22));ctx.stroke();
+    if(m%200===0&&(w>520||m%400===0))txt(ctx,m+' m',x,h-12,C.muted,12,600,'center','middle',MONO);}
+  pill(ctx,'A',X(0),ly[0]-36,C.ink,12);
+  const M=meet5();if(M.k==='in'&&(S5.t>=M.t||$('full5').checked)){const xm=X(M.s);ctx.strokeStyle=C.warn;ctx.lineWidth=2;ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(xm,ly[0]-28);ctx.lineTo(xm,ly[1]+4);ctx.stroke();ctx.setLineDash([]);}
+  const a=s5(S5.v1,0,S5.t),b=s5(S5.v2,S5.d,S5.t);
+  if(a<=Y5)car(ctx,X(a)+(a<1?34:0),ly[0],C.laneA,'1');else pill(ctx,'1 →',x1,ly[0]-10,C.laneA,12,'right');
+  if(b<=Y5)car(ctx,X(b)+(b<1?34:0),ly[1],C.laneB,'2');else pill(ctx,'2 →',x1,ly[1]-10,C.laneB,12,'right');
+  pill(ctx,'t = '+nf(S5.t,1,1)+' s',w-8,14,C.ink,13,'right');}
+let G5=null;
+function render5b(){const cv=$('cv5b'),{ctx,w,h}=size(cv,.6,430,260),B=gBox(w,h);
+  const A=axes(ctx,B,{x1:T5,y1:Y5,xs:10,ys:200,xm:5,ym:100,xl:'t (s)',yl:'s (m)'});G5={A,B};
+  ctx.save();ctx.beginPath();ctx.rect(B.l-2,B.t-2,B.w+4,B.h+4);ctx.clip();
+  const pl=(v,t0,tt)=>{const p=[[A.X(0),A.Y(0)]];if(t0>0)p.push([A.X(Math.min(t0,tt)),A.Y(0)]);if(tt>t0)p.push([A.X(tt),A.Y(v*(tt-t0))]);return p;};
+  if($('full5').checked){ctx.globalAlpha=.5;line(ctx,pl(S5.v1,0,T5),C.laneA,2,[6,5]);line(ctx,pl(S5.v2,S5.d,T5),C.laneB,2,[6,5]);ctx.globalAlpha=1;}
+  line(ctx,pl(S5.v2,S5.d,S5.t),C.laneB,4);line(ctx,pl(S5.v1,0,S5.t),C.laneA,4);
+  ctx.restore();
+  const M=meet5();
+  if(M.k==='in'&&(S5.t>=M.t||$('full5').checked)){const x=A.X(M.t),y=A.Y(M.s);line(ctx,[[x,B.t+B.h],[x,y],[B.l,y]],C.warn,1.5,[5,4]);dot(ctx,x,y,8,C.warn,C.panel,2.5);
+    pill(ctx,T('o5meetL'),x+12,y-14,C.warn,12,'left');}
+  const xc=A.X(S5.t);ctx.strokeStyle=C.ink;ctx.globalAlpha=.45;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(xc,B.t);ctx.lineTo(xc,B.t+B.h);ctx.stroke();ctx.globalAlpha=1;
+  const a=s5(S5.v1,0,S5.t),b=s5(S5.v2,S5.d,S5.t);if(a<=Y5)dot(ctx,xc,A.Y(a),5.5,C.laneA,C.panel,2);if(b<=Y5)dot(ctx,xc,A.Y(b),5.5,C.laneB,C.panel,2);
+  if(S5.d>0){pill(ctx,'t₀ = '+nf(S5.d,0)+' s',A.X(S5.d),B.t+B.h-14,C.laneB,12);}}
+I18N.vi.o5meetL='Gặp nhau';I18N.en.o5meetL='Meet';
+onDrag($('cv5b'),p=>{if(!G5)return false;S5.run=false;S5.t=clamp(G5.A.tOf(p.x),0,T5);ui5();return true;},
+  p=>{S5.t=clamp(G5.A.tOf(p.x),0,T5);ui5();});
+
 /* ================= Ngôn ngữ ================= */
 function applyLang(){document.documentElement.lang=lang;document.title=T('title');
   document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=T(el.dataset.i18n));
   document.querySelectorAll('[data-i18n-html]').forEach(el=>el.innerHTML=T(el.dataset.i18nHtml));
   $('langBtn').textContent=lang==='vi'?'EN':'VI';
-  Object.keys(PRED).forEach(renderPred);[1,2,3,4].forEach(renderVideo);
+  Object.keys(PRED).forEach(renderPred);[0,1,2,3,4,5].forEach(renderVideo);
   seg('spd1',speedItems([.25,.5,1]),S1.speed,k=>{S1.speed=k;applySpd1();});
-  pre1();setV1();S1._lang=null;ui1();pick2(S2.k);ui3(true);ui4(true);}
+  pre1();setV1();S1._lang=null;ui1();pick2(S2.k);ui3(true);ui4(true);setV0();ui0(true);fillCv();ui5(true);}
 function applySpd1(){seg('spd1',speedItems([.25,.5,1]),S1.speed,k=>{S1.speed=k;applySpd1();});}
 $('langBtn').onclick=()=>{lang=lang==='vi'?'en':'vi';applyLang();};
 
 /* ================= Vòng lặp ================= */
 reset3();applyLang();
-{const t=+store.get('dt-tab');setTab(t>=1&&t<=4?t:1);}
+{const t=+store.get('dt-tab');setTab(t>=0&&t<=5?t:0);}
 let last=performance.now(),uiT=0;
 function loop(now){const dt=Math.min((now-last)/1000,.1);last=now;uiT+=dt;
   try{
-    if(tab===1){if(S1.run){S1.t=Math.min(T1,S1.t+dt*S1.speed);if(S1.t>=T1)S1.run=false;}render1a();render1b();if(uiT>.1){uiT=0;ui1();}}
+    if(tab===0){if(S0.run){S0.t=Math.min(tEnd0(),S0.t+dt*S0.speed);if(done0())S0.run=false;}render0();if(uiT>.1){uiT=0;ui0();}}
+    else if(tab===5){if(S5.run){S5.t=Math.min(T5,S5.t+dt*S5.speed);if(S5.t>=T5)S5.run=false;}render5a();render5b();if(uiT>.1){uiT=0;ui5();}}
+    else if(tab===1){if(S1.run){S1.t=Math.min(T1,S1.t+dt*S1.speed);if(S1.t>=T1)S1.run=false;}render1a();render1b();if(uiT>.1){uiT=0;ui1();}}
     else if(tab===2){const c=sc2();if(S2.play){c.cur=Math.min(c.tEnd,c.cur+dt*c.rate);if(c.cur>=c.tEnd)S2.play=false;}render2a();render2b();if(uiT>.1&&S2.play){uiT=0;ui2();}else if(uiT>.1&&!S2.play&&S2._was){ui2();}S2._was=S2.play;}
     else if(tab===3){step3(dt);render3a();render3b();if(uiT>.12){uiT=0;ui3();}}
     else if(tab===4){step4(dt);render4a();render4b();if(uiT>.1){uiT=0;ui4();}}

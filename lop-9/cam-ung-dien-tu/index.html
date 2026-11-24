@@ -206,6 +206,7 @@ footer{font-size:13px;color:var(--muted)}
       <div class="stage">
         <p class="hint" data-i18n="hint2"></p>
         <p class="status" id="st2"></p>
+        <div class="controls"><div class="seg" id="view2"></div><div class="seg" id="cam2"></div><span class="muted" id="drag2"></span></div>
         <canvas id="cv2" aria-label="scenario: magnet, coil and galvanometer"></canvas>
         <div class="controls">
           <button class="btn primary" id="run2"></button>
@@ -235,6 +236,7 @@ footer{font-size:13px;color:var(--muted)}
       <div class="stage">
         <div class="controls"><div class="seg" id="mode3"></div><div class="seg" id="ring3"></div><div class="seg" id="load3"></div></div>
         <p class="hint" id="hint3"></p>
+        <div class="controls"><div class="seg" id="view3"></div><div class="seg" id="cam3"></div><span class="muted" id="drag3"></span></div>
         <canvas id="cv3" aria-label="AC generator"></canvas>
         <div class="controls">
           <button class="btn primary" id="run3"></button>
@@ -356,7 +358,7 @@ score2:'Đã chạy {m}/7 tình huống. Em đoán đúng {n}.',
 s1:'Đưa nam châm lại gần rồi ra xa',s2:'Nam châm nằm yên trong cuộn dây',s3:'Nam châm và cuộn dây cùng chuyển động',s4:'Quay nam châm trước cuộn dây',
 s5:'Đóng, ngắt công tắc của nam châm điện',s6:'Nam châm quay quanh trục của chính nó',s7:'Đưa nam châm ra vào nhưng mạch hở',
 s1d:'Nam châm chạy tới gần cuộn dây rồi lùi ra xa, cuộn dây đứng yên.',s2d:'Nam châm đã nằm sẵn giữa cuộn dây, không ai động vào.',
-s3d:'Nam châm và cuộn dây được gắn chung trên một xe, đi tới đi lui cùng nhau.',s4d:'Nam châm quay tròn quanh một trục vuông góc với trục cuộn dây.',
+s3d:'Nam châm và cuộn dây được gắn chung trên một xe, đi tới đi lui cùng nhau.',s4d:'Nam châm xoay ngang trước miệng cuộn dây, quanh một trục thẳng đứng (vuông góc với trục cuộn dây).',tooFast:'Quay quá nhanh, mắt không theo kịp: bật “Xem chậm” để thấy rõ.',view3d:'3D',view2d:'2D',camTilt:'Nhìn nghiêng',camTop:'Nhìn từ trên',camFront:'Nhìn chính diện',drag3:'Kéo trên hình để xoay góc nhìn.',ax4:'trục quay thẳng đứng',ax6:'trục quay trùng trục cuộn dây',emK:'nối pin qua công tắc K',emOn:'K đóng',emOff:'K ngắt',cart:'xe chở cả nam châm và cuộn dây',k3note:'Hình 3D: mỗi vòng đường sức trong hình 2D được vẽ thành 6 đường quanh trục, nên số đường sức gấp 3 lần ở chế độ 2D.',
 s5d:'Cuộn dây có lõi sắt nối với pin qua công tắc K đặt cạnh cuộn dây G. Đóng K rồi một lúc sau ngắt K.',
 s6d:'Nam châm quay tròn quanh chính trục dọc của nó (như con quay), trục này trùng với trục cuộn dây.',
 s7d:'Giống tình huống 1, nhưng công tắc K mở nên mạch không kín.',
@@ -372,7 +374,7 @@ mis2:`<ul><li><b>“Cứ có chuyển động là có dòng điện.”</b> Sai:
 <li><b>“Mạch hở thì không có gì xảy ra.”</b> Chưa đủ: vẫn có hiệu điện thế cảm ứng giữa hai đầu cuộn dây (vôn kế sẽ chỉ), chỉ là không có dòng điện.</li></ul>`,
 /* Tab 3 */
 modeCoil:'Khung dây quay',modeMag:'Nam châm quay',ringSlip:'Vành khuyên',ringComm:'Cổ góp',loadG:'Điện kế',loadLED:'Hai đèn LED',
-hint3Coil:'Khung dây (nhìn từ trên xuống) quay đều giữa hai cực nam châm. Hai đầu khung nối với hai vành khuyên, chổi than tì vào vành để đưa điện ra ngoài. Hai đèn LED mắc ngược chiều nhau: đèn đỏ sáng khi dòng chạy chiều này, đèn xanh sáng khi dòng chạy chiều kia.',
+hint3Coil:'Khung dây quay đều giữa hai cực nam châm. Hai đầu khung nối với hai vành khuyên, chổi than tì vào vành để đưa điện ra ngoài. Hai đèn LED mắc ngược chiều nhau: đèn đỏ sáng khi dòng chạy chiều này, đèn xanh sáng khi dòng chạy chiều kia.',
 hint3Mag:'Nam châm quay đều trước cuộn dây có lõi sắt đứng yên (giống đinamô xe đạp và máy phát ở nhà máy điện). Không cần vành khuyên vì cuộn dây không quay.',
 slowLbl:'Xem chậm để mắt theo kịp',slowNote:'đang xem chậm ×1/{k}',realNote:'đang chạy đúng tốc độ thật',
 setF:'Tốc độ quay',kF:'Tần số f (số vòng quay mỗi giây)',kT:'Chu kì T',kRpm:'Số vòng quay mỗi phút',kRev:'Số lần dòng điện đổi chiều mỗi giây',
@@ -504,7 +506,7 @@ score2:'Situations run: {m}/7. Correct predictions: {n}.',
 s1:'Move the magnet towards and away',s2:'Magnet resting inside the coil',s3:'Magnet and coil moving together',s4:'Rotate the magnet in front of the coil',
 s5:'Switch an electromagnet on and off',s6:'Magnet spinning about its own axis',s7:'Move the magnet, circuit open',
 s1d:'The magnet moves towards the coil and back; the coil stays still.',s2d:'The magnet already sits in the middle of the coil; nobody touches it.',
-s3d:'Magnet and coil are fixed on one cart and move back and forth together.',s4d:'The magnet spins about an axis perpendicular to the coil’s axis.',
+s3d:'Magnet and coil are fixed on one cart and move back and forth together.',s4d:'The magnet turns horizontally in front of the coil’s mouth, about a vertical axis (perpendicular to the coil’s axis).',tooFast:'Turning too fast for the eye: tick “Slow motion” to see it.',view3d:'3D',view2d:'2D',camTilt:'Angled view',camTop:'Top view',camFront:'Front view',drag3:'Drag on the picture to turn the view.',ax4:'vertical rotation axis',ax6:'rotation axis = coil axis',emK:'battery and switch K',emOn:'K closed',emOff:'K open',cart:'cart carrying magnet and coil',k3note:'3D view: each field-line ring of the 2D view is drawn as 6 lines around the axis, so the line count is 3 times the 2D count.',
 s5d:'An iron-cored coil, connected to a battery through switch K, sits next to coil G. Close K, then open it.',
 s6d:'The magnet spins about its own long axis (like a spinning top), which lies along the coil’s axis.',s7d:'As situation 1, but switch K is open so the circuit is not closed.',
 stPick:'Choose Yes or No for this situation before running.',stDone:'Done. The result is in the table.',stRun:'Running: watch the needle and the orange field lines.',
@@ -518,7 +520,7 @@ mis2:`<ul><li><b>“Any motion gives a current.”</b> No: moving together, or s
 <li><b>“Motion is needed.”</b> No: switching an electromagnet needs no motion.</li>
 <li><b>“Nothing happens in an open circuit.”</b> Not quite: there is still an induced voltage across the coil, just no current.</li></ul>`,
 modeCoil:'Rotating coil',modeMag:'Rotating magnet',ringSlip:'Slip rings',ringComm:'Commutator',loadG:'Galvanometer',loadLED:'Two LEDs',
-hint3Coil:'A coil (seen from above) turns steadily between two magnet poles. Its ends connect to two slip rings; carbon brushes press on the rings to carry current out. Two LEDs face opposite ways: red lights for one direction, green for the other.',
+hint3Coil:'A coil turns steadily between two magnet poles. Its ends connect to two slip rings; carbon brushes press on the rings to carry current out. Two LEDs face opposite ways: red lights for one direction, green for the other.',
 hint3Mag:'A magnet turns in front of a fixed iron-cored coil (like a bicycle dynamo or a power-station generator). No slip rings are needed because the coil does not turn.',
 slowLbl:'Slow motion so your eyes can follow',slowNote:'slowed down ×1/{k}',realNote:'running at real speed',
 setF:'Rotation speed',kF:'Frequency f (turns per second)',kT:'Period T',kRpm:'Turns per minute',kRev:'Current reversals per second',
@@ -847,9 +849,9 @@ $('run2').onclick=()=>{if(U2.run)return;if(U2.pred[SC[U2.cur].k]==null){$('st2')
   setup2();U2.run=true;U2.kMin=1e9;U2.kMax=-1e9;U2.iMax=0;ui2(true);};
 function step2(dt){if(!U2.run)return;const sc=SC[U2.cur];const n=Math.max(1,Math.round(dt*240)),h=dt/n;
   for(let k=0;k<n;k++){U2.t+=h;sc.set(S2,U2.t,h);physStep(S2,h);if(U2.t>0.15){const K=kCount(S2);U2.kMin=Math.min(U2.kMin,K);U2.kMax=Math.max(U2.kMax,K);U2.iMax=Math.max(U2.iMax,Math.abs(S2.i));}}
-  U2.hT+=dt;if(U2.hT>=1/30){U2.hT=0;U2.H.push([U2.t,kCount(S2),S2.i*1000]);}
+  U2.hT+=dt;if(U2.hT>=1/30){U2.hT=0;U2.H.push([U2.t,kCount(S2)*k3fac(),S2.i*1000]);}
   if(U2.t>=U2.dur){U2.run=false;U2.res[sc.k]={flux:U2.kMax-U2.kMin>0.2,cur:U2.iMax>3e-5};ui2(true);$('st2').textContent=T('stDone');}}
-function draw2(){const cv=$('cv2');const {c,w,h}=fit(cv,isPhone()?.62:.5);const V=sceneView(w,h);drawScene(c,V,S2);
+function draw2(){const cv=$('cv2');const {c,w,h}=fit(cv,isPhone()?.75:.52);if(V3.on){draw2_3d(c,w,h,S2,SC[U2.cur].k);drawHist($('gr2'),U2.H,U2.t,U2.dur);return;}const V=sceneView(w,h);drawScene(c,V,S2);
   if(SC[U2.cur].k==='s6'){const [X,Y]=V.p(S2.xm,0);txt(c,'↻',X,Y-MAG.ht*V.S-14,{sz:20,col:CS.accent,w:700});}
   if(SC[U2.cur].k==='s4'){const [X,Y]=V.p(S2.xm,0);c.fillStyle=CS.ink;c.beginPath();c.arc(X,Y,3.5,0,TAU);c.fill();}
   if(SC[U2.cur].k==='s3'){const [a,b]=V.p(S2.xm-0.06,-0.045),[d]=V.p(S2.xc+0.03,-0.045);c.strokeStyle=CS.muted;c.lineWidth=4;c.beginPath();c.moveTo(a,b);c.lineTo(d,b);c.stroke();
@@ -863,9 +865,90 @@ function ui2(full){const sc=SC[U2.cur];$('run2').textContent=T(U2.run?'running2'
     <td><div class="yn"><button class="btn ${p===true?'picked':''}" data-p="${i}:1">${T('yes')}</button><button class="btn ${p===false?'picked':''}" data-p="${i}:0">${T('no')}</button></div></td>
     <td>${r?T(r.flux?'fluxCh':'fluxSame'):'<span class="muted">'+T('notRun')+'</span>'}</td>
     <td>${r?`<span class="${p===r.cur?'res-ok':'res-no'}">${T(r.cur?'yes':'no')} ${p===r.cur?'✓':'✗'}</span>`:'<span class="muted">—</span>'}</td></tr>`;});
-  $('tb2').innerHTML=html+'</tbody>';$('score2').textContent=Tf('score2',{m,n:ok});}
+  $('tb2').innerHTML=html+'</tbody>';$('score2').textContent=Tf('score2',{m,n:ok})+(V3.on?' '+T('k3note'):'');ui2v();}
 $('tb2').addEventListener('click',e=>{const s=e.target.closest('[data-sel]'),p=e.target.closest('[data-p]');
   if(p){const [i,v]=p.dataset.p.split(':');U2.pred[SC[+i].k]=v==='1';if(!U2.run&&U2.cur!==+i){U2.cur=+i;setup2();}ui2(true);}else if(s)select2(+s.dataset.sel);});
+
+/* ================= Hình 3D cho tab 2 (tự vẽ phép chiếu phối cảnh, không cần thư viện, chạy offline) ================= */
+const V3={on:true,yaw:-0.75,pitch:0.42,dist:0.5,tgt:[-0.04,0,0],cam:'tilt',drag:null,AZ:6};
+const CAMS={tilt:[-0.75,0.42],top:[0,1.45],front:[0,0.04]};
+const vsub=(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]],vdot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2],
+  vcross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]],vnorm=a=>{const m=Math.hypot(a[0],a[1],a[2])||1;return[a[0]/m,a[1]/m,a[2]/m];};
+function hexRgb(h){h=(h||'').trim();if(h[0]==='#'){if(h.length===4)h='#'+h[1]+h[1]+h[2]+h[2]+h[3]+h[3];return[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];}return[128,128,128];}
+const shade=(hex,k)=>{const [r,g,b]=hexRgb(hex);return`rgb(${Math.round(clamp(r*k,0,255))},${Math.round(clamp(g*k,0,255))},${Math.round(clamp(b*k,0,255))})`;};
+function mkCam(w,h,V=V3){const cp=Math.cos(V.pitch),t=V.tgt,eye=[t[0]+V.dist*cp*Math.sin(V.yaw),t[1]+V.dist*Math.sin(V.pitch),t[2]+V.dist*cp*Math.cos(V.yaw)];
+  const f=vnorm(vsub(t,eye)),r=vnorm(vcross(f,[0,1,0])),u=vcross(r,f),F=Math.min(w,h*1.7)*1.05;
+  return{eye,w,h,F,proj(p){const d=vsub(p,eye),z=Math.max(1e-4,vdot(d,f));return[w/2+F*vdot(d,r)/z,h*0.54-F*vdot(d,u)/z,z];}};}
+let PR=[];
+function seg3(cam,a,b,col,w,al=1,o={}){const A=cam.proj(a),B=cam.proj(b);PR.push({t:0,A,B,z:(A[2]+B[2])/2,col,w,al,dash:o.dash,arrow:o.arrow});}
+function poly3(cam,pts,fill,al=1){const P=pts.map(p=>cam.proj(p));PR.push({t:1,P,z:P.reduce((s,p)=>s+p[2],0)/P.length,fill,al});}
+function flush3(c){PR.sort((a,b)=>b.z-a.z);for(const p of PR){c.globalAlpha=p.al;
+    if(p.t===1){c.fillStyle=p.fill;c.beginPath();p.P.forEach((q,i)=>i?c.lineTo(q[0],q[1]):c.moveTo(q[0],q[1]));c.closePath();c.fill();c.strokeStyle='rgba(0,0,0,.18)';c.lineWidth=.6;c.stroke();}
+    else{c.strokeStyle=p.col;c.lineWidth=p.w;c.setLineDash(p.dash||[]);c.beginPath();c.moveTo(p.A[0],p.A[1]);c.lineTo(p.B[0],p.B[1]);c.stroke();c.setLineDash([]);
+      if(p.arrow)arrowHead(c,p.B[0],p.B[1],Math.atan2(p.B[1]-p.A[1],p.B[0]-p.A[0]),p.arrow,p.col);}}
+  c.globalAlpha=1;PR=[];}
+/* Nam châm: hệ quy chiếu riêng (N ở +x); quay quanh trục của nó (spin) rồi quay ngang quanh trục thẳng đứng (ang) */
+function magXf(xm,ang,spin){const ca=Math.cos(ang),sa=Math.sin(ang),cs=Math.cos(spin),ss=Math.sin(spin);
+  return p=>{const y=p[1]*cs-p[2]*ss,z=p[1]*ss+p[2]*cs;return[xm+p[0]*ca+z*sa,y,-p[0]*sa+z*ca];};}
+const LIGHT=vnorm([0.35,0.85,0.55]);
+function box3(cam,xf,x0,x1,h,col,nx=4){/* hộp từ x0 đến x1, tiết diện vuông cạnh 2h; mặt bên chia nhỏ để sắp xếp độ sâu tốt hơn */
+  const faces=[[[0,1,1],[0,-1,1],[0,-1,-1],[0,1,-1]]];
+  const add=(pts)=>{const W=pts.map(xf),n=vnorm(vcross(vsub(W[1],W[0]),vsub(W[2],W[0]))),cen=W.reduce((s,p)=>[s[0]+p[0]/4,s[1]+p[1]/4,s[2]+p[2]/4],[0,0,0]);
+    let nn=n;if(vdot(nn,vsub(cen,xf([(x0+x1)/2,0,0])))<0)nn=[-n[0],-n[1],-n[2]];if(vdot(nn,vsub(cam.eye,cen))<=0)return;
+    poly3(cam,W,shade(col,0.55+0.5*Math.max(0,vdot(nn,LIGHT))));};
+  add([[x0,h,h],[x0,-h,h],[x0,-h,-h],[x0,h,-h]]);add([[x1,h,h],[x1,-h,h],[x1,-h,-h],[x1,h,-h]]);
+  for(let k=0;k<nx;k++){const a=x0+(x1-x0)*k/nx,b=x0+(x1-x0)*(k+1)/nx;
+    add([[a,h,h],[b,h,h],[b,h,-h],[a,h,-h]]);add([[a,-h,h],[b,-h,h],[b,-h,-h],[a,-h,-h]]);add([[a,h,h],[b,h,h],[b,-h,h],[a,-h,h]]);add([[a,h,-h],[b,h,-h],[b,-h,-h],[a,-h,-h]]);}}
+function field3(cam,xm,ang,spin,n,alpha,coilX){if(alpha<=0.02)return;const L=getLines(n),xf=magXf(xm,ang,0),R2=COIL.a*COIL.a;
+  for(let k=0;k<V3.AZ;k++){const ph=k*TAU/V3.AZ+spin,c=Math.cos(ph),s=Math.sin(ph);
+    for(const pts of L.out){const W=[];for(let i=0;i<pts.length;i+=8)W.push(xf([pts[i],pts[i+1]*c,pts[i+1]*s]));if(W.length<2)continue;
+      let hit=false;for(let i=1;i<W.length&&!hit;i++){const a=W[i-1],b=W[i];if((a[0]-coilX)*(b[0]-coilX)<=0){const t=(coilX-a[0])/((b[0]-a[0])||1e-9),y=a[1]+(b[1]-a[1])*t,z=a[2]+(b[2]-a[2])*t;if(y*y+z*z<R2)hit=true;}}
+      const col=hit?CS.fieldhi:CS.fieldc,m=Math.floor(W.length/2);
+      for(let i=1;i<W.length;i++)seg3(cam,W[i-1],W[i],col,hit?2.2:1.1,alpha*(hit?1:.55),i===m?{arrow:hit?6:4.5}:{});}}}
+function coil3(cam,xc){const n=13,sg=22,tot=n*sg;let prev=null;
+  for(let i=0;i<=tot;i++){const t=i/tot,th=TAU*n*t,p=[xc-COIL.l/2+COIL.l*t,COIL.a*Math.cos(th),COIL.a*Math.sin(th)];
+    if(prev){const rad=[0,Math.cos(th),Math.sin(th)],front=vdot(rad,vsub(cam.eye,p))>0;seg3(cam,prev,p,shade(CS.copper,front?1:.6),front?3:2.2);}prev=p;}
+  const top=0.075,e0=[xc-COIL.l/2,COIL.a,0],e1=[xc+COIL.l/2,COIL.a,0];seg3(cam,e0,[e0[0],top,0],CS.ink,2);seg3(cam,e1,[e1[0],top,0],CS.ink,2);
+  return[cam.proj([e0[0],top,0]),cam.proj([e1[0],top,0])];}
+function ring3(cam,cx,r,axis,col,w,a0=0,a1=TAU,arrow){/* vòng tròn quanh trục x hoặc y */const N=40;let prev=null;
+  for(let i=0;i<=N;i++){const a=a0+(a1-a0)*i/N,p=axis==='x'?[cx[0],cx[1]+r*Math.cos(a),cx[2]+r*Math.sin(a)]:[cx[0]+r*Math.cos(a),cx[1],cx[2]-r*Math.sin(a)];
+    if(prev)seg3(cam,prev,p,col,w,1,i===N&&arrow?{arrow:7}:{});prev=p;}}
+function ground3(c,cam){c.strokeStyle=CS.line;c.lineWidth=1;c.globalAlpha=.7;const y=-0.06;
+  for(let x=-0.3;x<=0.2001;x+=0.05){const a=cam.proj([x,y,-0.15]),b=cam.proj([x,y,0.15]);c.beginPath();c.moveTo(a[0],a[1]);c.lineTo(b[0],b[1]);c.stroke();}
+  for(let z=-0.15;z<=0.1501;z+=0.05){const a=cam.proj([-0.3,y,z]),b=cam.proj([0.2,y,z]);c.beginPath();c.moveTo(a[0],a[1]);c.lineTo(b[0],b[1]);c.stroke();}c.globalAlpha=1;}
+function draw2_3d(c,w,h,S,k){const cam=mkCam(w,h),n=NH[S.str]||8,spin=S.spin!=null?S.spin*2.4:0;ground3(c,cam);
+  if(k==='s3'){const x0=S.xm-0.07,x1=S.xc+0.04,y=-0.034;poly3(cam,[[x0,y,0.045],[x1,y,0.045],[x1,y,-0.045],[x0,y,-0.045]],shade(CS.metal,1.15),.9);}
+  if(S.em){field3(cam,S.xm,0,0,n,clamp(S.Iem,0,1),S.xc);const xf=magXf(S.xm,0,0);box3(cam,xf,-MAG.hl,MAG.hl,MAG.ht,CS.metal);
+    for(let j=0;j<11;j++)ring3(cam,[S.xm-MAG.hl*.85+j*MAG.hl*1.7/10,0,0],MAG.ht*1.45,'x',CS.copper,2.4);}
+  else{field3(cam,S.xm,S.ang,spin,n,1,S.xc);const xf=magXf(S.xm,S.ang,spin);box3(cam,xf,-MAG.hl,0,MAG.ht,CS.sPole);box3(cam,xf,0,MAG.hl,MAG.ht,CS.nPole);
+    if(S.spin!=null){/* vạch trắng để thấy nam châm tự quay */const w2=MAG.ht*1.01;seg3(cam,xf([-MAG.hl*.95,w2,0]),xf([MAG.hl*.95,w2,0]),'#fff',3);}}
+  if(k==='s4'){seg3(cam,[S.xm,-0.06,0],[S.xm,0.07,0],CS.accent,2,1,{dash:[6,5]});ring3(cam,[S.xm,0.055,0],0.062,'y',CS.accent,2.4,0.3,TAU*0.85,true);}
+  if(k==='s6'){seg3(cam,[S.xm-0.1,0,0],[S.xm-MAG.hl,0,0],CS.accent,2,1,{dash:[6,5]});seg3(cam,[S.xc+COIL.l/2,0,0],[S.xc+0.09,0,0],CS.accent,2,1,{dash:[6,5]});
+    ring3(cam,[S.xm-0.075,0,0],0.02,'x',CS.accent,2.4,0.3,TAU*0.85,true);}
+  const ends=coil3(cam,S.xc);flush3(c);
+  /* nhãn N, S và chú thích */
+  if(!S.em){const xf=magXf(S.xm,S.ang,spin);for(const [x,l] of [[MAG.hl*.5,'N'],[-MAG.hl*.5,'S']]){const p=cam.proj(xf([x,MAG.ht*2.2,0]));txt(c,l,p[0],p[1],{w:800,sz:15,col:l==='N'?CS.nPole:CS.sPole});}}
+  else{const p=cam.proj([S.xm,-0.04,0]);txt(c,T('emK')+' · '+T(S.emOn?'emOn':'emOff'),p[0],p[1]+6,{sz:12,col:CS.muted});
+    if(S.Iem>0.05){const a=cam.proj([S.xm+MAG.hl+0.008,0.02,0]),b=cam.proj([S.xm-MAG.hl-0.008,0.02,0]);txt(c,'N',a[0],a[1],{w:800,sz:15,col:CS.nPole});txt(c,'S',b[0],b[1],{w:800,sz:15,col:CS.sPole});}}
+  if(k==='s4'){const p=cam.proj([S.xm,0.075,0]);txt(c,T('ax4'),p[0],p[1]-8,{sz:12,col:CS.accent});}
+  if(k==='s6'){const p=cam.proj([S.xm-0.075,-0.03,0]);txt(c,T('ax6'),p[0],p[1]+10,{sz:12,col:CS.accent});}
+  if(k==='s3'){const p=cam.proj([S.xc+0.04,-0.034,0.045]);txt(c,T('cart'),p[0],p[1]+12,{sz:12,col:CS.muted,al:'right'});}
+  /* điện kế cố định ở góc trên bên phải, dây nối từ hai đầu cuộn dây */
+  const R=clamp(w*0.075,30,58),mx=w-R-12,my=R+10;c.strokeStyle=CS.ink;c.lineWidth=2;
+  const tA=[mx-R*.45,my+R*.75],tB=[mx+R*.45,my+R*.75];
+  for(const [e,t,dy] of [[ends[0],tA,-10],[ends[1],tB,-2]]){c.beginPath();c.moveTo(e[0],e[1]);c.lineTo(e[0],Math.min(e[1],t[1]+24)+dy);c.lineTo(t[0],Math.min(e[1],t[1]+24)+dy);c.lineTo(t[0],t[1]);c.stroke();}
+  if(!S.closed){const y=Math.min(ends[0][1],tA[1]+24)-10,x=(ends[0][0]+tA[0])/2;c.strokeStyle=CS.lane;c.lineWidth=6;c.beginPath();c.moveTo(x-12,y);c.lineTo(x+12,y);c.stroke();
+    c.strokeStyle=CS.ink;c.lineWidth=2.4;c.beginPath();c.moveTo(x-12,y);c.lineTo(x+8,y-14);c.stroke();txt(c,'K',x,y+12,{sz:12});}
+  drawMeter(c,mx,my,R,S.nd,'G','±1 mA');}
+const cv2el=$('cv2');
+cv2el.addEventListener('pointerdown',e=>{if(!V3.on)return;V3.drag=[e.clientX,e.clientY];cv2el.setPointerCapture(e.pointerId);});
+cv2el.addEventListener('pointermove',e=>{if(!V3.drag)return;const dx=e.clientX-V3.drag[0],dy=e.clientY-V3.drag[1];V3.drag=[e.clientX,e.clientY];
+  V3.yaw-=dx*0.01;V3.pitch=clamp(V3.pitch+dy*0.01,-0.3,1.45);V3.cam=null;ui2v();});
+const end2=()=>{V3.drag=null;};cv2el.addEventListener('pointerup',end2);cv2el.addEventListener('pointercancel',end2);
+const k3fac=()=>V3.on?V3.AZ/2:1;
+function ui2v(){seg('view2',[{k:true,label:T('view3d')},{k:false,label:T('view2d')}],V3.on,k=>{V3.on=k;U2.H=[];ui2v();});
+  $('cam2').hidden=!V3.on;$('drag2').textContent=V3.on?T('drag3'):'';cv2el.style.touchAction=V3.on?'none':'pan-y';
+  if(V3.on)seg('cam2',[{k:'tilt',label:T('camTilt')},{k:'top',label:T('camTop')},{k:'front',label:T('camFront')}],V3.cam,k=>{V3.cam=k;[V3.yaw,V3.pitch]=CAMS[k];ui2v();});}
 
 /* ================= TAB 3: Máy phát điện xoay chiều ================= */
 const F3=[0.5,1,2,3,5,10,25,50];
@@ -937,19 +1020,94 @@ function drawRings3(c,V,th){/* hình nhỏ: vành khuyên / cổ góp nhìn nghi
   if(V.w>=560)txt(c,T('brush'),shX+rx+28,V.p(0,ringYs[0])[1]-12,{sz:10,col:CS.muted,al:'left'});
   return src;}
 function drawGen3Mag(c,V,th,alpha){drawField(c,V,0,0,th,NH[G3.str]||8,alpha,alpha===1?XC3:null);drawMagnet(c,V,0,0,th,null,alpha);}
-function draw3(){const cv=$('cv3');const {c,w,h}=fit(cv,isPhone()?.62:.56);const V=view3(w,h);const k=slowK3(),fD=f3()/k,blur=fD>2.5&&G3.run;
-  let src;
+function draw3(){const cv=$('cv3');const {c,w,h}=fit(cv,isPhone()?.75:.56);const V=view3(w,h);const k=slowK3(),fD=f3()/k,blur=fD>2.5&&G3.run;
+  let src;if(V3G.on){draw3_3d(c,w,h);drawScope3();return;}
   if(G3.mode==='coil'){drawGen3Coil(c,V,G3.th,1);if(blur)for(let j=1;j<6;j++)drawGen3Coil(c,V,G3.th-j*0.5,0.18);src=drawRings3(c,V,G3.th);}
   else{if(blur){for(let j=1;j<6;j++)drawMagnet(c,V,0,0,G3.th-j*0.5,null,0.18);}drawGen3Mag(c,V,G3.th,1);
     const [cx,cy]=V.p(XC3,0),hw=0.02*V.S,hh=0.012*V.S;
     drawCoil(c,V,XC3,'back');c.fillStyle=CS.metal;c.globalAlpha=.85;c.fillRect(cx-hw,cy-hh,2*hw,2*hh);c.globalAlpha=1;drawCoil(c,V,XC3,'front');
     txt(c,T('core'),cx,cy+COIL.a*V.S+14,{sz:11,col:CS.muted});src=[[XC3-COIL.l/2,COIL.a],[XC3+COIL.l/2,COIL.a]];}
-  drawOutput3(c,V,src);
+  drawOutput3(c,V,src);drawScope3();}
+function drawScope3(){
   /* dao động kí */const g=$('gr3'),{c:c2,w:w2,h:h2}=fit(g,isPhone()?.55:.3),f=f3(),W=2.6/f,t1=Math.max(W,G3.t),t0=t1-W,E=emax3()||1;
   const comm=G3.mode==='coil'&&G3.ring==='comm',ymin=comm?-E*.25:-E*1.2,L=52;
   const P=plot(c2,L,6,w2-L-8,h2-30,{t0,t1,ymin,ymax:E*1.2,ylab:'u (V)',xlab:'t (s)',ytick:['+'+nf(E*1.2,E<1?2:1),comm?'':'−'+nf(E*1.2,E<1?2:1)],series:[{d:G3.H,col:CS.vel,w:2.4}]});
   const tA=t0+0.2/f,tB=tA+1/f,yy=h2-12;c2.strokeStyle=CS.ink;c2.lineWidth=1.5;c2.beginPath();c2.moveTo(P.X(tA),yy);c2.lineTo(P.X(tB),yy);c2.stroke();
   arrowHead(c2,P.X(tA),yy,Math.PI,5,CS.ink);arrowHead(c2,P.X(tB),yy,0,5,CS.ink);txt(c2,T('oneT')+' = '+nf(1/f,3)+' s',(P.X(tA)+P.X(tB))/2,yy-9,{sz:11});}
+/* ================= Hình 3D cho tab 3: máy phát điện ================= */
+const V3G={on:true,yaw:-0.4,pitch:0.45,dist:0.5,tgt:[0.05,-0.025,0],cam:'tilt',drag:null};
+const CAMS3={tilt:[-0.4,0.45],top:[0,1.45],front:[0,0.04]};
+function slab3(cam,x0,x1,y0,y1,z0,z1,col,al=1){/* hộp thẳng đứng theo trục toạ độ (cực nam châm, đế) */
+  const P=(x,y,z)=>[x,y,z],F=[[[x0,y0,z1],[x1,y0,z1],[x1,y1,z1],[x0,y1,z1],[0,0,1]],[[x0,y0,z0],[x1,y0,z0],[x1,y1,z0],[x0,y1,z0],[0,0,-1]],
+    [[x0,y1,z0],[x1,y1,z0],[x1,y1,z1],[x0,y1,z1],[0,1,0]],[[x0,y0,z0],[x1,y0,z0],[x1,y0,z1],[x0,y0,z1],[0,-1,0]],
+    [[x0,y0,z0],[x0,y1,z0],[x0,y1,z1],[x0,y0,z1],[-1,0,0]],[[x1,y0,z0],[x1,y1,z0],[x1,y1,z1],[x1,y0,z1],[1,0,0]]];
+  for(const f of F){const n=f[4],cen=[(f[0][0]+f[2][0])/2,(f[0][1]+f[2][1])/2,(f[0][2]+f[2][2])/2];if(vdot(n,vsub(cam.eye,cen))<=0)continue;
+    poly3(cam,f.slice(0,4).map(q=>P(...q)),shade(col,0.55+0.5*Math.max(0,vdot(n,LIGHT))),al);}}
+function ground3g(c,cam,y){c.strokeStyle=CS.line;c.lineWidth=1;c.globalAlpha=.7;
+  for(let x=-0.15;x<=0.2001;x+=0.05){const a=cam.proj([x,y,-0.12]),b=cam.proj([x,y,0.12]);c.beginPath();c.moveTo(a[0],a[1]);c.lineTo(b[0],b[1]);c.stroke();}
+  for(let z=-0.12;z<=0.1201;z+=0.04){const a=cam.proj([-0.15,y,z]),b=cam.proj([0.2,y,z]);c.beginPath();c.moveTo(a[0],a[1]);c.lineTo(b[0],b[1]);c.stroke();}c.globalAlpha=1;}
+/* Tải (LED hoặc điện kế) đặt ở một điểm cố định trong không gian 3D; dây nối vẽ bằng toạ độ 3D nên xoay hướng nào cũng nối đúng.
+   Bảng tải luôn quay mặt về phía người xem và giữ kích thước cố định trên màn hình và luôn nằm trong khung hình; hai đầu dây 3D nối vào hai cực ở mép dưới của bảng bằng đoạn ngắn trên màn hình. */
+function load3pos(){const Ly=G3.mode==='coil'?-0.005:0.02;return{L:[0.22,Ly,0],Ta:[0.22,Ly-0.05,-0.014],Tb:[0.22,Ly-0.05,0.014]};}
+function poly3w(cam,P,col,w){for(let i=1;i<P.length;i++)seg3(cam,P[i-1],P[i],col,w);}
+function wires3(cam,src){const {Ta,Tb}=load3pos(),b0=src[0],b1=src[1];
+  if(G3.mode==='coil'){poly3w(cam,[b0,[Ta[0],b0[1],Ta[2]],Ta],CS.ink,2.2);
+    if(G3.ring==='comm')poly3w(cam,[b1,[b1[0],-0.098,0.03],[Tb[0],-0.098,0.03],[Tb[0],-0.098,Tb[2]],Tb],CS.ink,2.2);
+    else poly3w(cam,[b1,[Tb[0],b1[1],Tb[2]],Tb],CS.ink,2.2);}
+  else{poly3w(cam,[b0,[b0[0],0.088,Ta[2]],[Ta[0],0.088,Ta[2]],Ta],CS.ink,2.2);poly3w(cam,[b1,[b1[0],0.082,Tb[2]],[Tb[0],0.082,Tb[2]],Tb],CS.ink,2.2);}}
+function loadPanel3(c,cam){const {L,Ta,Tb}=load3pos(),hw=clamp(cam.w/24,30,38),hh=hw*1.45,P0=cam.proj(L),cx=clamp(P0[0],hw+6,cam.w-hw-6),cy=clamp(P0[1],hh+6,cam.h-hh-10),pa=cam.proj(Ta),pb=cam.proj(Tb),sg=pa[0]<=pb[0]?1:-1;
+  const tl=[cx-hw*.55,cy+hh],tr=[cx+hw*.55,cy+hh],ta=sg>0?tl:tr,tb=sg>0?tr:tl;
+  c.strokeStyle=CS.ink;c.lineWidth=2.2;c.beginPath();c.moveTo(pa[0],pa[1]);c.lineTo(ta[0],ta[1]);c.moveTo(pb[0],pb[1]);c.lineTo(tb[0],tb[1]);c.stroke();
+  if(G3.load==='led'){rrect(c,cx-hw,cy-hh,2*hw,2*hh,8);c.fillStyle=CS.panel;c.fill();c.strokeStyle=CS.ink;c.lineWidth=2;c.stroke();
+    const xl=cx-hw*.55,xr=cx+hw*.55,y1=cy-hh*.38,y2=cy+hh*.3;c.lineWidth=2;c.beginPath();
+    c.moveTo(ta[0],ta[1]);c.lineTo(ta[0],y1);c.moveTo(tb[0],tb[1]);c.lineTo(tb[0],y1);c.moveTo(xl,y1);c.lineTo(xr,y1);c.moveTo(xl,y2);c.lineTo(xr,y2);c.stroke();
+    drawLED(c,cx,y1,CS.ledR,G3.bR,'',sg>0);drawLED(c,cx,y2,CS.ledG,G3.bG,'',sg<0);}
+  else{const R=hw*1.15;drawMeter(c,cx,cy+hh-0.75*R,R,G3.nd,'G','±20 mA');}}
+function draw3_3d(c,w,h){const cam=mkCam(w,h,V3G),th=G3.th,k=slowK3(),fD=f3()/k;ground3g(c,cam,-0.125);let src;
+  if(G3.mode==='coil'){const B=0.075,hy=0.05,hz=0.04;
+    slab3(cam,-0.12,-B,-hy,hy,-hz,hz,CS.nPole);slab3(cam,B,0.12,-hy,hy,-hz,hz,CS.sPole);
+    /* khung dây trong mặt phẳng x = 0 khi θ = 0; quay quanh trục thẳng đứng y */
+    const hw=S3.w/2,hh=S3.h/2,cs=Math.cos(th),sn=Math.sin(th),L=(y,z)=>[z*sn,y,z*cs];
+    /* đường sức đều song song trục x; đường nào đi qua lòng khung thì tô cam */
+    for(let j=-2;j<=2;j++)for(let q=-2;q<=2;q++){const y=j*0.0185,z=q*0.019,hit=Math.abs(y)<hh&&Math.abs(z)<hw*Math.abs(cs)-1e-9,col=hit?CS.fieldhi:CS.fieldc;
+      const xs=[-B,-0.04,0,0.04,B];for(let i=1;i<xs.length;i++)seg3(cam,[xs[i-1],y,z],[xs[i],y,z],col,hit?2.2:1.1,hit?1:.55,i===4?{arrow:hit?6:4.5}:{});}
+    const cu=CS.copper;for(let t=-1;t<=1;t++){const o=t*0.0025,C=[L(hh+o,hw),L(hh+o,-hw),L(-hh+o,-hw),L(-hh+o,hw)];for(let i=0;i<4;i++)seg3(cam,C[i],C[(i+1)%4],cu,3);}
+    /* hai mặt khung tô màu nhạt để thấy khung đang quay */
+    poly3(cam,[L(hh,hw),L(hh,-hw),L(-hh,-hw),L(-hh,hw)],CS.fieldhi,0.10);
+    /* chiều dòng điện trên hai cạnh thẳng đứng */
+    if(Math.abs(G3.i)>1e-4||G3.load==='g'&&Math.abs(G3.e)>0.02){const sg=G3.e>0?1:-1;
+      seg3(cam,L(-hh*.5*sg,hw),L(hh*.5*sg,hw),CS.vel,2.6,1,{arrow:8});seg3(cam,L(hh*.5*sg,-hw),L(-hh*.5*sg,-hw),CS.vel,2.6,1,{arrow:8});}
+    /* trục, vành khuyên / cổ góp, chổi than */
+    seg3(cam,L(-hh,0),[0,-0.112,0],CS.metal2,4);
+    const r=0.013;let bpts=[];
+    if(G3.ring==='slip'){[[-0.06,CS.ledR,0],[-0.085,CS.ledG,Math.PI]].forEach(([y,col,ph])=>{ring3(cam,[0,y,0],r,'y',col,4);
+        const m=[r*Math.cos(th+ph),y,-r*Math.sin(th+ph)];seg3(cam,m,[m[0]*1.05,y+0.004,m[2]*1.05],'#fff',3);
+        slab3(cam,r+0.001,r+0.012,y-0.004,y+0.004,-0.004,0.004,CS.ink);bpts.push([r+0.012,y,0]);});
+      /* dây từ hai đầu khung xuống hai vành */
+      seg3(cam,L(-hh,hw*.3),[0.004*sn,-0.06,0.004*cs],CS.ledR,1.6);seg3(cam,L(-hh,-hw*.3),[-0.004*sn,-0.085,-0.004*cs],CS.ledG,1.6);}
+    else{const y=-0.072,first=Math.sin(th)>=0;ring3(cam,[0,y,0],r,'y',first?CS.ledR:CS.ledG,4,-Math.PI/2+th,Math.PI/2+th);ring3(cam,[0,y,0],r,'y',first?CS.ledG:CS.ledR,4,Math.PI/2+th,Math.PI*1.5+th);
+      slab3(cam,r+0.001,r+0.012,y-0.004,y+0.004,-0.004,0.004,CS.ink);slab3(cam,-r-0.012,-r-0.001,y-0.004,y+0.004,-0.004,0.004,CS.ink);
+      bpts=[[r+0.012,y,0],[-r-0.012,y,0]];}
+    src=bpts;wires3(cam,src);flush3(c);
+    for(const [x,l] of [[-0.0975,'N'],[0.0975,'S']]){const p=cam.proj([x,0,0.04]);txt(c,l,p[0],p[1],{w:800,sz:20,col:'#fff'});}
+    const lp=cam.proj([0,-0.118,0]);txt(c,T(G3.ring==='comm'?'ringComm':'ringSlip')+' · '+T('brush'),lp[0],lp[1]+14,{sz:12,col:CS.muted});
+  }
+  else{const xf=magXf(0,th,0);field3(cam,0,th,0,NH[G3.str]||8,1,XC3);box3(cam,xf,-MAG.hl,0,MAG.ht,CS.sPole);box3(cam,xf,0,MAG.hl,MAG.ht,CS.nPole);
+    seg3(cam,[0,-0.06,0],[0,0.05,0],CS.metal2,3);slab3(cam,XC3-0.022,XC3+0.022,-0.012,0.012,-0.012,0.012,CS.metal);
+    coil3(cam,XC3);src=[[XC3+COIL.l/2,0.075,0],[XC3-COIL.l/2,0.075,0]];wires3(cam,src);flush3(c);
+    for(const [x,l] of [[MAG.hl*.5,'N'],[-MAG.hl*.5,'S']]){const p=cam.proj(xf([x,MAG.ht*2.4,0]));txt(c,l,p[0],p[1],{w:800,sz:15,col:l==='N'?CS.nPole:CS.sPole});}
+    const pc=cam.proj([XC3,-0.04,0]);txt(c,T('core'),pc[0],pc[1]+8,{sz:12,col:CS.muted});}
+  loadPanel3(c,cam);
+  if(fD>2.5&&G3.run)txt(c,T('tooFast'),12,18,{al:'left',sz:13,col:CS.warn});}
+const cv3el=$('cv3');
+cv3el.addEventListener('pointerdown',e=>{if(!V3G.on)return;V3G.drag=[e.clientX,e.clientY];cv3el.setPointerCapture(e.pointerId);});
+cv3el.addEventListener('pointermove',e=>{if(!V3G.drag)return;const dx=e.clientX-V3G.drag[0],dy=e.clientY-V3G.drag[1];V3G.drag=[e.clientX,e.clientY];
+  V3G.yaw-=dx*0.01;V3G.pitch=clamp(V3G.pitch+dy*0.01,-0.3,1.45);if(V3G.cam){V3G.cam=null;ui3v();}});
+const end3=()=>{V3G.drag=null;};cv3el.addEventListener('pointerup',end3);cv3el.addEventListener('pointercancel',end3);
+function ui3v(){seg('view3',[{k:true,label:T('view3d')},{k:false,label:T('view2d')}],V3G.on,k=>{V3G.on=k;ui3v();});
+  $('cam3').hidden=!V3G.on;$('drag3').textContent=V3G.on?T('drag3'):'';cv3el.style.touchAction=V3G.on?'none':'pan-y';
+  if(V3G.on)seg('cam3',[{k:'tilt',label:T('camTilt')},{k:'top',label:T('camTop')},{k:'front',label:T('camFront')}],V3G.cam,k=>{V3G.cam=k;[V3G.yaw,V3G.pitch]=CAMS3[k];ui3v();});}
+
 function kLines3(){if(G3.mode==='coil'){const lim=0.045*Math.abs(Math.cos(G3.th));let n=0;for(let j=0;j<11;j++)if(Math.abs(-0.05+0.01*j)<lim)n++;return n*Math.sign(Math.cos(G3.th));}
   return PHI3[0]*KCORE*Math.cos(G3.th)*G3.str/PHI_UNIT;}
 function ui3(full){const f=f3();if(full){
@@ -957,7 +1115,7 @@ function ui3(full){const f=f3();if(full){
     seg('ring3',[{k:'slip',label:T('ringSlip')},{k:'comm',label:T('ringComm')}],G3.ring,k=>{G3.ring=k;G3.H=[];ui3(true);});$('ring3').hidden=G3.mode!=='coil';
     seg('load3',[{k:'led',label:T('loadLED')},{k:'g',label:T('loadG')}],G3.load,k=>{G3.load=k;ui3(true);});
     seg('str3',[{k:.5,label:T('strW')},{k:1,label:T('strM')},{k:1.5,label:T('strS')}],G3.str,k=>{G3.str=k;ui3(true);});
-    $('hint3').textContent=T(G3.mode==='coil'?'hint3Coil':'hint3Mag');$('run3').textContent=T(G3.run?'pause':'run');
+    $('hint3').textContent=T(G3.mode==='coil'?'hint3Coil':'hint3Mag');ui3v();$('run3').textContent=T(G3.run?'pause':'run');
     $('f3V').textContent=nf(f,1)+' Hz · '+nf(f*60,0)+(lang==='vi'?' vòng/phút':' rpm');$('n3V').textContent=G3.N+(lang==='vi'?' vòng':' turns');
     $('assume3').textContent=Tf(G3.mode==='coil'?'assume3Coil':'assume3Mag',{N:G3.N,B:nf(B3(),2)});}
   const k=slowK3();$('slowNote3').textContent=k>1?Tf('slowNote',{k:nf(k,0)}):T('realNote');

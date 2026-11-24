@@ -1,0 +1,1138 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Đo tốc độ và an toàn giao thông</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Đo tốc độ và an toàn giao thông (KHTN 7, l7-01 + l7-03): 4 tab. Cùng hệ màu, phông với bộ mô phỏng KHTN 6–9.
+   Mất mạng vẫn chạy: phông rơi về phông hệ thống, video đọc từ thư mục media/. */
+:root{
+  --bg:#edf0f3; --panel:#ffffff; --lane:#f4f6f9; --ink:#141c26; --muted:#556170; --line:#c9d1db;
+  --accent:#1d5fa8; --accent-ink:#ffffff; --ok:#1d8a4b; --warn:#c2410c;
+  --force:#d1323b; --vel:#1f6fd1; --react:#e07b00; --brake:#d1323b;
+  --road:#5b636d; --road2:#454c55; --grass:#7fb06a; --metal:#8b96a3; --metal2:#5b6673; --wood:#b07a45;
+  --space:#0d1626; --star:#e9eef7; --gold:#c99a2e; --carA:#c23a3a; --carB:#1f6fd1; --beam:#ff2a2a;
+  --font-ui:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-num:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Consolas,monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0e131a; --panel:#161e28; --lane:#111821; --ink:#e3e9f0; --muted:#97a3b2; --line:#2a3644;
+  --accent:#5ea6ec; --accent-ink:#04182c; --ok:#47c47d; --warn:#f08a4b;
+  --force:#ff5f67; --vel:#5aa2ff; --react:#ffa630; --brake:#ff5f67;
+  --road:#3a4049; --road2:#2c3138; --grass:#3f6b38; --metal:#7c8794; --metal2:#a9b4c1; --wood:#9a6a3c;
+  --space:#060a12; --star:#cfd8e6; --gold:#e0b24a; --carA:#e05a5a; --carB:#4d93ef; --beam:#ff4d4d;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e131a; --panel:#161e28; --lane:#111821; --ink:#e3e9f0; --muted:#97a3b2; --line:#2a3644;
+  --accent:#5ea6ec; --accent-ink:#04182c; --ok:#47c47d; --warn:#f08a4b;
+  --force:#ff5f67; --vel:#5aa2ff; --react:#ffa630; --brake:#ff5f67;
+  --road:#3a4049; --road2:#2c3138; --grass:#3f6b38; --metal:#7c8794; --metal2:#a9b4c1; --wood:#9a6a3c;
+  --space:#060a12; --star:#cfd8e6; --gold:#e0b24a; --carA:#e05a5a; --carB:#4d93ef; --beam:#ff4d4d;
+  color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-ui);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px 40px}
+.wrap{max-width:1320px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.hbtns{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.eyebrow{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{margin:0;font-size:clamp(25px,3.4vw,36px);line-height:1.15;font-weight:800;text-wrap:balance;letter-spacing:-.01em}
+h2{margin:0;font-size:17px;font-weight:700;text-wrap:balance}
+h3{margin:0;font-size:15px;font-weight:700}
+.btn{font:inherit;font-weight:600;font-size:15px;min-height:44px;padding:8px 14px;border-radius:8px;border:1px solid var(--line);
+  background:var(--panel);color:var(--ink);cursor:pointer;touch-action:manipulation}
+.btn:hover{border-color:var(--accent)}
+.btn:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
+.seg .btn{border:0;border-radius:0;min-width:52px}
+.choices{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:6px}
+.choices .btn{font-size:14px;padding:6px 8px;line-height:1.25;text-align:left}
+.choices .btn small{display:block;font-family:var(--font-num);font-size:12px;font-weight:500;opacity:.8}
+nav.tabs{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line)}
+nav.tabs button{font:inherit;font-size:15px;font-weight:600;white-space:nowrap;min-height:46px;padding:8px 14px;border:0;border-bottom:3px solid transparent;
+  background:none;color:var(--muted);cursor:pointer;margin-bottom:-1px}
+nav.tabs button.on{color:var(--ink);border-bottom-color:var(--accent)}
+.req{margin:0;font-size:14px;color:var(--muted);max-width:110ch}
+.req b{color:var(--ink);font-weight:600}
+.lab{display:grid;grid-template-columns:minmax(0,1fr) 390px;gap:14px;align-items:start}
+@media (max-width:1020px){.lab{grid-template-columns:minmax(0,1fr)}}
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.col{display:flex;flex-direction:column;gap:12px;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card p{margin:0}
+canvas{display:block;width:100%;border-radius:8px;background:var(--lane);touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.hint{margin:0;font-size:14px;color:var(--muted)}
+.status{margin:0;font-weight:600;min-height:1.5em}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:14px;color:var(--muted)}
+.legend i{display:inline-block;width:18px;height:8px;border-radius:3px;margin-right:6px;vertical-align:middle}
+.sl{display:flex;flex-direction:column;gap:4px}
+.sl .top{display:flex;justify-content:space-between;gap:8px;font-size:15px}
+.sl .val{font-family:var(--font-num);font-weight:600;text-align:right}
+.sl .ends{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+input[type=range]{width:100%;height:44px;accent-color:var(--accent);margin:0}
+select{font:inherit;font-size:15px;min-height:44px;padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);width:100%}
+.kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;font-size:15px;margin:0}
+.kv dt{color:var(--muted)} .kv dd{margin:0;font-family:var(--font-num);font-variant-numeric:tabular-nums;text-align:right;overflow-wrap:anywhere}
+.opts{display:flex;flex-direction:column;gap:6px}
+.opts .btn{text-align:left;font-size:14px}
+.opts .btn.picked{border:2px solid var(--accent)}
+.opts .btn.right{background:color-mix(in srgb,var(--ok) 18%,var(--panel));border-color:var(--ok)}
+.ans{background:var(--lane);border-left:4px solid var(--ok);padding:8px 12px;border-radius:6px;font-size:15px}
+.muted{color:var(--muted);font-size:14px}
+details.k{border:1px solid var(--line);border-radius:var(--r);background:var(--panel);padding:0 14px}
+details.k[open]{padding-bottom:12px}
+details.k summary{cursor:pointer;font-weight:700;min-height:44px;display:flex;align-items:center;font-size:15px}
+details.k p,details.k ul{margin:6px 0;font-size:15px;max-width:95ch}
+details.k ul{padding-left:20px}
+details.k h3{margin-top:10px}
+.fine{font-size:13px;color:var(--muted);margin:0}
+.tblwrap{overflow-x:auto}
+table.log{border-collapse:collapse;width:100%;font-size:14px}
+table.log th,table.log td{padding:4px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+table.log th:first-child,table.log td:first-child{text-align:left}
+table.log td{font-family:var(--font-num);font-variant-numeric:tabular-nums}
+table.log th{color:var(--muted);font-weight:600}
+table.log tr.mean td{font-weight:700;border-top:2px solid var(--line)}
+table.law{border-collapse:collapse;width:100%;font-size:14px}
+table.law td,table.law th{padding:4px 8px;border-bottom:1px solid var(--line);text-align:left}
+table.law td:last-child{font-family:var(--font-num);text-align:right;white-space:nowrap}
+table.law tr.on td{background:color-mix(in srgb,var(--accent) 16%,var(--panel));font-weight:700}
+/* Đồng hồ hiện số */
+.clock{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:#0b0f14;color:#7dff9b;border-radius:10px;padding:10px 16px}
+.clock .digits{font-family:var(--font-num);font-size:clamp(34px,6vw,56px);font-weight:600;line-height:1;letter-spacing:.02em;min-width:5.2ch;text-shadow:0 0 10px rgba(125,255,155,.35)}
+.clock .cl{font-size:13px;color:#a9c7b3;display:flex;flex-direction:column;gap:2px}
+.clock .cl b{color:#e9fff0;font-size:14px}
+.clock.red{color:#ff8a7a}.clock.red .digits{text-shadow:0 0 10px rgba(255,138,122,.35)}
+.press{font:inherit;font-size:20px;font-weight:800;min-height:64px;min-width:150px;border-radius:14px;border:0;background:var(--warn);color:#fff;cursor:pointer;touch-action:manipulation;
+  box-shadow:0 4px 0 color-mix(in srgb,var(--warn) 60%,#000)}
+.press:active{transform:translateY(3px);box-shadow:0 1px 0 color-mix(in srgb,var(--warn) 60%,#000)}
+.press:disabled{opacity:.4;cursor:not-allowed}
+.verdict{font-weight:800;font-size:18px;padding:8px 12px;border-radius:8px}
+.verdict.ok{background:color-mix(in srgb,var(--ok) 18%,var(--panel));color:var(--ok)}
+.verdict.no{background:color-mix(in srgb,var(--force) 16%,var(--panel));color:var(--force)}
+.verdict.mid{background:color-mix(in srgb,var(--react) 18%,var(--panel));color:var(--react)}
+.calc{font-family:var(--font-num);font-size:15px;background:var(--lane);border-radius:8px;padding:8px 12px;line-height:1.7;overflow-wrap:anywhere}
+.calc b{color:var(--vel)}
+/* Video thực tế */
+.vids{display:flex;flex-direction:column;gap:10px;background:var(--space);color:var(--star);border-radius:var(--r);padding:12px 14px}
+.vids details{border:0;background:none;padding:0;color:inherit}
+.vids summary.vhead{display:flex;justify-content:space-between;align-items:center;gap:6px 12px;flex-wrap:wrap;min-height:44px;cursor:pointer;list-style:none;margin:0}
+.vids summary.vhead::-webkit-details-marker{display:none}
+.vids summary.vhead b::before{content:"▸ "}.vids details[open] summary.vhead b::before{content:"▾ "}
+.vids .vbody{display:flex;flex-direction:column;gap:10px;padding-top:6px}
+.vhead b{font-size:12px;letter-spacing:.08em;text-transform:uppercase;opacity:.8}
+.vhead span{font-size:13px;opacity:.75;font-weight:400}
+.vlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
+.vcard{display:grid;grid-template-columns:150px minmax(0,1fr);gap:10px;align-items:start}
+.thumb{position:relative;display:block;aspect-ratio:16/9;border-radius:8px;overflow:hidden;background:linear-gradient(135deg,#1f3150,#0b1220);
+  border:1px solid color-mix(in srgb,var(--star) 25%,transparent);padding:0;cursor:pointer;width:100%;color:var(--star);font:inherit}
+.thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.thumb .pl{position:absolute;inset:0;margin:auto;width:46px;height:46px;border-radius:50%;background:var(--force);box-shadow:0 2px 10px rgba(0,0,0,.45)}
+.thumb .pl::before{content:"";position:absolute;left:17px;top:13px;border-style:solid;border-width:10px 0 10px 16px;border-color:transparent transparent transparent #fff}
+.thumb .tag{position:absolute;left:6px;bottom:6px;font-size:11px;font-weight:700;background:rgba(0,0,0,.7);color:#fff;padding:1px 7px;border-radius:4px}
+.vtx{display:flex;flex-direction:column;gap:2px;min-width:0}
+.vtx .ttl{font-weight:700;font-size:15px;line-height:1.3;overflow-wrap:anywhere}
+.vtx .ch{font-size:12px;opacity:.75}
+.vtx .look{font-size:14px;opacity:.95}
+.vtx .flag{font-size:12px;color:#ffd27a}
+.vtx a{color:var(--star);font-size:13px;font-weight:600}
+.vplayer{position:relative;background:#000;border-radius:8px;overflow:hidden}
+.vplayer video,.vplayer iframe{display:block;width:100%;aspect-ratio:16/9;border:0;background:#000}
+.vplayer .vmsg{padding:14px 56px 14px 14px;font-size:15px;color:#fff}
+.vplayer .vmsg a{color:#9fd0ff}
+.vplayer .vclose{position:absolute;right:6px;top:6px;z-index:2;min-height:40px;background:rgba(255,255,255,.92);color:#000}
+@media (max-width:440px){.vlist{grid-template-columns:1fr}.vcard{grid-template-columns:118px minmax(0,1fr)}.thumb .pl{width:34px;height:34px}.thumb .pl::before{left:13px;top:9px;border-width:8px 0 8px 12px}.thumb .tag{font-size:10px;padding:0 5px}}
+/* Chế độ giáo viên: che số liệu để lớp dự đoán */
+body.hideNums .num{filter:blur(7px);user-select:none}
+body.hideNums .num:hover{filter:none}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:560px){.two{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow" data-i18n="eyebrow"></div>
+      <h1 data-i18n="title"></h1>
+    </div>
+    <div class="hbtns">
+      <button class="btn" id="gvBtn" aria-pressed="false" data-i18n="gvBtn"></button>
+      <button class="btn" id="langBtn">EN</button>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="1" data-i18n="tab1"></button>
+    <button role="tab" data-tab="2" data-i18n="tab2"></button>
+    <button role="tab" data-tab="3" data-i18n="tab3"></button>
+    <button role="tab" data-tab="4" data-i18n="tab4"></button>
+  </nav>
+
+  <!-- ===================== TAB 1: ĐỒNG HỒ BẤM GIÂY ===================== -->
+  <section id="t1" class="col">
+    <p class="req" data-i18n-html="req1"></p>
+    <div class="vids" id="v1"></div>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" data-i18n="hint1"></p>
+        <canvas id="c1" aria-label="Đường chạy có vạch xuất phát A và vạch đích B"></canvas>
+        <div class="clock" id="clk1">
+          <div class="digits" id="clk1d">0,00</div>
+          <div class="cl"><b data-i18n="clk1t"></b><span id="clk1s"></span></div>
+        </div>
+        <div class="controls">
+          <button class="btn primary" id="go1" data-i18n="go1"></button>
+          <button class="press" id="press1" data-i18n="press1"></button>
+          <button class="btn" id="clr1" data-i18n="clearTbl"></button>
+        </div>
+        <p class="status" id="st1" aria-live="polite"></p>
+        <p class="fine" data-i18n="as1"></p>
+      </div>
+      <div class="col">
+        <div class="card" id="p1"></div>
+        <div class="card">
+          <h2 data-i18n="set"></h2>
+          <div><h3 data-i18n="who1"></h3><div class="choices" id="mov1"></div></div>
+          <div><h3 data-i18n="dist1"></h3><div class="seg" id="dist1"></div></div>
+          <div><h3 data-i18n="mode1"></h3><div class="seg" id="mode1"></div></div>
+        </div>
+        <div class="card">
+          <div class="controls" style="justify-content:space-between"><h2 data-i18n="tbl1"></h2><button class="btn" id="true1" aria-pressed="false" data-i18n="showTrue"></button></div>
+          <div class="tblwrap"><table class="log" id="tb1"></table></div>
+          <p class="muted" id="note1"></p>
+        </div>
+        <div class="card" id="p1b"></div>
+      </div>
+    </div>
+    <details class="k" open><summary data-i18n="kT1"></summary><div data-i18n-html="k1"></div></details>
+  </section>
+
+  <!-- ===================== TAB 2: CỔNG QUANG ĐIỆN ===================== -->
+  <section id="t2" class="col" hidden>
+    <p class="req" data-i18n-html="req2"></p>
+    <div class="vids" id="v2"></div>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" data-i18n="hint2"></p>
+        <canvas id="c2" aria-label="Máng nghiêng, viên bi và hai cổng quang điện A, B"></canvas>
+        <div class="clock" id="clk2">
+          <div class="digits" id="clk2d">0,000</div>
+          <div class="cl"><b data-i18n="clk2t"></b><span id="clk2s"></span></div>
+        </div>
+        <div class="controls">
+          <button class="btn primary" id="run2" data-i18n="release"></button>
+          <button class="btn" id="rst2" data-i18n="reset"></button>
+          <span class="muted" data-i18n="slow"></span><div class="seg" id="sp2"></div>
+        </div>
+        <p class="status" id="st2" aria-live="polite"></p>
+        <p class="fine" data-i18n="as2"></p>
+      </div>
+      <div class="col">
+        <div class="card" id="p2"></div>
+        <div class="card">
+          <h2 data-i18n="set"></h2>
+          <div><h3 data-i18n="track2"></h3><div class="seg" id="trk2"></div></div>
+          <div class="sl" id="angBox"><div class="top"><span data-i18n="ang2"></span><span class="val" id="ang2V"></span></div><input type="range" id="ang2" min="1" max="10" step="0.5" value="4"><div class="ends"><span>1°</span><span>10°</span></div></div>
+          <div class="sl" id="v0Box" hidden><div class="top"><span data-i18n="v02"></span><span class="val" id="v02V"></span></div><input type="range" id="v02" min="0.1" max="1" step="0.05" value="0.4"><div class="ends"><span>0,10 m/s</span><span>1,00 m/s</span></div></div>
+          <div><h3 data-i18n="clkMode"></h3><div class="seg" id="cm2"></div></div>
+          <p class="muted" id="cmh2"></p>
+        </div>
+        <div class="card">
+          <div class="controls" style="justify-content:space-between"><h2 data-i18n="tbl2"></h2><button class="btn" id="clr2" data-i18n="clearTbl"></button></div>
+          <div class="tblwrap"><table class="log" id="tb2"></table></div>
+          <p class="muted" id="note2"></p>
+        </div>
+        <div class="card" id="p2b"></div>
+      </div>
+    </div>
+    <details class="k" open><summary data-i18n="kT2"></summary><div data-i18n-html="k2"></div></details>
+  </section>
+
+  <!-- ===================== TAB 3: THIẾT BỊ BẮN TỐC ĐỘ ===================== -->
+  <section id="t3" class="col" hidden>
+    <p class="req" data-i18n-html="req3"></p>
+    <div class="vids" id="v3"></div>
+    <div class="controls"><div class="seg" id="m3"></div></div>
+    <div class="lab" id="lab3L">
+      <div class="stage">
+        <p class="hint" data-i18n="hint3"></p>
+        <canvas id="c3" aria-label="Cảnh sát dùng súng laser bắn tốc độ xe đang chạy tới"></canvas>
+        <div class="controls">
+          <button class="press" id="fire3" data-i18n="fire3"></button>
+          <span class="muted" id="st3" aria-live="polite"></span>
+        </div>
+        <p class="fine" data-i18n="as3"></p>
+      </div>
+      <div class="col">
+        <div class="card" id="p3"></div>
+        <div class="card">
+          <h2 data-i18n="set"></h2>
+          <div><h3 data-i18n="veh3"></h3><div class="seg" id="veh3"></div></div>
+          <div><h3 data-i18n="road3"></h3><select id="road3"></select></div>
+          <div class="sl"><div class="top"><span data-i18n="vtrue3"></span><span class="val num" id="vk3V"></span></div><input type="range" id="vk3" min="20" max="140" step="1" value="72"><div class="ends"><span>20 km/h</span><span>140 km/h</span></div></div>
+        </div>
+        <div class="card">
+          <h2 data-i18n="res3"></h2>
+          <div id="o3"></div>
+        </div>
+      </div>
+    </div>
+    <div class="lab" id="lab3A" hidden>
+      <div class="stage">
+        <p class="hint" data-i18n="hint3a"></p>
+        <canvas id="c3a" aria-label="Đoạn đường có camera đầu và cuối đoạn đo tốc độ trung bình"></canvas>
+        <div class="clock" id="clk3"><div class="digits" id="clk3d">08:00:00</div><div class="cl"><b data-i18n="clk3t"></b><span id="clk3s"></span></div></div>
+        <div class="controls">
+          <button class="btn primary" id="run3a" data-i18n="run3a"></button>
+          <button class="btn" id="rst3a" data-i18n="reset"></button>
+        </div>
+        <p class="fine" data-i18n="as3a"></p>
+      </div>
+      <div class="col">
+        <div class="card" id="p3b"></div>
+        <div class="card">
+          <h2 data-i18n="set"></h2>
+          <div class="two">
+            <div><h3 data-i18n="len3a"></h3><div class="seg" id="len3a"></div></div>
+            <div><h3 data-i18n="lim3a"></h3><div class="seg" id="lim3a"></div></div>
+          </div>
+          <div class="sl"><div class="top"><span data-i18n="seg1"></span><span class="val" id="sa1V"></span></div><input type="range" id="sa1" min="40" max="150" step="5" value="130"></div>
+          <div class="sl"><div class="top"><span data-i18n="seg2"></span><span class="val" id="sa2V"></span></div><input type="range" id="sa2" min="40" max="150" step="5" value="90"></div>
+          <div class="sl"><div class="top"><span data-i18n="seg3"></span><span class="val" id="sa3V"></span></div><input type="range" id="sa3" min="40" max="150" step="5" value="130"></div>
+        </div>
+        <div class="card"><h2 data-i18n="res3"></h2><div id="o3a"></div></div>
+      </div>
+    </div>
+    <details class="k" open><summary data-i18n="kT3"></summary><div data-i18n-html="k3"></div></details>
+  </section>
+
+  <!-- ===================== TAB 4: KHOẢNG CÁCH AN TOÀN ===================== -->
+  <section id="t4" class="col" hidden>
+    <p class="req" data-i18n-html="req4"></p>
+    <div class="vids" id="v4"></div>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" data-i18n="hint4"></p>
+        <canvas id="c4" aria-label="Hai xe cùng làn, xe phía trước phanh gấp"></canvas>
+        <div class="controls">
+          <button class="btn primary" id="run4" data-i18n="run4"></button>
+          <button class="btn" id="rst4" data-i18n="reset"></button>
+          <span class="muted" data-i18n="slow"></span><div class="seg" id="sp4"></div>
+        </div>
+        <p class="status" id="st4" aria-live="polite"></p>
+        <h2 data-i18n="chart4"></h2>
+        <canvas id="c4b" aria-label="Biểu đồ quãng đường dừng xe theo tốc độ"></canvas>
+        <div class="legend"><span><i style="background:var(--react)"></i><span data-i18n="lgReact"></span></span><span><i style="background:var(--brake)"></i><span data-i18n="lgBrake"></span></span><span><i style="background:var(--ink);height:3px"></i><span data-i18n="lgLaw"></span></span><span><i style="background:var(--vel);height:3px"></i><span data-i18n="lgGap"></span></span></div>
+        <p class="fine" data-i18n="as4"></p>
+      </div>
+      <div class="col">
+        <div class="card" id="p4"></div>
+        <div class="card">
+          <h2 data-i18n="set"></h2>
+          <div><h3 data-i18n="sc4"></h3><div class="seg" id="sc4"></div></div>
+          <div class="sl"><div class="top"><span data-i18n="v4"></span><span class="val" id="v4V"></span></div><input type="range" id="v4" min="20" max="120" step="5" value="60"><div class="ends"><span>20 km/h</span><span>120 km/h</span></div></div>
+          <div class="sl"><div class="top"><span data-i18n="d4"></span><span class="val" id="d4V"></span></div><input type="range" id="d4" min="5" max="150" step="1" value="35"><div class="ends"><span>5 m</span><span>150 m</span></div></div>
+          <div><h3 data-i18n="rt4"></h3><div class="choices" id="rt4"></div></div>
+          <div><h3 data-i18n="road4"></h3><div class="seg" id="road4"></div></div>
+        </div>
+        <div class="card"><h2 data-i18n="res4"></h2><div id="o4"></div></div>
+        <div class="card"><h2 data-i18n="law4"></h2><table class="law" id="law4"></table><p class="fine" data-i18n="law4n"></p></div>
+        <div class="card" id="p4b"></div>
+      </div>
+    </div>
+    <details class="k" open><summary data-i18n="kT4"></summary><div data-i18n-html="k4"></div></details>
+  </section>
+
+  <p class="fine" data-i18n-html="footer"></p>
+</div>
+<script>
+/* ================= Chuỗi song ngữ ================= */
+const I18N={vi:{
+eyebrow:'KHTN 7 · Tốc độ · Đo tốc độ và an toàn giao thông',title:'Đo tốc độ và an toàn giao thông',
+gvBtn:'Che số liệu',tab1:'1. Đồng hồ bấm giây',tab2:'2. Cổng quang điện',tab3:'3. Thiết bị bắn tốc độ',tab4:'4. Tốc độ và khoảng cách an toàn',
+set:'Thiết lập',reset:'Đặt lại',clearTbl:'Xoá bảng',slow:'Chậm:',showTrue:'Hiện giá trị thật',hideTrue:'Ẩn giá trị thật',
+predTitle:'Dự đoán trước',predThen:'Làm thí nghiệm để kiểm tra, rồi xem đáp án.',showAns:'Xem đáp án',hideAns:'Ẩn đáp án',
+vLbl:'Video thực tế',vUnchecked:'⚠ Mới kiểm tra được tiêu đề, chưa xem được nội dung và thời lượng; GV nên xem trước.',vOpen:'Mở trên YouTube ↗',vClose:'Đóng ✕',
+vEnvClaude:'Bấm ảnh để mở video ở thẻ mới. Khi trang lên web, video sẽ phát ngay tại đây.',vEnvWeb:'Bấm ảnh để phát video ngay tại đây.',vEnvFile:'Bản offline: video phát từ thư mục media/ cạnh file này.',
+vNoFile:'Chưa có file video trong thư mục media/: cần lưu với tên {f}. Khi có mạng, mở trên YouTube:',
+kindPhen:'Hiện tượng',kindExp:'Thí nghiệm',kindApp:'Ứng dụng',vLook:'Để ý: ',
+footer:'Mô phỏng thuộc bộ <b>Mô phỏng Vật lí 6789</b> (KHTN THCS, chương trình GDPT 2018). Kí hiệu: s là quãng đường, t là thời gian, v là tốc độ; v = s : t; 1 m/s = 3,6 km/h. Số liệu luật lấy theo Thông tư 38/2024/TT-BGTVT (hiệu lực 01/01/2025).',
+
+/* Tab 1 */
+req1:'<b>Yêu cầu cần đạt (KHTN 7):</b> Mô tả được sơ lược cách đo tốc độ bằng <b>đồng hồ bấm giây</b> và cổng quang điện trong dụng cụ thực hành ở nhà trường. Xác định được tốc độ = quãng đường vật đi / thời gian đi quãng đường đó.',
+hint1:'Bấm “Cho xuất phát”. Khi vật vừa chạm vạch A thì bấm nút cam (hoặc phím cách) để chạy đồng hồ; khi vật chạm vạch B thì bấm lần nữa để dừng. Đo nhiều lần rồi so với giá trị thật.',
+clk1t:'Đồng hồ bấm giây',go1:'▶ Cho xuất phát',press1:'⏱ BẤM',
+who1:'Vật chuyển động',dist1:'Quãng đường AB',mode1:'Ai bấm đồng hồ?',modeMe:'Em tự bấm',modeBot:'Bạn ảo bấm',
+mToy:'Xe đồ chơi',mWalk:'Bạn đi bộ',mRun:'Bạn chạy nhanh',mBike:'Xe đạp',
+tbl1:'Bảng kết quả',thN:'Lần',thS:'s (m)',thT:'t đo (s)',thV:'v = s/t (m/s)',thTt:'t thật (s)',thE:'Lệch t',mean:'Trung bình',
+st1Idle:'Chọn vật và quãng đường, rồi bấm “Cho xuất phát”.',st1Run:'Vật đang chạy tới. Canh vạch A!',st1On:'Đồng hồ đang chạy, canh vạch B!',
+st1Rec:'Đã ghi lần đo. Bấm “Cho xuất phát” để đo lại.',st1Early:'Em bấm khi vật chưa tới A, lần này sẽ lệch nhiều. Vẫn ghi lại để so sánh.',
+st1Bot:'Bạn ảo đang canh vạch… (phản ứng của người khoảng 0,15–0,35 s)',st1Need:'Bấm “Cho xuất phát” trước đã.',
+st1Miss:'Vật đã qua B mà đồng hồ chưa dừng. Bấm để dừng.',
+note1T:'Giá trị thật của lần đo gần nhất: tốc độ {v} m/s ({k} km/h). Thời gian thật đi hết AB là {t} s.',
+note1H:'Bấm “Hiện giá trị thật” sau khi đo để biết mình bấm lệch bao nhiêu.',
+as1:'Giả thiết mô phỏng: vật chuyển động đều qua đoạn AB; tốc độ mỗi lượt thay đổi nhẹ (±3 %) như người thật. Đồng hồ hiện 0,01 s nhưng tay người bấm chậm khoảng 0,1–0,3 s.',
+p1q:'Bạn chạy nhanh (khoảng 6 m/s). Đo bằng đồng hồ bấm tay trên quãng 5 m và trên quãng 50 m. Phép đo nào cho tốc độ lệch (tính theo phần trăm) nhiều hơn?',
+p1a:'Quãng 50 m, vì đường dài nên dễ sai',p1b:'Quãng 5 m',p1c:'Như nhau, vì cùng một đồng hồ',
+p1e:'Quãng 5 m. Tay người luôn bấm trễ hoặc sớm khoảng 0,1–0,3 s dù quãng dài hay ngắn. Quãng 5 m chỉ mất chưa tới 1 s, nên 0,2 s là sai tới hơn 20 %. Quãng 50 m mất khoảng 8 s, cùng 0,2 s chỉ sai khoảng 2–3 %.',
+p1bq:'Đồng hồ hiện tới 0,01 s. Vậy kết quả đo bằng tay có chính xác tới 0,01 s không?',
+p1ba:'Có, đồng hồ hiện bao nhiêu thì chính xác bấy nhiêu',p1bb:'Không, sai số do tay người lớn hơn nhiều (khoảng 0,2 s)',p1bc:'Chỉ đúng khi đo người đi bộ',
+p1be:'Không. Độ chia nhỏ nhất của đồng hồ là 0,01 s, nhưng phản ứng của mắt và tay mất khoảng 0,2 s. Sai số của phép đo do cái lớn hơn quyết định. Vì vậy ta đo nhiều lần lấy trung bình, chọn quãng đường đủ dài, hoặc dùng cổng quang điện (tab 2).',
+kT1:'Cơ chế khoa học · giải thích cho học sinh · hiểu sai thường gặp',
+k1:`<h3>Cơ chế</h3><p>Tốc độ được tính bằng v = s : t. Muốn biết v, ta đo hai đại lượng: quãng đường s (thước dây, vạch kẻ sẵn) và thời gian t (đồng hồ). Với đồng hồ bấm tay, thời gian đo được là khoảng thời gian giữa hai lần ngón tay bấm, không phải giữa hai lúc vật chạm vạch. Từ lúc mắt thấy vật chạm vạch đến lúc ngón tay bấm, tín hiệu phải đi từ mắt lên não, não ra lệnh, rồi tín hiệu theo dây thần kinh xuống cơ tay. Quá trình này mất khoảng 0,15–0,3 s và mỗi lần một khác.</p>
+<p>Hai lần bấm đều trễ nên một phần sai số tự triệt tiêu, nhưng phần còn lại vẫn khoảng ±0,1–0,2 s. Sai số này gần như không đổi, nên thời gian đo càng ngắn thì phần trăm sai càng lớn.</p>
+<h3>Nói với học sinh</h3><p>Đồng hồ thì nhanh, tay mình thì chậm. Mắt thấy rồi, não mới bảo tay bấm, mất chừng “một cái chớp mắt”. Đo vật chạy vèo qua 2 m thì cái chớp mắt đó chiếm phần lớn thời gian. Đo trên đoạn dài thì cái chớp mắt chỉ là phần nhỏ. Vì thế: chọn đoạn đường dài, đo nhiều lần, lấy trung bình.</p>
+<h3>Hiểu sai thường gặp</h3><ul><li>“Đồng hồ hiện 0,01 s nên kết quả chính xác 0,01 s.” Sai: sai số do người bấm lớn hơn nhiều.</li><li>“Đo một lần là đủ.” Mỗi lần bấm lệch khác nhau, nên cần đo 3–5 lần và lấy trung bình.</li><li>“Bấm đúng lúc vật xuất phát.” Ở đây vật đã chạy đà trước vạch A; ta đo thời gian đi đoạn AB, không phải lúc bắt đầu chạy.</li></ul>
+<h3>Nguồn gốc thuật ngữ</h3><p><b>Tốc độ</b> 速度: <i>tốc</i> 速 là nhanh (như “cấp tốc”, “tốc hành”), <i>độ</i> 度 là mức, thước đo (như “nhiệt độ”, “độ dài”). Tốc độ là “mức nhanh”. Tiếng Trung đọc <i>sùdù</i>, tiếng Nhật <i>sokudo</i> (速度). Tiếng Anh <b>speed</b> gốc tiếng Anh cổ <i>spēd</i> nghĩa là “thành công, may mắn” (còn trong lời chúc <i>Godspeed</i>), về sau mới mang nghĩa “nhanh”. <i>Velocity</i> (vận tốc, có hướng, học ở lớp 10) từ Latinh <i>velox</i> “nhanh”; tiếng Pháp <i>vitesse</i>, tiếng Đức <i>Geschwindigkeit</i> (<i>geschwind</i> = nhanh). <b>Đồng hồ bấm giây</b> tiếng Anh là <i>stopwatch</i>, “đồng hồ dừng được”.</p>`,
+
+/* Tab 2 */
+req2:'<b>Yêu cầu cần đạt (KHTN 7):</b> Mô tả được sơ lược cách đo tốc độ bằng đồng hồ bấm giây và <b>cổng quang điện</b> trong dụng cụ thực hành ở nhà trường.',
+hint2:'Kéo cổng A và cổng B dọc máng để đổi quãng đường. Bấm “Thả bi”. Đồng hồ hiện số tự chạy khi bi che chùm sáng ở cổng A và tự dừng khi bi che chùm sáng ở cổng B, không cần tay người.',
+clk2t:'Đồng hồ đo thời gian hiện số',release:'▶ Thả bi',
+track2:'Kiểu máng',trkInc:'Máng nghiêng',trkFlat:'Máng ngang (bi đã được đẩy)',ang2:'Góc nghiêng của máng',v02:'Tốc độ bi khi được đẩy',
+clkMode:'Chế độ đồng hồ',cmAB:'A ↔ B',cmA:'Chỉ cổng A',
+cmhAB:'Đồng hồ đo thời gian bi đi từ cổng A đến cổng B. Tốc độ trung bình trên đoạn AB: v = s<sub>AB</sub> : t.',
+cmhA:'Đồng hồ đo thời gian bi che chùm sáng ở cổng A. Quãng đường lúc này chính là đường kính bi d = 2,0 cm, nên v ≈ d : t là tốc độ bi lúc đi qua A.',
+tbl2:'Bảng kết quả',thMode:'Chế độ',thSc:'s (cm)',thT3:'t (s)',thV2:'v (m/s)',
+st2Idle:'Kéo hai cổng tới chỗ muốn đo, rồi thả bi.',st2Run:'Bi đang lăn…',st2Done:'Đã ghi kết quả. Kéo cổng hoặc đổi góc rồi thả lại.',
+st2Drag:'Đang kéo cổng {g}: cách đầu máng {x} cm.',
+note2:'Nếu đo khoảng thời gian {t} s này bằng tay, sai lệch 0,2 s sẽ làm kết quả lệch khoảng {p} %.',
+as2:'Giả thiết mô phỏng: viên bi thép đường kính 2,0 cm lăn không trượt, bỏ qua ma sát lăn và sức cản không khí; đồng hồ hiện số có độ chia 0,001 s. Máng dài 1,0 m.',
+p2q:'Máng nghiêng. Đặt hai cổng cách nhau 20 cm ở đầu máng, sau đó dời cả hai xuống cuối máng (vẫn cách nhau 20 cm). Thời gian đồng hồ đo được sẽ thế nào?',
+p2a:'Như nhau, vì cùng 20 cm',p2b:'Ở cuối máng ngắn hơn',p2c:'Ở cuối máng dài hơn',
+p2e:'Ở cuối máng ngắn hơn. Trên máng nghiêng, bi lăn càng lúc càng nhanh, nên cùng 20 cm bi đi hết ít thời gian hơn. Tốc độ đo được (s : t) là tốc độ trung bình trên đoạn đó. Thử chuyển sang “máng ngang”: bi chạy đều, thời gian ở đâu cũng như nhau.',
+p2bq:'Ở chế độ “Chỉ cổng A”, đồng hồ đo khoảng thời gian nào?',
+p2ba:'Thời gian bi đi từ đầu máng tới A',p2bb:'Thời gian bi che chùm sáng ở A (bi đi được một đoạn bằng đường kính của nó)',p2bc:'Thời gian bi đi từ A tới cuối máng',
+p2be:'Đồng hồ chạy khi mép trước của bi cắt chùm sáng và dừng khi mép sau của bi rời chùm sáng. Trong thời gian đó bi đi được đúng bằng đường kính d = 2 cm. Thời gian rất ngắn (vài phần trăm giây), tay người không thể bấm được, chỉ cổng quang điện mới đo được.',
+kT2:'Cơ chế khoa học · giải thích cho học sinh · hiểu sai thường gặp',
+k2:`<h3>Cơ chế</h3><p>Mỗi cổng quang điện có một bên phát chùm tia hồng ngoại (hoặc ánh sáng) và một bên là cảm biến quang (điốt quang hoặc tranzito quang). Khi có ánh sáng chiếu vào, cảm biến cho dòng điện chạy qua; khi vật chắn chùm sáng, dòng điện tắt. Sự thay đổi đó là một tín hiệu điện đưa về đồng hồ đo thời gian hiện số. Bên trong đồng hồ là một bộ dao động thạch anh đếm hàng nghìn nhịp mỗi giây, nên đo được tới 0,001 s.</p>
+<p>Chế độ <b>A ↔ B</b>: tín hiệu ở cổng A bắt đầu đếm, tín hiệu ở cổng B dừng đếm. Chế độ <b>A</b>: đồng hồ đếm trong suốt thời gian chùm sáng ở A bị che. Không có tay người tham gia nên không có sai số phản ứng.</p>
+<h3>Nói với học sinh</h3><p>Cổng quang điện giống “cánh cửa tự động” ở siêu thị: có tia sáng vô hình chiếu ngang, ai đi qua chắn tia sáng là máy biết ngay. Ở đây máy không mở cửa mà bấm đồng hồ, và bấm nhanh hơn tay người cả trăm lần.</p>
+<h3>Hiểu sai thường gặp</h3><ul><li>“Cổng quang điện đo tốc độ.” Thật ra nó đo <b>thời gian</b>. Tốc độ do ta tính: lấy quãng đường chia thời gian.</li><li>“Tốc độ đo được trên máng nghiêng là tốc độ của bi.” Đó là tốc độ trung bình trên đoạn AB; bi đang nhanh dần.</li><li>“Đồng hồ chạy khi bi ở giữa cổng.” Đồng hồ chạy ngay khi mép trước của bi chạm chùm sáng.</li></ul>
+<h3>Nguồn gốc thuật ngữ</h3><p><b>Quang điện</b> 光電: <i>quang</i> 光 là ánh sáng, <i>điện</i> 電 là điện: “ánh sáng tạo ra (hay điều khiển) tín hiệu điện”. Tiếng Anh <i>photogate</i> (Mỹ) hay <i>light gate</i> (Anh): <i>photo-</i> từ tiếng Hy Lạp <i>phōs, phōtós</i> “ánh sáng”, <i>gate</i> là cổng. Tiếng Trung gọi <i>光电门</i> (guāngdiàn mén, “cửa quang điện”).</p>`,
+
+/* Tab 3 */
+req3:'<b>Yêu cầu cần đạt (KHTN 7):</b> Mô tả được sơ lược thiết bị <b>“bắn tốc độ”</b> trong kiểm tra tốc độ các phương tiện giao thông.',
+m3L:'Súng bắn tốc độ laser',m3A:'Đo tốc độ trung bình theo đoạn',
+hint3:'Chỉnh tốc độ thật của xe (người lái biết, cảnh sát chưa biết). Bấm “Bắn” khi xe trong tầm. Súng gửi hai xung laser cách nhau 0,300 s, đo hai khoảng cách, rồi tính tốc độ.',
+fire3:'🔫 BẮN',veh3:'Loại xe',vCar:'Ô tô con',vMoto:'Xe mô tô',road3:'Loại đường (Thông tư 38/2024)',vtrue3:'Tốc độ thật của xe',res3:'Kết quả đo',
+rKdc2:'Trong khu dân cư, đường hai chiều',rKdc1:'Trong khu dân cư, đường đôi',rOut2:'Ngoài khu dân cư, đường hai chiều',rOut1:'Ngoài khu dân cư, đường đôi',rExp:'Đường cao tốc',
+lim:'tối đa {v} km/h',noMoto:'Xe mô tô không được đi vào đường cao tốc.',
+st3Ready:'Xe trong tầm, có thể bắn.',st3Far:'Xe còn xa, chờ vào tầm (dưới 400 m).',st3P1:'Xung 1 đang bay…',st3Gap:'Chờ 0,300 s…',st3P2:'Xung 2 đang bay…',st3Done:'Đã đo xong.',
+slowNote:'Xung laser được vẽ chậm lại khoảng 1 000 000 lần',
+p1L:'Xung 1',p2L:'Xung 2',tRound:'thời gian đi và về',dist:'khoảng cách',
+o3c:'Ánh sáng đi với tốc độ c = 300 000 km/s = 300 000 000 m/s.',o3dd:'Xe đi được',o3v:'Tốc độ',
+okLim:'✓ Không vượt tốc độ ({v} ≤ {l} km/h)',overLim:'✗ Vượt tốc độ {d} km/h ({v} > {l} km/h)',
+o3wait:'Bấm “Bắn” để đo.',
+as3:'Giả thiết mô phỏng: súng đặt sát lề, xe chạy thẳng về phía súng nên khoảng cách đo được giảm dần; máy thật bắn hàng chục xung trong khoảng 0,3–0,5 s rồi lấy trung bình, sai số khoảng ±1–2 km/h. Ở đây chỉ vẽ hai xung cho dễ theo dõi.',
+hint3a:'Camera ở đầu và cuối đoạn chụp biển số xe cùng thời điểm đi qua. Chỉnh tốc độ của xe trên ba khúc (khúc giữa có chốt bắn laser), rồi bấm “Cho xe chạy”. Thời gian được tua nhanh 60 lần.',
+clk3t:'Đồng hồ hệ thống camera',run3a:'▶ Cho xe chạy',len3a:'Chiều dài đoạn',lim3a:'Tốc độ tối đa',
+seg1:'Khúc 1: tốc độ',seg2:'Khúc 2 (có chốt laser): tốc độ',seg3:'Khúc 3: tốc độ',
+camA:'Camera đầu đoạn',camB:'Camera cuối đoạn',laserPost:'Chốt laser',
+o3aTA:'Qua camera đầu đoạn',o3aTB:'Qua camera cuối đoạn',o3aT:'Thời gian đi hết đoạn',o3aV:'Tốc độ trung bình',o3aL:'Tốc độ ở chốt laser',
+o3aWait:'Xe chưa đi hết đoạn. Kết quả sẽ có khi xe qua camera cuối đoạn.',
+as3a:'Giả thiết mô phỏng: trên mỗi khúc xe chạy đều; thời gian đổi tốc độ bỏ qua. Hệ thống thật nhận biển số bằng camera và đồng bộ giờ giữa các camera.',
+p3q:'Súng laser “biết” tốc độ của xe bằng cách nào?',
+p3a:'Tia laser đo trực tiếp tốc độ, như tốc kế trên xe',p3b:'Đo khoảng cách tới xe hai lần cách nhau một khoảng thời gian, rồi lấy quãng đường xe đi chia thời gian',p3c:'Chụp ảnh xe rồi đoán',
+p3e:'Súng đo khoảng cách bằng thời gian đi và về của xung sáng: d = c × t : 2. Đo hai lần, khoảng cách giảm bao nhiêu là xe đi được bấy nhiêu trong khoảng thời gian giữa hai xung. Tốc độ = quãng đường : thời gian, đúng công thức lớp 7.',
+p3bq:'Đoạn 10 km, tốc độ tối đa 100 km/h. Xe chạy 130 km/h, gần tới chốt laser thì giảm còn 90 km/h, qua chốt lại chạy 130 km/h. Xe có vi phạm không?',
+p3ba:'Không, vì lúc qua chốt chỉ 90 km/h',p3bb:'Có: chốt laser không phát hiện, nhưng camera đầu và cuối đoạn tính ra tốc độ trung bình vẫn trên 100 km/h',p3bc:'Không biết được',
+p3be:'Tốc độ trung bình = quãng đường cả đoạn : thời gian đi cả đoạn. Giảm tốc một chút ở chốt không bù lại được thời gian đã “ăn bớt” ở hai khúc kia. Thử trong mô phỏng với 130 – 90 – 130 km/h.',
+kT3:'Cơ chế khoa học · giải thích cho học sinh · hiểu sai thường gặp',
+k3:`<h3>Cơ chế: súng laser (LIDAR)</h3><p>Súng phát một xung ánh sáng hồng ngoại rất ngắn (vài phần tỉ giây). Xung bay tới xe, phản xạ ở biển số hoặc đèn xe rồi quay về. Đồng hồ điện tử trong súng đo thời gian đi và về t. Ánh sáng đi với tốc độ c ≈ 300 000 km/s, nên khoảng cách d = c × t : 2 (chia 2 vì xung đi cả lượt đi và lượt về). Ở 300 m, t chỉ khoảng 2 phần triệu giây. Sau một khoảng thời gian Δt, súng bắn xung tiếp theo và đo khoảng cách mới. Hiệu hai khoảng cách là quãng đường xe đi trong Δt, nên v = (d₁ − d₂) : Δt.</p>
+<p>Chùm laser rất hẹp (ở 300 m chỉ rộng khoảng 1 m), nên cảnh sát chọn được đúng một xe giữa dòng xe.</p>
+<h3>Cơ chế: súng radar</h3><p>Súng radar phát sóng vô tuyến liên tục. Sóng phản xạ từ xe đang chạy tới có tần số cao hơn một chút, xe chạy ra xa thì thấp hơn (hiệu ứng Doppler, học ở lớp trên). Từ độ lệch tần số, máy tính ra tốc độ. Chùm radar rộng hơn laser nên khó tách từng xe.</p>
+<h3>Cơ chế: đo tốc độ trung bình theo đoạn</h3><p>Hai camera ở đầu và cuối đoạn đường dài vài kilômét, cùng một đồng hồ chuẩn. Camera đọc biển số và ghi thời điểm xe đi qua. Tốc độ trung bình = chiều dài đoạn : thời gian. Đây chính là cách đo bằng “đồng hồ bấm giây” nhưng quãng đường dài hàng km, nên sai số thời gian vài phần trăm giây là không đáng kể.</p>
+<h3>Nói với học sinh</h3><p>Súng laser giống em hét vào vách núi rồi đếm thời gian tiếng vọng về để biết vách núi xa bao nhiêu, chỉ khác là dùng ánh sáng thay cho âm thanh và nhanh gấp gần một triệu lần. Đo hai lần là biết xe tới gần thêm bao nhiêu mét trong thời gian đó.</p>
+<h3>Hiểu sai thường gặp</h3><ul><li>“Tia laser đo thẳng ra tốc độ.” Không: nó đo khoảng cách và thời gian; tốc độ là phép chia.</li><li>“Thấy chốt bắn tốc độ thì phanh lại là xong.” Đoạn có camera đo tốc độ trung bình vẫn phát hiện.</li><li>“Laser đi chậm nên phải chờ.” Ánh sáng đi 300 m chỉ mất 1 phần triệu giây; trong lúc đó xe gần như đứng yên.</li></ul>
+<h3>Nguồn gốc thuật ngữ</h3><p><b>Laser</b> là chữ viết tắt tiếng Anh <i>Light Amplification by Stimulated Emission of Radiation</i>, “khuếch đại ánh sáng bằng phát xạ kích thích” (đặt ra khoảng năm 1959). <b>LIDAR</b>: <i>LIght Detection And Ranging</i>, “phát hiện và đo khoảng cách bằng ánh sáng”. <b>Radar</b>: <i>RAdio Detection And Ranging</i> (Hải quân Mỹ, 1940), dùng sóng vô tuyến. Tiếng Việt gọi chung là “súng bắn tốc độ”; tiếng Trung là 测速仪 (cèsù yí, “máy đo tốc độ”); tiếng Pháp <i>cinémomètre</i> (Hy Lạp <i>kínēma</i> “chuyển động” + <i>métron</i> “đo”).</p>`,
+
+/* Tab 4 */
+req4:'<b>Yêu cầu cần đạt (KHTN 7):</b> Dựa vào tranh ảnh (hoặc học liệu điện tử) thảo luận để nêu được <b>ảnh hưởng của tốc độ trong an toàn giao thông</b>.',
+hint4:'Xe xanh (em) đi sau xe đỏ. Chọn tốc độ, khoảng cách (kéo xe xanh hoặc dùng thanh trượt), thời gian phản ứng và mặt đường. Bấm “Chạy”: xe đỏ phanh gấp, em mất một lúc mới đạp phanh được. Có kịp dừng không?',
+run4:'▶ Chạy',again4:'▶ Chạy lại',chart4:'Quãng đường cần để dừng xe theo tốc độ',
+lgReact:'Đi trong thời gian phản ứng',lgBrake:'Đi trong lúc phanh',lgLaw:'Khoảng cách tối thiểu theo luật',lgGap:'Khoảng cách em đang giữ',
+sc4:'Tình huống',scBrake:'Xe trước phanh gấp',scObs:'Vật cản đứng yên phía trước',
+v4:'Tốc độ hai xe',d4:'Khoảng cách tới xe trước',rt4:'Thời gian phản ứng của người lái',road4:'Mặt đường',
+rtFocus:'Tập trung',rtTired:'Mệt, buồn ngủ',rtAlc:'Đã uống rượu bia',rtPhone:'Nhìn điện thoại',
+dry:'Khô',wet:'Ướt, mưa',
+res4:'Kết quả',law4:'Khoảng cách an toàn tối thiểu (Thông tư 38/2024)',
+law4n:'Áp dụng khi mặt đường khô ráo. Trời mưa, sương mù, đường trơn, đèo dốc thì phải giữ khoảng cách lớn hơn. Dưới 60 km/h luật không ghi số mét: người lái tự giữ khoảng cách phù hợp.',
+lawRow1:'Tốc độ 60 km/h',lawRow2:'Trên 60 đến 80 km/h',lawRow3:'Trên 80 đến 100 km/h',lawRow4:'Trên 100 đến 120 km/h',lawRow0:'Dưới 60 km/h',lawFree:'chủ động, phù hợp',
+o4react:'Đi trong thời gian phản ứng',o4brake:'Đi trong lúc phanh',o4stop:'Tổng quãng đường dừng xe',o4sec:'Khoảng cách theo giây',o4law:'Luật yêu cầu',o4lawFree:'tự giữ cho phù hợp',
+o4ok:'✓ Dừng kịp, còn cách {g} m',o4col:'✗ Va chạm ở tốc độ {v} km/h',o4h:'Va chạm này mạnh như rơi từ độ cao khoảng {h} m (khoảng tầng {f}).',
+o4lawOk:'Đủ khoảng cách theo luật ({d} m).',o4lawNo:'Chưa đủ khoảng cách theo luật (cần ít nhất {d} m).',o4wet:'Đường ướt: luật yêu cầu giữ xa hơn mức trong bảng.',
+o4secAdv:'Quy tắc thường dùng ở nhiều nước: giữ ít nhất 2–3 giây (đường ướt gấp đôi).',
+st4Idle:'Bấm “Chạy” để xem.',st4Pre:'Hai xe chạy cùng tốc độ…',st4React:'Xe trước phanh! Em đang phản ứng… ({t} s)',st4React1:'Có vật cản! Em đang phản ứng… ({t} s)',st4Brake:'Em đang phanh…',st4Stop:'Dừng kịp.',st4Crash:'Va chạm!',
+gapLbl:'cách {d} m',reactBub:'Thấy rồi… đạp phanh!',obsLbl:'Vật cản',
+as4:'Giả thiết mô phỏng: phanh gấp làm tốc độ giảm đều khoảng 25 km/h mỗi giây trên đường khô, 14 km/h mỗi giây trên đường ướt (lốp tốt, phanh tốt); hai xe phanh tốt như nhau. Thời gian phản ứng là giá trị ước lượng điển hình; người thật có thể khác. Hình xe được vẽ to hơn thật cho dễ nhìn, khoảng hở giữa hai xe vẽ đúng tỉ lệ.',
+p4q:'Đi 50 km/h, sau khi đạp phanh xe còn trôi khoảng 14 m mới dừng. Nếu đi 100 km/h (gấp đôi) thì sau khi đạp phanh xe còn trôi bao xa?',
+p4a:'Khoảng 28 m (gấp đôi)',p4b:'Khoảng 55 m (gấp bốn)',p4c:'Vẫn khoảng 14 m',
+p4e:'Gấp bốn, khoảng 55 m. Tốc độ gấp đôi thì mỗi giây xe đi xa gấp đôi, và cũng cần gấp đôi thời gian mới phanh hết tốc độ. Hai cái nhân lên thành gấp bốn. Xem biểu đồ cột màu đỏ: cột tăng nhanh hơn tốc độ.',
+p4bq:'Xe trước phanh gấp, xe em phanh tốt như xe trước. Khoảng cách tối thiểu để không đâm vào xe trước chủ yếu phụ thuộc vào điều gì?',
+p4ba:'Quãng đường phanh của xe em',p4bb:'Quãng đường xe em đi trong thời gian phản ứng',p4bc:'Khối lượng của hai xe',
+p4be:'Thời gian phản ứng. Khi hai xe phanh như nhau, xe trước bắt đầu phanh sớm hơn em đúng bằng thời gian phản ứng. Khoảng cách bị “ăn mất” chính là quãng đường em đi trong thời gian đó (60 km/h, 1,5 s là 25 m). Nhìn điện thoại 3 s ở 60 km/h là đi mù 50 m! Đổi sang “Vật cản đứng yên” thì phải cộng thêm cả quãng đường phanh.',
+kT4:'Cơ chế khoa học · giải thích cho học sinh · số liệu thật',
+k4:`<h3>Cơ chế</h3><p>Từ lúc thấy nguy hiểm đến lúc xe dừng hẳn gồm hai giai đoạn. <b>Giai đoạn phản ứng</b>: mắt thấy, não xử lí, chân chuyển sang bàn phanh. Trong thời gian này xe vẫn chạy nguyên tốc độ, nên quãng đường = tốc độ × thời gian phản ứng (tăng tỉ lệ với tốc độ). <b>Giai đoạn phanh</b>: lực ma sát giữa lốp và mặt đường làm xe chậm dần (xem mô phỏng Lực ma sát lớp 6). Tốc độ gấp đôi thì quãng đường phanh gấp bốn. Mặt đường ướt làm ma sát giảm, quãng đường phanh dài gần gấp đôi.</p>
+<p>Va chạm ở tốc độ v giống như rơi từ độ cao h = v² : (2g). 50 km/h giống rơi từ khoảng 10 m (tầng 3–4); 100 km/h giống rơi từ khoảng 39 m (tầng 13).</p>
+<h3>Nói với học sinh</h3><p>Hãy nói khoảng cách bằng <b>giây</b> thay vì mét: khi xe trước đi qua một cột điện, em đếm “một nghìn lẻ một, một nghìn lẻ hai”. Đếm xong mà xe em mới tới cột điện là đủ 2 giây. Chạy nhanh thì 2 giây là quãng dài hơn, nên cách đếm này tự điều chỉnh theo tốc độ.</p>
+<h3>Số liệu thật</h3><ul><li>Thông tư 38/2024/TT-BGTVT (từ 01/01/2025): tốc độ tối đa trong khu dân cư 60 km/h (đường đôi) và 50 km/h (đường hai chiều); ngoài khu dân cư ô tô con 90 và 80 km/h, xe mô tô 70 và 60 km/h; xe gắn máy (dưới 50 cm³) tối đa 40 km/h; đường cao tốc tối đa 120 km/h.</li><li>Khoảng cách an toàn tối thiểu khi đường khô: 35 m (60 km/h), 55 m (trên 60–80), 70 m (trên 80–100), 100 m (trên 100–120 km/h).</li><li>Tổ chức Y tế Thế giới (WHO): người đi bộ trưởng thành bị ô tô đâm ở tốc độ dưới 50 km/h có nguy cơ tử vong dưới 20 %, ở 80 km/h là gần 60 %. Mỗi 1 km/h tốc độ trung bình tăng thêm làm tăng khoảng 3 % số vụ va chạm gây thương tích.</li></ul>
+<h3>Hiểu sai thường gặp</h3><ul><li>“Tốc độ gấp đôi thì quãng đường phanh gấp đôi.” Thật ra gấp bốn.</li><li>“Phanh tốt thì đi sát cũng được.” Thời gian phản ứng không phụ thuộc phanh; trong thời gian đó xe chưa giảm tốc chút nào.</li><li>“Nhìn điện thoại một tí không sao.” 3 giây ở 50 km/h là đi gần 42 m mà không nhìn đường.</li></ul>`
+},
+en:{
+eyebrow:'Science 7 · Speed · Measuring speed and road safety',title:'Measuring speed and road safety',
+gvBtn:'Hide numbers',tab1:'1. Stopwatch',tab2:'2. Light gates',tab3:'3. Speed guns',tab4:'4. Speed and safe distance',
+set:'Settings',reset:'Reset',clearTbl:'Clear table',slow:'Slow:',showTrue:'Show true values',hideTrue:'Hide true values',
+predTitle:'Predict first',predThen:'Do the experiment to check, then reveal the answer.',showAns:'Show answer',hideAns:'Hide answer',
+vLbl:'Real-world video',vUnchecked:'⚠ Only the title has been checked, not the content or length; teachers should preview.',vOpen:'Open on YouTube ↗',vClose:'Close ✕',
+vEnvClaude:'Tap a thumbnail to open the video in a new tab. Once this page is on the web, videos play right here.',vEnvWeb:'Tap a thumbnail to play the video here.',vEnvFile:'Offline copy: videos play from the media/ folder next to this file.',
+vNoFile:'No video file in the media/ folder yet: save it as {f}. When online, open it on YouTube:',
+kindPhen:'Phenomenon',kindExp:'Experiment',kindApp:'Application',vLook:'Look for: ',
+footer:'Part of the <b>Physics Simulations 6789</b> set (lower-secondary science, Vietnam 2018 curriculum). Symbols: s distance, t time, v speed; v = s ÷ t; 1 m/s = 3.6 km/h. Legal values from Vietnam’s Circular 38/2024/TT-BGTVT (in force 1 Jan 2025).',
+req1:'<b>Learning outcome (Science 7):</b> Briefly describe how to measure speed with a <b>stopwatch</b> and light gates in school lab kits. Find speed = distance travelled ÷ time taken.',
+hint1:'Press “Start”. When the object just reaches line A, press the orange button (or the space bar) to start the clock; when it reaches line B, press again to stop. Repeat and compare with the true value.',
+clk1t:'Stopwatch',go1:'▶ Start',press1:'⏱ PRESS',
+who1:'Moving object',dist1:'Distance AB',mode1:'Who presses the stopwatch?',modeMe:'You',modeBot:'Virtual friend',
+mToy:'Toy car',mWalk:'Walking pupil',mRun:'Sprinting pupil',mBike:'Bicycle',
+tbl1:'Results',thN:'Trial',thS:'s (m)',thT:'t measured (s)',thV:'v = s/t (m/s)',thTt:'t true (s)',thE:'t error',mean:'Mean',
+st1Idle:'Choose the object and distance, then press “Start”.',st1Run:'The object is coming. Watch line A!',st1On:'The clock is running, watch line B!',
+st1Rec:'Trial recorded. Press “Start” to measure again.',st1Early:'You pressed before the object reached A, so this trial will be off. It is still recorded for comparison.',
+st1Bot:'Your virtual friend is watching the line… (human reaction is about 0.15–0.35 s)',st1Need:'Press “Start” first.',
+st1Miss:'The object has passed B but the clock is still running. Press to stop.',
+note1T:'True values for the latest trial: speed {v} m/s ({k} km/h). True time to cover AB: {t} s.',
+note1H:'Press “Show true values” after measuring to see how far off your timing was.',
+as1:'Model assumptions: the object moves at a steady speed through AB; its speed varies slightly (±3 %) from trial to trial, like a real person. The stopwatch shows 0.01 s, but a human hand is about 0.1–0.3 s late.',
+p1q:'A sprinting pupil (about 6 m/s) is timed with a hand stopwatch over 5 m and over 50 m. Which gives a larger percentage error in speed?',
+p1a:'50 m, because it is longer',p1b:'5 m',p1c:'The same, it is the same stopwatch',
+p1e:'5 m. The hand is early or late by about 0.1–0.3 s whatever the distance. Over 5 m the run takes under 1 s, so 0.2 s is more than 20 %. Over 50 m it takes about 8 s, so the same 0.2 s is only 2–3 %.',
+p1bq:'The stopwatch shows 0.01 s. Is a hand-timed result accurate to 0.01 s?',
+p1ba:'Yes, it is as accurate as the display',p1bb:'No, the human error (about 0.2 s) is much bigger',p1bc:'Only for walking pupils',
+p1be:'No. The smallest division is 0.01 s, but eye-and-hand reaction takes about 0.2 s. The larger error decides the uncertainty. So we repeat and average, choose a long enough distance, or use light gates (tab 2).',
+kT1:'Science · explaining to pupils · common misconceptions',
+k1:`<h3>Mechanism</h3><p>Speed is v = s ÷ t. To find v we measure the distance s (tape measure, marked lines) and the time t (a clock). With a hand stopwatch, the measured time is between two finger presses, not between the moments the object crosses the lines. From seeing the object cross to pressing, the signal travels from eye to brain, the brain sends a command, and nerves carry it to the hand muscles: about 0.15–0.3 s, different each time.</p><p>Both presses are late, so part of the error cancels, but about ±0.1–0.2 s remains. Because this error is roughly constant, the shorter the time, the larger the percentage error.</p>
+<h3>For pupils</h3><p>The clock is fast; your hand is slow. You see it, then your brain tells your finger, which takes “a blink”. When something whizzes past 2 m, the blink is most of the time. Over a long distance the blink is a small part. So: use long distances, repeat, and average.</p>
+<h3>Common misconceptions</h3><ul><li>“The display shows 0.01 s, so the result is accurate to 0.01 s.” No: the human error is much larger.</li><li>“One measurement is enough.” Each press is off by a different amount; take 3–5 and average.</li><li>“Press when the object starts moving.” Here the object has a run-up; we time the stretch AB only.</li></ul>
+<h3>Word origins</h3><p>Vietnamese <i>tốc độ</i> 速度 combines 速 “fast” and 度 “degree, measure”; Chinese <i>sùdù</i>, Japanese <i>sokudo</i>. English <b>speed</b> comes from Old English <i>spēd</i> “success, luck” (still heard in <i>Godspeed</i>); the sense “quickness” came later. <i>Velocity</i> is from Latin <i>velox</i> “swift”; French <i>vitesse</i>, German <i>Geschwindigkeit</i>. A <b>stopwatch</b> is a watch you can stop.</p>`,
+req2:'<b>Learning outcome (Science 7):</b> Briefly describe how to measure speed with a stopwatch and <b>light gates</b> in school lab kits.',
+hint2:'Drag gates A and B along the track to change the distance. Press “Release”. The digital timer starts by itself when the ball blocks the beam at A and stops when it blocks the beam at B; no human hand involved.',
+clk2t:'Digital timer',release:'▶ Release',
+track2:'Track',trkInc:'Inclined track',trkFlat:'Level track (ball pushed)',ang2:'Track angle',v02:'Ball speed after the push',
+clkMode:'Timer mode',cmAB:'A ↔ B',cmA:'Gate A only',
+cmhAB:'The timer measures the time from gate A to gate B. Average speed over AB: v = s<sub>AB</sub> ÷ t.',
+cmhA:'The timer measures how long the ball blocks the beam at A. The distance is the ball diameter d = 2.0 cm, so v ≈ d ÷ t is the ball’s speed as it passes A.',
+tbl2:'Results',thMode:'Mode',thSc:'s (cm)',thT3:'t (s)',thV2:'v (m/s)',
+st2Idle:'Drag the two gates where you want, then release the ball.',st2Run:'The ball is rolling…',st2Done:'Result recorded. Move a gate or change the angle and release again.',
+st2Drag:'Dragging gate {g}: {x} cm from the top of the track.',
+note2:'If you timed this {t} s interval by hand, a 0.2 s error would change the result by about {p} %.',
+as2:'Model assumptions: a 2.0 cm steel ball rolls without slipping; rolling friction and air resistance are ignored; the timer resolution is 0.001 s. The track is 1.0 m long.',
+p2q:'Inclined track. Put the gates 20 cm apart near the top, then move both near the bottom (still 20 cm apart). How does the measured time change?',
+p2a:'The same, it is still 20 cm',p2b:'Shorter near the bottom',p2c:'Longer near the bottom',
+p2e:'Shorter near the bottom. On a slope the ball speeds up, so it covers the same 20 cm in less time. The speed s ÷ t is the average speed over that stretch. Try the level track: the ball moves steadily and the time is the same everywhere.',
+p2bq:'In “Gate A only” mode, what does the timer measure?',
+p2ba:'The time from the top of the track to A',p2bb:'How long the ball blocks the beam at A (it moves one diameter)',p2bc:'The time from A to the end',
+p2be:'The timer starts when the front edge of the ball cuts the beam and stops when the back edge leaves it. Meanwhile the ball moves exactly one diameter, 2 cm. The time is a few hundredths of a second, far too short for a hand; only a light gate can measure it.',
+kT2:'Science · explaining to pupils · common misconceptions',
+k2:`<h3>Mechanism</h3><p>Each light gate has an emitter of infrared (or visible) light on one side and a light sensor (photodiode or phototransistor) on the other. When light falls on the sensor, current flows; when an object blocks the beam, the current stops. That change is an electrical signal sent to the digital timer, which counts a quartz oscillator thousands of times per second, so it resolves 0.001 s.</p><p><b>A ↔ B</b> mode: the signal at A starts the count and the signal at B stops it. <b>A</b> mode: the timer counts while the beam at A is blocked. No human hand, so no reaction-time error.</p>
+<h3>For pupils</h3><p>A light gate is like an automatic shop door: an invisible beam crosses the doorway, and anyone who blocks it is detected at once. Here the gate does not open a door; it presses the stopwatch, about a hundred times faster than your hand.</p>
+<h3>Common misconceptions</h3><ul><li>“The light gate measures speed.” It measures <b>time</b>. We calculate speed: distance ÷ time.</li><li>“The speed measured on the slope is the ball’s speed.” It is the average speed over AB; the ball is speeding up.</li><li>“The timer starts when the ball is in the middle of the gate.” It starts when the front edge reaches the beam.</li></ul>
+<h3>Word origins</h3><p>Vietnamese <i>quang điện</i> 光電: 光 “light” + 電 “electricity”. English <i>photogate</i> (US) or <i>light gate</i> (UK); <i>photo-</i> from Greek <i>phōs, phōtós</i> “light”. Chinese 光电门 (guāngdiàn mén, “photoelectric door”).</p>`,
+req3:'<b>Learning outcome (Science 7):</b> Briefly describe <b>speed guns</b> used to check the speed of vehicles.',
+m3L:'Laser speed gun',m3A:'Average-speed cameras',
+hint3:'Set the car’s true speed (the driver knows it; the police do not yet). Press “Fire” when the car is in range. The gun sends two laser pulses 0.300 s apart, measures two distances and calculates the speed.',
+fire3:'🔫 FIRE',veh3:'Vehicle',vCar:'Car',vMoto:'Motorbike',road3:'Road type (Circular 38/2024)',vtrue3:'True speed of the vehicle',res3:'Measurement',
+rKdc2:'Built-up area, two-way road',rKdc1:'Built-up area, dual carriageway',rOut2:'Outside built-up area, two-way road',rOut1:'Outside built-up area, dual carriageway',rExp:'Expressway',
+lim:'max {v} km/h',noMoto:'Motorbikes are not allowed on expressways.',
+st3Ready:'The vehicle is in range: fire.',st3Far:'The vehicle is too far; wait until it is within 400 m.',st3P1:'Pulse 1 travelling…',st3Gap:'Waiting 0.300 s…',st3P2:'Pulse 2 travelling…',st3Done:'Done.',
+slowNote:'Laser pulses drawn about 1,000,000 times slower',
+p1L:'Pulse 1',p2L:'Pulse 2',tRound:'round-trip time',dist:'distance',
+o3c:'Light travels at c = 300,000 km/s = 300,000,000 m/s.',o3dd:'Vehicle moved',o3v:'Speed',
+okLim:'✓ Within the limit ({v} ≤ {l} km/h)',overLim:'✗ Speeding by {d} km/h ({v} > {l} km/h)',
+o3wait:'Press “Fire” to measure.',
+as3:'Model assumptions: the gun is at the roadside and the vehicle drives straight towards it, so the distance decreases; real guns fire dozens of pulses in about 0.3–0.5 s and average them, with an error of about ±1–2 km/h. Only two pulses are drawn here.',
+hint3a:'Cameras at the start and end of the section read the number plate and record the time. Set the vehicle’s speed on three stretches (the middle one has a laser checkpoint), then press “Drive”. Time runs 60 times faster.',
+clk3t:'Camera system clock',run3a:'▶ Drive',len3a:'Section length',lim3a:'Speed limit',
+seg1:'Stretch 1: speed',seg2:'Stretch 2 (laser checkpoint): speed',seg3:'Stretch 3: speed',
+camA:'Start camera',camB:'End camera',laserPost:'Laser check',
+o3aTA:'Passed the start camera',o3aTB:'Passed the end camera',o3aT:'Time for the section',o3aV:'Average speed',o3aL:'Speed at laser check',
+o3aWait:'The vehicle has not finished the section. The result appears when it passes the end camera.',
+as3a:'Model assumptions: the vehicle moves steadily on each stretch; time to change speed is ignored. Real systems read plates with cameras and synchronise their clocks.',
+p3q:'How does a laser gun “know” the vehicle’s speed?',
+p3a:'The laser measures speed directly, like a speedometer',p3b:'It measures the distance twice, a short time apart, then divides the distance moved by the time',p3c:'It photographs the vehicle and guesses',
+p3e:'The gun finds the distance from the round-trip time of a light pulse: d = c × t ÷ 2. It does this twice; the drop in distance is how far the vehicle moved between the pulses. Speed = distance ÷ time, the Grade 7 formula.',
+p3bq:'A 10 km section with a 100 km/h limit. A car drives at 130 km/h, slows to 90 km/h at the laser checkpoint, then goes back to 130 km/h. Is it speeding?',
+p3ba:'No, it was only 90 km/h at the checkpoint',p3bb:'Yes: the laser misses it, but the start and end cameras find an average speed above 100 km/h',p3bc:'Cannot tell',
+p3be:'Average speed = section length ÷ time for the whole section. Slowing briefly at the checkpoint cannot make up for the time “saved” on the other stretches. Try 130 – 90 – 130 km/h in the simulation.',
+kT3:'Science · explaining to pupils · common misconceptions',
+k3:`<h3>Mechanism: laser gun (LIDAR)</h3><p>The gun emits a very short pulse of infrared light. It reflects off the number plate or headlights and returns. An electronic clock measures the round-trip time t. Light travels at c ≈ 300,000 km/s, so the distance is d = c × t ÷ 2 (halved because the pulse goes there and back). At 300 m, t is only about 2 millionths of a second. After an interval Δt the gun fires again and measures a new distance. The difference is how far the vehicle moved in Δt, so v = (d₁ − d₂) ÷ Δt.</p><p>The beam is very narrow (about 1 m wide at 300 m), so one vehicle can be picked out of traffic.</p>
+<h3>Mechanism: radar gun</h3><p>A radar gun sends out radio waves continuously. Waves reflected from an approaching vehicle return at a slightly higher frequency, and from a receding one at a lower frequency (the Doppler effect, taught later). The frequency shift gives the speed. Radar beams are wider, so it is harder to single out one vehicle.</p>
+<h3>Mechanism: average-speed cameras</h3><p>Two cameras several kilometres apart share an accurate clock. They read the number plate and record the time each vehicle passes. Average speed = section length ÷ time. It is “stopwatch timing” over kilometres, so a few hundredths of a second of timing error do not matter.</p>
+<h3>For pupils</h3><p>A laser gun is like shouting at a cliff and timing the echo to find how far away it is, except it uses light instead of sound, nearly a million times faster. Measure twice and you know how many metres closer the car came in that time.</p>
+<h3>Common misconceptions</h3><ul><li>“The laser measures speed directly.” No: it measures distance and time; speed is a division.</li><li>“Brake when you see the checkpoint and you are fine.” Average-speed cameras still catch you.</li><li>“The laser is slow, so you have to wait.” Light covers 300 m in a millionth of a second; the car is practically frozen meanwhile.</li></ul>
+<h3>Word origins</h3><p><b>Laser</b> is the acronym <i>Light Amplification by Stimulated Emission of Radiation</i> (coined around 1959). <b>LIDAR</b>: <i>LIght Detection And Ranging</i>. <b>Radar</b>: <i>RAdio Detection And Ranging</i> (US Navy, 1940). Vietnamese calls them all “súng bắn tốc độ” (speed-shooting gun); Chinese 测速仪 (cèsù yí, “speed-measuring instrument”); French <i>cinémomètre</i> (Greek <i>kínēma</i> “motion” + <i>métron</i> “measure”).</p>`,
+req4:'<b>Learning outcome (Science 7):</b> Using pictures or digital resources, discuss <b>how speed affects road safety</b>.',
+hint4:'You drive the blue car behind the red one. Choose the speed, the gap (drag the blue car or use the slider), reaction time and road surface. Press “Run”: the red car brakes hard and you take a moment to hit the brake. Can you stop in time?',
+run4:'▶ Run',again4:'▶ Run again',chart4:'Distance needed to stop at each speed',
+lgReact:'Travelled during reaction time',lgBrake:'Travelled while braking',lgLaw:'Legal minimum gap',lgGap:'Your current gap',
+sc4:'Situation',scBrake:'Car in front brakes hard',scObs:'Stationary obstacle ahead',
+v4:'Speed of both vehicles',d4:'Gap to the vehicle in front',rt4:'Driver reaction time',road4:'Road surface',
+rtFocus:'Focused',rtTired:'Tired, sleepy',rtAlc:'After drinking alcohol',rtPhone:'Looking at a phone',
+dry:'Dry',wet:'Wet, rain',
+res4:'Result',law4:'Minimum safe distance (Circular 38/2024)',
+law4n:'Applies on dry roads. In rain, fog, slippery roads or on mountain passes the gap must be larger. Below 60 km/h no figure is given: drivers keep a suitable gap.',
+lawRow1:'60 km/h',lawRow2:'Over 60 to 80 km/h',lawRow3:'Over 80 to 100 km/h',lawRow4:'Over 100 to 120 km/h',lawRow0:'Below 60 km/h',lawFree:'suitable gap',
+o4react:'Travelled during reaction',o4brake:'Travelled while braking',o4stop:'Total stopping distance',o4sec:'Gap in seconds',o4law:'Legal minimum',o4lawFree:'driver’s judgement',
+o4ok:'✓ Stopped in time, {g} m to spare',o4col:'✗ Collision at {v} km/h',o4h:'This impact is like falling from about {h} m (around floor {f}).',
+o4lawOk:'The gap meets the legal minimum ({d} m).',o4lawNo:'The gap is below the legal minimum ({d} m).',o4wet:'Wet road: the law requires more than the table value.',
+o4secAdv:'A common rule in many countries: keep at least 2–3 seconds (double it in the wet).',
+st4Idle:'Press “Run” to watch.',st4Pre:'Both vehicles at the same speed…',st4React:'The car in front brakes! You are reacting… ({t} s)',st4React1:'Obstacle! You are reacting… ({t} s)',st4Brake:'You are braking…',st4Stop:'Stopped in time.',st4Crash:'Collision!',
+gapLbl:'{d} m gap',reactBub:'Seen it… brake!',obsLbl:'Obstacle',
+as4:'Model assumptions: hard braking reduces speed steadily by about 25 km/h every second on a dry road and 14 km/h every second on a wet road (good tyres and brakes); both vehicles brake equally well. Reaction times are typical estimates; real people vary. Vehicles are drawn larger than scale for visibility; the gap between them is drawn to scale.',
+p4q:'At 50 km/h a car travels about 14 m after the brakes go on. At 100 km/h (double), how far does it travel after braking starts?',
+p4a:'About 28 m (double)',p4b:'About 55 m (four times)',p4c:'Still about 14 m',
+p4e:'Four times, about 55 m. At double speed the car goes twice as far each second and also needs twice as long to lose its speed. Together that makes four times. See the red bars: they grow faster than the speed.',
+p4bq:'The car in front brakes hard and your car brakes just as well. What mainly decides the minimum gap to avoid hitting it?',
+p4ba:'Your braking distance',p4bb:'The distance you travel during your reaction time',p4bc:'The masses of the vehicles',
+p4be:'Reaction time. With equal braking, the car in front starts braking earlier than you by exactly your reaction time. The gap lost is the distance you travel in that time (60 km/h for 1.5 s is 25 m). Looking at a phone for 3 s at 60 km/h means driving blind for 50 m! Switch to “Stationary obstacle” and the braking distance must be added too.',
+kT4:'Science · explaining to pupils · real data',
+k4:`<h3>Mechanism</h3><p>From seeing danger to stopping there are two stages. <b>Reaction</b>: the eyes see, the brain decides, the foot moves to the brake. The car keeps its full speed, so the distance = speed × reaction time (proportional to speed). <b>Braking</b>: friction between tyres and road slows the car (see the Grade 6 friction simulation). Doubling the speed makes the braking distance four times longer. A wet road lowers friction and nearly doubles the braking distance.</p><p>A collision at speed v is like falling from a height h = v² ÷ (2g). 50 km/h is like falling about 10 m (3rd–4th floor); 100 km/h like about 39 m (13th floor).</p>
+<h3>For pupils</h3><p>Measure the gap in <b>seconds</b>, not metres: when the car ahead passes a lamp post, count “one thousand and one, one thousand and two”. If you reach the post after you finish counting, you have 2 seconds. At higher speed 2 seconds is a longer distance, so the rule adjusts itself.</p>
+<h3>Real data</h3><ul><li>Circular 38/2024/TT-BGTVT (from 1 Jan 2025): maximum speed in built-up areas 60 km/h (dual carriageway) and 50 km/h (two-way road); outside built-up areas cars 90 and 80 km/h, motorbikes 70 and 60 km/h; mopeds (under 50 cc) 40 km/h; expressways up to 120 km/h.</li><li>Minimum safe gap on a dry road: 35 m (60 km/h), 55 m (over 60–80), 70 m (over 80–100), 100 m (over 100–120 km/h).</li><li>World Health Organization: an adult pedestrian hit by a car at under 50 km/h has less than a 20 % risk of dying, but almost 60 % at 80 km/h. Every 1 km/h increase in mean speed raises injury crashes by about 3 %.</li></ul>
+<h3>Common misconceptions</h3><ul><li>“Double the speed, double the braking distance.” It is four times.</li><li>“Good brakes mean I can follow closely.” Reaction time has nothing to do with brakes; meanwhile the car has not slowed at all.</li><li>“A quick look at the phone is fine.” 3 seconds at 50 km/h is almost 42 m without looking at the road.</li></ul>`
+}};
+
+/* ================= Tiện ích chung ================= */
+let lang='vi';
+const $=id=>document.getElementById(id);
+const T=k=>(I18N[lang][k]!==undefined?I18N[lang][k]:(I18N.vi[k]!==undefined?I18N.vi[k]:k));
+const fill=(s,o)=>String(s).replace(/\{(\w+)\}/g,(_,k)=>o[k]!==undefined?o[k]:'');
+const Tf=(k,o)=>fill(T(k),o);
+const loc=()=>lang==='vi'?'vi-VN':'en-US';
+const nf=(x,d=1)=>isFinite(x)?new Intl.NumberFormat(loc(),{minimumFractionDigits:d,maximumFractionDigits:d}).format(x):'—';
+const FONT='"Be Vietnam Pro",system-ui,sans-serif', MONO='"IBM Plex Mono",ui-monospace,monospace';
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const store={get(k){try{return localStorage.getItem(k);}catch(e){return null;}},set(k,v){try{localStorage.setItem(k,v);}catch(e){}}};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const G=9.8;
+function gauss(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+
+let C={};
+function readColors(){const cs=getComputedStyle(document.documentElement);
+  ['bg','panel','lane','ink','muted','line','accent','ok','warn','force','vel','react','brake','road','road2','grass','metal','metal2','wood','gold','space','star','carA','carB','beam']
+    .forEach(k=>C[k]=cs.getPropertyValue('--'+k).trim());}
+readColors();
+try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',readColors);}catch(e){}
+function hexA(hex,a){const h=hex.replace('#','');const n=parseInt(h.length===3?h.split('').map(c=>c+c).join(''):h,16);return `rgba(${n>>16&255},${n>>8&255},${n&255},${a})`;}
+
+function size(cv,ratio,maxH,minH=160){
+  const w=cv.clientWidth||300; let h=Math.round(w*ratio); if(maxH)h=Math.min(h,maxH); h=Math.max(h,minH);
+  if(cv._h!==h){cv.style.height=h+'px';cv._h=h;}
+  const d=window.devicePixelRatio||1,W=Math.round(w*d),H=Math.round(h*d);
+  if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H;}
+  const ctx=cv.getContext('2d');ctx.setTransform(d,0,0,d,0,0);ctx.clearRect(0,0,w,h);return {ctx,w,h};
+}
+function txt(ctx,s,x,y,col,sz=14,wt=600,al='left',bl='middle',font=FONT){ctx.fillStyle=col;ctx.font=`${wt} ${sz}px ${font}`;ctx.textAlign=al;ctx.textBaseline=bl;ctx.fillText(s,x,y);}
+function rrect(ctx,x,y,w,h,r){ctx.beginPath();if(ctx.roundRect)ctx.roundRect(x,y,w,h,r);else ctx.rect(x,y,w,h);}
+function pill(ctx,s,x,y,col,sz=13,al='center',bg){ctx.font=`700 ${sz}px ${FONT}`;const tw=ctx.measureText(s).width;let x0=al==='center'?x-tw/2:al==='right'?x-tw:x;
+  ctx.fillStyle=bg||C.panel;ctx.globalAlpha=.92;rrect(ctx,x0-5,y-sz*.75,tw+10,sz*1.5,5);ctx.fill();ctx.globalAlpha=1;txt(ctx,s,x0,y,col,sz,700,'left');}
+function arrow(ctx,x1,y1,x2,y2,col,lw=3){
+  const dx=x2-x1,dy=y2-y1,L=Math.hypot(dx,dy);if(L<2)return;const ux=dx/L,uy=dy/L,hl=Math.min(12,L*.7),hw=hl*.55;
+  ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=lw;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2-ux*hl*.8,y2-uy*hl*.8);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(x2,y2);ctx.lineTo(x2-ux*hl-uy*hw,y2-uy*hl+ux*hw);ctx.lineTo(x2-ux*hl+uy*hw,y2-uy*hl-ux*hw);ctx.closePath();ctx.fill();}
+function dimLine(ctx,x1,x2,y,col,label){ctx.strokeStyle=col;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(x1,y);ctx.lineTo(x2,y);ctx.moveTo(x1,y-6);ctx.lineTo(x1,y+6);ctx.moveTo(x2,y-6);ctx.lineTo(x2,y+6);ctx.stroke();
+  if(label)pill(ctx,label,(x1+x2)/2,y,col,12);}
+function seg(id,items,cur,pick){const el=$(id);el.innerHTML='';items.forEach(it=>{const b=document.createElement('button');b.className='btn';b.innerHTML=it.label;
+  b.setAttribute('aria-pressed',String(it.k===cur));b.onclick=()=>pick(it.k);el.appendChild(b);});}
+function nfs(x,d){return nf(x,d);}
+/* Hình người que, xe đạp, ô tô (nhìn ngang) */
+function person(ctx,x,y,s,col,ph,run){ctx.save();ctx.translate(x,y);ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=Math.max(2,s*.09);ctx.lineCap='round';
+  const sw=Math.sin(ph)*(run?.55:.35), lean=run?.18:.04;
+  ctx.beginPath();ctx.arc(s*lean*.9,-s*.88,s*.12,0,7);ctx.fill();
+  ctx.beginPath();ctx.moveTo(s*lean*.8,-s*.75);ctx.lineTo(0,-s*.4);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(0,-s*.4);ctx.lineTo(Math.sin(sw)*s*.42,-s*.4+Math.cos(sw)*s*.4);ctx.moveTo(0,-s*.4);ctx.lineTo(-Math.sin(sw)*s*.42,-s*.4+Math.cos(sw)*s*.4);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(s*lean*.6,-s*.66);ctx.lineTo(s*lean*.6-Math.sin(sw)*s*.3,-s*.66+Math.cos(sw)*s*.28);ctx.moveTo(s*lean*.6,-s*.66);ctx.lineTo(s*lean*.6+Math.sin(sw)*s*.3,-s*.66+Math.cos(sw)*s*.28);ctx.stroke();
+  ctx.restore();}
+function bike(ctx,x,y,s,col,ph){ctx.save();ctx.translate(x,y);const r=s*.24;ctx.strokeStyle=C.ink;ctx.lineWidth=2;
+  [[-s*.32,-r],[s*.32,-r]].forEach(([cx,cy])=>{ctx.beginPath();ctx.arc(cx,cy,r,0,7);ctx.stroke();ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(ph)*r,cy+Math.sin(ph)*r);ctx.stroke();});
+  ctx.strokeStyle=col;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-s*.32,-r);ctx.lineTo(-s*.05,-r);ctx.lineTo(s*.2,-s*.5);ctx.lineTo(-s*.12,-s*.5);ctx.lineTo(-s*.05,-r);ctx.moveTo(s*.2,-s*.5);ctx.lineTo(s*.32,-r);ctx.stroke();
+  ctx.fillStyle=col;ctx.strokeStyle=col;ctx.lineWidth=Math.max(2,s*.08);ctx.lineCap='round';
+  ctx.beginPath();ctx.arc(-s*.02,-s*1.02,s*.1,0,7);ctx.fill();ctx.beginPath();ctx.moveTo(-s*.06,-s*.9);ctx.lineTo(-s*.12,-s*.56);ctx.moveTo(-s*.06,-s*.84);ctx.lineTo(s*.18,-s*.58);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(-s*.12,-s*.56);ctx.lineTo(-s*.05+Math.cos(ph)*s*.1,-r+Math.sin(ph)*s*.1);ctx.stroke();ctx.restore();}
+function carSide(ctx,x,y,len,col,o={}){ // x = mép sau, y = mặt đường
+  const h=len*.36;ctx.save();ctx.translate(x,y);
+  ctx.fillStyle=col;rrect(ctx,0,-h*.85,len,h*.55,h*.15);ctx.fill();
+  ctx.beginPath();ctx.moveTo(len*.2,-h*.85);ctx.lineTo(len*.32,-h*1.25);ctx.lineTo(len*.7,-h*1.25);ctx.lineTo(len*.82,-h*.85);ctx.closePath();ctx.fill();
+  ctx.fillStyle='rgba(210,230,255,.85)';ctx.beginPath();ctx.moveTo(len*.27,-h*.88);ctx.lineTo(len*.35,-h*1.17);ctx.lineTo(len*.49,-h*1.17);ctx.lineTo(len*.49,-h*.88);ctx.closePath();ctx.fill();
+  ctx.beginPath();ctx.moveTo(len*.53,-h*.88);ctx.lineTo(len*.53,-h*1.17);ctx.lineTo(len*.67,-h*1.17);ctx.lineTo(len*.76,-h*.88);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#1b1f24';[len*.22,len*.78].forEach(cx=>{ctx.beginPath();ctx.arc(cx,-h*.3,h*.3,0,7);ctx.fill();});
+  ctx.fillStyle='#c9ced6';[len*.22,len*.78].forEach(cx=>{ctx.beginPath();ctx.arc(cx,-h*.3,h*.13,0,7);ctx.fill();});
+  ctx.fillStyle=o.brake?'#ff2020':'#7a1d1d';ctx.fillRect(-1,-h*.78,Math.max(3,len*.05),h*.18);
+  if(o.brake){ctx.fillStyle='rgba(255,40,40,.35)';ctx.beginPath();ctx.arc(0,-h*.7,h*.35,0,7);ctx.fill();}
+  ctx.fillStyle='#ffe9a8';ctx.fillRect(len-Math.max(3,len*.05)+1,-h*.78,Math.max(3,len*.05),h*.16);
+  ctx.restore();}
+
+/* ================= Tabs ================= */
+let tab=1;
+function setTab(n){tab=n;document.querySelectorAll('nav.tabs button').forEach(b=>{const on=+b.dataset.tab===n;b.classList.toggle('on',on);b.setAttribute('aria-selected',on);});
+  [1,2,3,4].forEach(i=>$('t'+i).hidden=i!==n);store.set('tdat-tab',n);}
+document.querySelectorAll('nav.tabs button').forEach(b=>b.onclick=()=>setTab(+b.dataset.tab));
+$('gvBtn').onclick=()=>{const on=!document.body.classList.contains('hideNums');document.body.classList.toggle('hideNums',on);$('gvBtn').setAttribute('aria-pressed',on);};
+
+/* ================= Video thực tế ================= */
+const VIDS={
+1:[{id:'ZFxlkem_p8s',f:'tab1-thi-nghiem.mp4',k:'exp',t:'Measurement for time using a digital stopwatch',
+    look:{vi:'Cách cầm đồng hồ, bấm bắt đầu, dừng, xoá về 0 và đọc số chỉ. Đồng hồ hiện tới phần trăm giây, nhưng tay người có nhanh được như vậy không?',en:'How to hold the stopwatch, start, stop, reset and read it. It shows hundredths of a second, but can a human hand be that quick?'}},
+   {id:'LheOjO2DJD0',f:'tab1-thi-nghiem-phan-ung.mp4',k:'exp',t:'Measuring Reaction Time – PRACTICAL – GCSE Physics Experiment',
+    look:{vi:'Thí nghiệm thả thước để đo thời gian phản ứng của người. Kết quả thường khoảng 0,2 s, đúng bằng sai số khi bấm đồng hồ bằng tay.',en:'The ruler-drop test measures human reaction time. Results are typically about 0.2 s, the same size as hand-timing error.'}}],
+2:[{id:'xpc1zohJGZw',f:'tab2-thi-nghiem.mp4',k:'exp',t:'Measuring velocity with an air track and light gates.',
+    look:{vi:'Xe trượt trên đệm khí đi qua cổng quang điện. Tấm chắn trên xe che chùm sáng; đồng hồ đo thời gian che sáng, chia chiều dài tấm chắn cho thời gian là ra tốc độ.',en:'A glider on an air track passes through light gates. A card on the glider blocks the beam; card length ÷ blocking time gives the speed.'}},
+   {id:'YEQhtJB8P-8',f:'tab2-thi-nghiem-2.mp4',k:'exp',t:'Photogate to measure velocity (NCPQ)',
+    look:{vi:'Cổng quang điện đo thời gian vật đi qua. Để ý đèn báo trên cổng sáng lên khi chùm tia bị che.',en:'A photogate times an object passing through. Watch the indicator light come on when the beam is blocked.'}}],
+3:[{id:'9t5CZ5kFdmQ',f:'tab3-ung-dung-laser.mp4',k:'app',t:'How Police Lidar Guns Work',
+    look:{vi:'Súng laser đo khoảng cách nhiều lần trong thời gian rất ngắn rồi tính tốc độ. Để ý chùm tia hẹp nên chọn được đúng một xe.',en:'A lidar gun measures distance many times in a very short time and calculates speed. Notice that the narrow beam picks out a single vehicle.'}},
+   {id:'mtdfJepSEwY',f:'tab3-ung-dung-trung-binh.mp4',k:'app',t:'How average speed cameras work',
+    look:{vi:'Hai camera cách nhau một đoạn dài ghi thời điểm xe đi qua; tốc độ trung bình = quãng đường : thời gian.',en:'Two cameras a long way apart record when a vehicle passes; average speed = distance ÷ time.'}}],
+4:[{id:'Z_n-HIBnfts',f:'tab4-thi-nghiem-phanh.mp4',k:'exp',t:'Stopping Distance Demonstration',
+    look:{vi:'Xe chạy nhanh hơn thì cần quãng đường dài hơn hẳn mới dừng được. So sánh với biểu đồ cột trong tab này.',en:'At a higher speed the car needs a much longer distance to stop. Compare with the bar chart in this tab.'}},
+   {id:'R9IV7VIRfjs',f:'tab4-ung-dung-2-giay.mp4',k:'app',t:'The 2-Second Rule: Simple Trick to Keep a Safe Distance on the Road',
+    look:{vi:'Cách đếm 2 giây bằng một mốc bên đường (cột điện, biển báo) để giữ khoảng cách.',en:'How to count 2 seconds using a roadside marker (lamp post, sign) to keep your distance.'}},
+   {id:'4sdTz8lzmd8',f:'tab4-hien-tuong-va-cham.mp4',k:'phen',t:'Car Crash Test Different Speeds',
+    look:{vi:'Thử nghiệm va chạm ở các tốc độ khác nhau: tốc độ tăng một chút mà mức hư hỏng tăng rất nhiều.',en:'Crash tests at different speeds: a little more speed causes much more damage.'}}]};
+let ENV='claude';
+try{ENV=location.protocol==='file:'?'file':(/^https?:$/.test(location.protocol)&&!/claude|anthropic/i.test(location.hostname)&&window.top===window.self?'web':'claude');}catch(e){ENV='claude';}
+const ytUrl=id=>'https://www.youtube.com/watch?v='+id;
+let vOpen=null;
+function renderVids(n){const el=$('v'+n),L=VIDS[n];if(vOpen===null)vOpen=innerWidth>=900;
+  el.innerHTML=`<details ${vOpen?'open':''}><summary class="vhead"><b>${T('vLbl')} (${L.length})</b><span>${T(ENV==='claude'?'vEnvClaude':ENV==='web'?'vEnvWeb':'vEnvFile')}</span></summary><div class="vbody"><div class="vplayer" id="vp${n}" hidden></div>
+  <div class="vlist">${L.map((v,i)=>{const kind=T(v.k==='phen'?'kindPhen':v.k==='exp'?'kindExp':'kindApp');
+    const img=`<img alt="" loading="lazy" src="${ENV==='claude'?'https://i.ytimg.com/vi/'+v.id+'/mqdefault.jpg':'media/'+v.f.replace('.mp4','.jpg')}" data-yt="${v.id}" data-tried="${ENV==='claude'?1:''}">`;
+    const inner=`${img}<span class="tag">${kind}</span><span class="pl"></span>`;
+    const th=ENV==='claude'?`<a class="thumb" href="${ytUrl(v.id)}" target="_blank" rel="noopener" aria-label="${esc(v.t)}">${inner}</a>`:`<button class="thumb" data-i="${i}" aria-label="${esc(v.t)}">${inner}</button>`;
+    return `<div class="vcard">${th}<div class="vtx"><span class="ttl">${esc(v.t)}</span><span class="ch">${kind} · YouTube · ${lang==='vi'?'tiếng Anh':'English'}</span><span class="look"><b>${T('vLook')}</b>${esc(v.look[lang])}</span><span class="flag">${T('vUnchecked')}</span><a href="${ytUrl(v.id)}" target="_blank" rel="noopener">${T('vOpen')}</a></div></div>`;}).join('')}</div></div></details>`;
+  el.querySelector('details').addEventListener('toggle',e=>{vOpen=e.target.open;});
+  el.querySelectorAll('img').forEach(im=>im.onerror=()=>{if(!im.dataset.tried){im.dataset.tried=1;im.src='https://i.ytimg.com/vi/'+im.dataset.yt+'/mqdefault.jpg';}else im.remove();});
+  el.querySelectorAll('button.thumb').forEach(b=>b.onclick=()=>playVid(n,+b.dataset.i));}
+function playVid(n,i){const v=VIDS[n][i],P=$('vp'+n);P.hidden=false;
+  P.innerHTML=`<button class="btn vclose">${T('vClose')}</button>`;P.querySelector('.vclose').onclick=()=>{P.hidden=true;P.innerHTML='';};
+  const vd=document.createElement('video');vd.controls=true;vd.playsInline=true;vd.preload='metadata';let done=false;
+  const fail=()=>{if(done)return;done=true;vd.removeAttribute('src');vd.remove();
+    if(ENV==='web'){const f=document.createElement('iframe');f.src=`https://www.youtube-nocookie.com/embed/${v.id}?autoplay=1&rel=0`;f.allow='autoplay; encrypted-media; picture-in-picture; fullscreen';f.allowFullscreen=true;f.title=v.t;P.appendChild(f);}
+    else{const m=document.createElement('div');m.className='vmsg';m.innerHTML=fill(T('vNoFile'),{f:'<code>media/'+v.f+'</code>'})+` <a href="${ytUrl(v.id)}" target="_blank" rel="noopener">${T('vOpen')}</a>`;P.appendChild(m);}};
+  vd.addEventListener('loadedmetadata',()=>{if(done)return;done=true;vd.play().catch(()=>{});});
+  vd.addEventListener('error',fail);vd.src='media/'+v.f;P.appendChild(vd);setTimeout(fail,2500);
+  try{P.scrollIntoView({block:'nearest',behavior:'smooth'});}catch(e){}}
+
+/* ================= Dự đoán ================= */
+const PRED={p1:{q:'p1q',o:['p1a','p1b','p1c'],c:1,e:'p1e'},p1b:{q:'p1bq',o:['p1ba','p1bb','p1bc'],c:1,e:'p1be'},
+  p2:{q:'p2q',o:['p2a','p2b','p2c'],c:1,e:'p2e'},p2b:{q:'p2bq',o:['p2ba','p2bb','p2bc'],c:1,e:'p2be'},
+  p3:{q:'p3q',o:['p3a','p3b','p3c'],c:1,e:'p3e'},p3b:{q:'p3bq',o:['p3ba','p3bb','p3bc'],c:1,e:'p3be'},
+  p4:{q:'p4q',o:['p4a','p4b','p4c'],c:1,e:'p4e'},p4b:{q:'p4bq',o:['p4ba','p4bb','p4bc'],c:1,e:'p4be'}};
+function renderPred(id){const P=PRED[id],el=$(id);
+  el.innerHTML=`<h2>${T('predTitle')}</h2><p>${T(P.q)}</p><div class="opts">${P.o.map((k,i)=>`<button class="btn ${P.pick===i?'picked':''} ${P.show&&i===P.c?'right':''}" data-i="${i}">${T(k)}</button>`).join('')}</div>`+
+  (P.pick==null?'':`<p class="muted">${T('predThen')}</p><div><button class="btn rv">${T(P.show?'hideAns':'showAns')}</button></div>`)+(P.show?`<div class="ans">${T(P.e)}</div>`:'');}
+Object.keys(PRED).forEach(id=>$(id).addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const P=PRED[id];
+  if(b.classList.contains('rv'))P.show=!P.show;else P.pick=+b.dataset.i;renderPred(id);}));
+
+/* =====================================================================
+   TAB 1: ĐỒNG HỒ BẤM GIÂY
+   x(t) = v·(t − T_RUN): vật chạy đà T_RUN giây rồi mới tới vạch A (x = 0).
+   ===================================================================== */
+const MOV=[{k:'mToy',v:0.5,ic:'toy'},{k:'mWalk',v:1.4,ic:'walk'},{k:'mRun',v:6.0,ic:'run'},{k:'mBike',v:4.5,ic:'bike'}];
+const DIST=[2,5,10,20,50];
+const T_RUN=1.3;
+const S1={mi:2,di:1,mode:'me',ph:'idle',t:0,v:6,clk:false,c0:0,cv:0,tA:0,tB:0,rec:false,early:false,rows:[],show:false,bot:null,last:null,msg:''};
+const s1=()=>DIST[S1.di];
+function go1(){const M=MOV[S1.mi];S1.v=M.v*(1+(Math.random()-.5)*.06);S1.t=0;S1.ph='run';S1.clk=false;S1.cv=0;S1.rec=false;S1.early=false;S1.msg='';
+  S1.tA=T_RUN;S1.tB=T_RUN+s1()/S1.v;
+  S1.bot=S1.mode==='bot'?{a:S1.tA+clamp(.24+.06*gauss(),.12,.4),b:S1.tB+clamp(.22+.07*gauss(),.1,.4),da:false,db:false}:null;ui1();}
+function press1(){
+  if(S1.ph==='idle'){S1.msg=T('st1Need');ui1();return;}
+  if(S1.rec)return;
+  if(!S1.clk){S1.clk=true;S1.c0=S1.t;S1.cv=0;S1.early=S1.t<S1.tA-.05;S1.msg=S1.early?T('st1Early'):'';}
+  else{S1.clk=false;S1.cv=S1.t-S1.c0;S1.rec=true;
+    const row={s:s1(),tm:S1.cv,tt:S1.tB-S1.tA,vt:S1.v};S1.rows.push(row);if(S1.rows.length>10)S1.rows.shift();S1.last=row;S1.msg=T('st1Rec');renderTbl1();}
+  ui1();}
+$('go1').onclick=go1;
+$('press1').onclick=press1;
+$('clr1').onclick=()=>{S1.rows=[];S1.last=null;renderTbl1();ui1();};
+$('true1').onclick=()=>{S1.show=!S1.show;renderTbl1();ui1();};
+addEventListener('keydown',e=>{if(tab!==1||e.code!=='Space'||S1.mode!=='me')return;const tg=e.target.tagName;if(tg==='INPUT'||tg==='SELECT'||tg==='TEXTAREA'||tg==='BUTTON'&&e.target.id!=='press1')return;
+  e.preventDefault();if(!e.repeat)press1();});
+function set1(){
+  $('mov1').innerHTML=MOV.map((m,i)=>`<button class="btn" aria-pressed="${i===S1.mi}" data-i="${i}">${T(m.k)}<small class="num">≈ ${nf(m.v,1)} m/s</small></button>`).join('');
+  $('mov1').querySelectorAll('button').forEach(b=>b.onclick=()=>{S1.mi=+b.dataset.i;S1.ph='idle';S1.clk=false;S1.cv=0;set1();ui1();});
+  seg('dist1',DIST.map(d=>({k:d,label:d+' m'})),s1(),k=>{S1.di=DIST.indexOf(k);S1.ph='idle';S1.clk=false;S1.cv=0;set1();ui1();});
+  seg('mode1',[{k:'me',label:T('modeMe')},{k:'bot',label:T('modeBot')}],S1.mode,k=>{S1.mode=k;S1.ph='idle';S1.clk=false;S1.cv=0;set1();ui1();});}
+function renderTbl1(){const R=S1.rows;let h=`<tr><th>${T('thN')}</th><th>${T('thS')}</th><th>${T('thT')}</th><th>${T('thV')}</th>${S1.show?`<th>${T('thTt')}</th><th>${T('thE')}</th>`:''}</tr>`;
+  R.forEach((r,i)=>{h+=`<tr><td>${i+1}</td><td>${nf(r.s,0)}</td><td>${nf(r.tm,2)}</td><td>${nf(r.s/r.tm,2)}</td>${S1.show?`<td>${nf(r.tt,2)}</td><td>${(r.tm-r.tt>=0?'+':'')+nf(r.tm-r.tt,2)}</td>`:''}</tr>`;});
+  if(R.length>1){const mv=R.reduce((a,r)=>a+r.s/r.tm,0)/R.length;h+=`<tr class="mean"><td>${T('mean')}</td><td></td><td></td><td>${nf(mv,2)}</td>${S1.show?'<td></td><td></td>':''}</tr>`;}
+  $('tb1').innerHTML=h;
+  $('note1').textContent=S1.show&&S1.last?Tf('note1T',{v:nf(S1.last.vt,2),k:nf(S1.last.vt*3.6,1),t:nf(S1.last.tt,2)}):T('note1H');
+  $('true1').textContent=T(S1.show?'hideTrue':'showTrue');$('true1').setAttribute('aria-pressed',S1.show);}
+function ui1(){$('press1').disabled=S1.mode==='bot';
+  let st=S1.msg;
+  if(!st){if(S1.ph==='idle')st=T('st1Idle');else if(S1.mode==='bot'&&!S1.rec)st=T('st1Bot');else if(S1.clk&&S1.t>S1.tB+.6)st=T('st1Miss');else if(S1.clk)st=T('st1On');else if(!S1.rec)st=T('st1Run');}
+  $('st1').textContent=st;}
+function step1(dt){if(S1.ph!=='run')return;S1.t+=dt;
+  if(S1.bot){const B=S1.bot;if(!B.da&&S1.t>=B.a){B.da=true;S1.clk=true;S1.c0=B.a;}if(!B.db&&S1.t>=B.b){B.db=true;S1.t=Math.max(S1.t,B.b);const keep=S1.t;S1.t=B.b;press1();S1.t=keep;}}
+  if(S1.clk)S1.cv=S1.t-S1.c0;
+  const xEnd=s1()+Math.max(1.5,S1.v*1.2);
+  if(S1.v*(S1.t-T_RUN)>xEnd&&(S1.rec||S1.t>S1.tB+8)){S1.ph='done';}
+  const tag=(S1.clk?1:0)+(S1.rec?2:0)+(S1.t>S1.tB+.6?4:0);if(tag!==S1._tag){S1._tag=tag;ui1();}}
+function render1(){
+  const cv=$('c1');const {ctx,w,h}=size(cv,.3,260,170);
+  const s=s1(),pre=Math.max(S1.v*T_RUN,s*.12,1)*1.0,post=Math.max(1.5,s*.12);
+  const x0m=-Math.max(MOV[S1.mi].v*T_RUN*1.05,s*.15),x1m=s+post;
+  const L=28,Rr=28,k=(w-L-Rr)/(x1m-x0m),X=x=>L+(x-x0m)*k;
+  const gy=h*.72;
+  ctx.fillStyle=C.grass;ctx.globalAlpha=.35;ctx.fillRect(0,gy,w,h-gy);ctx.globalAlpha=1;
+  ctx.fillStyle=hexA(C.road,.25);ctx.fillRect(0,gy-4,w,14);
+  // vạch chia mét
+  const stp=s<=2?.5:s<=5?1:s<=10?2:s<=20?5:10;
+  for(let m=Math.ceil(x0m/stp)*stp;m<=x1m;m+=stp){const px=X(m);ctx.strokeStyle=C.muted;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(px,gy+10);ctx.lineTo(px,gy+16);ctx.stroke();
+    if(m>=0&&m<=s)txt(ctx,nf(m,stp<1?1:0)+' m',px,gy+26,C.muted,11,500,'center','middle',MONO);}
+  // vạch A, B
+  [[0,'A'],[s,'B']].forEach(([m,l])=>{const px=X(m);ctx.strokeStyle=C.ink;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(px,gy-60);ctx.lineTo(px,gy+10);ctx.stroke();
+    ctx.fillStyle=l==='A'?C.ok:C.force;ctx.beginPath();ctx.moveTo(px,gy-60);ctx.lineTo(px+22,gy-53);ctx.lineTo(px,gy-46);ctx.fill();txt(ctx,l,px+6,gy-53,'#fff',11,800,'left');});
+  dimLine(ctx,X(0),X(s),gy-72,C.ink,'s = '+nf(s,0)+' m');
+  // vật
+  const xm=S1.ph==='idle'?x0m+0.02*(x1m-x0m):S1.v*(S1.t-T_RUN);
+  const px=X(xm),M=MOV[S1.mi],sz=Math.min(64,h*.36),ph=S1.ph==='idle'?0:(S1.t*S1.v*(M.ic==='walk'?4.2:M.ic==='run'?2.2:3))%(Math.PI*2);
+  ctx.save();ctx.beginPath();ctx.rect(0,0,w,h);ctx.clip();
+  if(M.ic==='toy'){const l=Math.max(26,0.25*k);carSide(ctx,px-l,gy,l,C.carB);}
+  else if(M.ic==='bike')bike(ctx,px-sz*.5,gy,sz,C.carB,ph*2);
+  else person(ctx,px-sz*.15,gy,sz,C.carB,ph*Math.PI,M.ic==='run');
+  ctx.restore();
+  // dấu chạm vạch
+  if(S1.ph!=='idle'){[[S1.tA,0],[S1.tB,s]].forEach(([tt,m])=>{if(S1.t>=tt&&S1.t<tt+.25){ctx.strokeStyle=C.gold;ctx.lineWidth=5;ctx.globalAlpha=1-(S1.t-tt)/.25;ctx.beginPath();ctx.arc(X(m),gy-30,26,0,7);ctx.stroke();ctx.globalAlpha=1;}});}
+  // bạn ảo
+  if(S1.mode==='bot'){const hx=w-60,hy=30;txt(ctx,'🧑',hx,hy,C.ink,22,600,'center');if(S1.clk)pill(ctx,'⏱',hx+28,hy,C.warn,14);}
+  // đồng hồ
+  $('clk1d').textContent=nf(S1.cv,2);
+  $('clk1s').textContent=S1.clk?'●':'';
+}
+
+/* =====================================================================
+   TAB 2: CỔNG QUANG ĐIỆN
+   Máng nghiêng: bi đặc lăn không trượt, a = (5/7)·g·sin α; x(t) = x0 + a t²/2.
+   Máng ngang: x(t) = x0 + v0·t. Cổng che sáng khi |x − x_cổng| < r.
+   ===================================================================== */
+const L2=1.0,R2=0.01,X02=R2+0.005;
+const S2={mode:'inc',ang:4,v0:0.4,xA:0.30,xB:0.70,cm:'AB',t:0,run:false,fin:false,sp:1,rows:[],drag:null,geo:null};
+const a2=()=>5/7*G*Math.sin(S2.ang*Math.PI/180);
+const x2=t=>S2.mode==='inc'?X02+.5*a2()*t*t:X02+S2.v0*t;
+const t2=x=>{x=Math.max(x,X02);return S2.mode==='inc'?Math.sqrt(2*(x-X02)/a2()):(x-X02)/S2.v0;};
+const tEnd2=()=>t2(L2-R2);
+function clk2(t){if(S2.cm==='AB'){const a=t2(S2.xA-R2),b=t2(S2.xB-R2);return t<a?0:t<b?t-a:b-a;}
+  const a=t2(S2.xA-R2),b=t2(S2.xA+R2);return clamp(t-a,0,b-a);}
+function clkOn2(t){if(S2.cm==='AB'){const a=t2(S2.xA-R2),b=t2(S2.xB-R2);return t>=a&&t<b;}const a=t2(S2.xA-R2),b=t2(S2.xA+R2);return t>=a&&t<b;}
+function reset2(){S2.t=0;S2.run=false;S2.fin=false;ui2();}
+$('run2').onclick=()=>{if(S2.run){S2.run=false;}else{if(S2.fin||S2.t>0)S2.t=0;S2.fin=false;S2.run=true;}ui2();};
+$('rst2').onclick=reset2;
+$('clr2').onclick=()=>{S2.rows=[];renderTbl2();};
+$('ang2').oninput=e=>{S2.ang=+e.target.value;reset2();};
+$('v02').oninput=e=>{S2.v0=+e.target.value;reset2();};
+function set2(){seg('trk2',[{k:'inc',label:T('trkInc')},{k:'flat',label:T('trkFlat')}],S2.mode,k=>{S2.mode=k;set2();reset2();});
+  seg('cm2',[{k:'AB',label:T('cmAB')},{k:'A',label:T('cmA')}],S2.cm,k=>{S2.cm=k;set2();reset2();});
+  seg('sp2',[.1,.25,1].map(k=>({k,label:'×'+nf(k,k<1?(k===.1?1:2):0)})),S2.sp,k=>{S2.sp=k;set2();});
+  $('angBox').hidden=S2.mode!=='inc';$('v0Box').hidden=S2.mode!=='flat';
+  $('ang2V').textContent=nf(S2.ang,1)+'°';$('v02V').textContent=nf(S2.v0,2)+' m/s';
+  $('cmh2').innerHTML=T(S2.cm==='AB'?'cmhAB':'cmhA');}
+function step2(dt){if(!S2.run)return;S2.t+=dt*S2.sp;
+  if(S2.t>=tEnd2()){S2.t=tEnd2();S2.run=false;S2.fin=true;
+    const tt=clk2(S2.t),s=S2.cm==='AB'?S2.xB-S2.xA:2*R2;S2.rows.push({m:S2.cm,s,t:tt,v:s/tt,tr:S2.mode==='inc'?nf(S2.ang,1)+'°':'→'});if(S2.rows.length>10)S2.rows.shift();renderTbl2();ui2();}}
+function renderTbl2(){let h=`<tr><th>${T('thMode')}</th><th>${T('thSc')}</th><th>${T('thT3')}</th><th>${T('thV2')}</th></tr>`;
+  S2.rows.forEach(r=>{h+=`<tr><td>${r.m==='AB'?'A↔B':'A'} · ${r.tr}</td><td>${nf(r.s*100,1)}</td><td class="num">${nf(r.t,3)}</td><td class="num">${nf(r.v,3)}</td></tr>`;});
+  $('tb2').innerHTML=h;
+  const r=S2.rows[S2.rows.length-1];$('note2').textContent=r?Tf('note2',{t:nf(r.t,3),p:nf(.2/r.t*100,0)}):'';}
+function ui2(){$('run2').textContent=S2.run?(lang==='vi'?'⏸ Tạm dừng':'⏸ Pause'):T('release');
+  $('st2').textContent=S2.drag?Tf('st2Drag',{g:S2.drag,x:nf((S2.drag==='A'?S2.xA:S2.xB)*100,1)}):S2.run?T('st2Run'):S2.fin?T('st2Done'):T('st2Idle');}
+function geo2(w,h){const ang=S2.ang*Math.PI/180*(S2.mode==='inc'?1:0),c=Math.cos(ang),s=Math.sin(ang);
+  const L=40,len=(w-L-40)/c;const k=len/L2;const P0={x:L,y:Math.max(50,h*.42-len*s*.5)};return {c,s,k,P0,
+    P:x=>({x:P0.x+c*x*k,y:P0.y+s*x*k}),N:{x:s,y:-c}};}
+function render2(){const cv=$('c2');const {ctx,w,h}=size(cv,.42,330,200);const g=geo2(w,h);S2.geo=g;
+  const th=8,br=Math.max(R2*g.k,6);
+  // chân đỡ
+  const Pe=g.P(L2);ctx.fillStyle=C.metal2;ctx.fillRect(g.P0.x-6,g.P0.y,8,h-24-g.P0.y);ctx.fillRect(Pe.x-4,Pe.y,8,Math.max(4,h-24-Pe.y));
+  ctx.fillStyle=hexA(C.ink,.12);ctx.fillRect(0,h-24,w,24);
+  // máng
+  ctx.save();ctx.translate(g.P0.x,g.P0.y);ctx.rotate(Math.atan2(g.s,g.c));
+  ctx.fillStyle=C.metal;ctx.fillRect(0,0,L2*g.k,th);ctx.strokeStyle=C.metal2;ctx.lineWidth=1;ctx.strokeRect(0,0,L2*g.k,th);
+  for(let i=0;i<=20;i++){const px=i*.05*g.k;ctx.strokeStyle=C.ink;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(px,th);ctx.lineTo(px,th+(i%2?4:8));ctx.stroke();
+    if(i%2===0&&(i%4===0||w>600))txt(ctx,String(i*5),px,th+16,C.muted,10,500,'center','middle',MONO);}
+  txt(ctx,'cm',L2*g.k+6,th+16,C.muted,10,600,'left');
+  ctx.fillStyle=C.metal2;ctx.fillRect(L2*g.k-4,-br*2.2,6,br*2.2);
+  ctx.restore();
+  // cổng
+  const tt=S2.t;const xb=x2(tt);
+  ['A','B'].forEach(gn=>{if(gn==='B'&&S2.cm==='A'){ctx.globalAlpha=.35;}
+    const xg=gn==='A'?S2.xA:S2.xB,p=g.P(xg),hy=br*2+26;const top={x:p.x+g.N.x*hy,y:p.y+g.N.y*hy};
+    const blocked=Math.abs(xb-xg)<R2&&(S2.run||S2.fin||tt>0);
+    ctx.strokeStyle=S2.drag===gn?C.accent:C.ink;ctx.lineWidth=S2.drag===gn?6:5;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(p.x,p.y+th+2);ctx.lineTo(top.x,top.y);ctx.stroke();
+    ctx.fillStyle=C.space;ctx.beginPath();ctx.arc(top.x,top.y,9,0,7);ctx.fill();
+    const bc={x:p.x+g.N.x*br,y:p.y+g.N.y*br};
+    ctx.fillStyle=blocked?C.muted:C.beam;ctx.beginPath();ctx.arc(bc.x,bc.y,4,0,7);ctx.fill();
+    if(!blocked){ctx.fillStyle=hexA(C.beam,.25);ctx.beginPath();ctx.arc(bc.x,bc.y,8,0,7);ctx.fill();}
+    ctx.fillStyle=blocked?'#ffd23a':'#444';ctx.beginPath();ctx.arc(top.x,top.y,4,0,7);ctx.fill();
+    pill(ctx,gn,top.x,top.y-20,S2.drag===gn?C.accent:C.ink,14);ctx.globalAlpha=1;});
+  // khoảng AB
+  if(S2.cm==='AB'){const pa=g.P(S2.xA),pb=g.P(S2.xB),o=br*2+54;
+    const a={x:pa.x+g.N.x*o,y:pa.y+g.N.y*o},b={x:pb.x+g.N.x*o,y:pb.y+g.N.y*o};
+    ctx.strokeStyle=C.vel;ctx.lineWidth=1.5;ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();ctx.setLineDash([]);
+    pill(ctx,'s = '+nf((S2.xB-S2.xA)*100,1)+' cm',(a.x+b.x)/2,(a.y+b.y)/2,C.vel,13);}
+  // bi
+  const pb=g.P(clamp(xb,0,L2)),bc={x:pb.x+g.N.x*br,y:pb.y+g.N.y*br};
+  const grd=ctx.createRadialGradient(bc.x-br*.35,bc.y-br*.35,1,bc.x,bc.y,br);grd.addColorStop(0,'#fff');grd.addColorStop(1,'#6d7884');
+  ctx.fillStyle=grd;ctx.beginPath();ctx.arc(bc.x,bc.y,br,0,7);ctx.fill();
+  // đồng hồ
+  const on=(S2.run||S2.fin)&&clkOn2(tt);$('clk2d').textContent=nf(clk2(tt),3);$('clk2s').textContent=(S2.cm==='AB'?'MODE A↔B':'MODE A')+(on?'  ●':'');
+}
+const cv2=$('c2');
+function ptr2(e){const r=cv2.getBoundingClientRect();return {x:e.clientX-r.left,y:e.clientY-r.top};}
+function proj2(p){const g=S2.geo;return ((p.x-g.P0.x)*g.c+(p.y-g.P0.y)*g.s)/g.k;}
+cv2.addEventListener('pointerdown',e=>{if(!S2.geo||S2.run)return;const p=ptr2(e),g=S2.geo;let best=null,bd=40;
+  ['A','B'].forEach(gn=>{if(gn==='B'&&S2.cm==='A')return;const q=g.P(gn==='A'?S2.xA:S2.xB);const hy=Math.max(R2*g.k,6)*2+26;
+    for(let f=0;f<=1;f+=.25){const d=Math.hypot(p.x-(q.x+g.N.x*hy*f),p.y-(q.y+g.N.y*hy*f));if(d<bd){bd=d;best=gn;}}});
+  if(best){S2.drag=best;cv2.setPointerCapture(e.pointerId);cv2.style.touchAction='none';S2.t=0;S2.fin=false;ui2();e.preventDefault();}});
+cv2.addEventListener('pointermove',e=>{if(!S2.drag){if(S2.geo){const p=ptr2(e),g=S2.geo;let near=false;['A','B'].forEach(gn=>{const q=g.P(gn==='A'?S2.xA:S2.xB);if(Math.hypot(p.x-q.x,p.y-q.y)<50)near=true;});cv2.style.cursor=near?'grab':'default';}return;}
+  let x=Math.round(proj2(ptr2(e))*200)/200;
+  if(S2.drag==='A')S2.xA=clamp(x,.06,(S2.cm==='AB'?S2.xB-.05:.95));else S2.xB=clamp(x,S2.xA+.05,.96);ui2();});
+['pointerup','pointercancel'].forEach(ev=>cv2.addEventListener(ev,()=>{if(S2.drag){S2.drag=null;cv2.style.touchAction='';ui2();}}));
+
+/* =====================================================================
+   TAB 3: SÚNG BẮN TỐC ĐỘ LASER + ĐO TỐC ĐỘ TRUNG BÌNH THEO ĐOẠN
+   d = c·t/2; v = (d1 − d2)/Δt. Xe chạy thẳng về phía súng.
+   ===================================================================== */
+const CL=299792458, DT3=0.300, RANGE3=400;
+const ROADS=[{k:'rKdc2',car:50,moto:50},{k:'rKdc1',car:60,moto:60},{k:'rOut2',car:80,moto:60},{k:'rOut1',car:90,moto:70},{k:'rExp',car:120,moto:null}];
+const S3={m:'L',veh:'car',road:3,vk:72,x:480,seq:null,res:null};
+function lim3(){const R=ROADS[S3.road];return S3.veh==='car'?R.car:R.moto;}
+function set3(){seg('m3',[{k:'L',label:T('m3L')},{k:'A',label:T('m3A')}],S3.m,k=>{S3.m=k;set3();});
+  $('lab3L').hidden=S3.m!=='L';$('lab3A').hidden=S3.m!=='A';
+  seg('veh3',[{k:'car',label:T('vCar')},{k:'moto',label:T('vMoto')}],S3.veh,k=>{S3.veh=k;set3();out3();});
+  $('road3').innerHTML=ROADS.map((r,i)=>{const l=S3.veh==='car'?r.car:r.moto;return `<option value="${i}">${T(r.k)} · ${l?Tf('lim',{v:l}):'—'}</option>`;}).join('');$('road3').value=S3.road;
+  $('vk3V').textContent=S3.vk+' km/h';
+  seg('len3a',[5,10,20].map(k=>({k,label:k+' km'})),SA.L,k=>{SA.L=k;set3();resetA();});
+  seg('lim3a',[80,90,100,120].map(k=>({k,label:k})),SA.lim,k=>{SA.lim=k;set3();resetA();});
+  [1,2,3].forEach(i=>$('sa'+i+'V').textContent=SA.v[i-1]+' km/h');}
+$('road3').onchange=e=>{S3.road=+e.target.value;out3();};
+$('vk3').oninput=e=>{S3.vk=+e.target.value;$('vk3V').textContent=S3.vk+' km/h';};
+$('fire3').onclick=()=>{if(S3.seq||S3.x>RANGE3||S3.x<25)return;S3.seq={ph:'p1',tt:0,d1:S3.x,d2:null,v:S3.vk};S3.res=null;out3();};
+const PULSE_T=1.0;
+function step3(dt){const v=S3.vk/3.6;const Q=S3.seq;
+  if(Q&&(Q.ph==='p1'||Q.ph==='p2')){Q.tt+=dt;if(Q.tt>=PULSE_T){if(Q.ph==='p1'){Q.ph='gap';Q.tt=0;}else{Q.ph='done';S3.res={d1:Q.d1,d2:Q.d2,v:Q.v};S3.seq=null;out3();}}return;}
+  S3.x-=v*dt;
+  if(Q&&Q.ph==='gap'){Q.tt+=dt;if(Q.tt>=DT3){S3.x=Q.d1-v*DT3;Q.ph='p2';Q.tt=0;Q.d2=S3.x;}}
+  if(S3.x<8&&!S3.seq)S3.x=RANGE3+80+Math.random()*60;}
+function out3(){const R=S3.res,l=lim3();
+  if(!R){$('o3').innerHTML=`<p class="muted">${T('o3wait')}</p>`+(l?'':`<div class="verdict mid">${T('noMoto')}</div>`);return;}
+  const t1=2*R.d1/CL,t2=2*R.d2/CL,dd=R.d1-R.d2,v=dd/DT3,vk=v*3.6,vr=Math.round(vk);
+  const us=x=>nf(x*1e6,3)+' µs';
+  let h=`<div class="calc">${T('p1L')}: ${T('tRound')} t₁ = <span class="num">${us(t1)}</span><br>→ d₁ = c × t₁ : 2 = <b class="num">${nf(R.d1,2)} m</b><br>`+
+    `${T('p2L')}: t₂ = <span class="num">${us(t2)}</span> → d₂ = <b class="num">${nf(R.d2,2)} m</b><br>`+
+    `${T('o3dd')}: d₁ − d₂ = <b class="num">${nf(dd,2)} m</b> / Δt = ${nf(DT3,3)} s<br>`+
+    `${T('o3v')}: v = <b class="num">${nf(v,2)} m/s = ${nf(vk,1)} km/h</b></div><p class="fine">${T('o3c')}</p>`;
+  if(!l)h+=`<div class="verdict mid">${T('noMoto')}</div>`;
+  else h+=`<div class="verdict ${vr<=l?'ok':'no'} num">${vr<=l?Tf('okLim',{v:vr,l}):Tf('overLim',{d:vr-l,v:vr,l})}</div>`;
+  $('o3').innerHTML=h;}
+function render3(){const cv=$('c3');const {ctx,w,h}=size(cv,.36,290,190);
+  const L=70,Rr=20,k=(w-L-Rr)/RANGE3,X=d=>L+d*k;
+  const ry=h*.38,rh=Math.min(70,h*.3);
+  ctx.fillStyle=hexA(C.grass,.5);ctx.fillRect(0,0,w,h);
+  ctx.fillStyle=C.road;ctx.fillRect(L-20,ry,w,rh);
+  ctx.strokeStyle='#f3f3f3';ctx.lineWidth=2;ctx.setLineDash([16,14]);ctx.beginPath();ctx.moveTo(L-20,ry+rh/2);ctx.lineTo(w,ry+rh/2);ctx.stroke();ctx.setLineDash([]);
+  for(let d=0;d<=RANGE3;d+=50){txt(ctx,d+' m',X(d),ry+rh+14,C.ink,11,600,'center','middle',MONO);ctx.fillStyle=C.ink;ctx.fillRect(X(d)-1,ry+rh,2,6);}
+  // cảnh sát + súng
+  const gx=L-34,gy=ry+rh+40;
+  ctx.fillStyle='#e8d36a';ctx.beginPath();ctx.arc(gx,gy-24,9,0,7);ctx.fill();ctx.fillStyle='#2f4f7a';rrect(ctx,gx-10,gy-15,20,26,4);ctx.fill();
+  ctx.fillStyle=C.ink;rrect(ctx,gx+6,gy-22,22,9,2);ctx.fill();
+  const muzzle={x:gx+28,y:gy-18};
+  // xe
+  const cy=ry+rh*.27,cl=Math.max(28,4.4*k),cw=Math.max(14,1.8*k),xd=S3.x;
+  if(xd<RANGE3+40){const cx=X(xd);ctx.save();ctx.beginPath();ctx.rect(L-20,0,w,h);ctx.clip();
+    if(S3.veh==='car'){ctx.fillStyle=C.carA;rrect(ctx,cx,cy-cw/2,cl,cw,4);ctx.fill();ctx.fillStyle='rgba(210,230,255,.85)';ctx.fillRect(cx+cl*.18,cy-cw/2+2,cl*.16,cw-4);ctx.fillStyle='#ffe9a8';ctx.fillRect(cx-1,cy-cw/2+2,3,4);ctx.fillRect(cx-1,cy+cw/2-6,3,4);}
+    else{ctx.fillStyle=C.carA;rrect(ctx,cx,cy-4,Math.max(18,2*k),8,4);ctx.fill();ctx.fillStyle=C.ink;ctx.beginPath();ctx.arc(cx+Math.max(9,k),cy,5,0,7);ctx.fill();}
+    pill(ctx,(S3.seq||S3.res?'':'')+nf(S3.vk,0)+' km/h',cx+cl/2,cy-cw/2-12,C.carA,11);
+    ctx.restore();}
+  // xung laser
+  const Q=S3.seq;
+  if(Q&&(Q.ph==='p1'||Q.ph==='p2')){const d=Q.ph==='p1'?Q.d1:Q.d2,tgt={x:X(d),y:cy};const f=Q.tt/PULSE_T;
+    ctx.strokeStyle=hexA(C.beam,.35);ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(muzzle.x,muzzle.y);ctx.lineTo(tgt.x,tgt.y);ctx.stroke();
+    const u=f<.5?f*2:2-f*2;const p={x:muzzle.x+(tgt.x-muzzle.x)*u,y:muzzle.y+(tgt.y-muzzle.y)*u};
+    ctx.fillStyle=C.beam;ctx.beginPath();ctx.arc(p.x,p.y,6,0,7);ctx.fill();ctx.fillStyle=hexA(C.beam,.3);ctx.beginPath();ctx.arc(p.x,p.y,13,0,7);ctx.fill();
+    const tr=2*d/CL*u;pill(ctx,(Q.ph==='p1'?T('p1L'):T('p2L'))+' · t = '+nf(tr*1e6,3)+' µs',w/2,18,C.beam,13);
+    txt(ctx,T('slowNote'),w/2,38,C.muted,12,600,'center');}
+  if(Q&&Q.ph==='gap'){pill(ctx,T('st3Gap')+' '+nf(Q.tt,3)+' s',w/2,18,C.ink,13);}
+  if(S3.res){const R=S3.res;[[R.d1,'d₁'],[R.d2,'d₂']].forEach(([d,l],i)=>{const y=ry-14-i*16;ctx.strokeStyle=i?C.vel:C.react;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(muzzle.x,y);ctx.lineTo(X(d),y);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(X(d),y-5);ctx.lineTo(X(d),y+5);ctx.stroke();txt(ctx,l+' = '+nf(d,1)+' m',X(d)+6,y,i?C.vel:C.react,11,700,'left','middle',MONO);});}
+  // trạng thái
+  const st=Q?(Q.ph==='p1'?T('st3P1'):Q.ph==='gap'?T('st3Gap'):T('st3P2')):S3.x>RANGE3?T('st3Far'):T('st3Ready');
+  if($('st3')._t!==st){$('st3').textContent=st;$('st3')._t=st;}
+  $('fire3').disabled=!!Q||S3.x>RANGE3||S3.x<25;}
+
+/* Đo tốc độ trung bình theo đoạn */
+const SA={L:10,lim:100,v:[130,90,130],t:0,run:false,fin:false,TL:60};
+function tSeg(){return SA.v.map(v=>SA.L/3/v*3600);} // giây
+function resetA(){SA.t=0;SA.run=false;SA.fin=false;outA();}
+[1,2,3].forEach(i=>$('sa'+i).oninput=e=>{SA.v[i-1]=+e.target.value;$('sa'+i+'V').textContent=SA.v[i-1]+' km/h';resetA();});
+$('run3a').onclick=()=>{if(SA.run)SA.run=false;else{if(SA.fin)SA.t=0;SA.fin=false;SA.run=true;}outA();};
+$('rst3a').onclick=resetA;
+function posA(t){const ts=tSeg();let x=0,tt=t;for(let i=0;i<3;i++){if(tt<=ts[i])return x+SA.v[i]/3600*tt;x+=SA.L/3;tt-=ts[i];}return SA.L;}
+function stepA(dt){if(!SA.run)return;SA.t+=dt*SA.TL;const tot=tSeg().reduce((a,b)=>a+b,0);if(SA.t>=tot){SA.t=tot;SA.run=false;SA.fin=true;outA();}}
+const hms=s=>{const base=8*3600+Math.round(s);const H=Math.floor(base/3600),M=Math.floor(base%3600/60),S=base%60;return [H,M,S].map(x=>String(x).padStart(2,'0')).join(':');};
+function outA(){$('run3a').textContent=SA.run?(lang==='vi'?'⏸ Tạm dừng':'⏸ Pause'):T('run3a');
+  if(!SA.fin){$('o3a').innerHTML=`<p class="muted">${T('o3aWait')}</p>`;return;}
+  const tot=tSeg().reduce((a,b)=>a+b,0),vtb=SA.L/(tot/3600),mm=Math.floor(Math.round(tot)/60),ss=Math.round(tot)%60,vl=SA.v[1];
+  $('o3a').innerHTML=`<dl class="kv"><dt>${T('o3aTA')}</dt><dd>08:00:00</dd><dt>${T('o3aTB')}</dt><dd>${hms(tot)}</dd><dt>${T('o3aT')}</dt><dd class="num">${mm} ${lang==='vi'?'phút':'min'} ${ss} s = ${nf(tot/3600,4)} h</dd></dl>
+  <div class="calc">v<sub>tb</sub> = ${SA.L} km : ${nf(tot/3600,4)} h = <b class="num">${nf(vtb,1)} km/h</b></div>
+  <div class="verdict ${vtb<=SA.lim+1e-9?'ok':'no'} num">${T('o3aV')}: ${vtb<=SA.lim+1e-9?Tf('okLim',{v:nf(vtb,1),l:SA.lim}):Tf('overLim',{d:nf(vtb-SA.lim,1),v:nf(vtb,1),l:SA.lim})}</div>
+  <div class="verdict ${vl<=SA.lim?'ok':'no'}">${T('o3aL')}: ${vl<=SA.lim?Tf('okLim',{v:vl,l:SA.lim}):Tf('overLim',{d:vl-SA.lim,v:vl,l:SA.lim})}</div>`;}
+function renderA(){const cv=$('c3a');const {ctx,w,h}=size(cv,.3,240,170);
+  const L=30,Rr=30,k=(w-L-Rr)/SA.L,X=x=>L+x*k,ry=h*.42,rh=Math.min(46,h*.24);
+  ctx.fillStyle=hexA(C.grass,.5);ctx.fillRect(0,0,w,h);ctx.fillStyle=C.road;ctx.fillRect(0,ry,w,rh);
+  const cols=[C.react,C.vel,C.react];
+  for(let i=0;i<3;i++){ctx.fillStyle=hexA(cols[i],.85);ctx.fillRect(X(i*SA.L/3),ry+rh,SA.L/3*k,5);
+    txt(ctx,SA.v[i]+' km/h',X((i+.5)*SA.L/3),ry+rh+18,cols[i],12,700,'center');}
+  ctx.strokeStyle='#f3f3f3';ctx.lineWidth=2;ctx.setLineDash([12,12]);ctx.beginPath();ctx.moveTo(0,ry+rh/2);ctx.lineTo(w,ry+rh/2);ctx.stroke();ctx.setLineDash([]);
+  [[0,'camA'],[SA.L,'camB']].forEach(([x,l])=>{const px=X(x);ctx.fillStyle=C.ink;ctx.fillRect(px-2,ry-40,4,40);rrect(ctx,px-11,ry-50,22,13,3);ctx.fill();ctx.fillStyle='#9fd0ff';ctx.beginPath();ctx.arc(px+(x?-6:6),ry-43,3,0,7);ctx.fill();
+    txt(ctx,T(l),px,ry-60,C.ink,11,700,x?'right':'left');});
+  const lx=X(SA.L/2);ctx.fillStyle=C.force;ctx.beginPath();ctx.arc(lx,ry-14,6,0,7);ctx.fill();txt(ctx,T('laserPost'),lx,ry-28,C.force,11,700,'center');
+  const xc=posA(SA.t),px=X(xc);ctx.fillStyle=C.carA;rrect(ctx,px-16,ry+rh*.18,22,rh*.3,4);ctx.fill();
+  $('clk3d').textContent=hms(SA.t);$('clk3s').textContent=SA.run?'×60 ●':'×60';}
+
+/* =====================================================================
+   TAB 4: KHOẢNG CÁCH AN TOÀN
+   Xe B (em) sau xe A. t = 0: A phanh gấp (hoặc vật cản đứng yên ở khoảng cách d).
+   B phản ứng t_r rồi phanh. Giảm tốc đều a (khô 7 m/s², ướt 4 m/s²).
+   ===================================================================== */
+const RT=[{k:'rtFocus',t:1.0},{k:'rtTired',t:1.5},{k:'rtAlc',t:2.0},{k:'rtPhone',t:3.0}];
+const RD=[{k:'dry',a:7.0},{k:'wet',a:4.0}];
+const S4={v:60,d:35,rt:0,rd:0,sc:'brake',t:-1.5,run:false,fin:false,sp:1,drag:null,res:null};
+function law4(v){if(v<60)return null;if(v<=60)return 35;if(v<=80)return 55;if(v<=100)return 70;return 100;}
+function pos4(t,P){const v=P.v/3.6,a=P.a,tr=P.tr;let xA,vA,xB,vB;
+  if(P.sc==='brake'){if(t<0){xA=P.d+v*t;vA=v;}else{const tt=Math.min(t,v/a);xA=P.d+v*tt-.5*a*tt*tt;vA=Math.max(0,v-a*t);}}else{xA=P.d;vA=0;}
+  if(t<tr){xB=v*t;vB=v;}else{const tt=Math.min(t-tr,v/a);xB=v*tr+v*tt-.5*a*tt*tt;vB=Math.max(0,v-a*(t-tr));}
+  return {xA,vA,xB,vB};}
+function params4(){return {v:S4.v,d:S4.d,tr:RT[S4.rt].t,a:RD[S4.rd].a,sc:S4.sc};}
+function sim4(P){const v=P.v/3.6,tEnd=P.tr+v/P.a+.01;let tc=null;
+  for(let t=0;t<=tEnd;t+=1/1000){const q=pos4(t,P);if(q.xB>=q.xA){tc=t;break;}}
+  if(tc!==null){const q=pos4(tc,P);return {col:true,tc,vrel:(q.vB-q.vA)*3.6,end:tc+1.2};}
+  const q=pos4(tEnd,P);return {col:false,gap:q.xA-q.xB,end:tEnd+1.0};}
+function upd4(){const P=params4();S4.res=sim4(P);S4.t=-1.5;S4.run=false;S4.fin=false;out4();chart4();}
+$('v4').oninput=e=>{S4.v=+e.target.value;$('v4V').textContent=S4.v+' km/h';upd4();};
+$('d4').oninput=e=>{S4.d=+e.target.value;$('d4V').textContent=S4.d+' m';upd4();};
+$('run4').onclick=()=>{if(S4.run)S4.run=false;else{if(S4.fin||S4.t>-1.5)S4.t=-1.5;S4.fin=false;S4.run=true;}ui4();};
+$('rst4').onclick=()=>{S4.t=-1.5;S4.run=false;S4.fin=false;ui4();};
+function set4(){seg('sc4',[{k:'brake',label:T('scBrake')},{k:'obs',label:T('scObs')}],S4.sc,k=>{S4.sc=k;set4();upd4();});
+  $('rt4').innerHTML=RT.map((r,i)=>`<button class="btn" aria-pressed="${i===S4.rt}" data-i="${i}">${T(r.k)}<small>≈ ${nf(r.t,1)} s</small></button>`).join('');
+  $('rt4').querySelectorAll('button').forEach(b=>b.onclick=()=>{S4.rt=+b.dataset.i;set4();upd4();});
+  seg('road4',RD.map((r,i)=>({k:i,label:T(r.k)})),S4.rd,k=>{S4.rd=k;set4();upd4();});
+  seg('sp4',[.25,.5,1].map(k=>({k,label:'×'+nf(k,k<1?2:0)})),S4.sp,k=>{S4.sp=k;set4();});
+  $('v4V').textContent=S4.v+' km/h';$('d4V').textContent=S4.d+' m';}
+function out4(){const P=params4(),v=P.v/3.6,sr=v*P.tr,sb=v*v/(2*P.a),R=S4.res,L=law4(S4.v);
+  let h=`<dl class="kv"><dt><span style="color:var(--react)">■</span> ${T('o4react')}</dt><dd class="num">${nf(sr,1)} m</dd><dt><span style="color:var(--brake)">■</span> ${T('o4brake')}</dt><dd class="num">${nf(sb,1)} m</dd>
+    <dt>${T('o4stop')}</dt><dd class="num"><b>${nf(sr+sb,1)} m</b></dd><dt>${T('o4sec')}</dt><dd class="num">${nf(S4.d/v,1)} s</dd><dt>${T('o4law')}</dt><dd>${L?'≥ '+L+' m':T('o4lawFree')}</dd></dl>`;
+  h+=R.col?`<div class="verdict no num">${Tf('o4col',{v:nf(R.vrel,0)})}</div><p>${Tf('o4h',{h:nf((R.vrel/3.6)**2/(2*G),1),f:Math.max(1,Math.round((R.vrel/3.6)**2/(2*G)/3)+1)})}</p>`
+    :`<div class="verdict ok num">${Tf('o4ok',{g:nf(R.gap,1)})}</div>`;
+  if(L)h+=`<p class="${S4.d>=L?'':'muted'}" style="font-weight:600;color:var(${S4.d>=L?'--ok':'--force'})">${Tf(S4.d>=L?'o4lawOk':'o4lawNo',{d:L})}</p>`;
+  if(S4.rd===1)h+=`<p class="muted">${T('o4wet')}</p>`;
+  h+=`<p class="fine">${T('o4secAdv')}</p>`;
+  $('o4').innerHTML=h;
+  const rows=[['lawRow0',null],['lawRow1',35],['lawRow2',55],['lawRow3',70],['lawRow4',100]];const ri=S4.v<60?0:S4.v<=60?1:S4.v<=80?2:S4.v<=100?3:4;
+  $('law4').innerHTML=rows.map((r,i)=>`<tr class="${i===ri?'on':''}"><td>${T(r[0])}</td><td>${r[1]?r[1]+' m':T('lawFree')}</td></tr>`).join('');
+  ui4();}
+function ui4(){$('run4').textContent=S4.run?(lang==='vi'?'⏸ Tạm dừng':'⏸ Pause'):S4.fin?T('again4'):T('run4');
+  const P=params4(),R=S4.res,t=S4.t;let st;
+  if(!S4.run&&!S4.fin&&t<=-1.5)st=T('st4Idle');else if(t<0)st=T('st4Pre');else if(R.col&&t>=R.tc)st=T('st4Crash');
+  else if(t<P.tr)st=Tf(S4.sc==='brake'?'st4React':'st4React1',{t:nf(Math.min(t,P.tr),1)});else if(S4.fin||t>=P.tr+P.v/3.6/P.a)st=T('st4Stop');else st=T('st4Brake');
+  if($('st4')._t!==st){$('st4').textContent=st;$('st4')._t=st;}}
+function step4(dt){if(!S4.run)return;S4.t+=dt*S4.sp;if(S4.t>=S4.res.end){S4.t=S4.res.end;S4.run=false;S4.fin=true;}ui4();}
+let geo4=null;
+function render4(){const cv=$('c4');const {ctx,w,h}=size(cv,.34,270,180);const P=params4(),R=S4.res;
+  let t=S4.t;if(R.col&&t>R.tc)t=R.tc;const q=pos4(t,P);
+  const span=Math.max(45,S4.d+25),k=(w-20)/span,camL=q.xB-8,X=x=>10+(x-camL)*k;geo4={k,camL};
+  const gy=h*.74;
+  ctx.fillStyle=hexA(C.grass,.45);ctx.fillRect(0,0,w,gy-30);ctx.fillStyle=C.road;ctx.fillRect(0,gy-4,w,h-gy+4);
+  ctx.strokeStyle='#f3f3f3';ctx.lineWidth=3;
+  const dash=6,per=12;for(let m=Math.floor(camL/per)*per;m<camL+span+per;m+=per){ctx.beginPath();ctx.moveTo(X(m),gy+16);ctx.lineTo(X(m+dash),gy+16);ctx.stroke();}
+  // cột mốc mỗi 10 m (để thấy xe chạy)
+  for(let m=Math.floor(camL/10)*10;m<camL+span+10;m+=10){const px=X(m);ctx.fillStyle=hexA(C.ink,.35);ctx.fillRect(px-1,gy-30,2,24);}
+  const cl=Math.max(4.5*k,26);
+  // xe A hoặc vật cản (mép sau tại xA)
+  if(S4.sc==='brake')carSide(ctx,X(q.xA),gy,cl,C.carA,{brake:t>=0});
+  else if(t>=0){const px=X(q.xA);ctx.fillStyle='#f28c28';ctx.beginPath();ctx.moveTo(px+4,gy);ctx.lineTo(px+14,gy-30);ctx.lineTo(px+24,gy);ctx.fill();ctx.fillStyle='#fff';ctx.fillRect(px+9,gy-16,10,4);
+    ctx.fillStyle=C.metal2;rrect(ctx,px+26,gy-34,cl*.9,30,4);ctx.fill();txt(ctx,T('obsLbl'),px+26+cl*.45,gy-19,'#fff',11,700,'center');}
+  // xe B (mép trước tại xB)
+  carSide(ctx,X(q.xB)-cl,gy,cl,C.carB,{brake:t>=P.tr});
+  // khoảng hở
+  const gap=q.xA-q.xB;if(gap>0.05)dimLine(ctx,X(q.xB),X(q.xA),gy-cl*.55-14,C.vel,Tf('gapLbl',{d:nf(gap,1)}));
+  // bong bóng phản ứng
+  if(t>=0&&t<P.tr){const bx=X(q.xB)-cl*.6,by=gy-cl*.6-30;pill(ctx,(S4.rt===3?'📱 ':'')+T('reactBub')+' '+nf(P.tr-t,1)+' s',Math.max(80,bx),by,C.react,12);}
+  // tốc độ
+  pill(ctx,nf(q.vB*3.6,0)+' km/h',Math.max(40,X(q.xB)-cl/2),gy+34,C.carB,12);
+  if(S4.sc==='brake')pill(ctx,nf(q.vA*3.6,0)+' km/h',Math.min(w-40,X(q.xA)+cl/2),gy+34,C.carA,12);
+  if(R.col&&S4.t>=R.tc){const px=X(q.xB);ctx.fillStyle='#ffd23a';ctx.beginPath();for(let i=0;i<16;i++){const r=i%2?14:30,a=i/16*Math.PI*2;ctx.lineTo(px+Math.cos(a)*r,gy-cl*.25+Math.sin(a)*r);}ctx.closePath();ctx.fill();
+    pill(ctx,Tf('o4col',{v:nf(R.vrel,0)}),w/2,20,C.force,14);}
+  // đồng hồ thời gian
+  txt(ctx,'t = '+nf(Math.max(0,t),2)+' s',w-10,16,C.muted,12,600,'right','middle',MONO);}
+const cv4=$('c4');
+cv4.addEventListener('pointerdown',e=>{if(S4.run||!geo4)return;const r=cv4.getBoundingClientRect(),x=e.clientX-r.left;const q=pos4(S4.t,params4());const bx=10+(q.xB-geo4.camL)*geo4.k;
+  if(Math.abs(x-bx+Math.max(4.5*geo4.k,26)/2)<Math.max(4.5*geo4.k,26)){S4.drag={x0:x,d0:S4.d};cv4.setPointerCapture(e.pointerId);cv4.style.touchAction='none';e.preventDefault();}});
+cv4.addEventListener('pointermove',e=>{if(!S4.drag)return;const r=cv4.getBoundingClientRect(),x=e.clientX-r.left;
+  const d=clamp(Math.round(S4.drag.d0-(x-S4.drag.x0)/geo4.k),5,150);if(d!==S4.d){S4.d=d;$('d4').value=d;$('d4V').textContent=d+' m';upd4();}});
+['pointerup','pointercancel'].forEach(ev=>cv4.addEventListener(ev,()=>{if(S4.drag){S4.drag=null;cv4.style.touchAction='';}}));
+function chart4(){const cv=$('c4b');const {ctx,w,h}=size(cv,.42,260,190);const P=params4();
+  const sp=[];for(let v=20;v<=120;v+=10)sp.push(v);
+  const st=v=>{const m=v/3.6;return [m*P.tr,m*m/(2*P.a)];};
+  const ymax=Math.max(160,Math.max(...sp.map(v=>st(v)[0]+st(v)[1])),S4.d)*1.08;
+  const L=44,Rr=10,Tt=12,B=34,pw=w-L-Rr,ph=h-Tt-B,bw=pw/sp.length,Y=y=>Tt+ph-y/ymax*ph;
+  const yst=ymax>300?100:50;
+  for(let y=0;y<=ymax;y+=yst){ctx.strokeStyle=C.line;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(L,Y(y));ctx.lineTo(L+pw,Y(y));ctx.stroke();txt(ctx,y+' m',L-5,Y(y),C.muted,11,500,'right','middle',MONO);}
+  const cur=Math.round(S4.v/10)*10;
+  sp.forEach((v,i)=>{const [a,b]=st(v),x=L+i*bw+bw*.15,bwi=bw*.7;
+    ctx.fillStyle=C.react;ctx.fillRect(x,Y(a),bwi,Y(0)-Y(a));ctx.fillStyle=C.brake;ctx.fillRect(x,Y(a+b),bwi,Y(a)-Y(a+b));
+    if(v===cur){ctx.strokeStyle=C.ink;ctx.lineWidth=2.5;ctx.strokeRect(x-2,Y(a+b)-2,bwi+4,Y(0)-Y(a+b)+4);txt(ctx,nf(a+b,0)+' m',x+bwi/2,Y(a+b)-10,C.ink,11,700,'center','middle',MONO);}
+    const lw=law4(v);if(lw){ctx.strokeStyle=C.ink;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x-3,Y(lw));ctx.lineTo(x+bwi+3,Y(lw));ctx.stroke();}
+    txt(ctx,String(v),x+bwi/2,Tt+ph+12,v===cur?C.ink:C.muted,11,v===cur?800:500,'center','middle',MONO);});
+  txt(ctx,'km/h',L+pw,Tt+ph+26,C.muted,11,600,'right');
+  ctx.strokeStyle=C.vel;ctx.lineWidth=2;ctx.setLineDash([6,4]);ctx.beginPath();ctx.moveTo(L,Y(S4.d));ctx.lineTo(L+pw,Y(S4.d));ctx.stroke();ctx.setLineDash([]);
+  pill(ctx,nf(S4.d,0)+' m',L+30,Y(S4.d),C.vel,11);}
+
+/* ================= Ngôn ngữ ================= */
+function applyLang(){document.documentElement.lang=lang;document.title=T('title');
+  document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=T(el.dataset.i18n));
+  document.querySelectorAll('[data-i18n-html]').forEach(el=>el.innerHTML=T(el.dataset.i18nHtml));
+  $('langBtn').textContent=lang==='vi'?'EN':'VI';
+  Object.keys(PRED).forEach(renderPred);[1,2,3,4].forEach(renderVids);
+  set1();renderTbl1();ui1();set2();renderTbl2();ui2();set3();out3();outA();set4();out4();chart4();}
+$('langBtn').onclick=()=>{lang=lang==='vi'?'en':'vi';applyLang();};
+
+/* ================= Vòng lặp ================= */
+upd4();applyLang();
+{const t=+store.get('tdat-tab');setTab(t>=1&&t<=4?t:1);}
+let last=performance.now();
+function loop(now){const dt=Math.min((now-last)/1000,.05);last=now;
+  try{
+    if(tab===1){step1(dt);render1();}
+    else if(tab===2){step2(dt);render2();}
+    else if(tab===3){if(S3.m==='L'){step3(dt);render3();}else{stepA(dt);renderA();}}
+    else{step4(dt);render4();}
+  }catch(err){console.error(err);}
+  requestAnimationFrame(loop);}
+addEventListener('resize',()=>chart4());
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
