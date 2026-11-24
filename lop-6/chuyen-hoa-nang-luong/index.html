@@ -1,0 +1,1021 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Chuyển hoá năng lượng</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Phòng thí nghiệm năng lượng (KHTN 6): dải video thực tế, sân khấu canvas bên trái, sổ ghi chép bên phải. Điện thoại xếp một cột.
+   Màu các dạng năng lượng dùng thống nhất cho cả 4 tab. */
+:root{
+  --bg:#eef0ec; --panel:#ffffff; --lane:#f5f6f2; --ink:#171d16; --muted:#586255; --line:#cdd3c8;
+  --accent:#2f6b2a; --accent-ink:#ffffff; --ok:#1d8a4b; --warn:#c2410c;
+  --space:#101a12; --star:#eaf1e8;
+  --eElec:#2d6fdb; --eLight:#e6b400; --eHeat:#e0452b; --eKin:#16a06a; --ePot:#7b4fd1; --eChem:#8d5a2b; --eSound:#d23d92; --eEl:#0ea5b7;
+  --sky:#cfe4f5; --ground:#a9c98a; --water:#5aa3dd; --metal:#8b96a3; --metal2:#5b6673;
+  --font-ui:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-num:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Consolas,monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f130e; --panel:#171d16; --lane:#121711; --ink:#e4ebe1; --muted:#9aa696; --line:#2c3629;
+  --accent:#7cc46f; --accent-ink:#0b1f08; --ok:#47c47d; --warn:#f08a4b;
+  --space:#070b07; --star:#dfe8dc;
+  --eElec:#5b97ff; --eLight:#ffd23f; --eHeat:#ff6a4d; --eKin:#33cc8c; --ePot:#a585ff; --eChem:#c98b52; --eSound:#ff6bb8; --eEl:#3fd0e0;
+  --sky:#1d2e3d; --ground:#3b5530; --water:#3b7fb8; --metal:#7c8794; --metal2:#a9b4c1;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f130e; --panel:#171d16; --lane:#121711; --ink:#e4ebe1; --muted:#9aa696; --line:#2c3629;
+  --accent:#7cc46f; --accent-ink:#0b1f08; --ok:#47c47d; --warn:#f08a4b;
+  --space:#070b07; --star:#dfe8dc;
+  --eElec:#5b97ff; --eLight:#ffd23f; --eHeat:#ff6a4d; --eKin:#33cc8c; --ePot:#a585ff; --eChem:#c98b52; --eSound:#ff6bb8; --eEl:#3fd0e0;
+  --sky:#1d2e3d; --ground:#3b5530; --water:#3b7fb8; --metal:#7c8794; --metal2:#a9b4c1;
+  color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-ui);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px 40px}
+.wrap{max-width:1320px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.hbtns{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.eyebrow{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{margin:0;font-size:clamp(25px,3.4vw,36px);line-height:1.15;font-weight:800;text-wrap:balance;letter-spacing:-.01em}
+h2{margin:0;font-size:17px;font-weight:700;text-wrap:balance}
+h3{margin:0;font-size:15px;font-weight:700}
+.btn{font:inherit;font-weight:600;font-size:15px;min-height:44px;padding:8px 14px;border-radius:8px;border:1px solid var(--line);
+  background:var(--panel);color:var(--ink);cursor:pointer;touch-action:manipulation}
+.btn:hover{border-color:var(--accent)}
+.btn:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible,a:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn.sm{min-height:40px;padding:4px 12px;font-size:14px}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
+.seg .btn{border:0;border-radius:0;min-width:52px}
+.seg.wide{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;border:0;background:none}
+.seg.wide .btn{border:1px solid var(--line);border-radius:8px;text-align:left;font-size:14px}
+nav.tabs{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line)}
+nav.tabs button{font:inherit;font-size:15px;font-weight:600;white-space:nowrap;min-height:46px;padding:8px 14px;border:0;border-bottom:3px solid transparent;
+  background:none;color:var(--muted);cursor:pointer;margin-bottom:-1px}
+nav.tabs button.on{color:var(--ink);border-bottom-color:var(--accent)}
+.req{margin:0;font-size:14px;color:var(--muted);max-width:110ch}
+.req b{color:var(--ink);font-weight:600}
+.lab{display:grid;grid-template-columns:minmax(0,1fr) 390px;gap:14px;align-items:start}
+@media (max-width:1020px){.lab{grid-template-columns:minmax(0,1fr)}}
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.col{display:flex;flex-direction:column;gap:12px;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card p{margin:0}
+canvas{display:block;width:100%;border-radius:8px;background:var(--lane);touch-action:pan-y;user-select:none;-webkit-user-select:none}
+#cv2{touch-action:none;cursor:grab}
+.hint{margin:0;font-size:14px;color:var(--muted)}
+.status{margin:0;font-weight:600;min-height:1.5em}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chk{display:inline-flex;align-items:center;gap:8px;min-height:44px;font-size:15px;cursor:pointer}
+.chk input{width:22px;height:22px;accent-color:var(--accent)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:14px;color:var(--muted)}
+.legend i{display:inline-block;width:18px;height:8px;border-radius:3px;margin-right:6px;vertical-align:middle}
+.sl{display:flex;flex-direction:column;gap:2px}
+.sl .top{display:flex;justify-content:space-between;gap:8px;font-size:15px}
+.sl .val{font-family:var(--font-num);font-weight:600;text-align:right}
+input[type=range]{width:100%;height:44px;accent-color:var(--accent);margin:0}
+.kv{display:grid;grid-template-columns:minmax(0,1fr) max-content;gap:4px 12px;font-size:15px;margin:0}
+.kv dt{color:var(--muted)} .kv dd{margin:0;font-family:var(--font-num);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.kv dd.t{font-family:var(--font-ui);font-weight:600;white-space:normal;grid-column:1/-1;text-align:left;margin:-2px 0 4px 12px}
+.opts{display:flex;flex-direction:column;gap:6px}
+.opts .btn{text-align:left;font-size:14px}
+.opts .btn.picked{border:2px solid var(--accent)}
+.opts .btn.right{background:color-mix(in srgb,var(--ok) 18%,var(--panel));border-color:var(--ok)}
+.ans{background:var(--lane);border-left:4px solid var(--ok);padding:8px 12px;border-radius:6px;font-size:15px}
+.muted{color:var(--muted);font-size:14px}
+.chain{font-size:15px;font-weight:600;line-height:1.6}
+.chain span{display:inline-block;padding:1px 8px;border-radius:6px;color:#fff;margin:1px 0}
+details{border:1px solid var(--line);border-radius:var(--r);background:var(--panel);padding:0 14px}
+details[open]{padding-bottom:12px}
+summary{cursor:pointer;font-weight:700;min-height:44px;display:flex;align-items:center;font-size:15px}
+details p,details ul,details ol{margin:6px 0;font-size:15px;max-width:95ch}
+details ul,details ol{padding-left:22px}
+details li{margin:3px 0}
+.fine{font-size:13px;color:var(--muted);margin:0}
+.tblwrap{overflow-x:auto}
+table.log{border-collapse:collapse;width:100%;font-size:14px}
+table.log th,table.log td{padding:6px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+table.log th{color:var(--muted);font-weight:600}
+table.log td.n{font-family:var(--font-num);text-align:right}
+/* Thanh năng lượng */
+.bars{display:flex;flex-direction:column;gap:6px}
+.bar{display:grid;grid-template-columns:118px minmax(0,1fr) 74px;gap:8px;align-items:center;font-size:14px}
+.bar .tr{height:18px;border-radius:5px;background:var(--lane);border:1px solid var(--line);overflow:hidden}
+.bar .tr i{display:block;height:100%;width:0}
+.bar b{font-family:var(--font-num);font-weight:600;text-align:right;font-size:13.5px}
+.bar.tot{border-top:1px dashed var(--line);padding-top:6px}
+/* Phân loại nguồn */
+.sort{display:flex;flex-direction:column;gap:6px}
+.srow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;font-size:14px;padding:4px 0;border-bottom:1px solid var(--line)}
+.srow .yn{display:flex;gap:4px}
+.srow .btn{min-height:40px;padding:4px 10px;font-size:13.5px}
+.srow .btn.good{background:color-mix(in srgb,var(--ok) 20%,var(--panel));border-color:var(--ok)}
+.srow .btn.bad{background:color-mix(in srgb,var(--warn) 20%,var(--panel));border-color:var(--warn)}
+.srow .why{grid-column:1/-1;font-size:13px;color:var(--muted)}
+/* Ngôi nhà */
+.apps{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.app{border:1px solid var(--line);border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:6px;background:var(--lane)}
+.app .hd{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.app .hd b{font-family:var(--font-num);font-size:14px;white-space:nowrap}
+.app.saved{border-color:var(--ok);box-shadow:inset 4px 0 0 var(--ok)}
+.app.more{border-color:var(--warn);box-shadow:inset 4px 0 0 var(--warn)}
+.app .seg .btn{min-width:0;font-size:13.5px;padding:6px 10px;min-height:40px}
+.goal{height:22px;border-radius:6px;background:var(--lane);border:1px solid var(--line);overflow:hidden;position:relative}
+.goal i{display:block;height:100%;width:0;background:var(--ok)}
+.goal span{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--ink);left:30%}
+.big{font-family:var(--font-num);font-size:clamp(24px,3.6vw,34px);font-weight:600;line-height:1.1}
+.meas{margin:0;padding-left:20px;font-size:14.5px}
+.meas li{margin:3px 0}
+.meas .up{color:var(--warn)}
+/* Dải video thực tế */
+.vbox{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:14px;align-items:start;background:var(--space);color:var(--star);border-radius:var(--r);padding:12px}
+.vbox.playing{grid-template-columns:minmax(0,1fr)}
+@media (max-width:720px){.vbox{grid-template-columns:minmax(0,1fr)}}
+.vmedia{position:relative;width:100%;aspect-ratio:16/9;border-radius:8px;overflow:hidden;background:linear-gradient(135deg,#24361f,#0b120a)}
+.vbox.playing .vmedia{max-width:860px}
+.thumb{all:unset;cursor:pointer;position:absolute;inset:0;display:block}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb .ph{position:absolute;left:10px;bottom:8px;font-size:13px;opacity:.75}
+.thumb .pbtn{position:absolute;left:50%;top:50%;width:64px;height:64px;margin:-32px 0 0 -32px;border-radius:50%;background:#d1323b;box-shadow:0 2px 12px rgba(0,0,0,.4)}
+.thumb .pbtn::before{content:"";position:absolute;left:25px;top:20px;border-style:solid;border-width:12px 0 12px 20px;border-color:transparent transparent transparent #fff}
+.thumb .dur{position:absolute;right:8px;bottom:8px;background:rgba(0,0,0,.75);color:#fff;font:600 13px var(--font-num);padding:2px 6px;border-radius:4px}
+.thumb:focus-visible{outline:3px solid var(--star);outline-offset:-3px}
+.player{position:absolute;inset:0}
+.player video,.player iframe{width:100%;height:100%;border:0;display:block;background:#000}
+.vt{display:flex;flex-direction:column;gap:4px;min-width:0}
+.vt .lbl{font-size:12px;letter-spacing:.06em;text-transform:uppercase;opacity:.75;font-weight:600}
+.vt .ttl{font-weight:700;font-size:16px;line-height:1.3}
+.vt .look{font-size:14px;opacity:.92}
+.vt .src{font-size:12.5px;opacity:.7}
+.vchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.chip{font:inherit;font-size:14px;font-weight:600;min-height:40px;padding:6px 12px;border-radius:8px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;
+  background:transparent;color:var(--star);border:1px solid color-mix(in srgb,var(--star) 45%,transparent)}
+.chip.on{background:var(--star);color:var(--space)}
+body.hideNums .num{filter:blur(7px);user-select:none}
+body.hideNums .num:hover{filter:none}
+footer{font-size:13px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow" data-i18n="eyebrow"></div>
+      <h1 data-i18n="title"></h1>
+    </div>
+    <div class="hbtns">
+      <button class="btn" id="gvBtn" aria-pressed="false" data-i18n="gvBtn"></button>
+      <button class="btn" id="langBtn">EN</button>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="1" data-i18n="tab1"></button>
+    <button role="tab" data-tab="2" data-i18n="tab2"></button>
+    <button role="tab" data-tab="3" data-i18n="tab3"></button>
+    <button role="tab" data-tab="4" data-i18n="tab4"></button>
+  </nav>
+
+  <!-- ===================== TAB 1: CHUYỂN HOÁ VÀ HAO PHÍ ===================== -->
+  <section id="t1" class="col">
+    <p class="req" data-i18n-html="req1"></p>
+    <div class="vbox" id="v1"></div>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" data-i18n="hint1"></p>
+        <canvas id="cv1" aria-label="energy flowing into a device and splitting into useful and wasted energy"></canvas>
+        <div class="controls">
+          <button class="btn primary" id="run1"></button>
+          <button class="btn" id="rst1" data-i18n="reset"></button>
+          <div class="seg" id="spd1"></div>
+          <label class="chk"><input type="checkbox" id="th1"><span data-i18n="thermal"></span></label>
+        </div>
+        <p class="status" id="st1"></p>
+        <canvas id="sk1" aria-label="energy flow diagram"></canvas>
+        <p class="fine" data-i18n="assume1"></p>
+      </div>
+      <div class="col">
+        <div class="card" id="p1"></div>
+        <div class="card"><h2 data-i18n="pickDev"></h2><div class="seg wide" id="dev1"></div><p class="chain" id="chain1"></p></div>
+        <div class="card"><h2 data-i18n="data"></h2><dl class="kv" id="kv1"></dl></div>
+        <div class="card" id="c1"></div>
+      </div>
+    </div>
+    <details><summary data-i18n="whyT"></summary><div data-i18n-html="why1"></div></details>
+    <details><summary data-i18n="misT"></summary><div data-i18n-html="mis1"></div></details>
+    <details><summary data-i18n="wordT"></summary><div data-i18n-html="word1"></div></details>
+  </section>
+
+  <!-- ===================== TAB 2: BẢO TOÀN NĂNG LƯỢNG ===================== -->
+  <section id="t2" class="col" hidden>
+    <p class="req" data-i18n-html="req2"></p>
+    <div class="vbox" id="v2"></div>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" data-i18n="hint2"></p>
+        <canvas id="cv2" aria-label="a ball dropped on the floor, drag it up to set the drop height"></canvas>
+        <div class="controls">
+          <button class="btn primary" id="run2"></button>
+          <button class="btn" id="rst2" data-i18n="reset"></button>
+          <div class="seg" id="slow2"></div>
+          <div class="seg" id="mode2"></div>
+        </div>
+        <canvas id="gr2" aria-label="stacked graph of energy forms against time"></canvas>
+        <div class="legend" id="lg2"></div>
+        <p class="fine" data-i18n="assume2"></p>
+      </div>
+      <div class="col">
+        <div class="card" id="p2"></div>
+        <div class="card"><h2 data-i18n="pickBall"></h2><div class="seg wide" id="ball2"></div></div>
+        <div class="card"><h2 data-i18n="bars2"></h2><div class="bars" id="bars2"></div></div>
+        <div class="card"><h2 data-i18n="data"></h2><dl class="kv" id="kv2"></dl>
+          <div class="tblwrap"><table class="log" id="tb2"></table></div></div>
+        <div class="card" id="p2b"></div>
+        <div class="card" id="c2"></div>
+      </div>
+    </div>
+    <details><summary data-i18n="whyT"></summary><div data-i18n-html="why2"></div></details>
+    <details><summary data-i18n="misT"></summary><div data-i18n-html="mis2"></div></details>
+  </section>
+
+  <!-- ===================== TAB 3: NĂNG LƯỢNG TÁI TẠO ===================== -->
+  <section id="t3" class="col" hidden>
+    <p class="req" data-i18n-html="req3"></p>
+    <div class="vbox" id="v3"></div>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" data-i18n="hint3"></p>
+        <canvas id="cv3" aria-label="landscape with a power source and houses lit by its electricity"></canvas>
+        <div class="controls">
+          <button class="btn primary" id="run3"></button>
+          <button class="btn" id="rst3" data-i18n="reset"></button>
+          <div class="seg" id="spd3"></div>
+        </div>
+        <canvas id="gr3" aria-label="graph of power from each source over three days"></canvas>
+        <div class="legend" id="lg3"></div>
+        <p class="fine" data-i18n="assume3"></p>
+      </div>
+      <div class="col">
+        <div class="card" id="p3"></div>
+        <div class="card"><h2 data-i18n="pickSrc"></h2><div class="seg wide" id="src3"></div>
+          <div id="sl3sun" class="col">
+            <div class="sl"><div class="top"><span data-i18n="sN"></span><span class="val" id="sNV"></span></div><input type="range" id="sN" min="1" max="20" step="1" value="10"></div>
+            <div class="sl"><div class="top"><span data-i18n="sCloud"></span><span class="val" id="sCloudV"></span></div><input type="range" id="sCloud" min="0" max="100" step="5" value="20"></div>
+          </div>
+          <div id="sl3wind" class="col" hidden>
+            <div class="sl"><div class="top"><span data-i18n="wV"></span><span class="val" id="wVV"></span></div><input type="range" id="wV" min="0" max="28" step="0.5" value="6"></div>
+          </div>
+          <div id="sl3hyd" class="col" hidden>
+            <div class="sl"><div class="top"><span data-i18n="hH"></span><span class="val" id="hHV"></span></div><input type="range" id="hH" min="2" max="40" step="1" value="10"></div>
+            <div class="sl"><div class="top"><span data-i18n="hQ"></span><span class="val" id="hQV"></span></div><input type="range" id="hQ" min="0.02" max="0.3" step="0.01" value="0.1"></div>
+            <div><div class="muted" data-i18n="hRain"></div><div class="seg" id="rain3"></div></div>
+          </div>
+          <div id="sl3coal" class="col" hidden>
+            <div class="sl"><div class="top"><span data-i18n="cP"></span><span class="val" id="cPV"></span></div><input type="range" id="cP" min="1" max="10" step="0.5" value="5"></div>
+          </div>
+        </div>
+        <div class="card"><h2 data-i18n="data"></h2><dl class="kv" id="kv3"></dl></div>
+        <div class="card" id="c3"></div>
+      </div>
+    </div>
+    <div class="card"><h2 data-i18n="sortT"></h2><p class="muted" data-i18n="sortHint"></p><div class="sort" id="sort3"></div><p class="status" id="sortSt"></p></div>
+    <details><summary data-i18n="whyT"></summary><div data-i18n-html="why3"></div></details>
+    <details><summary data-i18n="misT"></summary><div data-i18n-html="mis3"></div></details>
+  </section>
+
+  <!-- ===================== TAB 4: TIẾT KIỆM NĂNG LƯỢNG ===================== -->
+  <section id="t4" class="col" hidden>
+    <p class="req" data-i18n-html="req4"></p>
+    <div class="vbox" id="v4"></div>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" data-i18n="hint4"></p>
+        <canvas id="cv4" aria-label="a house with its electrical appliances and an electricity meter"></canvas>
+        <div class="controls"><button class="btn" id="rst4" data-i18n="reset4"></button><button class="btn" id="best4" data-i18n="best4"></button></div>
+        <div class="apps" id="apps4"></div>
+        <p class="fine" data-i18n="assume4"></p>
+      </div>
+      <div class="col">
+        <div class="card" id="p4"></div>
+        <div class="card"><h2 data-i18n="bill4"></h2>
+          <div class="big num" id="bill4"></div>
+          <dl class="kv" id="kv4"></dl>
+          <div class="muted" data-i18n="goal4"></div>
+          <div class="goal"><i id="goal4"></i><span></span></div>
+          <p class="status" id="st4"></p>
+        </div>
+        <div class="card"><h2 data-i18n="meas4"></h2><ul class="meas" id="meas4"></ul></div>
+        <div class="card" id="c4"></div>
+      </div>
+    </div>
+    <details><summary data-i18n="whyT"></summary><div data-i18n-html="why4"></div></details>
+    <details><summary data-i18n="misT"></summary><div data-i18n-html="mis4"></div></details>
+  </section>
+
+  <details><summary data-i18n="mediaT"></summary><p data-i18n-html="mediaIntro"></p><div class="tblwrap"><table class="log" id="mediaTbl"></table></div></details>
+  <footer data-i18n-html="foot"></footer>
+</div>
+
+<script>
+const I18N={vi:{
+eyebrow:'KHTN 6 · Năng lượng và cuộc sống',title:'Chuyển hoá năng lượng, hao phí và tiết kiệm năng lượng',
+gvBtn:'Chế độ GV: che số liệu',tab1:'1. Chuyển hoá và hao phí',tab2:'2. Bảo toàn năng lượng',tab3:'3. Năng lượng tái tạo',tab4:'4. Tiết kiệm năng lượng',
+run:'▶ Chạy',pause:'⏸ Tạm dừng',reset:'↺ Đặt lại',data:'Số liệu',predTitle:'Dự đoán trước',predThen:'Giờ chạy mô phỏng để kiểm tra.',showAns:'Xem giải thích',hideAns:'Ẩn giải thích',
+conclTitle:'Rút ra kết luận',whyT:'Vì sao? Cơ chế khoa học và cách nói cho học sinh',misT:'Học sinh hay hiểu sai',wordT:'Nguồn gốc thuật ngữ',
+F_elec:'Điện năng',F_light:'Quang năng',F_heat:'Nhiệt năng',F_kin:'Động năng',F_chem:'Hoá năng',F_sound:'Năng lượng âm',F_pot:'Thế năng hấp dẫn',F_el:'Thế năng đàn hồi',
+useful:'có ích',waste:'hao phí',
+/* Tab 1 */
+req1:'<b>Yêu cầu cần đạt (KHTN 6):</b> Lấy ví dụ chứng tỏ năng lượng có thể chuyển từ dạng này sang dạng khác, từ vật này sang vật khác. Nêu được năng lượng hao phí luôn xuất hiện khi năng lượng được chuyển dạng hoặc truyền đi. Nêu được sự truyền năng lượng trong một số trường hợp đơn giản.',
+hint1:'Chọn một thiết bị rồi bấm Chạy. Mỗi chấm màu là một phần năng lượng: chấm đi vào thiết bị, rồi tách thành phần có ích và phần hao phí. Bật “Camera nhiệt” để xem thiết bị nóng lên.',
+thermal:'Camera nhiệt',pickDev:'Chọn thiết bị',
+d_inc:'Bóng đèn sợi đốt 60 W',d_led:'Đèn LED 8 W (sáng bằng bóng 60 W)',d_fan:'Quạt điện 50 W',d_ket:'Ấm siêu tốc 1800 W (1,5 lít nước)',d_moto:'Xe máy đang chạy',d_sol:'Tấm pin mặt trời',
+o_inc:['ánh sáng chiếu sáng','làm nóng bóng đèn và không khí'],o_led:['ánh sáng chiếu sáng','làm nóng đế đèn và không khí'],
+o_fan:['cánh quạt quay, tạo gió','động cơ nóng lên (ma sát, dòng điện)','tiếng ồn'],
+o_ket:['làm nóng nước','làm nóng vỏ ấm và không khí','tiếng sôi rì rì'],
+o_moto:['xe chuyển động','động cơ, khí thải nóng','tiếng nổ máy'],o_sol:['dòng điện sạc pin','tấm pin nóng lên','ánh sáng bị phản xạ đi'],
+src_elec:'ổ điện',src_chem:'xăng',src_light:'Mặt Trời',
+tgt_inc:'sách được chiếu sáng',tgt_led:'sách được chiếu sáng',tgt_fan:'gió',tgt_ket:'nước',tgt_moto:'chuyển động',tgt_sol:'pin sạc',
+kP:'Năng lượng cung cấp mỗi giây',kT:'Thời gian chạy',kIn:'Năng lượng cung cấp',kUse:'Năng lượng có ích',kWaste:'Năng lượng hao phí',kSum:'Có ích + hao phí',kPct:'Phần có ích',kDot:'Mỗi chấm ứng với',kDots:'Số chấm: vào / ra',kTw:'Nhiệt độ nước',kTd:'Nhiệt độ thiết bị (ước lượng)',kOk:'bằng năng lượng cung cấp ✓',
+perS:'J mỗi giây',sk:'Sơ đồ dòng năng lượng (độ rộng dải tỉ lệ với năng lượng)',kettleOff:'Nước sôi 100 °C, ấm tự ngắt điện.',speed:'Tua nhanh',
+assume1:'Giả thiết mô phỏng: tỉ lệ có ích/hao phí lấy theo số liệu điển hình (bóng sợi đốt khoảng 5 % thành ánh sáng, đèn LED khoảng 35 %, quạt khoảng 60 %, ấm siêu tốc khoảng 85 %, động cơ xe máy khoảng 20 %, pin mặt trời khoảng 20 %). Nhiệt độ thiết bị chỉ là ước lượng. Năng lượng âm thực tế rất nhỏ, ở đây vẽ to hơn để nhìn thấy.',
+p1q:'Bóng đèn sợi đốt 60 W đang sáng. Phần lớn điện năng cung cấp cho bóng biến thành dạng nào?',p1a:'Quang năng (ánh sáng)',p1b:'Nhiệt năng (làm nóng bóng đèn và không khí)',p1c:'Mỗi dạng một nửa',
+p1e:'Chỉ khoảng 5 phần trăm thành ánh sáng, khoảng 95 phần trăm thành nhiệt năng. Vì thế bóng sợi đốt rất nóng. Đèn LED sáng bằng chỉ cần 8 J mỗi giây vì ít hao phí hơn nhiều.',
+c1q:'Sau khi chạy hết các thiết bị: năng lượng có ích cộng năng lượng hao phí so với năng lượng cung cấp thì thế nào? Có thiết bị nào không có hao phí không?',
+c1a:'Ở mọi thiết bị, năng lượng có ích + năng lượng hao phí = năng lượng cung cấp. Năng lượng không tự mất đi mà chuyển sang dạng khác. Không có thiết bị nào không hao phí: luôn có một phần chuyển thành nhiệt năng (và âm thanh) lan ra xung quanh. Thiết bị tốt là thiết bị có phần hao phí nhỏ.',
+why1:'<p><b>Cơ chế:</b> Năng lượng là đại lượng đặc trưng cho khả năng tác dụng lực, làm vật chuyển động, nóng lên, phát sáng. Khi một thiết bị hoạt động, năng lượng chuyển từ dạng này sang dạng khác (điện năng → quang năng, hoá năng → động năng) và truyền từ vật này sang vật khác (từ dây điện vào bóng đèn, từ dây đốt nóng sang nước). Trong mọi quá trình thật đều có những “lối rò”: dòng điện làm nóng dây dẫn, các bộ phận cọ xát nhau (ma sát), vật rung phát ra âm thanh. Phần năng lượng đi theo các lối này là <b>năng lượng hao phí</b>, cuối cùng hầu hết thành nhiệt năng tản ra môi trường xung quanh và rất khó gom lại để dùng tiếp.</p><p><b>Nói cho học sinh:</b> Năng lượng giống như nước rót từ bình sang cốc: phần lớn vào cốc (có ích), nhưng luôn có ít nước bắn ra ngoài (hao phí). Tổng lượng nước không đổi, chỉ là phần bắn ra thì không uống được nữa.</p><p><b>Ví dụ truyền năng lượng:</b> ấm điện truyền nhiệt năng cho nước; Mặt Trời truyền năng lượng ánh sáng cho tấm pin; cánh quạt truyền động năng cho không khí.</p>',
+mis1:'<ul><li><b>“Năng lượng bị mất đi, biến mất.”</b> Không. Năng lượng hao phí vẫn còn, nó thành nhiệt năng, âm thanh lan ra xung quanh. Đếm chấm: số chấm ra luôn bằng số chấm vào.</li><li><b>“Đèn LED không toả nhiệt.”</b> LED vẫn toả nhiệt (khoảng 65 % điện năng), nhưng vì cần ít điện năng hơn nên tổng nhiệt toả ra ít hơn bóng sợi đốt nhiều.</li><li><b>“Thiết bị mới, đắt tiền thì không hao phí.”</b> Mọi thiết bị đều có hao phí; chỉ có thể làm cho hao phí nhỏ hơn.</li><li><b>“Năng lượng hao phí là năng lượng bị phá huỷ.”</b> Hao phí nghĩa là không dùng được cho mục đích của ta, chứ không phải bị phá huỷ.</li></ul>',
+word1:'<ul><li><b>Năng lượng</b> (能量): <i>năng</i> 能 là “có thể, có sức làm”, <i>lượng</i> 量 là “lượng, mức đo”. Tiếng Anh <i>energy</i>, tiếng Pháp <i>énergie</i> bắt nguồn từ tiếng Hy Lạp <i>ἐνέργεια (enérgeia)</i>: <i>en</i> “ở trong” + <i>ergon</i> “việc làm”, nghĩa là “sức hoạt động ở bên trong”. Aristotle dùng từ này; năm 1807 Thomas Young dùng <i>energy</i> theo nghĩa vật lí. Tiếng Trung 能量 (néngliàng), tiếng Nhật エネルギー (mượn từ tiếng Đức <i>Energie</i>).</li><li><b>Chuyển hoá</b> (轉化): <i>chuyển</i> “dời, đổi”, <i>hoá</i> “biến thành”. Tiếng Anh <i>transformation</i> từ Latinh <i>trans</i> “qua” + <i>forma</i> “hình dạng”: đổi sang hình dạng khác.</li><li><b>Hao phí</b> (耗費): <i>hao</i> “hao mòn, tiêu tốn”, <i>phí</i> “tiêu, tốn”. Tiếng Anh <i>wasted energy</i>; nhà khoa học còn nói năng lượng bị <i>dissipated</i> (Latinh <i>dissipare</i> “rải tung ra”), đúng với hình ảnh nhiệt tản ra khắp nơi.</li></ul>',
+/* Tab 2 */
+req2:'<b>Yêu cầu cần đạt (KHTN 6):</b> Nêu được định luật bảo toàn năng lượng và lấy được ví dụ minh hoạ. Năng lượng hao phí luôn xuất hiện khi năng lượng chuyển dạng, truyền từ vật này sang vật khác.',
+hint2:'Kéo quả bóng lên độ cao muốn thả rồi buông tay. Xem thanh năng lượng: thế năng ↔ động năng ↔ thế năng đàn hồi, phần hao phí tăng dần, nhưng tổng không đổi. Dùng ×0,1 để xem lúc bóng bẹp xuống.',
+slow:'Chậm',one:'Một quả bóng',two:'Hai quả chồng lên nhau',pickBall:'Chọn quả bóng',bars2:'Năng lượng lúc này (so với ban đầu)',
+b_sup:'Bóng nảy (siêu bóng)',b_ten:'Bóng tennis',b_bas:'Bóng rổ',b_clay:'Viên đất nặn',b_ideal:'Bóng tưởng tượng: không hao phí',
+heatS:'Nhiệt năng + âm (hao phí)',total:'Tổng năng lượng',kH0:'Độ cao thả',kHnow:'Độ cao bóng',kM:'Khối lượng bóng',kE0:'Năng lượng ban đầu',kEt:'Tổng lúc này',kBn:'Số lần chạm sàn',kDT:'Bóng nóng thêm khoảng',
+thN:'Lần nảy',thH:'Độ cao đỉnh',thR:'So với lần trước',topBall:'quả trên',drop:'độ cao thả',
+grE:'Năng lượng (J)',grT:'thời gian (s)',
+assume2:'Giả thiết mô phỏng: bỏ qua sức cản không khí; g = 9,8 m/s². Lúc chạm sàn, bóng được coi như một lò xo có ma sát bên trong; thời gian va chạm kéo dài khoảng 15 ms (thật chỉ vài ms) và bóng được vẽ to hơn để dễ thấy. Khoảng nhiệt độ tăng tính với nhiệt dung riêng cao su khoảng 1500 J/(kg·°C), coi một nửa nhiệt năng ở lại trong bóng.',
+p2q:'Thả bóng tennis từ độ cao 1,5 m. Lần nảy đầu tiên bóng lên cao bao nhiêu?',p2a:'Đúng 1,5 m',p2b:'Thấp hơn 1,5 m',p2c:'Cao hơn 1,5 m',
+p2e:'Thấp hơn (khoảng 0,8 m). Mỗi lần chạm sàn, một phần năng lượng chuyển thành nhiệt năng và năng lượng âm (tiếng “bộp”), nên bóng còn ít năng lượng hơn để lên cao. Chỉ “bóng tưởng tượng không hao phí” mới nảy lên lại đúng độ cao thả.',
+p2bq:'Chọn “Hai quả chồng lên nhau”: bóng tennis đặt trên bóng rổ, thả cùng lúc. Bóng tennis nảy lên thế nào?',p2ba:'Thấp hơn khi thả một mình',p2bb:'Cao gấp mấy lần độ cao thả',p2bc:'Không nảy',
+p2be:'Bóng tennis vọt lên cao gấp vài lần! Bóng rổ nặng truyền phần lớn năng lượng của nó cho bóng tennis nhẹ (truyền năng lượng từ vật này sang vật khác), nên bóng rổ gần như nằm yên. Tổng năng lượng vẫn không tăng: xem thanh “Tổng”.',
+c2q:'Khi bóng nằm yên trên sàn, năng lượng ban đầu đi đâu? Phát biểu định luật bảo toàn năng lượng.',
+c2a:'Năng lượng ban đầu không mất đi: nó đã chuyển hết thành nhiệt năng (bóng, sàn, không khí nóng lên một chút) và năng lượng âm. <b>Định luật bảo toàn năng lượng:</b> Năng lượng không tự sinh ra cũng không tự mất đi, nó chỉ chuyển từ dạng này sang dạng khác, hoặc truyền từ vật này sang vật khác.',
+why2:'<p><b>Cơ chế:</b> Khi rơi, thế năng hấp dẫn của bóng chuyển dần thành động năng. Lúc chạm sàn, bóng bị nén lại: động năng chuyển thành thế năng đàn hồi (như lò xo bị nén). Bóng bung ra, thế năng đàn hồi chuyển lại thành động năng và bóng nảy lên. Nhưng khi bị nén và bung, các phân tử cao su cọ xát với nhau (ma sát bên trong), sàn rung lên phát ra tiếng, nên một phần năng lượng thành nhiệt năng và năng lượng âm. Phần này tản ra, không quay về làm bóng nảy được nữa. Bóng nảy siêu bóng ít ma sát bên trong nên nảy cao; đất nặn biến dạng mà không bung lại nên gần như không nảy.</p><p><b>Lịch sử:</b> Khoảng năm 1845, James Joule đo được: cùng một lượng công cơ học luôn làm nước nóng lên cùng một lượng. Từ đó Mayer, Joule và Helmholtz (1847) phát biểu định luật bảo toàn năng lượng.</p><p><b>Nói cho học sinh:</b> Tổng năng lượng giống số tiền trong ví: em đổi tiền chẵn ra tiền lẻ (đổi dạng), cho bạn mượn (truyền sang vật khác), làm rơi vài đồng xu xuống khe ghế (hao phí). Tổng số tiền vẫn còn, chỉ là phần rơi mất thì khó lấy lại.</p>',
+mis2:'<ul><li><b>“Bóng dừng lại vì hết năng lượng, năng lượng biến mất.”</b> Năng lượng chuyển thành nhiệt năng và âm thanh. Bóng nóng lên rất ít (vài phần nghìn độ) nên tay ta không cảm nhận được, nhưng tổng vẫn đủ.</li><li><b>“Bóng tennis nảy cao hơn lúc thả là tự sinh ra năng lượng.”</b> Không, nó lấy năng lượng của bóng rổ. Tổng năng lượng hai quả không tăng.</li><li><b>“Bảo toàn năng lượng nghĩa là bóng phải nảy mãi.”</b> Bảo toàn là tổng không đổi; còn phần hữu ích (để nảy) thì giảm dần vì hao phí.</li></ul>',
+/* Tab 3 */
+req3:'<b>Yêu cầu cần đạt (KHTN 6):</b> Lấy được ví dụ về một số loại năng lượng tái tạo thông dụng. Phân loại được năng lượng theo tiêu chí. Nêu được vật liệu giải phóng năng lượng, tạo ra nhiệt và ánh sáng khi bị đốt cháy gọi là nhiên liệu.',
+hint3:'Chọn nguồn điện, chỉnh thanh trượt rồi bấm Chạy cho thời gian trôi qua nhiều ngày. Mỗi ngôi nhà sáng đèn dùng khoảng 0,3 kW. Để ý: nguồn nào sáng lại mỗi ngày, nguồn nào cạn dần.',
+pickSrc:'Chọn nguồn năng lượng',s_sun:'Mặt Trời (pin mặt trời)',s_wind:'Gió (tua bin gió)',s_hyd:'Nước (thuỷ điện nhỏ)',s_coal:'Than đá (nhiệt điện)',
+sN:'Số tấm pin (mỗi tấm 1,6 m²)',sCloud:'Mây che',wV:'Tốc độ gió trung bình',hH:'Độ cao cột nước',hQ:'Lưu lượng nước qua tua bin',hRain:'Mùa',dry:'Mùa khô',wet:'Mùa mưa',cP:'Công suất nhà máy',
+kNow:'Công suất phát lúc này',kHouses:'Số nhà được thắp sáng',kDay:'Đã phát hôm nay',kAll:'Tổng đã phát',kClock:'Thời gian',kWind:'Gió lúc này',kSun:'Ánh sáng Mặt Trời',kRes:'Nước trong hồ',kStock:'Than còn trong kho',kCO2:'Khí CO₂ đã thải',kRenew:'Nguồn này',renewY:'tái tạo: được thiên nhiên bù lại liên tục',renewN:'không tái tạo: dùng hết là cạn',
+day:'Ngày',cutout:'Gió quá mạnh: tua bin dừng để an toàn',empty:'Hồ cạn: chỉ còn nước mưa chảy vào',coalOut:'Hết than! Than đá phải mất hàng triệu năm mới hình thành.',night:'Ban đêm: pin mặt trời không phát điện',
+grP:'Công suất (kW)',grH:'thời gian (giờ)',
+assume3:'Giả thiết mô phỏng: 1 giây chạy = 1 giờ (tuỳ tốc độ). Pin mặt trời hiệu suất 20 %, nắng giữa trưa 1000 W/m². Tua bin gió nhỏ đường kính 4 m, lấy được 35 % năng lượng gió, bắt đầu quay từ 3 m/s, dừng khi gió trên 25 m/s. Thuỷ điện nhỏ hiệu suất 80 %, hồ chứa 20 000 m³. Nhà máy than hiệu suất 35 %, 1 kg than cho 24 MJ và thải khoảng 2,4 kg CO₂. Mỗi nhà trung bình 0,3 kW (khoảng 200 kWh mỗi tháng).',
+p3q:'Ban đêm, tấm pin mặt trời phát được bao nhiêu điện?',p3a:'Bằng ban ngày',p3b:'Bằng một nửa ban ngày',p3c:'Gần như không phát',
+p3e:'Gần như không phát, vì không có ánh sáng Mặt Trời chiếu vào. Nhưng sáng hôm sau Mặt Trời lại mọc: nguồn năng lượng này được thiên nhiên bù lại mỗi ngày, nên gọi là năng lượng tái tạo. Muốn có điện ban đêm phải tích vào pin (ắc quy) hoặc dùng thêm nguồn khác.',
+c3q:'Chạy mô phỏng nhiều ngày với cả bốn nguồn. Năng lượng tái tạo khác năng lượng từ than đá ở điểm nào? Kể tên các nguồn năng lượng tái tạo em biết.',
+c3a:'Năng lượng tái tạo (Mặt Trời, gió, nước, sinh khối, địa nhiệt, sóng biển...) được thiên nhiên bổ sung liên tục, dùng xong lại có, và hầu như không thải CO₂ khi phát điện. Than đá, dầu mỏ, khí đốt là nhiên liệu hoá thạch: hình thành trong hàng triệu năm, dùng đến đâu cạn đến đó, khi đốt thải nhiều CO₂. Tuy vậy, năng lượng tái tạo phụ thuộc thời tiết (đêm, lặng gió, mùa khô) nên cần kết hợp nhiều nguồn và tiết kiệm.',
+sortT:'Xếp loại: nguồn năng lượng nào là tái tạo?',sortHint:'Bấm “Tái tạo” hoặc “Không tái tạo” cho từng nguồn. Đúng sẽ hiện màu xanh kèm lí do.',yes:'Tái tạo',no:'Không tái tạo',sortDone:'Em xếp đúng {n}/{m} nguồn.',
+srcs:[['Ánh sáng Mặt Trời',1,'Mặt Trời chiếu sáng mỗi ngày, còn hàng tỉ năm nữa.'],['Gió',1,'Gió sinh ra do Mặt Trời làm nóng không khí không đều, luôn có lại.'],['Nước sông, hồ (thuỷ điện)',1,'Mặt Trời làm nước bốc hơi, mưa xuống lại đầy hồ (vòng tuần hoàn của nước).'],['Sóng biển, thuỷ triều',1,'Do gió và lực hút của Mặt Trăng, liên tục có lại.'],['Sinh khối: rơm, củi, bã mía, phân',1,'Cây mọc lại được trong vài tháng đến vài năm, nếu trồng lại.'],['Địa nhiệt (nhiệt trong lòng đất)',1,'Nhiệt từ lòng Trái Đất gần như vô tận.'],['Than đá',0,'Hình thành từ cây cối bị vùi lấp hàng triệu năm, dùng hết là cạn.'],['Dầu mỏ (xăng, dầu)',0,'Hình thành từ sinh vật biển hàng triệu năm, dùng hết là cạn.'],['Khí đốt tự nhiên (gas)',0,'Nhiên liệu hoá thạch như dầu mỏ, có hạn.']],
+why3:'<p><b>Cơ chế:</b> Hầu hết năng lượng tái tạo bắt nguồn từ Mặt Trời. Ánh sáng làm pin mặt trời sinh ra dòng điện (quang năng → điện năng). Mặt Trời đốt nóng mặt đất không đều làm không khí chuyển động thành gió (động năng của gió → động năng cánh quạt → điện năng). Mặt Trời làm nước bốc hơi, mưa xuống chỗ cao, nước chảy từ hồ xuống làm quay tua bin (thế năng của nước → động năng → điện năng). Cây quang hợp tích năng lượng ánh sáng thành hoá năng trong gỗ, rơm (sinh khối). Các nguồn này được bổ sung liên tục trong thời gian ngắn nên gọi là <b>tái tạo</b>.</p><p>Than đá, dầu mỏ, khí đốt cũng là năng lượng Mặt Trời “cất giữ” từ cây cối, sinh vật cổ đại, nhưng phải mất hàng triệu năm mới hình thành. Chúng là <b>nhiên liệu</b> (vật liệu khi bị đốt cháy giải phóng năng lượng, tạo ra nhiệt và ánh sáng) loại không tái tạo.</p><p><b>Nói cho học sinh:</b> Năng lượng tái tạo giống giếng nước có mạch ngầm, múc hôm nay mai lại đầy. Than đá giống bình nước đóng chai: uống hết là hết.</p><p><b>Nguồn gốc từ:</b> <i>tái tạo</i> (再造): <i>tái</i> “lại”, <i>tạo</i> “làm ra”. Tiếng Anh <i>renewable</i>: <i>re-</i> “lại” + <i>new</i> “mới”, nghĩa là “làm mới lại được”. <i>Hoá thạch</i> (化石) “hoá thành đá”, tiếng Anh <i>fossil</i> từ Latinh <i>fossilis</i> “được đào lên”.</p>',
+mis3:'<ul><li><b>“Năng lượng tái tạo là vô hạn nên dùng thoải mái.”</b> Nguồn thì được bù lại, nhưng lượng ta thu được mỗi lúc có hạn (phụ thuộc nắng, gió, mưa) và nhà máy cũng tốn tiền, tốn tài nguyên. Vẫn cần tiết kiệm.</li><li><b>“Pin mặt trời không có hao phí.”</b> Chỉ khoảng 20 % ánh sáng thành điện, phần lớn còn lại làm nóng tấm pin.</li><li><b>“Củi, rơm không phải năng lượng tái tạo vì phải đốt.”</b> Sinh khối là tái tạo nếu được trồng lại; đốt sinh khối vẫn tạo khói nên cần dùng đúng cách.</li></ul>',
+/* Tab 4 */
+req4:'<b>Yêu cầu cần đạt (KHTN 6):</b> Đề xuất được biện pháp để tiết kiệm năng lượng trong các hoạt động hằng ngày.',
+hint4:'Đây là một gia đình đang dùng điện lãng phí. Thay đổi cách dùng từng thiết bị bên dưới để giảm tiền điện ít nhất 30 % mà nhà vẫn đủ sáng, đủ mát. Thiết bị nào tiết kiệm sẽ có viền xanh.',
+reset4:'↺ Về gia đình lãng phí',best4:'Xem một cách tiết kiệm tốt',bill4:'Tiền điện mỗi tháng',meas4:'Biện pháp tiết kiệm của em',
+goal4:'Mức giảm so với gia đình lãng phí (vạch đen: mục tiêu 30 %)',kMon:'Điện dùng mỗi tháng',kBase:'Gia đình lãng phí',kSave:'Giảm được',kCO2m:'CO₂ thải ra do sản xuất điện',
+goalOk:'Đạt mục tiêu! Gia đình giảm được {p} % điện năng.',goalNo:'Còn thiếu: cần giảm thêm khoảng {k} kWh mỗi tháng.',noMeas:'Chưa có biện pháp nào. Hãy thay đổi cách dùng thiết bị.',
+perMon:'kWh/tháng',hours:'Số giờ dùng mỗi ngày',
+a_light:'Đèn chiếu sáng (6 bóng)',a_ac:'Điều hoà nhiệt độ',a_fridge:'Tủ lạnh',a_tv:'Tivi',a_stby:'Thiết bị cắm điện chờ (tivi, đầu thu, sạc...)',a_wh:'Bình nóng lạnh',a_rice:'Nồi cơm điện',a_fan:'Quạt điện',a_wash:'Máy giặt',
+l_inc:'Sợi đốt 60 W',l_cfl:'Compact 15 W',l_led:'LED 9 W',acT:'Nhiệt độ cài đặt',acDoor:'Đóng kín cửa phòng',fr_old:'Tủ cũ',fr_inv:'Tủ inverter nhãn 5 sao',frCare:'Không mở tủ lâu, để nguội thức ăn trước khi cất',
+stbyU:'Rút phích, tắt ổ cắm khi không dùng',wh_all:'Bật cả ngày',wh_need:'Bật 30 phút trước khi tắm',riceU:'Rút điện khi ăn xong (không giữ ấm cả ngày)',washN:'Số lần giặt mỗi tuần',
+m_light_type:'Thay bóng sợi đốt bằng bóng tiết kiệm điện (LED) cùng độ sáng',m_light_h:'Tắt đèn khi ra khỏi phòng, tận dụng ánh sáng tự nhiên',m_ac_T:'Đặt điều hoà 26–28 °C thay vì quá lạnh',m_ac_h:'Bật điều hoà ít giờ hơn, kết hợp quạt',m_ac_door:'Đóng kín cửa khi bật điều hoà',
+m_fr_type:'Chọn tủ lạnh tiết kiệm điện (nhãn năng lượng nhiều sao)',m_fr_care:'Không mở tủ lạnh lâu, để nguội thức ăn trước khi cất',m_tv:'Xem tivi ít giờ hơn',m_stby:'Rút phích cắm hoặc tắt ổ cắm khi không dùng',m_wh:'Chỉ bật bình nóng lạnh trước khi tắm rồi tắt',m_rice:'Rút điện nồi cơm khi ăn xong',m_fan:'Dùng quạt nhiều hơn',m_wash:'Gom quần áo, giặt đầy máy',
+upTxt:'tăng',saveTxt:'giảm',
+assume4:'Giả thiết mô phỏng: công suất và số giờ là số liệu điển hình của hộ gia đình Việt Nam. Điều hoà 0,9 kW ở 25 °C, mỗi độ cài thấp hơn tốn thêm khoảng 5 %, mở cửa tốn thêm 30 %. Bình nóng lạnh bật cả ngày mất thêm khoảng 1,2 kWh mỗi ngày do nhiệt tản ra. Giá điện lấy trung bình 2 500 đồng/kWh (thực tế tính theo bậc thang). Mỗi kWh điện ở Việt Nam thải khoảng 0,66 kg CO₂.',
+p4q:'Tắt tivi bằng điều khiển từ xa (đèn đỏ vẫn sáng). Tivi còn tốn điện không?',p4a:'Không tốn chút nào',p4b:'Vẫn tốn một ít (chế độ chờ)',p4c:'Tốn như lúc đang xem',
+p4e:'Vẫn tốn một ít. Ở chế độ chờ, tivi, đầu thu, bộ sạc vẫn dùng vài oát để giữ mạch nhận tín hiệu. Cả nhà cộng lại khoảng 10 đến 15 W, cắm suốt ngày đêm thành khoảng 6 kWh mỗi tháng. Rút phích hoặc dùng ổ cắm có công tắc sẽ hết hao phí này.',
+c4q:'Em hãy đề xuất ba biện pháp tiết kiệm năng lượng ở nhà em và giải thích mỗi biện pháp làm giảm năng lượng hao phí hay giảm thời gian sử dụng.',
+c4a:'Ví dụ: (1) Thay bóng sợi đốt bằng bóng LED: giảm hao phí vì LED biến nhiều điện năng thành ánh sáng hơn. (2) Đặt điều hoà 26–28 °C, đóng kín cửa: giảm năng lượng cần để làm mát và giảm nhiệt lọt vào. (3) Tắt đèn, rút phích khi không dùng: giảm thời gian dùng và hao phí ở chế độ chờ. Ngoài điện: đi bộ, đi xe đạp quãng ngắn, tắt bếp khi nấu xong, tận dụng ánh sáng và gió tự nhiên.',
+why4:'<p><b>Cơ chế:</b> Năng lượng một thiết bị tiêu thụ = công suất × thời gian dùng (kWh = kW × giờ). Muốn tiết kiệm có hai hướng: <b>(1) giảm thời gian dùng khi không cần</b> (tắt đèn, rút phích, không giữ ấm cả ngày), và <b>(2) giảm năng lượng hao phí</b> bằng thiết bị hiệu quả (LED, tủ lạnh inverter) và cách dùng hợp lí (đóng cửa khi bật điều hoà, để nguội thức ăn trước khi cất tủ). Tiết kiệm năng lượng còn giảm khí CO₂ vì phần lớn điện ở Việt Nam vẫn sản xuất từ than đá và khí đốt.</p><p><b>Nói cho học sinh:</b> Tiết kiệm năng lượng không phải là không dùng điện, mà là dùng đúng lúc, đúng chỗ, chọn thiết bị ít hao phí. Mỗi “chấm năng lượng” hao phí là tiền điện của nhà em bay đi thành nhiệt.</p><p><b>1 kWh là gì?</b> “Một số điện” = năng lượng của thiết bị 1000 W chạy trong 1 giờ = 3 600 000 J.</p>',
+mis4:'<ul><li><b>“Tiết kiệm năng lượng là không dùng điện.”</b> Vẫn dùng đủ, chỉ bỏ phần lãng phí.</li><li><b>“Tắt bằng điều khiển là hết tốn điện.”</b> Chế độ chờ vẫn tốn điện.</li><li><b>“Để điều hoà thật lạnh cho mau mát rồi tắt sẽ đỡ tốn.”</b> Cài càng lạnh, máy càng chạy lâu, càng tốn.</li><li><b>“Bóng LED đắt nên không tiết kiệm.”</b> Bóng LED dùng ít điện gấp khoảng 6 lần và bền hơn, nên tiền điện tiết kiệm được lớn hơn nhiều tiền mua bóng.</li></ul>',
+/* Video */
+mediaT:'Danh sách video (dùng cho bản offline)',
+mediaIntro:'Bản offline: tạo thư mục <b>media</b> cạnh file <b>index.html</b>, tải từng video về và đặt đúng tên file trong bảng (có thể thêm ảnh bìa cùng tên, đuôi <b>.jpg</b>). Khi bấm hình, trang phát file trong <b>media/</b> trước; không có file thì phát YouTube (cần mạng). Chỉ kiểm tra được tiêu đề; kênh và thời lượng ghi “?” là chưa kiểm tra được, thầy cô nên xem trước.',
+mTab:'Tab',mFile:'Tên file cần lưu',mVideo:'Video',mDur:'Thời lượng',mType:'Loại',
+vLbl:'Video thực tế',vLook:'Để ý:',vNo:'Video',vDurUnk:'chưa kiểm tra thời lượng',vChUnk:'kênh chưa kiểm tra',vNoThumb:'Bấm để phát video',
+vNote:'Bấm hình để phát ngay trong trang. Nếu khung phát để trống (xem trên claude.ai không nhúng được YouTube), bấm “YouTube ↗”.',
+vt_phen:'Hiện tượng',vt_exp:'Thí nghiệm',vt_app:'Ứng dụng',
+foot:'Mô phỏng KHTN 6 · Chủ đề Năng lượng và cuộc sống · Chương trình GDPT 2018. Số liệu là giá trị điển hình, đã ghi rõ chỗ đơn giản hoá ở từng tab.'
+},
+en:{
+eyebrow:'Science 6 · Energy and life',title:'Energy transfers, wasted energy and saving energy',
+gvBtn:'Teacher mode: hide numbers',tab1:'1. Transfers and waste',tab2:'2. Conservation of energy',tab3:'3. Renewable energy',tab4:'4. Saving energy',
+run:'▶ Run',pause:'⏸ Pause',reset:'↺ Reset',data:'Data',predTitle:'Predict first',predThen:'Now run the simulation to check.',showAns:'Show explanation',hideAns:'Hide explanation',
+conclTitle:'Conclusion',whyT:'Why? The science and how to explain it to students',misT:'Common misconceptions',wordT:'Where the words come from',
+F_elec:'Electrical',F_light:'Light',F_heat:'Thermal',F_kin:'Kinetic',F_chem:'Chemical',F_sound:'Sound',F_pot:'Gravitational potential',F_el:'Elastic potential',
+useful:'useful',waste:'wasted',
+req1:'<b>Learning outcomes (Science 6):</b> Give examples showing energy can change from one form to another and pass from one object to another. State that wasted energy always appears when energy is transformed or transferred. Describe energy transfer in simple everyday cases.',
+hint1:'Pick a device and press Run. Each coloured dot is a parcel of energy: dots flow into the device, then split into useful and wasted energy. Turn on “Thermal camera” to see the device warm up.',
+thermal:'Thermal camera',pickDev:'Choose a device',
+d_inc:'60 W filament bulb',d_led:'8 W LED (as bright as 60 W bulb)',d_fan:'50 W electric fan',d_ket:'1800 W kettle (1.5 L water)',d_moto:'Running motorbike',d_sol:'Solar panel',
+o_inc:['light','heats bulb and air'],o_led:['light','heats base and air'],o_fan:['blades turn, moving air','motor warms (friction, current)','noise'],
+o_ket:['heats the water','heats the kettle body and air','hissing sound'],o_moto:['bike moves','hot engine and exhaust','engine noise'],o_sol:['current charges battery','panel warms','reflected light'],
+src_elec:'socket',src_chem:'petrol',src_light:'Sun',
+tgt_inc:'lit book',tgt_led:'lit book',tgt_fan:'wind',tgt_ket:'water',tgt_moto:'motion',tgt_sol:'battery',
+kP:'Energy supplied per second',kT:'Running time',kIn:'Energy supplied',kUse:'Useful energy',kWaste:'Wasted energy',kSum:'Useful + wasted',kPct:'Useful share',kDot:'Each dot is',kDots:'Dots: in / out',kTw:'Water temperature',kTd:'Device temperature (estimate)',kOk:'equals energy supplied ✓',
+perS:'J per second',sk:'Energy flow diagram (band width proportional to energy)',kettleOff:'Water boils at 100 °C, the kettle switches off.',speed:'Fast forward',
+assume1:'Model assumptions: useful/wasted shares are typical values (filament bulb about 5 % light, LED about 35 %, fan about 60 %, kettle about 85 %, motorbike engine about 20 %, solar panel about 20 %). Device temperatures are estimates. Sound energy is really tiny; it is drawn larger so you can see it.',
+p1q:'A 60 W filament bulb is on. Most of the electrical energy becomes which form?',p1a:'Light energy',p1b:'Thermal energy (heating the bulb and air)',p1c:'Half each',
+p1e:'Only about 5 % becomes light, about 95 % becomes thermal energy. That is why filament bulbs get very hot. An equally bright LED needs only 8 J per second because it wastes much less.',
+c1q:'After trying every device: how does useful + wasted energy compare with the energy supplied? Is any device free of waste?',
+c1a:'For every device, useful + wasted energy = energy supplied. Energy does not disappear; it changes form. No device is free of waste: some energy always becomes thermal energy (and sound) that spreads out. A good device is one with little waste.',
+why1:'<p><b>Mechanism:</b> Energy measures the ability to exert forces, move things, heat them or make light. When a device works, energy changes form (electrical → light, chemical → kinetic) and passes from one object to another (wire to bulb, heating element to water). Every real process has “leaks”: current heats wires, moving parts rub (friction), vibrations make sound. Energy that leaks this way is <b>wasted energy</b>; it ends up mostly as thermal energy spread into the surroundings, very hard to collect and use again.</p><p><b>For students:</b> Energy is like water poured from a jug into a cup: most goes into the cup (useful), but some always splashes out (wasted). The total amount of water stays the same; the splashed part just cannot be drunk.</p><p><b>Transfer examples:</b> a kettle transfers thermal energy to water; the Sun transfers light energy to a solar panel; fan blades transfer kinetic energy to the air.</p>',
+mis1:'<ul><li><b>“Energy is lost, it disappears.”</b> No. Wasted energy is still there as heat and sound. Count the dots: dots out always equal dots in.</li><li><b>“LEDs give off no heat.”</b> LEDs do (about 65 % of their input), but they need so little input that they give off far less heat than filament bulbs.</li><li><b>“New, expensive devices waste nothing.”</b> Every device wastes some energy; we can only make the waste smaller.</li><li><b>“Wasted energy is destroyed energy.”</b> Wasted means not useful for our purpose, not destroyed.</li></ul>',
+word1:'<ul><li><b>Energy</b>: from Greek <i>ἐνέργεια (enérgeia)</i>, <i>en</i> “in” + <i>ergon</i> “work”, “activity within”. Used by Aristotle; Thomas Young gave it its physics meaning in 1807. Vietnamese <i>năng lượng</i> (能量): <i>năng</i> “able”, <i>lượng</i> “amount”. Chinese 能量, Japanese エネルギー (from German <i>Energie</i>).</li><li><b>Transformation</b>: Latin <i>trans</i> “across” + <i>forma</i> “shape”. Vietnamese <i>chuyển hoá</i> (轉化) “shift and become”.</li><li><b>Wasted / dissipated</b>: Latin <i>dissipare</i> “to scatter”, just like heat spreading out. Vietnamese <i>hao phí</i> (耗費) “worn away, spent”.</li></ul>',
+req2:'<b>Learning outcomes (Science 6):</b> State the law of conservation of energy and give examples. Wasted energy always appears when energy is transformed or transferred.',
+hint2:'Drag the ball up to a drop height and let go. Watch the bars: gravitational ↔ kinetic ↔ elastic energy, the wasted share grows, but the total stays the same. Use ×0.1 to see the ball squash.',
+slow:'Slow',one:'One ball',two:'Two balls stacked',pickBall:'Choose a ball',bars2:'Energy now (compared with the start)',
+b_sup:'Super ball',b_ten:'Tennis ball',b_bas:'Basketball',b_clay:'Lump of clay',b_ideal:'Imaginary ball: no waste',
+heatS:'Thermal + sound (wasted)',total:'Total energy',kH0:'Drop height',kHnow:'Ball height',kM:'Ball mass',kE0:'Energy at start',kEt:'Total now',kBn:'Floor hits',kDT:'Ball warms up by about',
+thN:'Bounce',thH:'Peak height',thR:'vs previous',topBall:'top ball',drop:'drop height',
+grE:'Energy (J)',grT:'time (s)',
+assume2:'Model assumptions: no air resistance; g = 9.8 m/s². On impact the ball acts like a spring with internal friction; contact lasts about 15 ms (really a few ms) and the ball is drawn larger so you can see it. The temperature rise uses rubber specific heat about 1500 J/(kg·°C), with half of the heat staying in the ball.',
+p2q:'A tennis ball is dropped from 1.5 m. How high does it go on the first bounce?',p2a:'Exactly 1.5 m',p2b:'Lower than 1.5 m',p2c:'Higher than 1.5 m',
+p2e:'Lower (about 0.8 m). Each impact turns some energy into thermal energy and sound (the “thud”), so the ball has less energy to rise. Only the imaginary no-waste ball returns to its drop height.',
+p2bq:'Choose “Two balls stacked”: a tennis ball on top of a basketball, dropped together. How does the tennis ball bounce?',p2ba:'Lower than when dropped alone',p2bb:'Several times higher than the drop height',p2bc:'It does not bounce',
+p2be:'The tennis ball shoots up several times higher! The heavy basketball passes most of its energy to the light tennis ball (energy transferred from one object to another), so the basketball nearly stops. The total still does not increase: watch the “Total” bar.',
+c2q:'When the ball lies still on the floor, where has the starting energy gone? State the law of conservation of energy.',
+c2a:'The energy is not lost: it has all become thermal energy (ball, floor and air slightly warmer) and sound. <b>Law of conservation of energy:</b> Energy cannot be created or destroyed; it only changes from one form to another or passes from one object to another.',
+why2:'<p><b>Mechanism:</b> As the ball falls, gravitational potential energy becomes kinetic energy. On impact the ball is squashed: kinetic energy becomes elastic potential energy (like a compressed spring). The ball springs back, elastic energy becomes kinetic again and it rises. But while squashing and springing back, rubber molecules rub on each other (internal friction) and the floor vibrates and makes sound, so some energy becomes thermal energy and sound. That part spreads out and never comes back to lift the ball. A super ball has little internal friction so it bounces high; clay deforms without springing back, so it hardly bounces.</p><p><b>History:</b> Around 1845 James Joule showed the same amount of mechanical work always warms water by the same amount. Mayer, Joule and Helmholtz (1847) then stated the law of conservation of energy.</p><p><b>For students:</b> Total energy is like money in a wallet: you can change a big note into coins (change form), lend some to a friend (transfer), or drop a few coins down the sofa (waste). The total still exists; the dropped part is just hard to get back.</p>',
+mis2:'<ul><li><b>“The ball stops because its energy vanished.”</b> It became thermal energy and sound. The ball warms by only thousandths of a degree, too little to feel, but the total adds up.</li><li><b>“The tennis ball going higher than its drop height creates energy.”</b> No, it takes energy from the basketball. The total of the two balls does not grow.</li><li><b>“Conservation means the ball should bounce forever.”</b> Conservation means the total stays constant; the useful part (for bouncing) shrinks because of waste.</li></ul>',
+req3:'<b>Learning outcomes (Science 6):</b> Give examples of common renewable energy sources. Classify energy by criteria. State that materials which release energy, heat and light when burned are called fuels.',
+hint3:'Choose a power source, set the sliders and press Run to let several days pass. Each lit house uses about 0.3 kW. Notice which source comes back every day and which one runs out.',
+pickSrc:'Choose an energy source',s_sun:'Sun (solar panels)',s_wind:'Wind (wind turbine)',s_hyd:'Water (small hydro)',s_coal:'Coal (power station)',
+sN:'Number of panels (1.6 m² each)',sCloud:'Cloud cover',wV:'Average wind speed',hH:'Water head height',hQ:'Water flow through turbine',hRain:'Season',dry:'Dry season',wet:'Rainy season',cP:'Power station output',
+kNow:'Power output now',kHouses:'Houses lit',kDay:'Generated today',kAll:'Total generated',kClock:'Time',kWind:'Wind now',kSun:'Sunlight',kRes:'Water in reservoir',kStock:'Coal left in store',kCO2:'CO₂ released',kRenew:'This source is',renewY:'renewable: nature keeps replacing it',renewN:'non-renewable: once used, it is gone',
+day:'Day',cutout:'Wind too strong: turbine stopped for safety',empty:'Reservoir empty: only rain inflow left',coalOut:'Out of coal! Coal takes millions of years to form.',night:'Night: solar panels make no electricity',
+grP:'Power (kW)',grH:'time (hours)',
+assume3:'Model assumptions: 1 second = 1 hour (depending on speed). Solar panels 20 % efficient, midday sunlight 1000 W/m². Small wind turbine 4 m across, captures 35 % of wind energy, starts at 3 m/s, stops above 25 m/s. Small hydro 80 % efficient, reservoir 20 000 m³. Coal station 35 % efficient, 1 kg coal gives 24 MJ and releases about 2.4 kg CO₂. Each house averages 0.3 kW (about 200 kWh a month).',
+p3q:'At night, how much electricity does a solar panel produce?',p3a:'The same as by day',p3b:'Half as much as by day',p3c:'Almost none',
+p3e:'Almost none, because no sunlight reaches it. But the Sun rises again the next morning: nature replaces this energy every day, so it is called renewable. For night-time electricity we must store energy in batteries or use another source.',
+c3q:'Run several days with all four sources. How does renewable energy differ from coal? Name the renewable sources you know.',
+c3a:'Renewable energy (sun, wind, water, biomass, geothermal, waves...) is replaced by nature continuously and produces almost no CO₂ when making electricity. Coal, oil and gas are fossil fuels: formed over millions of years, they run out as we use them and release much CO₂ when burned. Renewables depend on weather (night, calm days, dry season), so we combine sources and save energy.',
+sortT:'Sort: which energy sources are renewable?',sortHint:'Press “Renewable” or “Non-renewable” for each source. Correct answers turn green with a reason.',yes:'Renewable',no:'Non-renewable',sortDone:'You sorted {n}/{m} correctly.',
+srcs:[['Sunlight',1,'The Sun shines every day and will for billions of years.'],['Wind',1,'Wind comes from the Sun heating air unevenly; it keeps coming back.'],['River and lake water (hydro)',1,'The Sun evaporates water, rain refills the lake (water cycle).'],['Waves and tides',1,'Caused by wind and the Moon’s pull, always renewed.'],['Biomass: straw, wood, bagasse, manure',1,'Plants regrow in months or years if replanted.'],['Geothermal (Earth’s inner heat)',1,'Heat from inside the Earth is practically endless.'],['Coal',0,'Formed from buried plants over millions of years; it runs out.'],['Oil (petrol, diesel)',0,'Formed from sea creatures over millions of years; it runs out.'],['Natural gas',0,'A fossil fuel like oil; limited.']],
+why3:'<p><b>Mechanism:</b> Most renewable energy comes from the Sun. Light makes solar cells produce current (light → electrical). Uneven heating of the ground makes air move as wind (kinetic energy of wind → blades → electrical). The Sun evaporates water, rain falls on high ground, water flowing down turns a turbine (potential energy of water → kinetic → electrical). Plants store light energy as chemical energy in wood and straw (biomass). These are replaced quickly, so they are <b>renewable</b>.</p><p>Coal, oil and gas are also stored solar energy from ancient plants and creatures, but they take millions of years to form. They are non-renewable <b>fuels</b> (materials that release energy, heat and light when burned).</p><p><b>For students:</b> Renewable energy is like a well fed by a spring: draw water today, it is full again tomorrow. Coal is like bottled water: once drunk, it is gone.</p><p><b>Words:</b> <i>renewable</i>: <i>re-</i> “again” + <i>new</i>. Vietnamese <i>tái tạo</i> (再造) “made again”. <i>Fossil</i> from Latin <i>fossilis</i> “dug up”; Vietnamese <i>hoá thạch</i> (化石) “turned to stone”.</p>',
+mis3:'<ul><li><b>“Renewable energy is unlimited, so use as much as you like.”</b> The source is replaced, but how much we can collect at a time is limited (sun, wind, rain), and power plants cost money and materials. Saving still matters.</li><li><b>“Solar panels waste nothing.”</b> Only about 20 % of the light becomes electricity; most of the rest heats the panel.</li><li><b>“Wood and straw are not renewable because they are burned.”</b> Biomass is renewable if replanted; burning it still makes smoke, so it must be used carefully.</li></ul>',
+req4:'<b>Learning outcomes (Science 6):</b> Propose ways to save energy in everyday activities.',
+hint4:'This family wastes electricity. Change how each appliance below is used to cut the bill by at least 30 % while the home stays bright and cool. Appliances that save get a green edge.',
+reset4:'↺ Back to wasteful family',best4:'Show a good saving plan',bill4:'Electricity bill per month',meas4:'Your energy-saving measures',
+goal4:'Saving compared with the wasteful family (black mark: 30 % target)',kMon:'Electricity per month',kBase:'Wasteful family',kSave:'Saved',kCO2m:'CO₂ from making the electricity',
+goalOk:'Target reached! The family saves {p} % of its electricity.',goalNo:'Not yet: save about {k} kWh more per month.',noMeas:'No measures yet. Change how the appliances are used.',
+perMon:'kWh/month',hours:'Hours used per day',
+a_light:'Lights (6 bulbs)',a_ac:'Air conditioner',a_fridge:'Fridge',a_tv:'TV',a_stby:'Devices left on standby (TV, set-top box, chargers...)',a_wh:'Water heater',a_rice:'Rice cooker',a_fan:'Electric fan',a_wash:'Washing machine',
+l_inc:'Filament 60 W',l_cfl:'CFL 15 W',l_led:'LED 9 W',acT:'Set temperature',acDoor:'Keep the room door closed',fr_old:'Old fridge',fr_inv:'5-star inverter fridge',frCare:'Open the door briefly, cool food before storing',
+stbyU:'Unplug or switch off sockets when not in use',wh_all:'On all day',wh_need:'On 30 min before showering',riceU:'Unplug after the meal (no all-day keep-warm)',washN:'Washes per week',
+m_light_type:'Replace filament bulbs with equally bright LEDs',m_light_h:'Switch off lights when leaving a room, use daylight',m_ac_T:'Set the air conditioner to 26–28 °C, not too cold',m_ac_h:'Run the air conditioner fewer hours, use a fan too',m_ac_door:'Keep doors closed while the air conditioner runs',
+m_fr_type:'Choose an energy-efficient fridge (more stars on the label)',m_fr_care:'Open the fridge briefly, cool food before storing',m_tv:'Watch less TV',m_stby:'Unplug or switch off sockets when not in use',m_wh:'Heat water only before showering, then switch off',m_rice:'Unplug the rice cooker after the meal',m_fan:'Use the fan more',m_wash:'Wash full loads only',
+upTxt:'more',saveTxt:'less',
+assume4:'Model assumptions: power ratings and hours are typical for a Vietnamese household. Air conditioner 0.9 kW at 25 °C, each degree colder costs about 5 % more, an open door costs 30 % more. A water heater left on all day loses about 1.2 kWh a day as heat. Average price 2,500 VND/kWh (real bills use tiers). Each kWh in Vietnam releases about 0.66 kg CO₂.',
+p4q:'The TV is turned off with the remote (red light still on). Does it still use electricity?',p4a:'None at all',p4b:'A little (standby)',p4c:'As much as when watching',
+p4e:'A little. On standby, TVs, set-top boxes and chargers still draw a few watts to listen for signals. A whole home adds up to about 10–15 W, day and night, about 6 kWh a month. Unplugging or using switched sockets removes this waste.',
+c4q:'Propose three ways to save energy at home and say whether each one reduces wasted energy or reduces time of use.',
+c4a:'For example: (1) Replace filament bulbs with LEDs: less waste, because LEDs turn more electrical energy into light. (2) Set the air conditioner to 26–28 °C and close doors: less energy needed for cooling and less heat leaking in. (3) Switch off lights and unplug devices: less time of use and no standby waste. Beyond electricity: walk or cycle short trips, turn the stove off when done, use daylight and natural breezes.',
+why4:'<p><b>Mechanism:</b> Energy used by an appliance = power × time (kWh = kW × hours). There are two ways to save: <b>(1) cut time of use when not needed</b> (lights off, unplug, no all-day keep-warm), and <b>(2) cut wasted energy</b> with efficient devices (LEDs, inverter fridges) and sensible use (closing doors with air conditioning, cooling food before storing). Saving energy also cuts CO₂, since most electricity in Vietnam still comes from coal and gas.</p><p><b>For students:</b> Saving energy does not mean not using electricity; it means using it at the right time and place, with devices that waste little. Every wasted “energy dot” is your family’s money flying away as heat.</p><p><b>What is 1 kWh?</b> One “unit” = the energy of a 1000 W device running for 1 hour = 3,600,000 J.</p>',
+mis4:'<ul><li><b>“Saving energy means not using electricity.”</b> We still use enough; we just cut the waste.</li><li><b>“Off with the remote means no electricity.”</b> Standby still uses some.</li><li><b>“Set the air conditioner very cold to cool faster, then switch off.”</b> The colder the setting, the longer it runs and the more it uses.</li><li><b>“LED bulbs are expensive, so they don’t save.”</b> LEDs use about 6 times less electricity and last longer, so the savings far exceed the price.</li></ul>',
+mediaT:'Video list (for the offline version)',
+mediaIntro:'Offline version: make a folder <b>media</b> next to <b>index.html</b>, download each video and save it with the file name in the table (optionally add a cover image with the same name ending in <b>.jpg</b>). Clicking a video plays the file in <b>media/</b> first, otherwise YouTube (needs internet). Only titles were checked; channels and lengths marked “?” were not, please preview them.',
+mTab:'Tab',mFile:'File name to save',mVideo:'Video',mDur:'Length',mType:'Type',
+vLbl:'Real-world video',vLook:'Look for:',vNo:'Video',vDurUnk:'length not checked',vChUnk:'channel not checked',vNoThumb:'Click to play',
+vNote:'Click the picture to play it here. If the player stays blank (YouTube cannot be embedded on claude.ai), use “YouTube ↗”.',
+vt_phen:'Phenomenon',vt_exp:'Experiment',vt_app:'Application',
+foot:'Science 6 simulation · Energy and life · Vietnam 2018 curriculum. Numbers are typical values; simplifications are stated in each tab.'
+}};
+</script>
+<script>
+'use strict';
+/* ================= Tiện ích ================= */
+const $=id=>document.getElementById(id);
+let lang='vi';
+const T=k=>{const v=I18N[lang][k];return v!=null?v:(I18N.vi[k]!=null?I18N.vi[k]:k);};
+const Tf=(k,o)=>T(k).replace(/\{(\w+)\}/g,(_,n)=>o[n]);
+const nf=(x,d=2,mn=0)=>{if(!isFinite(x))x=0;if(Math.abs(x)<0.5*Math.pow(10,-d))x=0;return new Intl.NumberFormat(lang==='vi'?'vi-VN':'en-US',{maximumFractionDigits:d,minimumFractionDigits:mn}).format(x);};
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const TAU=Math.PI*2;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const store={get(k){try{return localStorage.getItem(k);}catch(e){return null;}},set(k,v){try{localStorage.setItem(k,v);}catch(e){}}};
+const isPhone=()=>innerWidth<640;
+let CS={};
+function readColors(){const s=getComputedStyle(document.documentElement);
+  ['bg','panel','lane','ink','muted','line','accent','ok','warn','space','star','eElec','eLight','eHeat','eKin','ePot','eChem','eSound','eEl','sky','ground','water','metal','metal2']
+  .forEach(k=>CS[k]=s.getPropertyValue('--'+k).trim());}
+readColors();
+const FCOL=f=>({elec:CS.eElec,light:CS.eLight,heat:CS.eHeat,kin:CS.eKin,chem:CS.eChem,sound:CS.eSound,pot:CS.ePot,el:CS.eEl}[f]);
+function fit(cv,asp,minH,maxH){const w=Math.max(260,cv.clientWidth|0);let h=Math.round(w*asp);if(minH)h=Math.max(h,minH);if(maxH)h=Math.min(h,maxH);
+  const d=Math.min(2.5,window.devicePixelRatio||1);
+  if(cv._w!==w||cv._h!==h||cv._d!==d){cv.width=Math.round(w*d);cv.height=Math.round(h*d);cv.style.height=h+'px';cv._w=w;cv._h=h;cv._d=d;}
+  const c=cv.getContext('2d');c.setTransform(d,0,0,d,0,0);c.clearRect(0,0,w,h);return{c,w,h};}
+function txt(c,s,x,y,o={}){c.save();c.font=`${o.w||600} ${o.sz||13}px ${o.mono?'"IBM Plex Mono",monospace':'"Be Vietnam Pro",system-ui,sans-serif'}`;
+  c.textAlign=o.al||'center';c.textBaseline=o.bl||'middle';
+  if(o.bg){const m=c.measureText(s),pw=m.width+10,ph=(o.sz||13)+8;let bx=x-(o.al==='left'?0:o.al==='right'?pw-5:pw/2)-(o.al==='left'?5:0);
+    c.fillStyle=o.bg;c.globalAlpha=o.bga||.85;c.beginPath();c.roundRect(bx,y-ph/2,pw,ph,5);c.fill();c.globalAlpha=1;}
+  c.fillStyle=o.col||CS.ink;c.fillText(s,x,y);c.restore();}
+function rr(c,x,y,w,h,r){c.beginPath();c.roundRect(x,y,w,h,r);}
+function fmtE(J){const a=Math.abs(J);if(a<1000)return nf(J,a<10?2:a<100?1:0)+' J';if(a<1e6)return nf(J/1000,J<1e4?2:1)+' kJ';return nf(J/1e6,2)+' MJ';}
+function fmtT(s){if(s<60)return nf(s,1)+' s';const m=Math.floor(s/60),r=Math.floor(s%60);return m+' min '+String(r).padStart(2,'0')+' s';}
+function kv(el,rows){el.innerHTML=rows.map(r=>r.t?`<dd class="t">${r.t}</dd>`:`<dt>${r[0]}</dt><dd class="num">${r[1]}</dd>`).join('');}
+function lerpCol(a,b,t){const pa=a.match(/\w\w/g).map(h=>parseInt(h,16)),pb=b.match(/\w\w/g).map(h=>parseInt(h,16));return 'rgb('+pa.map((v,i)=>Math.round(v+(pb[i]-v)*t)).join(',')+')';}
+function heatCol(Tc){const S=[[20,'1b2a8a'],[35,'7b2fbf'],[50,'d0305a'],[70,'f05a1a'],[100,'ffa01a'],[140,'ffe65a'],[220,'ffffff']];
+  if(Tc<=S[0][0])return '#'+S[0][1];for(let i=1;i<S.length;i++)if(Tc<=S[i][0])return lerpCol(S[i-1][1],S[i][1],(Tc-S[i-1][0])/(S[i][0]-S[i-1][0]));return '#ffffff';}
+function segBtns(el,items,cur,on){el.innerHTML=items.map(([k,l])=>`<button class="btn" data-k="${k}" aria-pressed="${k===cur}">${l}</button>`).join('');
+  el.onclick=e=>{const b=e.target.closest('button');if(b)on(b.dataset.k);};}
+
+/* ================= Dự đoán và kết luận ================= */
+const PRED={p1:{q:'p1q',o:['p1a','p1b','p1c'],c:1,e:'p1e'},p2:{q:'p2q',o:['p2a','p2b','p2c'],c:1,e:'p2e'},p2b:{q:'p2bq',o:['p2ba','p2bb','p2bc'],c:1,e:'p2be'},
+  p3:{q:'p3q',o:['p3a','p3b','p3c'],c:2,e:'p3e'},p4:{q:'p4q',o:['p4a','p4b','p4c'],c:1,e:'p4e'}};
+function predHTML(P){return `<h2>${T('predTitle')}</h2><p>${T(P.q)}</p><div class="opts">${P.o.map((k,i)=>`<button class="btn ${P.pick===i?'picked':''} ${P.show&&i===P.c?'right':''}" data-i="${i}">${T(k)}</button>`).join('')}</div>`+
+  (P.pick==null?'':`<p class="muted">${T('predThen')}</p><div><button class="btn sm rv">${T(P.show?'hideAns':'showAns')}</button></div>`)+(P.show?`<div class="ans">${T(P.e)}</div>`:'');}
+function renderPred(id){$(id).innerHTML=predHTML(PRED[id]);}
+Object.keys(PRED).forEach(id=>$(id).addEventListener('click',e=>{const P=PRED[id],b=e.target.closest('button');if(!b)return;if(b.classList.contains('rv'))P.show=!P.show;else if(b.dataset.i!=null)P.pick=+b.dataset.i;renderPred(id);}));
+const CONC={c1:{q:'c1q',a:'c1a'},c2:{q:'c2q',a:'c2a'},c3:{q:'c3q',a:'c3a'},c4:{q:'c4q',a:'c4a'}};
+function renderConc(id){const C=CONC[id];$(id).innerHTML=`<h2>${T('conclTitle')}</h2><p>${T(C.q)}</p><div><button class="btn sm">${T(C.show?'hideAns':'showAns')}</button></div>${C.show?`<div class="ans">${T(C.a)}</div>`:''}`;}
+Object.keys(CONC).forEach(id=>$(id).addEventListener('click',e=>{if(e.target.closest('button')){CONC[id].show=!CONC[id].show;renderConc(id);}}));
+
+/* =====================================================================
+   TAB 1: CHUYỂN HOÁ VÀ HAO PHÍ
+   Mỗi thiết bị: công suất cung cấp P (J/s), dạng năng lượng vào, các phần ra (dạng, tỉ lệ, có ích?).
+   Năng lượng: E_vào = P·t; E_ra,k = tỉ lệ_k·E_vào. Tổng tỉ lệ = 1 → bảo toàn.
+   ===================================================================== */
+const DEV={
+  inc:{P:60,src:'elec',out:[{f:'light',p:.05,u:1},{f:'heat',p:.95,u:0}],Tss:130},
+  led:{P:8,src:'elec',out:[{f:'light',p:.35,u:1},{f:'heat',p:.65,u:0}],Tss:45},
+  fan:{P:50,src:'elec',out:[{f:'kin',p:.60,u:1},{f:'heat',p:.39,u:0},{f:'sound',p:.01,u:0}],Tss:42},
+  ket:{P:1800,src:'elec',out:[{f:'heat',p:.85,u:1},{f:'heat',p:.14,u:0},{f:'sound',p:.01,u:0}],Tss:62},
+  moto:{P:7000,src:'chem',out:[{f:'kin',p:.20,u:1},{f:'heat',p:.79,u:0},{f:'sound',p:.01,u:0}],Tss:95},
+  sol:{P:1600,src:'light',out:[{f:'elec',p:.20,u:1},{f:'heat',p:.75,u:0},{f:'light',p:.05,u:0}],Tss:55}};
+const S1={dev:'inc',t:0,run:false,spd:1,th:false,pk:[],acc:[],emit:0,nIn:0,nOut:[],ang:0,road:0,msg:''};
+const RATE1=10; // chấm mỗi giây (thời gian thực)
+function reset1(){const D=DEV[S1.dev];S1.t=0;S1.pk=[];S1.acc=D.out.map(()=>0);S1.nOut=D.out.map(()=>0);S1.nIn=0;S1.emit=0;S1.msg='';}
+function Tw1(){return Math.min(100,25+0.85*DEV.ket.P*S1.t/(4200*1.5));}
+function Tdev1(){const D=DEV[S1.dev];if(S1.dev==='ket')return 25+(Tw1()-25)*0.55;return 25+(D.Tss-25)*(1-Math.exp(-S1.t/60));}
+function lay1(w,h){return{src:S1.dev==='sol'?{x:.13*w,y:.22*h}:{x:.1*w,y:.62*h},dev:{x:.47*w,y:.56*h},tgt:{x:(isPhone()?.8:.86)*w,y:.56*h},R:Math.min(w,h)};}
+function step1(dtR){if(!S1.run)return;const D=DEV[S1.dev];S1.t+=dtR*S1.spd;
+  if(S1.dev==='ket'&&Tw1()>=100){S1.run=false;S1.msg=T('kettleOff');ui1();}
+  S1.ang+=dtR*(S1.dev==='fan'?14:S1.dev==='moto'?10:0);S1.road+=dtR*(S1.dev==='moto'?120:0);
+  S1.emit+=dtR*RATE1;while(S1.emit>=1){S1.emit-=1;S1.pk.push({ph:0,s:0,j:(Math.random()-.5)});S1.nIn++;}
+  for(const p of S1.pk){p.s+=dtR/(p.ph===0?0.9:1.2);
+    if(p.ph===0&&p.s>=1){let k=0,best=-1;D.out.forEach((o,i)=>{S1.acc[i]+=o.p;});S1.acc.forEach((a,i)=>{if(a>best){best=a;k=i;}});S1.acc[k]-=1;
+      p.ph=1;p.s=0;p.k=k;const o=D.out[k];p.a=o.f==='sound'?(Math.random()<.5?-0.15:Math.PI+0.15)+(Math.random()-.5)*.6:(-Math.PI/2+(Math.random()-.5)*2.6);}
+    else if(p.ph===1&&p.s>=1){p.dead=1;S1.nOut[p.k]++;}}
+  S1.pk=S1.pk.filter(p=>!p.dead);}
+function drawSource1(c,L,w,h){const s=L.src,r=L.R*.07;
+  if(DEV[S1.dev].src==='elec'){c.fillStyle=CS.panel;c.strokeStyle=CS.muted;c.lineWidth=2;rr(c,s.x-r,s.y-r*1.2,r*2,r*2.4,6);c.fill();c.stroke();
+    c.fillStyle=CS.ink;c.beginPath();c.arc(s.x-r*.35,s.y-r*.3,r*.13,0,TAU);c.arc(s.x+r*.35,s.y-r*.3,r*.13,0,TAU);c.fill();
+    c.strokeStyle=CS.eElec;c.lineWidth=4;c.beginPath();c.moveTo(s.x,s.y+r*.4);c.quadraticCurveTo((s.x+L.dev.x)/2,s.y+r*2,L.dev.x-L.R*.09,L.dev.y+L.R*.08);c.stroke();}
+  else if(DEV[S1.dev].src==='chem'){c.fillStyle='#c0392b';rr(c,s.x-r*.9,s.y-r*1.1,r*1.8,r*2.2,5);c.fill();c.fillStyle='#fff';c.fillRect(s.x-r*.5,s.y-r*1.35,r*.5,r*.3);
+    txt(c,T('src_chem'),s.x,s.y,{sz:12,col:'#fff'});c.strokeStyle=CS.eChem;c.lineWidth=4;c.beginPath();c.moveTo(s.x+r*.9,s.y);c.lineTo(L.dev.x-L.R*.12,L.dev.y);c.stroke();}
+  else{c.fillStyle=CS.eLight;c.beginPath();c.arc(s.x,s.y,r*1.1,0,TAU);c.fill();c.strokeStyle=CS.eLight;c.lineWidth=3;
+    for(let i=0;i<10;i++){const a=i/10*TAU;c.beginPath();c.moveTo(s.x+Math.cos(a)*r*1.4,s.y+Math.sin(a)*r*1.4);c.lineTo(s.x+Math.cos(a)*r*1.9,s.y+Math.sin(a)*r*1.9);c.stroke();}}
+  txt(c,T('src_'+DEV[S1.dev].src),s.x,s.y+r*(DEV[S1.dev].src==='light'?2.5:1.9),{sz:13,col:CS.muted});}
+function drawDevice1(c,L,w,h){const d=L.dev,r=L.R*.13,id=S1.dev,on=S1.run||S1.t>0;
+  c.save();c.lineWidth=2;c.strokeStyle=CS.ink;
+  if(id==='inc'||id==='led'){const glow=on?(id==='inc'?.9:1):0;
+    if(glow){const g=c.createRadialGradient(d.x,d.y-r*.2,2,d.x,d.y-r*.2,r*2.4);g.addColorStop(0,id==='inc'?'rgba(255,200,80,.75)':'rgba(255,250,230,.8)');g.addColorStop(1,'rgba(255,220,120,0)');c.fillStyle=g;c.beginPath();c.arc(d.x,d.y-r*.2,r*2.4,0,TAU);c.fill();}
+    c.fillStyle=on?(id==='inc'?'#ffe9a8':'#fbfbf2'):'rgba(230,236,240,.8)';c.beginPath();c.arc(d.x,d.y-r*.25,r*.85,0,TAU);c.fill();c.stroke();
+    c.fillStyle=CS.metal;c.fillRect(d.x-r*.38,d.y+r*.5,r*.76,r*.55);c.strokeRect(d.x-r*.38,d.y+r*.5,r*.76,r*.55);
+    if(id==='inc'){c.strokeStyle=on?'#ff8a00':CS.metal2;c.lineWidth=2;c.beginPath();c.moveTo(d.x-r*.3,d.y+r*.45);c.lineTo(d.x-r*.3,d.y-r*.2);
+      for(let i=0;i<6;i++)c.lineTo(d.x-r*.3+r*.1*(i+1),d.y-r*.2+(i%2?-r*.15:r*.0));c.lineTo(d.x+r*.3,d.y+r*.45);c.stroke();}
+    else{c.fillStyle=on?'#fff':CS.metal;c.fillRect(d.x-r*.35,d.y+r*.05,r*.7,r*.18);c.fillStyle='#f5d000';for(let i=0;i<4;i++)c.fillRect(d.x-r*.3+i*r*.17,d.y+r*.07,r*.1,r*.12);}}
+  else if(id==='fan'){c.strokeStyle=CS.metal2;c.lineWidth=3;c.beginPath();c.moveTo(d.x,d.y+r*.2);c.lineTo(d.x,d.y+r*1.4);c.stroke();c.beginPath();c.ellipse(d.x,d.y+r*1.45,r*.6,r*.15,0,0,TAU);c.fillStyle=CS.metal;c.fill();
+    c.fillStyle=CS.eKin;for(let i=0;i<3;i++){const a=S1.ang+i*TAU/3;c.save();c.translate(d.x,d.y-r*.2);c.rotate(a);c.beginPath();c.ellipse(r*.45,0,r*.45,r*.17,0,0,TAU);c.globalAlpha=.85;c.fill();c.restore();}
+    c.strokeStyle=CS.muted;c.lineWidth=1.5;c.beginPath();c.arc(d.x,d.y-r*.2,r*1,0,TAU);c.stroke();c.fillStyle=CS.metal2;c.beginPath();c.arc(d.x,d.y-r*.2,r*.13,0,TAU);c.fill();}
+  else if(id==='ket'){const tw=Tw1(),top=d.y-r*.9,bot=d.y+r*.9;c.fillStyle=CS.metal;c.beginPath();c.moveTo(d.x-r*.7,top);c.lineTo(d.x+r*.7,top);c.lineTo(d.x+r*.85,bot);c.lineTo(d.x-r*.85,bot);c.closePath();c.fill();c.stroke();
+    c.fillStyle=lerpCol('5aa3dd','e0452b',clamp((tw-25)/75,0,1));c.globalAlpha=.85;c.fillRect(d.x-r*.6,d.y-r*.3,r*1.25,r*1.05);c.globalAlpha=1;
+    c.strokeStyle=CS.ink;c.beginPath();c.moveTo(d.x+r*.75,d.y-r*.5);c.quadraticCurveTo(d.x+r*1.35,d.y-r*.2,d.x+r*.82,d.y+r*.5);c.stroke();
+    txt(c,nf(tw,0)+' °C',d.x,d.y+r*.2,{sz:15,col:'#fff',mono:1});
+    if(tw>80){c.strokeStyle='rgba(200,200,210,.8)';c.lineWidth=3;for(let i=0;i<3;i++){const ox=d.x-r*.4+i*r*.4,ph=(S1.t*3+i)%2;c.beginPath();c.moveTo(ox,top-4);c.quadraticCurveTo(ox+8,top-15-ph*6,ox,top-28-ph*8);c.stroke();}}}
+  else if(id==='moto'){c.strokeStyle=CS.muted;c.setLineDash([16,14]);c.lineDashOffset=-S1.road;c.lineWidth=3;c.beginPath();c.moveTo(d.x-r*2.3,d.y+r*1.05);c.lineTo(w*.97,d.y+r*1.05);c.stroke();c.setLineDash([]);
+    for(const wx of[-r*.9,r*.9]){c.save();c.translate(d.x+wx,d.y+r*.55);c.rotate(S1.ang);c.fillStyle='#222';c.beginPath();c.arc(0,0,r*.48,0,TAU);c.fill();c.strokeStyle='#aaa';c.lineWidth=2;
+      for(let i=0;i<4;i++){c.beginPath();c.moveTo(0,0);c.lineTo(Math.cos(i*TAU/4)*r*.4,Math.sin(i*TAU/4)*r*.4);c.stroke();}c.restore();}
+    c.fillStyle='#c0392b';c.beginPath();c.moveTo(d.x-r*1.1,d.y+r*.3);c.lineTo(d.x-r*.4,d.y-r*.25);c.lineTo(d.x+r*.6,d.y-r*.25);c.lineTo(d.x+r*1.0,d.y+r*.3);c.closePath();c.fill();
+    c.fillStyle=CS.metal2;c.fillRect(d.x-r*.35,d.y+r*.05,r*.6,r*.4);c.strokeStyle=CS.ink;c.lineWidth=3;c.beginPath();c.moveTo(d.x+r*.6,d.y-r*.25);c.lineTo(d.x+r*.8,d.y-r*.75);c.lineTo(d.x+r*.5,d.y-r*.8);c.stroke();}
+  else if(id==='sol'){c.save();c.translate(d.x,d.y);c.transform(1,0,-.35,1,0,0);c.fillStyle='#1f3c78';c.fillRect(-r*1.1,-r*.7,r*2.2,r*1.4);c.strokeStyle='#9bb6e8';c.lineWidth=1;
+    for(let i=1;i<6;i++){c.beginPath();c.moveTo(-r*1.1+i*r*2.2/6,-r*.7);c.lineTo(-r*1.1+i*r*2.2/6,r*.7);c.stroke();}for(let j=1;j<4;j++){c.beginPath();c.moveTo(-r*1.1,-r*.7+j*r*1.4/4);c.lineTo(r*1.1,-r*.7+j*r*1.4/4);c.stroke();}c.restore();
+    c.strokeStyle=CS.metal2;c.lineWidth=3;c.beginPath();c.moveTo(d.x,d.y+r*.7);c.lineTo(d.x,d.y+r*1.3);c.stroke();}
+  c.restore();}
+function drawTarget1(c,L){const t=L.tgt,r=L.R*.08,id=S1.dev;c.save();
+  if(id==='inc'||id==='led'){c.fillStyle='#fff';c.strokeStyle=CS.muted;c.lineWidth=1.5;c.beginPath();c.moveTo(t.x-r*1.2,t.y);c.lineTo(t.x,t.y+r*.3);c.lineTo(t.x+r*1.2,t.y);c.lineTo(t.x+r*1.2,t.y+r*1.1);c.lineTo(t.x,t.y+r*1.4);c.lineTo(t.x-r*1.2,t.y+r*1.1);c.closePath();c.fill();c.stroke();
+    c.strokeStyle=CS.muted;for(let i=0;i<3;i++){c.beginPath();c.moveTo(t.x-r,t.y+r*(.35+i*.25));c.lineTo(t.x-r*.15,t.y+r*(.55+i*.25));c.stroke();}}
+  else if(id==='fan'){c.strokeStyle=CS.eKin;c.lineWidth=3;for(let i=0;i<3;i++){const y=t.y-r+i*r;const ph=(S1.t*2+i*.3)%1;c.globalAlpha=S1.run?.9:.35;c.beginPath();c.moveTo(t.x-r*1.4,y);c.bezierCurveTo(t.x-r*.5,y-r*.4,t.x+r*.3,y+r*.4,t.x+r*1.2+ph*4,y);c.stroke();}c.globalAlpha=1;}
+  else if(id==='moto'){c.fillStyle=CS.eKin;c.beginPath();c.moveTo(t.x-r*1.2,t.y-r*.3);c.lineTo(t.x+r*.3,t.y-r*.3);c.lineTo(t.x+r*.3,t.y-r*.8);c.lineTo(t.x+r*1.3,t.y);c.lineTo(t.x+r*.3,t.y+r*.8);c.lineTo(t.x+r*.3,t.y+r*.3);c.lineTo(t.x-r*1.2,t.y+r*.3);c.closePath();c.fill();}
+  else if(id==='sol'){const q=Math.min(1,S1.t/600);c.strokeStyle=CS.ink;c.lineWidth=2;rr(c,t.x-r*.6,t.y-r,r*1.2,r*2,4);c.stroke();c.fillStyle=CS.ink;c.fillRect(t.x-r*.25,t.y-r*1.2,r*.5,r*.2);
+    c.fillStyle=CS.ok;c.fillRect(t.x-r*.5,t.y+r*.9-r*1.8*q,r,r*1.8*q);}
+  if(id!=='ket')txt(c,T('tgt_'+id),Math.min(t.x,c.canvas._w-6),t.y+r*2.1,{sz:isPhone()?11:13,col:CS.muted,al:isPhone()?'right':'center'});c.restore();}
+function draw1(){const {c,w,h}=fit($('cv1'),isPhone()?.78:.5,240,520),L=lay1(w,h),D=DEV[S1.dev];
+  c.fillStyle=CS.lane;c.fillRect(0,0,w,h);
+  drawSource1(c,L,w,h);drawDevice1(c,L,w,h);drawTarget1(c,L);
+  if(S1.th){c.fillStyle='rgba(5,8,40,.82)';c.fillRect(0,0,w,h);const Td=Tdev1(),rr2=L.R*(.12+.1*clamp((Td-25)/100,0,1));
+    const g=c.createRadialGradient(L.dev.x,L.dev.y,2,L.dev.x,L.dev.y,rr2*2.2);g.addColorStop(0,heatCol(Td));g.addColorStop(.45,heatCol(25+(Td-25)*.6));g.addColorStop(1,'rgba(27,42,138,0)');
+    c.fillStyle=g;c.beginPath();c.arc(L.dev.x,L.dev.y,rr2*2.2,0,TAU);c.fill();
+    if(S1.dev==='ket'){const tw=Tw1();const g2=c.createRadialGradient(L.dev.x,L.dev.y+L.R*.05,2,L.dev.x,L.dev.y+L.R*.05,L.R*.12);g2.addColorStop(0,heatCol(tw));g2.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=g2;c.beginPath();c.arc(L.dev.x,L.dev.y+L.R*.05,L.R*.12,0,TAU);c.fill();}
+    txt(c,'≈ '+nf(Td,0)+' °C',L.dev.x,L.dev.y-L.R*.33,{sz:16,col:'#fff',mono:1,bg:'#000'});
+    const bw=Math.min(180,w*.35);for(let i=0;i<=40;i++){c.fillStyle=heatCol(20+i*3);c.fillRect(w-bw-12+i*bw/40,h-22,bw/40+1,10);}
+    txt(c,'20 °C',w-bw-12,h-30,{al:'left',sz:11,col:'#fff',mono:1});txt(c,'140 °C',w-12,h-30,{al:'right',sz:11,col:'#fff',mono:1});}
+  const pr=isPhone()?4.5:6;
+  for(const p of S1.pk){let x,y,a=1,col;
+    if(p.ph===0){const s=p.s;x=L.src.x+(L.dev.x-L.src.x)*s;y=L.src.y+(L.dev.y-L.src.y)*s-Math.sin(s*Math.PI)*L.R*.06*(1+p.j);col=FCOL(D.src);}
+    else{const o=D.out[p.k];col=FCOL(o.f);const s=p.s;
+      if(o.u){x=L.dev.x+(L.tgt.x-L.dev.x)*s;y=L.dev.y+(L.tgt.y-L.dev.y)*s+Math.sin(s*Math.PI)*L.R*.05*p.j*2;}
+      else{const R=L.R*(.12+.38*s);x=L.dev.x+Math.cos(p.a)*R;y=L.dev.y+Math.sin(p.a)*R;a=1-s*.85;}}
+    c.globalAlpha=a;c.fillStyle=col;c.beginPath();c.arc(x,y,pr,0,TAU);c.fill();c.strokeStyle='rgba(0,0,0,.35)';c.lineWidth=1;c.stroke();}
+  c.globalAlpha=1;
+  if(S1.spd>1&&S1.run)txt(c,'⏩ ×'+S1.spd,12,16,{al:'left',sz:13,col:S1.th?'#fff':CS.muted});}
+function N_OUT1(){return DEV[S1.dev].out.length;}
+function drawSankey1(){const {c,w,h}=fit($('sk1'),isPhone()?.7:.3,220,320),D=DEV[S1.dev];
+  const ph=isPhone();const top=26,H=h-top-(N_OUT1()>2?52:20),lx=8,x1=w*(ph?.12:.2),x2=w*(ph?.25:.4),labX=x2+8;const N=D.out.length,gap=10,Ht=H-gap*(N-1);
+  const Ein=D.P*S1.t;
+  txt(c,T('sk'),lx,12,{al:'left',sz:ph?10:12,col:CS.muted});
+  c.fillStyle=FCOL(D.src);c.fillRect(lx,top,x1-lx,Ht);
+  txt(c,ph?'':T('F_'+D.src),lx+6,top+Ht/2-9,{al:'left',sz:13,col:'#fff'});txt(c,'100 %',lx+6,top+Ht/2+9,{al:'left',sz:12,col:'#fff',mono:1});
+  let yl=top,yr=top,lastLab=-1e9;
+  D.out.forEach((o,i)=>{const th=Math.max(2,o.p*Ht);const col=FCOL(o.f);c.fillStyle=col;c.globalAlpha=o.u?.95:.7;
+    c.beginPath();c.moveTo(x1,yl);c.bezierCurveTo((x1+x2)/2,yl,(x1+x2)/2,yr,x2,yr);c.lineTo(x2+6,yr);c.lineTo(x2+6,yr+th);c.lineTo(x2,yr+th);
+    c.bezierCurveTo((x1+x2)/2,yr+th,(x1+x2)/2,yl+o.p*Ht,x1,yl+o.p*Ht);c.closePath();c.fill();c.globalAlpha=1;
+    if(!o.u){c.save();c.strokeStyle=CS.ink;c.setLineDash([4,3]);c.lineWidth=1;c.strokeRect(x2+.5,yr+.5,5,th-1);c.restore();}
+    const by=yr+th/2;const cy=Math.max(by,lastLab+(ph?32:36));lastLab=cy;
+    if(cy-by>2){c.strokeStyle=CS.muted;c.lineWidth=1;c.beginPath();c.moveTo(x2+6,by);c.lineTo(labX,cy-(ph?7:8));c.stroke();}
+    const lab=`${T('F_'+o.f)} (${T(o.u?'useful':'waste')}): ${nf(o.p*100,0)} %`;
+    txt(c,lab,labX+4,cy-(ph?7:8),{al:'left',sz:ph?12:13,col:o.u?CS.ok:CS.warn,w:700});
+    txt(c,T('o_'+S1.dev)[i]+' · '+fmtE(o.p*Ein),labX+4,cy+(ph?8:9),{al:'left',sz:ph?11:12,col:CS.muted,w:500});
+    yl+=o.p*Ht;yr+=th+gap;});}
+function ui1(full){const D=DEV[S1.dev];$('run1').textContent=T(S1.run?'pause':'run');
+  if(full){segBtns($('dev1'),Object.keys(DEV).map(k=>[k,T('d_'+k)]),S1.dev,k=>{S1.dev=k;S1.run=false;reset1();ui1(true);});
+    segBtns($('spd1'),[['1','×1'],['10','×10'],['60','×60']],String(S1.spd),k=>{S1.spd=+k;ui1(true);});
+    const parts=D.out.map(o=>`<span style="background:${FCOL(o.f)}">${T('F_'+o.f)}</span> <small>(${T(o.u?'useful':'waste')})</small>`).join(' + ');
+    $('chain1').innerHTML=`<span style="background:${FCOL(D.src)}">${T('F_'+D.src)}</span> → [${esc(T('d_'+S1.dev))}] → ${parts}`;}
+  $('st1').textContent=S1.msg;}
+function data1(){const D=DEV[S1.dev],E=D.P*S1.t;let use=0,was=0;D.out.forEach(o=>o.u?use+=o.p*E:was+=o.p*E);
+  const rows=[[T('kP'),nf(D.P,0)+' J/s = '+nf(D.P,0)+' W'],[T('kT'),fmtT(S1.t)],[T('kIn'),fmtE(E)],[T('kUse'),fmtE(use)],[T('kWaste'),fmtE(was)],[T('kSum'),fmtE(use+was)],{t:'= '+T('kOk')},
+    [T('kPct'),nf(use/D.P/Math.max(S1.t,1e-9)*100||D.out.filter(o=>o.u).reduce((a,o)=>a+o.p,0)*100,0)+' %'],[T('kDot'),fmtE(D.P*S1.spd/RATE1)],[T('kDots'),S1.nIn+' / '+S1.nOut.reduce((a,b)=>a+b,0)+' (+'+S1.pk.length+')']];
+  if(S1.dev==='ket')rows.push([T('kTw'),nf(Tw1(),1)+' °C']);
+  if(S1.th)rows.push([T('kTd'),'≈ '+nf(Tdev1(),0)+' °C']);
+  kv($('kv1'),rows);}
+$('run1').onclick=()=>{if(S1.dev==='ket'&&Tw1()>=100)reset1();S1.run=!S1.run;S1.msg='';ui1();};
+$('rst1').onclick=()=>{S1.run=false;reset1();ui1();};
+$('th1').onchange=e=>{S1.th=e.target.checked;};
+
+/* =====================================================================
+   TAB 2: BẢO TOÀN NĂNG LƯỢNG – BÓNG NẢY
+   Va chạm mô hình lò xo – giảm chấn tuyến tính: F = kδ + cδ' (F ≥ 0).
+   Chọn k, c để thời gian va chạm tc và hệ số phục hồi e đúng: ζ = −ln e / √(π² + ln² e), ω0 = (π/tc)/√(1−ζ²).
+   Nhiệt năng tích luỹ = ∫(F − kδ)·δ' dt ≥ 0. Thế năng hấp dẫn tính theo đáy bóng.
+   ===================================================================== */
+const G=9.8,TC=0.015,H2=1/20000;
+const BALLS={sup:{m:.025,R:.025,e:.90,col:'#8a5cf0'},ten:{m:.058,R:.033,e:.75,col:'#c9dc2a'},bas:{m:.62,R:.12,e:.80,col:'#e8701a'},clay:{m:.05,R:.03,e:.12,col:'#9a8f86'},ideal:{m:.058,R:.033,e:1,col:'#22b8cf'}};
+function cParams(m,e){const L=Math.log(e),z=e>=1?0:-L/Math.sqrt(Math.PI*Math.PI+L*L),w0=(Math.PI/TC)/Math.sqrt(1-z*z);return{k:m*w0*w0,c:2*z*m*w0};}
+const S2={ball:'ten',mode:1,h0:1.5,run:false,slow:1,b:[],C:[],heat:0,E0:0,hist:[],t:0,apex:[],viewH:2.2,hits:0,rings:[],drag:false};
+function build2(){const B=[];if(S2.mode===1){B.push({...BALLS[S2.ball],key:S2.ball});}else{B.push({...BALLS.bas,key:'bas'});const k=S2.ball==='bas'?'ten':S2.ball;B.push({...BALLS[k],key:k});}
+  let z=S2.h0;B.forEach(b=>{b.z=z+b.R;b.v=0;b.pv=0;z+=2*b.R+0.001;});
+  S2.b=B;S2.C=[];S2.C.push({i:-1,j:0,...cParams(B[0].m,B[0].e),on:false});
+  if(B.length>1){const mr=B[0].m*B[1].m/(B[0].m+B[1].m);S2.C.push({i:0,j:1,...cParams(mr,B[1].e),on:false});}
+  S2.heat=0;S2.t=0;S2.hist=[];S2.apex=[];S2.hits=0;S2.rings=[];S2.E0=energies2().tot;}
+function delta2(C){const B=S2.b;if(C.i<0){const b=B[C.j];return[b.R-b.z,-b.v];}const a=B[C.i],b=B[C.j];return[a.R+b.R-(b.z-a.z),a.v-b.v];}
+function energies2(){let K=0,P=0,El=0;for(const b of S2.b){K+=.5*b.m*b.v*b.v;P+=b.m*G*(b.z-b.R);}
+  for(const C of S2.C){const [d]=delta2(C);if(d>0)El+=.5*C.k*d*d;}return{K,P,El,Q:S2.heat,tot:K+P+El+S2.heat};}
+function sub2(h){const B=S2.b,F=B.map(b=>-b.m*G);
+  for(const C of S2.C){const [d,dd]=delta2(C);if(d>0){const Fe=C.k*d;let Ft=Fe+C.c*dd;if(Ft<0)Ft=0;S2.heat+=(Ft-Fe)*dd*h;
+      if(C.i<0)F[C.j]+=Ft;else{F[C.j]+=Ft;F[C.i]-=Ft;}
+      if(!C.on){C.on=true;if(C.i<0){S2.hits++;}const sp=Math.abs(dd);if(sp>.3)S2.rings.push({j:C.j,i:C.i,age:0,str:Math.min(1,sp/5*(1-B[C.j].e+.15))});}}
+    else C.on=false;}
+  B.forEach((b,i)=>{b.pv=b.v;b.v+=F[i]/b.m*h;b.z+=b.v*h;});
+  const top=B[B.length-1];if(top.pv>0&&top.v<=0){const hh=top.z-top.R;if(hh>0.003&&S2.apex.length<40)S2.apex.push(hh);}}
+function step2(dtR){S2.rings.forEach(r=>r.age+=dtR);S2.rings=S2.rings.filter(r=>r.age<.8);
+  if(!S2.run||S2.drag)return;const dt=Math.min(dtR,0.05)*S2.slow;const n=Math.max(1,Math.round(dt/H2));for(let i=0;i<n;i++)sub2(dt/n);S2.t+=dt;
+  const E=energies2();S2.hist.push([S2.t,E.Q,E.P,E.K,E.El]);while(S2.hist.length&&S2.hist[0][0]<S2.t-6)S2.hist.shift();}
+function view2(w,h){const fl=h-34,top=Math.max(...S2.b.map(b=>b.z+b.R));const target=Math.max(2.2,S2.h0*1.15+.25,top*1.08+.1);
+  if(target>S2.viewH)S2.viewH+=(target-S2.viewH)*.25;else S2.viewH+=(target-S2.viewH)*.02;const s=(fl-16)/S2.viewH;return{fl,s};}
+function draw2(){const {c,w,h}=fit($('cv2'),isPhone()?1.05:.58,300,560),V=view2(w,h),B=S2.b;const X0=w*.55;
+  const g=c.createLinearGradient(0,0,0,h);g.addColorStop(0,CS.lane);g.addColorStop(1,CS.panel);c.fillStyle=g;c.fillRect(0,0,w,h);
+  c.fillStyle=CS.metal;c.fillRect(0,V.fl,w,h-V.fl);c.fillStyle=CS.metal2;c.fillRect(0,V.fl,w,3);
+  // thước
+  const step=S2.viewH>5?1:S2.viewH>3?.5:.25;c.strokeStyle=CS.muted;c.lineWidth=1;c.beginPath();c.moveTo(46,V.fl);c.lineTo(46,V.fl-S2.viewH*V.s);c.stroke();
+  for(let y=0;y<=S2.viewH+1e-6;y+=step){const py=V.fl-y*V.s;c.beginPath();c.moveTo(40,py);c.lineTo(52,py);c.stroke();if(Math.abs(y/ (step*2)-Math.round(y/(step*2)))<1e-6||step>=.5)txt(c,nf(y,2)+' m',36,py,{al:'right',sz:11,col:CS.muted,mono:1});}
+  // vạch độ cao thả
+  const yd=V.fl-S2.h0*V.s;c.save();c.setLineDash([6,5]);c.strokeStyle=CS.accent;c.beginPath();c.moveTo(56,yd);c.lineTo(w-8,yd);c.stroke();c.restore();
+  txt(c,T('drop')+' '+nf(S2.h0,2)+' m',w-10,yd-10,{al:'right',sz:12,col:CS.accent});
+  // đỉnh các lần nảy
+  S2.apex.slice(-6).forEach((a,i,arr)=>{const py=V.fl-a*V.s;c.strokeStyle=CS.ePot;c.globalAlpha=.3+.7*(i+1)/arr.length;c.lineWidth=2;c.beginPath();c.moveTo(X0+50,py);c.lineTo(X0+90,py);c.stroke();c.globalAlpha=1;});
+  if(S2.apex.length){const a=S2.apex[S2.apex.length-1];txt(c,nf(a,2)+' m',X0+96,V.fl-a*V.s,{al:'left',sz:12,col:CS.ePot,mono:1});}
+  // bóng
+  let yBot=V.fl;
+  B.forEach((b,i)=>{const Rv=clamp(b.R*V.s*2.6,14,46);let gap;
+    if(i===0){gap=Math.max(0,b.z-b.R);}else{const a=B[i-1];gap=Math.max(0,(b.z-b.R)-(a.z+a.R));}
+    let sq=0;const C=S2.C[i];if(C){const [d]=delta2(C);if(d>0)sq=clamp(d/b.R*.9,0,.55);}
+    const bottom=yBot-gap*V.s,ry=Rv*(1-sq),rx=Rv*(1+sq*.6),cy=bottom-ry;
+    c.fillStyle='rgba(0,0,0,.15)';c.beginPath();c.ellipse(X0,V.fl+2,rx*(i===0?1:.6)*(1-clamp(gap*V.s/300,0,.6)),4,0,0,TAU);if(i===0)c.fill();
+    const gr=c.createRadialGradient(X0-rx*.35,cy-ry*.35,2,X0,cy,Math.max(rx,ry));gr.addColorStop(0,'#ffffff');gr.addColorStop(.25,b.col);gr.addColorStop(1,lerpCol(b.col.replace('#',''),'000000',.35));
+    c.fillStyle=gr;c.beginPath();c.ellipse(X0,cy,rx,ry,0,0,TAU);c.fill();c.strokeStyle='rgba(0,0,0,.4)';c.lineWidth=1;c.stroke();
+    if(b.key==='ten'){c.strokeStyle='#fff';c.lineWidth=2;c.beginPath();c.ellipse(X0-rx*.55,cy,rx*.5,ry*.85,0,-1.2,1.2);c.stroke();c.beginPath();c.ellipse(X0+rx*.55,cy,rx*.5,ry*.85,0,Math.PI-1.2,Math.PI+1.2);c.stroke();}
+    if(b.key==='bas'){c.strokeStyle='#4a2508';c.lineWidth=1.5;c.beginPath();c.moveTo(X0-rx,cy);c.lineTo(X0+rx,cy);c.moveTo(X0,cy-ry);c.lineTo(X0,cy+ry);c.stroke();}
+    b._cy=cy;b._r=Math.max(rx,ry);yBot=cy-ry;
+    // vectơ vận tốc
+    if(Math.abs(b.v)>.15){const L2=clamp(b.v*14,-90,90);c.strokeStyle=CS.eKin;c.fillStyle=CS.eKin;c.lineWidth=3;const xx=X0+(i?-1:1)*(Rv+16);c.beginPath();c.moveTo(xx,cy);c.lineTo(xx,cy-L2);c.stroke();
+      c.beginPath();c.moveTo(xx,cy-L2-Math.sign(L2)*8);c.lineTo(xx-6,cy-L2);c.lineTo(xx+6,cy-L2);c.closePath();c.fill();}});
+  // sóng âm, nhiệt lúc va chạm
+  for(const r of S2.rings){const b=B[r.j];const yy=r.i<0?V.fl:(B[r.i]._cy-B[r.i]._r);const R=10+r.age*120;c.strokeStyle=CS.eSound;c.globalAlpha=(1-r.age/.8)*r.str;c.lineWidth=3;
+    c.beginPath();c.arc(X0,yy,R,Math.PI*1.05,Math.PI*1.35);c.stroke();c.beginPath();c.arc(X0,yy,R,Math.PI*1.65,Math.PI*1.95);c.stroke();
+    c.fillStyle=CS.eHeat;c.beginPath();c.arc(X0-R*.4,yy-4-r.age*30,3,0,TAU);c.arc(X0+R*.4,yy-6-r.age*36,3,0,TAU);c.fill();c.globalAlpha=1;}
+  if(!S2.run&&S2.t===0)txt(c,'↕ '+T('hint2').split('.')[0],w/2,22,{sz:13,col:CS.muted,bg:CS.panel});
+  if(S2.slow<1)txt(c,'×'+nf(S2.slow,2),w-12,18,{al:'right',sz:13,col:CS.muted,mono:1});}
+const E2K=[['Q','eHeat','heatS'],['P','ePot','F_pot'],['K','eKin','F_kin'],['El','eEl','F_el']];
+function drawGr2(){const {c,w,h}=fit($('gr2'),isPhone()?.55:.26,150,240),H=S2.hist,L=46,x=L,y=8,pw=w-L-8,ph=h-30;
+  c.fillStyle=CS.panel;c.fillRect(x,y,pw,ph);c.strokeStyle=CS.line;c.strokeRect(x+.5,y+.5,pw-1,ph-1);
+  const E0=Math.max(S2.E0,1e-9),ymax=E0*1.15,t1=Math.max(6,S2.t),t0=t1-6,X=t=>x+(t-t0)/6*pw,Y=v=>y+ph-v/ymax*ph;
+  if(H.length>1){for(let k=E2K.length-1;k>=0;k--){c.fillStyle=CS[E2K[k][1]];c.globalAlpha=.85;c.beginPath();c.moveTo(X(H[0][0]),Y(0));
+      for(const p of H){let s=0;for(let j=0;j<=k;j++)s+=p[1+j];c.lineTo(X(p[0]),Y(s));}c.lineTo(X(H[H.length-1][0]),Y(0));c.closePath();c.fill();}c.globalAlpha=1;}
+  c.strokeStyle=CS.ink;c.setLineDash([6,4]);c.lineWidth=1.5;c.beginPath();c.moveTo(x,Y(E0));c.lineTo(x+pw,Y(E0));c.stroke();c.setLineDash([]);
+  txt(c,T('total')+' = '+fmtE(S2.E0),x+pw-6,Y(E0)-9,{al:'right',sz:12,col:CS.ink,bg:CS.panel,bga:.7});
+  txt(c,T('grE'),4,y+6,{al:'left',sz:11,col:CS.muted,bl:'top'});txt(c,fmtE(E0),x-4,Y(E0),{al:'right',sz:10,col:CS.muted,mono:1});txt(c,'0',x-4,Y(0),{al:'right',sz:10,col:CS.muted,mono:1});
+  txt(c,T('grT')+' · '+nf(t0,1)+' → '+nf(t1,1),x+pw,h-10,{al:'right',sz:11,col:CS.muted});}
+function bars2(){const E=energies2(),E0=Math.max(S2.E0,1e-12);
+  const rows=[[T('F_pot'),E.P,CS.ePot],[T('F_kin'),E.K,CS.eKin],[T('F_el'),E.El,CS.eEl],[T('heatS'),E.Q,CS.eHeat]];
+  let h=rows.map(r=>`<div class="bar"><span>${r[0]}</span><div class="tr"><i style="width:${clamp(r[1]/E0*100,0,100)}%;background:${r[2]}"></i></div><b class="num">${fmtE(r[1])}</b></div>`).join('');
+  const segs=rows.map(r=>`<i style="display:inline-block;width:${clamp(r[1]/E0*100,0,100)}%;background:${r[2]}"></i>`).join('');
+  h+=`<div class="bar tot"><span><b style="font-family:inherit;text-align:left">${T('total')}</b></span><div class="tr" style="display:flex">${segs}</div><b class="num">${fmtE(E.tot)}</b></div>`;
+  $('bars2').innerHTML=h;
+  const top=S2.b[S2.b.length-1],mTot=S2.b.reduce((a,b)=>a+b.m,0);
+  kv($('kv2'),[[T('kH0'),nf(S2.h0,2)+' m'],[T('kHnow')+(S2.mode===2?' ('+T('topBall')+')':''),nf(Math.max(0,top.z-top.R),2)+' m'],[T('kM'),S2.b.map(b=>nf(b.m*1000,0)+' g').join(' + ')],
+    [T('kE0'),fmtE(S2.E0)],[T('kEt'),fmtE(E.tot)+' ('+nf(E.tot/E0*100,0)+' %)'],[T('kBn'),String(S2.hits)],[T('kDT'),nf(E.Q*.5/(mTot*1500),4)+' °C']]);
+  let tb=`<thead><tr><th>${T('thN')}</th><th>${T('thH')}</th><th>${T('thR')}</th></tr></thead><tbody>`;
+  S2.apex.slice(0,6).forEach((a,i)=>{const prev=i?S2.apex[i-1]:S2.h0+(S2.mode===2?2*S2.b[0].R:0);tb+=`<tr><td>${i+1}</td><td class="n num">${nf(a,2)} m</td><td class="n num">${nf(a/prev*100,0)} %</td></tr>`;});
+  $('tb2').innerHTML=tb+'</tbody>';}
+function ui2(full){$('run2').textContent=T(S2.run?'pause':'run');
+  if(full){segBtns($('slow2'),[['0.1','×0,1'],['0.25','×0,25'],['1','×1']].map(([k,l])=>[k,lang==='en'?l.replace(',','.'):l]),String(S2.slow),k=>{S2.slow=+k;ui2(true);});
+    segBtns($('mode2'),[['1',T('one')],['2',T('two')]],String(S2.mode),k=>{S2.mode=+k;S2.run=false;build2();ui2(true);});
+    segBtns($('ball2'),Object.keys(BALLS).map(k=>[k,T('b_'+k)+' · e≈'+nf(BALLS[k].e,2)]),S2.ball,k=>{S2.ball=k;S2.run=false;build2();ui2(true);});
+    $('lg2').innerHTML=E2K.map(e=>`<span><i style="background:var(--${e[1]})"></i>${T(e[2])}</span>`).join('');}}
+$('run2').onclick=()=>{if(!S2.run&&S2.t>12)build2();S2.run=!S2.run;ui2();};
+$('rst2').onclick=()=>{S2.run=false;build2();ui2();};
+(function(){const cv=$('cv2');const toH=e=>{const r=cv.getBoundingClientRect(),y=e.clientY-r.top;const V=view2(cv._w,cv._h);return clamp((V.fl-y)/V.s-.05,0.05,2.0);};
+  cv.addEventListener('pointerdown',e=>{S2.drag=true;S2.run=false;cv.setPointerCapture(e.pointerId);S2.h0=toH(e);build2();ui2();cv.style.cursor='grabbing';});
+  cv.addEventListener('pointermove',e=>{if(!S2.drag)return;S2.h0=toH(e);build2();});
+  const up=()=>{if(!S2.drag)return;S2.drag=false;S2.run=true;cv.style.cursor='grab';ui2();};
+  cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);})();
+
+/* =====================================================================
+   TAB 3: NĂNG LƯỢNG TÁI TẠO
+   Pin mặt trời: P = N·1,6 m²·20 %·I(t)·(1 − 0,75·mây); I = 1000 W/m²·sin(π(giờ−6)/12) ban ngày.
+   Gió: P = ½ρAv³·0,35 (ρ = 1,2 kg/m³, A = π·2² m²), từ 3 m/s, giữ ở mức 12 m/s, dừng khi > 25 m/s.
+   Thuỷ điện: P = 0,8·ρgQh; hồ: dV/dt = Q_vào − Q.  Than: m' = P/(0,35·24 MJ/kg); CO₂ = 2,4·m.
+   ===================================================================== */
+const S3={t:6,run:false,spd:1,src:'sun',N:10,cloud:20,wv:6,hh:10,Q:.1,rain:'dry',V:12000,cP:5,stock:300,co2:0,E:{sun:0,wind:0,hyd:0,coal:0},Ed:{sun:0,wind:0,hyd:0,coal:0},hist:[],lastH:-1,day:0,P:{},vNow:0,I:0,blade:0};
+const SRC3=['sun','wind','hyd','coal'],SCOL3={sun:'eLight',wind:'eKin',hyd:'eElec',coal:'eChem'};
+const VMAX3=20000,AREA_W=Math.PI*4;
+function noise3(t,s){return .5*Math.sin(1.3*t+s)+.3*Math.sin(3.7*t+1+s*2)+.2*Math.sin(7.1*t+2+s*3);}
+function powers3(){const hr=S3.t%24;const I=(hr>6&&hr<18)?1000*Math.sin(Math.PI*(hr-6)/12):0;S3.I=I;
+  const cf=1-.75*S3.cloud/100*(.75+.25*noise3(S3.t*.7,1));const Ps=S3.N*1.6*.2*I*clamp(cf,0,1);
+  const v=Math.max(0,S3.wv*(1+.3*noise3(S3.t,4)+.1*Math.sin(Math.PI*(hr-9)/12)));S3.vNow=v;
+  const Pw=(v<3||v>25)?0:.5*1.2*AREA_W*Math.pow(Math.min(v,12),3)*.35;
+  const inflow=(S3.rain==='dry'?.04:.15)*(1+.3*noise3(S3.t*.3,7));S3.inflow=inflow;const Qe=S3.V>1?S3.Q:Math.min(S3.Q,inflow);S3.Qe=Qe;const Ph=.8*1000*G*Qe*S3.hh;
+  const Pc=S3.stock>0?S3.cP*1000:0;return{sun:Ps,wind:Pw,hyd:Ph,coal:Pc};}
+function step3(dtR){if(!S3.run)return;const dh=Math.min(dtR,.05)*S3.spd;const P=powers3();S3.P=P;
+  S3.V=clamp(S3.V+(S3.inflow-S3.Qe)*3600*dh,0,VMAX3);
+  if(S3.stock>0){const burn=P.coal*3600*dh/(.35*24e6);S3.stock=Math.max(0,S3.stock-burn);S3.co2+=2.4*burn;}
+  const dayNow=Math.floor(S3.t/24);S3.t+=dh;if(Math.floor(S3.t/24)!==dayNow)SRC3.forEach(k=>S3.Ed[k]=0);
+  SRC3.forEach(k=>{S3.E[k]+=P[k]/1000*dh;S3.Ed[k]+=P[k]/1000*dh;});
+  S3.blade+=dtR*(P.wind>0?Math.min(S3.vNow,12)*1.1:0);
+  if(!S3.hist.length||S3.t-S3.hist[S3.hist.length-1][0]>=.1)S3.hist.push([S3.t,P.sun,P.wind,P.hyd,P.coal]);while(S3.hist.length&&S3.hist[0][0]<S3.t-72)S3.hist.shift();}
+function reset3(){Object.assign(S3,{t:6,V:12000,stock:300,co2:0,E:{sun:0,wind:0,hyd:0,coal:0},Ed:{sun:0,wind:0,hyd:0,coal:0},hist:[],blade:0});S3.P=powers3();}
+function draw3(){const {c,w,h}=fit($('cv3'),isPhone()?.85:.5,260,520),hr=S3.t%24,P=S3.P[S3.src]||0;
+  const dayF=clamp(Math.sin(Math.PI*(hr-6)/12)*1.6,0,1);const gy=h*.62;
+  const sky=c.createLinearGradient(0,0,0,gy);sky.addColorStop(0,lerpCol('0b1530','6fb2e8',dayF));sky.addColorStop(1,lerpCol('1c2848','cfe6f7',dayF));c.fillStyle=sky;c.fillRect(0,0,w,gy);
+  if(dayF<.3){c.fillStyle='rgba(255,255,255,'+(.8*(1-dayF/.3))+')';for(let i=0;i<30;i++){const sx=(i*137.5)%w,sy=(i*71.3)%(gy*.7);c.fillRect(sx,sy,2,2);}}
+  if(hr>6&&hr<18){const a=Math.PI*(hr-6)/12,sx=w*.08+(w*.84)*(hr-6)/12,sy=gy-Math.sin(a)*gy*.8;c.fillStyle='#ffd93b';c.beginPath();c.arc(sx,sy,18,0,TAU);c.fill();
+    const g=c.createRadialGradient(sx,sy,10,sx,sy,60);g.addColorStop(0,'rgba(255,220,80,.5)');g.addColorStop(1,'rgba(255,220,80,0)');c.fillStyle=g;c.beginPath();c.arc(sx,sy,60,0,TAU);c.fill();}
+  else{const hn=(hr+6)%24,sx=w*.08+(w*.84)*hn/12,sy=gy-Math.sin(Math.PI*hn/12)*gy*.7;if(hn<12){c.fillStyle='#e8ecf5';c.beginPath();c.arc(sx,sy,13,0,TAU);c.fill();c.fillStyle=lerpCol('0b1530','1c2848',.3);c.beginPath();c.arc(sx+6,sy-3,11,0,TAU);c.fill();}}
+  if(S3.src==='sun'&&S3.cloud>0){c.fillStyle='rgba(235,240,245,'+(.35+.5*S3.cloud/100)+')';const n=Math.ceil(S3.cloud/20);for(let i=0;i<n;i++){const cx=((i*w/n)+S3.t*14)%(w+120)-60,cy=gy*.18+i%2*30;c.beginPath();c.ellipse(cx,cy,48,18,0,0,TAU);c.ellipse(cx+30,cy-8,32,16,0,0,TAU);c.fill();}}
+  c.fillStyle=lerpCol('2a3d22','a9c98a',dayF*.8+.2);c.fillRect(0,gy,w,h-gy);
+  const cx=w*.33;
+  if(S3.src==='sun'){const n=Math.min(S3.N,isPhone()?10:20),pw=Math.min(36,(w*.55)/Math.min(n,10)-6);for(let i=0;i<n;i++){const col=i%10,row=Math.floor(i/10);const x=w*.06+col*(pw+6),y=gy-34+row*22;
+      c.save();c.translate(x,y);c.transform(1,0,-.5,1,0,0);c.fillStyle=S3.I>0?'#2b55a8':'#1a2a4a';c.fillRect(0,0,pw,18);c.strokeStyle='#9bb6e8';c.lineWidth=1;c.strokeRect(0,0,pw,18);c.restore();}}
+  else if(S3.src==='wind'){const tx=cx,ty=gy-h*.36,R=h*.24;c.strokeStyle='#e9edf2';c.lineWidth=6;c.beginPath();c.moveTo(tx,gy+4);c.lineTo(tx,ty);c.stroke();
+    c.fillStyle='#f4f6f8';for(let i=0;i<3;i++){c.save();c.translate(tx,ty);c.rotate(S3.blade+i*TAU/3);c.beginPath();c.moveTo(0,-4);c.quadraticCurveTo(R*.5,-9,R,-2);c.lineTo(R,2);c.quadraticCurveTo(R*.5,6,0,4);c.closePath();c.fill();c.strokeStyle='#9aa4af';c.lineWidth=1;c.stroke();c.restore();}
+    c.fillStyle='#cfd5dc';c.beginPath();c.arc(tx,ty,7,0,TAU);c.fill();
+    c.strokeStyle='rgba(255,255,255,.7)';c.lineWidth=2;const nL=Math.min(6,Math.ceil(S3.vNow/3));for(let i=0;i<nL;i++){const yy=gy*.25+i*gy*.1,ox=((S3.t*S3.vNow*20+i*80)%(w*.5));c.beginPath();c.moveTo(ox,yy);c.lineTo(ox+30+S3.vNow*2,yy);c.stroke();}}
+  else if(S3.src==='hyd'){const dx=w*.32,lvl=S3.V/VMAX3;const lakeTop=gy-h*.34;c.fillStyle=lerpCol('6b5a44','8a7a60',dayF);c.beginPath();c.moveTo(dx,lakeTop-6);c.lineTo(dx+22,lakeTop-6);c.lineTo(dx+40,gy);c.lineTo(dx-10,gy);c.closePath();c.fill();
+    c.fillStyle=CS.water;c.fillRect(w*.02,gy-(gy-lakeTop)*lvl,dx-w*.02,(gy-lakeTop)*lvl);
+    if(S3.Qe>0){c.strokeStyle=CS.water;c.lineWidth=3+S3.Qe*20;c.beginPath();c.moveTo(dx+10,gy-8);c.lineTo(dx+70,gy-8);c.stroke();c.fillStyle='#ddd';c.beginPath();c.arc(dx+58,gy-12,9,0,TAU);c.fill();}
+    if(S3.rain==='wet'){c.strokeStyle='rgba(180,210,240,.7)';c.lineWidth=1.5;for(let i=0;i<40;i++){const rx=(i*53+S3.t*300)%(dx),ry=((i*97)+S3.t*900)%(gy*.9);c.beginPath();c.moveTo(rx,ry);c.lineTo(rx-3,ry+9);c.stroke();}}
+    txt(c,nf(lvl*100,0)+' %',w*.12,lakeTop-14,{sz:12,col:'#fff',bg:'#000',bga:.5});}
+  else{const px=w*.12,py=gy;c.fillStyle='#7a7f86';c.fillRect(px,py-h*.18,w*.18,h*.18);c.fillRect(px+w*.14,py-h*.36,w*.035,h*.36);
+    if(P>0){c.fillStyle='rgba(120,120,120,.55)';for(let i=0;i<6;i++){const a=((S3.t*2+i)%6)/6;c.beginPath();c.arc(px+w*.157+a*40,py-h*.38-a*60,8+a*14,0,TAU);c.fill();}}
+    const pile=S3.stock/300;c.fillStyle='#1c1c1c';c.beginPath();c.moveTo(px+w*.2,py);c.quadraticCurveTo(px+w*.2+35,py-50*pile,px+w*.2+70*Math.max(pile,.05)+10,py);c.closePath();c.fill();
+    txt(c,nf(S3.stock,0)+' kg',px+w*.24,py+14,{sz:12,col:'#fff',bg:'#000',bga:.5});}
+  // dây điện và nhà
+  const nH=Math.floor(P/300),maxH=isPhone()?16:30,cols=isPhone()?8:15,hw=Math.min(34,(w*.95)/cols-6);
+  for(let i=0;i<maxH;i++){const col=i%cols,row=Math.floor(i/cols);const x=w*.03+col*(hw+6),y=h-12-row*(hw*.95+8)-hw*.8;const lit=i<nH;
+    c.fillStyle=lerpCol('6e5a48','c9a77d',dayF*.7+.3);c.fillRect(x,y+hw*.35,hw,hw*.5);c.fillStyle='#8a3b2a';c.beginPath();c.moveTo(x-2,y+hw*.37);c.lineTo(x+hw/2,y);c.lineTo(x+hw+2,y+hw*.37);c.closePath();c.fill();
+    c.fillStyle=lit?'#ffe066':'#2d3340';c.fillRect(x+hw*.3,y+hw*.48,hw*.4,hw*.22);
+    if(lit&&dayF<.6){c.fillStyle='rgba(255,224,102,.25)';c.beginPath();c.arc(x+hw/2,y+hw*.58,hw*.6,0,TAU);c.fill();}}
+  if(nH>maxH)txt(c,'+'+(nH-maxH),w-12,h-14,{al:'right',sz:13,col:'#fff',bg:'#000'});
+  // đồng hồ
+  const d=Math.floor(S3.t/24)+1,hh=Math.floor(hr),mm=Math.floor((hr-hh)*60/15)*15;
+  txt(c,T('day')+' '+d+' · '+String(hh).padStart(2,'0')+':'+String(mm).padStart(2,'0'),w-12,18,{al:'right',sz:15,col:'#fff',mono:1,bg:'#000',bga:.55});
+  txt(c,(P>=1000?nf(P/1000,2)+' kW':nf(P,0)+' W'),w-12,44,{al:'right',sz:18,col:'#fff',mono:1,bg:CS.accent,bga:.9});}
+function drawGr3(){const {c,w,h}=fit($('gr3'),isPhone()?.55:.24,150,240),H=S3.hist,L=40,x=L,y=8,pw=w-L-8,ph=h-30;
+  c.fillStyle=CS.panel;c.fillRect(x,y,pw,ph);c.strokeStyle=CS.line;c.strokeRect(x+.5,y+.5,pw-1,ph-1);
+  const t1=Math.max(72,S3.t),t0=t1-72;let ymax=2;for(const p of H)for(let k=1;k<=4;k++)ymax=Math.max(ymax,p[k]/1000);ymax=Math.ceil(ymax/2)*2;
+  const X=t=>x+(t-t0)/72*pw,Y=v=>y+ph-v/ymax*ph;
+  for(let d=Math.ceil(t0/24)*24;d<=t1;d+=24){c.strokeStyle=CS.line;c.beginPath();c.moveTo(X(d),y);c.lineTo(X(d),y+ph);c.stroke();txt(c,T('day')+' '+(d/24+1),X(d)+4,y+ph-8,{al:'left',sz:10,col:CS.muted});}
+  SRC3.forEach((k,i)=>{if(H.length<2)return;c.strokeStyle=CS[SCOL3[k]];c.lineWidth=k===S3.src?3.2:1.6;c.globalAlpha=k===S3.src?1:.6;c.beginPath();H.forEach((p,j)=>{const px=X(p[0]),py=Y(p[i+1]/1000);j?c.lineTo(px,py):c.moveTo(px,py);});c.stroke();c.globalAlpha=1;});
+  txt(c,T('grP'),4,y+4,{al:'left',sz:11,col:CS.muted,bl:'top'});txt(c,String(ymax),x-4,y+6,{al:'right',sz:10,col:CS.muted,mono:1});txt(c,'0',x-4,y+ph,{al:'right',sz:10,col:CS.muted,mono:1});
+  txt(c,T('grH'),x+pw,h-8,{al:'right',sz:11,col:CS.muted});}
+function data3(){const P=S3.P[S3.src]||0,k=S3.src;const fP=v=>v>=1000?nf(v/1000,2)+' kW':nf(v,0)+' W';
+  const rows=[[T('kNow'),fP(P)],[T('kHouses'),String(Math.floor(P/300))],[T('kDay'),nf(S3.Ed[k],1)+' kWh'],[T('kAll'),nf(S3.E[k],1)+' kWh']];
+  if(k==='sun')rows.push([T('kSun'),nf(S3.I,0)+' W/m²']);
+  if(k==='wind')rows.push([T('kWind'),nf(S3.vNow,1)+' m/s']);
+  if(k==='hyd')rows.push([T('kRes'),nf(S3.V,0)+' m³ ('+nf(S3.V/VMAX3*100,0)+' %)']);
+  if(k==='coal'){rows.push([T('kStock'),nf(S3.stock,1)+' kg']);rows.push([T('kCO2'),nf(S3.co2,1)+' kg']);}
+  rows.push({t:T('kRenew')+' '+T(k==='coal'?'renewN':'renewY')});
+  let msg='';if(k==='sun'&&S3.I<=0)msg=T('night');if(k==='wind'&&S3.vNow>25)msg=T('cutout');if(k==='hyd'&&S3.V<=1)msg=T('empty');if(k==='coal'&&S3.stock<=0)msg=T('coalOut');
+  if(msg)rows.push({t:'⚠ '+msg});kv($('kv3'),rows);}
+function ui3(full){$('run3').textContent=T(S3.run?'pause':'run');
+  $('sNV').textContent=S3.N;$('sCloudV').textContent=S3.cloud+' %';$('wVV').textContent=nf(S3.wv,1)+' m/s';$('hHV').textContent=S3.hh+' m';$('hQV').textContent=nf(S3.Q,2)+' m³/s';$('cPV').textContent=nf(S3.cP,1)+' kW';
+  SRC3.forEach(k=>$('sl3'+k).hidden=k!==S3.src);
+  if(full){segBtns($('src3'),SRC3.map(k=>[k,T('s_'+k)]),S3.src,k=>{S3.src=k;ui3(true);});
+    segBtns($('spd3'),[['0.5','×0,5'],['1','×1'],['3','×3']].map(([k,l])=>[k,lang==='en'?l.replace(',','.'):l]),String(S3.spd),k=>{S3.spd=+k;ui3(true);});
+    segBtns($('rain3'),[['dry',T('dry')],['wet',T('wet')]],S3.rain,k=>{S3.rain=k;ui3(true);});
+    $('lg3').innerHTML=SRC3.map(k=>`<span><i style="background:var(--${SCOL3[k]})"></i>${T('s_'+k)}</span>`).join('');
+    renderSort();}}
+[['sN','N',1],['sCloud','cloud',1],['wV','wv',1],['hH','hh',1],['hQ','Q',1],['cP','cP',1]].forEach(([id,k])=>$(id).addEventListener('input',e=>{S3[k]=+e.target.value;S3.P=powers3();ui3();}));
+$('run3').onclick=()=>{S3.run=!S3.run;ui3();};$('rst3').onclick=()=>{S3.run=false;reset3();ui3();};
+const SORT={};
+function renderSort(){const L=T('srcs');let ok=0,done=0;
+  $('sort3').innerHTML=L.map((s,i)=>{const a=SORT[i];let cls1='',cls2='';if(a!=null){done++;const good=a===s[1];if(good)ok++;const c=good?'good':'bad';if(a===1)cls1=c;else cls2=c;}
+    return `<div class="srow"><span>${esc(s[0])}</span><div class="yn"><button class="btn ${cls1}" data-s="${i}:1">${T('yes')}</button><button class="btn ${cls2}" data-s="${i}:0">${T('no')}</button></div>${a!=null&&a===s[1]?`<span class="why">✓ ${esc(s[2])}</span>`:a!=null?`<span class="why">✗</span>`:''}</div>`;}).join('');
+  $('sortSt').textContent=done?Tf('sortDone',{n:ok,m:L.length}):'';}
+$('sort3').addEventListener('click',e=>{const b=e.target.closest('[data-s]');if(!b)return;const [i,v]=b.dataset.s.split(':').map(Number);SORT[i]=v;renderSort();});
+
+/* =====================================================================
+   TAB 4: TIẾT KIỆM NĂNG LƯỢNG – NGÔI NHÀ
+   Điện năng mỗi ngày (kWh) = công suất (kW) × số giờ. Tháng = 30 ngày. Giá 2 500 đ/kWh. 0,66 kg CO₂/kWh.
+   ===================================================================== */
+const BASE4={lt:'inc',lh:6,acT:20,acH:8,acD:false,fr:'old',frC:false,tvH:6,sb:false,wh:'all',rc:false,fanH:4,wn:7};
+let S4={...BASE4};
+const LW={inc:60,cfl:15,led:9},PRICE=2500,CO2K=.66;
+const APP4={
+  light:s=>6*LW[s.lt]*s.lh/1000, ac:s=>.9*(1+.05*(25-s.acT))*(s.acD?1:1.3)*s.acH, fridge:s=>(s.fr==='old'?1.2:.7)*(s.frC?1:1.25),
+  tv:s=>.12*s.tvH, stby:s=>s.sb?0:.012*18, wh:s=>s.wh==='all'?3.0:1.8, rice:s=>.4+(s.rc?0:.05*10), fan:s=>.05*s.fanH, wash:s=>.5*s.wn/7};
+const MEAS4=[['light','lt','m_light_type',s=>s.lt!=='inc'],['light','lh','m_light_h',s=>s.lh<BASE4.lh],['ac','acT','m_ac_T',s=>s.acT>BASE4.acT],['ac','acH','m_ac_h',s=>s.acH<BASE4.acH],['ac','acD','m_ac_door',s=>s.acD],
+  ['fridge','fr','m_fr_type',s=>s.fr!=='old'],['fridge','frC','m_fr_care',s=>s.frC],['tv','tvH','m_tv',s=>s.tvH<BASE4.tvH],['stby','sb','m_stby',s=>s.sb],['wh','wh','m_wh',s=>s.wh!=='all'],['rice','rc','m_rice',s=>s.rc],['wash','wn','m_wash',s=>s.wn<BASE4.wn]];
+const day4=s=>Object.values(APP4).reduce((a,f)=>a+f(s),0);
+function appsHTML(){const sl=(id,mn,mx,st,v,lab,unit)=>`<div class="sl"><div class="top"><span>${lab}</span><span class="val">${nf(v,0)} ${unit}</span></div><input type="range" data-k="${id}" min="${mn}" max="${mx}" step="${st}" value="${v}"></div>`;
+  const sg=(id,opts,v)=>`<div class="seg">${opts.map(([k,l])=>`<button class="btn" data-k="${id}" data-v="${k}" aria-pressed="${k===v}">${l}</button>`).join('')}</div>`;
+  const ck=(id,v,lab)=>`<label class="chk"><input type="checkbox" data-k="${id}" ${v?'checked':''}><span>${lab}</span></label>`;
+  const box=(a,inner)=>{const cur=APP4[a](S4)*30,b=APP4[a](BASE4)*30,cls=cur<b-1e-6?'saved':cur>b+1e-6?'more':'';
+    return `<div class="app ${cls}"><div class="hd"><h3>${T('a_'+a)}</h3><b class="num">${nf(cur,1)} ${T('perMon')}</b></div>${inner}</div>`;};
+  const h='h';const H=T('hours');
+  return box('light',sg('lt',[['inc',T('l_inc')],['cfl',T('l_cfl')],['led',T('l_led')]],S4.lt)+sl('lh',0,12,1,S4.lh,H,h))+
+    box('ac',sl('acT',18,30,1,S4.acT,T('acT'),'°C')+sl('acH',0,16,1,S4.acH,H,h)+ck('acD',S4.acD,T('acDoor')))+
+    box('fridge',sg('fr',[['old',T('fr_old')],['inv',T('fr_inv')]],S4.fr)+ck('frC',S4.frC,T('frCare')))+
+    box('tv',sl('tvH',0,12,1,S4.tvH,H,h))+box('stby',ck('sb',S4.sb,T('stbyU')))+
+    box('wh',sg('wh',[['all',T('wh_all')],['need',T('wh_need')]],S4.wh))+box('rice',ck('rc',S4.rc,T('riceU')))+
+    box('fan',sl('fanH',0,16,1,S4.fanH,H,h))+box('wash',sl('wn',1,14,1,S4.wn,T('washN'),''));}
+function ui4(){const el=$('apps4'),fx=document.activeElement&&document.activeElement.dataset?document.activeElement.dataset.k:null;
+  if(!el._busy){el.innerHTML=appsHTML();if(fx){const f=el.querySelector(`[data-k="${fx}"]`);if(f&&f.type==='range')f.focus();}}
+  const d=day4(S4),b=day4(BASE4),m=d*30,mb=b*30,save=1-d/b;
+  $('bill4').textContent=nf(Math.round(m*PRICE/1000)*1000,0)+' đ';
+  kv($('kv4'),[[T('kMon'),nf(m,0)+' kWh'],[T('kBase'),nf(mb,0)+' kWh · '+nf(Math.round(mb*PRICE/1000)*1000,0)+' đ'],[T('kSave'),nf(Math.max(0,mb-m),0)+' kWh ('+nf(save*100,0)+' %)'],[T('kCO2m'),nf(m*CO2K,0)+' kg']]);
+  $('goal4').style.width=clamp(save*100,0,100)+'%';
+  $('st4').textContent=save>=.3?Tf('goalOk',{p:nf(save*100,0)}):Tf('goalNo',{k:nf((.3-save)*mb,0)});$('st4').style.color=save>=.3?CS.ok:CS.muted;
+  const li=[];MEAS4.forEach(([a,key,txtk,test])=>{if(test(S4)){const s2={...S4};s2[key]=BASE4[key];const dk=(APP4[a](s2)-APP4[a](S4))*30;if(dk>0.05)li.push(`<li>✔ ${T(txtk)}: <b class="num">−${nf(dk,1)}</b> ${T('perMon')}</li>`);}});
+  if(S4.fanH>BASE4.fanH){const dk=(APP4.fan(S4)-APP4.fan(BASE4))*30;li.push(`<li class="up">${T('m_fan')}: +${nf(dk,1)} ${T('perMon')}</li>`);}
+  $('meas4').innerHTML=li.length?li.join(''):`<li class="muted" style="list-style:none;margin-left:-20px">${T('noMeas')}</li>`;}
+$('apps4').addEventListener('input',e=>{const k=e.target.dataset.k;if(!k)return;if(e.target.type==='range'){S4[k]=+e.target.value;$('apps4')._busy=true;ui4();$('apps4')._busy=false;
+  const box=e.target.closest('.app');const tmp=document.createElement('div');tmp.innerHTML=appsHTML();const idx=[...$('apps4').children].indexOf(box);const nb=tmp.children[idx];
+  box.className=nb.className;box.querySelector('.hd b').textContent=nb.querySelector('.hd b').textContent;e.target.parentElement.querySelector('.val').textContent=nb.querySelectorAll('.sl')[[...box.querySelectorAll('.sl')].indexOf(e.target.parentElement)].querySelector('.val').textContent;}});
+$('apps4').addEventListener('change',e=>{const k=e.target.dataset.k;if(!k)return;if(e.target.type==='checkbox'){S4[k]=e.target.checked;ui4();}else if(e.target.type==='range'){ui4();}});
+$('apps4').addEventListener('click',e=>{const b=e.target.closest('button[data-k]');if(!b)return;S4[b.dataset.k]=b.dataset.v;ui4();});
+$('rst4').onclick=()=>{S4={...BASE4};ui4();};
+$('best4').onclick=()=>{S4={lt:'led',lh:5,acT:27,acH:6,acD:true,fr:'old',frC:true,tvH:3,sb:true,wh:'need',rc:true,fanH:6,wn:3};ui4();};
+let meter4=0;
+function draw4(dtR){const {c,w,h}=fit($('cv4'),isPhone()?.8:.42,240,440),s=S4;const ph=isPhone();
+  const mw=ph?0:w*.2,hx=10,hy=h*.16,hw=w-mw-20,hh=h-hy-12;
+  c.fillStyle=CS.lane;c.fillRect(0,0,w,h);
+  c.fillStyle='#8a3b2a';c.beginPath();c.moveTo(hx-8,hy);c.lineTo(hx+hw/2,hy-h*.13);c.lineTo(hx+hw+8,hy);c.closePath();c.fill();
+  c.fillStyle=CS.panel;c.strokeStyle=CS.ink;c.lineWidth=2;c.fillRect(hx,hy,hw,hh);c.strokeRect(hx,hy,hw,hh);
+  c.beginPath();c.moveTo(hx+hw/2,hy);c.lineTo(hx+hw/2,hy+hh);c.moveTo(hx,hy+hh/2);c.lineTo(hx+hw,hy+hh/2);c.stroke();
+  const rooms=lang==='vi'?['Phòng khách','Phòng ngủ','Bếp','Phòng tắm, giặt']:['Living room','Bedroom','Kitchen','Bathroom, laundry'];
+  const R=[[hx,hy],[hx+hw/2,hy],[hx,hy+hh/2],[hx+hw/2,hy+hh/2]],rw=hw/2,rh=hh/2;
+  R.forEach((r,i)=>txt(c,rooms[i],r[0]+8,r[1]+12,{al:'left',sz:ph?11:12,col:CS.muted}));
+  // đèn
+  const lc=s.lt==='inc'?'#ffb733':s.lt==='cfl'?'#ffe9a0':'#fff2b8',lon=s.lh>0;
+  [[R[0],.3],[R[0],.7],[R[1],.5],[R[1],.8],[R[2],.5],[R[3],.5]].forEach(([r,f])=>{const x=r[0]+rw*f,y=r[1]+rh*.3;
+    if(lon){const g=c.createRadialGradient(x,y,2,x,y,rh*.5);g.addColorStop(0,s.lt==='inc'?'rgba(255,170,40,.6)':'rgba(255,230,140,.45)');g.addColorStop(1,'rgba(255,255,255,0)');c.fillStyle=g;c.beginPath();c.arc(x,y,rh*.5,0,TAU);c.fill();}
+    c.fillStyle=lon?lc:'#bbb';c.beginPath();c.arc(x,y,6,0,TAU);c.fill();c.strokeStyle=CS.ink;c.lineWidth=1;c.stroke();
+    if(lon&&s.lt==='inc'){c.strokeStyle=CS.eHeat;c.globalAlpha=.7;for(let k=0;k<2;k++){const ox=x-4+k*8,ph2=(performance.now()/600+k*.5)%1;c.beginPath();c.moveTo(ox,y-9-ph2*8);c.quadraticCurveTo(ox+3,y-14-ph2*8,ox,y-19-ph2*8);c.stroke();}c.globalAlpha=1;}});
+  // tivi + chế độ chờ
+  let x=R[0][0]+rw*.12,y=R[0][1]+rh*.6;c.fillStyle='#222';c.fillRect(x,y,rw*.3,rh*.25);if(s.tvH>0){c.fillStyle='#5aa3dd';c.fillRect(x+3,y+3,rw*.3-6,rh*.25-6);}
+  if(!s.sb){c.fillStyle='#ff2d2d';c.beginPath();c.arc(x+rw*.3-5,y+rh*.25+5,3.5,0,TAU);c.fill();c.beginPath();c.arc(R[1][0]+rw*.9,R[1][1]+rh*.85,3.5,0,TAU);c.fill();}
+  // quạt
+  x=R[0][0]+rw*.68;y=R[0][1]+rh*.72;c.strokeStyle=CS.metal2;c.lineWidth=2;c.beginPath();c.arc(x,y,rh*.13,0,TAU);c.stroke();if(s.fanH>0){c.save();c.translate(x,y);c.rotate(performance.now()/120);c.fillStyle=CS.eKin;for(let k=0;k<3;k++){c.rotate(TAU/3);c.beginPath();c.ellipse(rh*.06,0,rh*.06,rh*.025,0,0,TAU);c.fill();}c.restore();}
+  // điều hoà
+  x=R[1][0]+rw*.15;y=R[1][1]+rh*.5;c.fillStyle='#f0f3f6';c.strokeStyle=CS.ink;c.fillRect(x,y-8,rw*.4,14);c.strokeRect(x,y-8,rw*.4,14);
+  if(s.acH>0){const n=clamp(Math.round((31-s.acT)/2),1,6);c.strokeStyle='#4aa8ff';c.lineWidth=2;for(let k=0;k<n;k++){const ph2=(performance.now()/900+k/n)%1;c.globalAlpha=1-ph2;c.beginPath();c.moveTo(x+6+k*rw*.06,y+8+ph2*rh*.25);c.lineTo(x+10+k*rw*.06,y+14+ph2*rh*.25);c.stroke();}c.globalAlpha=1;
+    txt(c,s.acT+' °C',x+rw*.2,y-16,{sz:11,col:'#1d6fd1',mono:1});}
+  if(!s.acD){c.fillStyle=CS.lane;c.fillRect(R[1][0]+rw-6,R[1][1]+rh*.45,12,rh*.45);c.strokeStyle=CS.warn;c.lineWidth=2;c.beginPath();c.moveTo(R[1][0]+rw-6,R[1][1]+rh*.45);c.lineTo(R[1][0]+rw-22,R[1][1]+rh*.5);c.stroke();}
+  // tủ lạnh, nồi cơm
+  x=R[2][0]+rw*.1;y=R[2][1]+rh*.35;c.fillStyle=s.fr==='inv'?'#dfe8f0':'#c9cfd6';c.fillRect(x,y,rw*.18,rh*.58);c.strokeStyle=CS.ink;c.strokeRect(x,y,rw*.18,rh*.58);c.beginPath();c.moveTo(x,y+rh*.2);c.lineTo(x+rw*.18,y+rh*.2);c.stroke();
+  if(s.fr==='inv')txt(c,'★5',x+rw*.09,y+rh*.4,{sz:11,col:CS.ok});
+  x=R[2][0]+rw*.55;y=R[2][1]+rh*.7;c.fillStyle='#f4f4f4';c.beginPath();c.ellipse(x,y,rw*.09,rh*.12,0,0,TAU);c.fill();c.stroke();c.fillStyle=s.rc?'#bbb':'#ff9a1a';c.beginPath();c.arc(x,y,3.5,0,TAU);c.fill();
+  // bình nóng lạnh, máy giặt
+  x=R[3][0]+rw*.12;y=R[3][1]+rh*.35;c.fillStyle='#f4f6f8';c.beginPath();c.roundRect(x,y,rw*.14,rh*.38,8);c.fill();c.stroke();
+  if(s.wh==='all'){c.fillStyle='rgba(224,69,43,.55)';c.beginPath();c.arc(x+rw*.07,y+rh*.19,rh*.12,0,TAU);c.fill();}
+  x=R[3][0]+rw*.55;y=R[3][1]+rh*.45;c.fillStyle='#eef1f4';c.fillRect(x,y,rw*.25,rh*.45);c.strokeRect(x,y,rw*.25,rh*.45);c.beginPath();c.arc(x+rw*.125,y+rh*.25,rh*.12,0,TAU);c.stroke();
+  // công tơ
+  const d=day4(s),avgW=d/24*1000;meter4+=(dtR||0)*avgW/150;
+  const mx=ph?w-46:w-mw/2-4,my=ph?28:h*.45,mr=ph?22:Math.min(mw*.36,58);
+  c.fillStyle=CS.panel;c.strokeStyle=CS.ink;c.lineWidth=2;c.beginPath();c.arc(mx,my,mr,0,TAU);c.fill();c.stroke();
+  c.save();c.translate(mx,my);c.rotate(meter4);c.fillStyle=CS.warn;c.fillRect(-mr*.8,-3,mr*1.6,6);c.restore();
+  txt(c,'kWh',mx,my+mr*.5,{sz:ph?9:11,col:CS.muted});
+  if(!ph){txt(c,nf(avgW,0)+' W',mx,my+mr+16,{sz:14,col:CS.ink,mono:1});txt(c,lang==='vi'?'trung bình':'average',mx,my+mr+32,{sz:11,col:CS.muted});}}
+function ui4lang(){ui4();}
+
+/* ================= Video thực tế ================= */
+const VIDEOS={
+1:[{id:'qcTX0s_wHMY',file:'tab1-hien-tuong.mp4',t:'Testing Light Bulb Heat with a Thermal Camera',c:'?',d:'?',type:'phen',
+   look:{vi:'Camera nhiệt cho thấy nhiệt độ bằng màu. Để ý: bóng sợi đốt nóng rực (vàng, trắng), bóng LED sáng bằng mà mát hơn nhiều. Phần điện năng thành nhiệt là năng lượng hao phí. So với chế độ “Camera nhiệt” trong mô phỏng.',en:'A thermal camera shows temperature as colour. Notice: the filament bulb glows hot (yellow, white) while an equally bright LED stays much cooler. Electrical energy turned into heat is wasted energy. Compare with the “Thermal camera” option.'}},
+  {id:'VNN_Qtpl31E',file:'tab1-chuoi-chuyen-hoa.mp4',t:'Rube Goldberg Showing Energy Transformations',c:'?',d:'?',type:'exp',
+   look:{vi:'Một “cỗ máy dây chuyền” do học sinh làm. Để ý từng bước năng lượng chuyển dạng (thế năng → động năng → âm thanh...) và truyền từ vật này sang vật khác. Mỗi bước đều có hao phí nên cỗ máy không tự chạy lại được.',en:'A student-built chain-reaction machine. Notice each step where energy changes form (potential → kinetic → sound...) and passes from object to object. Every step wastes some, so the machine cannot restart itself.'}}],
+2:[{id:'atXjPU3uhYo',file:'tab2-hien-tuong.mp4',t:'Bouncy Balls – Science in Slow Motion',c:'?',d:'?',type:'phen',
+   look:{vi:'Quay chậm quả bóng chạm sàn. Để ý: bóng bẹp xuống (động năng → thế năng đàn hồi) rồi bung ra, và mỗi lần nảy lại thấp hơn lần trước.',en:'Slow motion of balls hitting the floor. Notice: the ball squashes (kinetic → elastic) then springs back, and each bounce is lower than the one before.'}},
+  {id:'afxN3RSwB_4',file:'tab2-hai-bong-chong.mp4',t:'Double Ball Bounce in SLOW MOTION!',c:'?',d:'?',type:'exp',
+   look:{vi:'Bóng nhỏ đặt trên bóng lớn, thả cùng lúc. Để ý: bóng lớn gần như đứng lại, bóng nhỏ vọt lên rất cao. Năng lượng truyền từ bóng lớn sang bóng nhỏ, tổng không tăng. Thử chế độ “Hai quả chồng” trong mô phỏng.',en:'A small ball on top of a big ball, dropped together. Notice: the big ball almost stops and the small one shoots up. Energy passes from the big ball to the small one; the total does not grow. Try “Two balls stacked”.'}},
+  {id:'x-jdAlMjZQE',file:'tab2-giai-thich.mp4',t:'The Physics of Bouncing a Ball',c:'?',d:'?',type:'exp',
+   look:{vi:'Giải thích vì sao bóng nảy và vì sao bóng nảy thấp dần. Để ý phần nói về năng lượng chuyển thành nhiệt và âm thanh khi va chạm.',en:'Why balls bounce and why bounces get lower. Notice the part about energy turning into heat and sound on impact.'}}],
+3:[{id:'xKxrkht7CpY',file:'tab3-pin-mat-troi.mp4',t:'How do solar panels work? – Richard Komp',c:'TED-Ed',d:'?',type:'app',
+   look:{vi:'Hoạt hình TED-Ed giải thích pin mặt trời. Để ý: ánh sáng làm electron trong silic chuyển động thành dòng điện (quang năng → điện năng), và vì sao pin chỉ đổi được một phần ánh sáng thành điện.',en:'TED-Ed animation on solar cells. Notice: light makes electrons in silicon move as a current (light → electrical), and why only part of the light becomes electricity.'}},
+  {id:'gFPQqe2zrp8',file:'tab3-tua-bin-gio.mp4',t:'How a Wind Turbine Works',c:'?',d:'?',type:'app',
+   look:{vi:'Bên trong tua bin gió. Để ý: gió làm quay cánh, hộp số tăng tốc, máy phát biến động năng thành điện năng; tua bin tự dừng khi gió quá mạnh.',en:'Inside a wind turbine. Notice: wind turns the blades, a gearbox speeds up the shaft, a generator turns kinetic energy into electrical energy; the turbine stops in very strong wind.'}},
+  {id:'rnPEtwQtmGQ',file:'tab3-thuy-dien.mp4',t:'How hydroelectricity works',c:'?',d:'?',type:'app',
+   look:{vi:'Nhà máy thuỷ điện. Để ý: nước từ hồ cao chảy xuống làm quay tua bin (thế năng của nước → động năng → điện năng). Nước trong hồ được mưa bổ sung lại.',en:'A hydroelectric plant. Notice: water from a high reservoir flows down and turns a turbine (potential → kinetic → electrical). Rain refills the reservoir.'}}],
+4:[{id:'hJSYd4Ade8Q',file:'tab4-dien-che-do-cho.mp4',t:'What is a Phantom Load',c:'?',d:'?',type:'app',
+   look:{vi:'“Phantom load” là điện năng thiết bị dùng khi đang tắt chờ. Để ý: những thiết bị nào vẫn tốn điện khi “tắt” và cách bỏ hao phí này.',en:'A “phantom load” is electricity used by devices that are switched off but still plugged in. Notice which devices still draw power when “off” and how to stop it.'}},
+  {id:'UXwLu-XfFCo',file:'tab4-led-va-soi-dot.mp4',t:'LED Bulb vs Incandescent: Side by Side Comparison',c:'?',d:'?',type:'exp',
+   look:{vi:'So sánh bóng LED và bóng sợi đốt. Để ý số oát (W) mỗi bóng cần để sáng như nhau và độ nóng của bóng.',en:'LED vs filament bulb. Notice the watts each needs for the same brightness, and how hot each gets.'}}]};
+const VSEL={1:0,2:0,3:0,4:0},VPLAY={};
+function renderVideo(n){const list=VIDEOS[n],V=list[VSEL[n]],el=$('v'+n),pl=!!VPLAY[n];el.classList.toggle('playing',pl);
+  const dur=V.d==='?'?T('vDurUnk'):V.d,ch=V.c==='?'?T('vChUnk'):V.c;
+  el.innerHTML=`<div class="vmedia">${pl?`<div class="player" id="pl${n}"></div>`:`<button class="thumb" data-play="${n}" aria-label="${esc(V.t)}"><span class="ph">${T('vNoThumb')}</span><img alt="" src="media/${V.file.replace('.mp4','.jpg')}"><span class="pbtn"></span>${V.d!=='?'?`<span class="dur">${V.d}</span>`:''}</button>`}</div>
+  <div class="vt"><span class="lbl">${T('vLbl')} · ${T('vt_'+V.type)} · ${esc(ch)} · ${dur}</span><span class="ttl">${esc(V.t)}</span>
+  <span class="look"><b>${T('vLook')}</b> ${esc(V.look[lang])}</span>
+  <div class="vchips">${list.map((x,i)=>`<button class="chip ${i===VSEL[n]?'on':''}" data-vsel="${n}:${i}">${T('vNo')} ${i+1}</button>`).join('')}<a class="chip" href="https://www.youtube.com/watch?v=${V.id}" target="_blank" rel="noopener">YouTube ↗</a></div>
+  <span class="src">${T('vNote')}</span></div>`;
+  const img=el.querySelector('img');if(img){img.onerror=()=>{if(!img.dataset.t){img.dataset.t=1;img.src='https://i.ytimg.com/vi/'+V.id+'/hqdefault.jpg';}else img.remove();};}
+  if(pl){const box=$('pl'+n),vid=document.createElement('video');vid.controls=true;vid.autoplay=true;vid.playsInline=true;
+    vid.onerror=()=>{const f=document.createElement('iframe');f.src='https://www.youtube-nocookie.com/embed/'+V.id+'?autoplay=1&rel=0&playsinline=1';
+      f.allow='autoplay; encrypted-media; picture-in-picture; fullscreen';f.allowFullscreen=true;f.title=V.t;box.replaceChildren(f);};
+    vid.src='media/'+V.file;box.replaceChildren(vid);}}
+document.addEventListener('click',e=>{const p=e.target.closest('[data-play]'),s=e.target.closest('[data-vsel]');
+  if(p){VPLAY[+p.dataset.play]=true;renderVideo(+p.dataset.play);}
+  else if(s){const [n,i]=s.dataset.vsel.split(':').map(Number);VSEL[n]=i;VPLAY[n]=false;renderVideo(n);}});
+function renderMedia(){let h=`<thead><tr><th>${T('mTab')}</th><th>${T('mFile')}</th><th>${T('mVideo')}</th><th>${T('mDur')}</th><th>${T('mType')}</th></tr></thead><tbody>`;
+  for(const n of [1,2,3,4])VIDEOS[n].forEach((V,i)=>{h+=`<tr><td>${n} · ${T('vNo')} ${i+1}</td><td><code>media/${V.file}</code></td><td><a href="https://www.youtube.com/watch?v=${V.id}" target="_blank" rel="noopener">${esc(V.t)}</a> · ${esc(V.c)}</td><td>${V.d}</td><td>${T('vt_'+V.type)}</td></tr>`;});
+  $('mediaTbl').innerHTML=h+'</tbody>';}
+
+/* ================= Tab, ngôn ngữ, chế độ GV ================= */
+let tab=1;
+function setTab(n){tab=n;document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.toggle('on',+b.dataset.tab===n));
+  for(let k=1;k<=4;k++)$('t'+k).hidden=k!==n;store.set('nl6-tab',String(n));}
+document.querySelectorAll('nav.tabs button').forEach(b=>b.onclick=()=>setTab(+b.dataset.tab));
+$('gvBtn').onclick=()=>{const on=!document.body.classList.contains('hideNums');document.body.classList.toggle('hideNums',on);$('gvBtn').setAttribute('aria-pressed',on);};
+function applyLang(){document.documentElement.lang=lang;document.title=lang==='vi'?'Chuyển hoá năng lượng':'Energy transfers';
+  document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=T(el.dataset.i18n));
+  document.querySelectorAll('[data-i18n-html]').forEach(el=>el.innerHTML=T(el.dataset.i18nHtml));
+  $('langBtn').textContent=lang==='vi'?'EN':'VI';
+  Object.keys(PRED).forEach(renderPred);Object.keys(CONC).forEach(renderConc);[1,2,3,4].forEach(renderVideo);renderMedia();
+  ui1(true);ui2(true);ui3(true);ui4();}
+$('langBtn').onclick=()=>{lang=lang==='vi'?'en':'vi';applyLang();};
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>readColors());
+
+/* ================= Vòng lặp ================= */
+reset1();build2();reset3();
+let last=performance.now(),dataT=0;
+function loop(now){const dt=Math.min(.1,(now-last)/1000);last=now;dataT+=dt;
+  if(tab===1){step1(dt);draw1();drawSankey1();if(dataT>.1)data1();}
+  else if(tab===2){step2(dt);draw2();drawGr2();if(dataT>.1)bars2();}
+  else if(tab===3){step3(dt);if(!S3.run)S3.P=powers3();draw3();drawGr3();if(dataT>.1)data3();}
+  else{draw4(dt);}
+  if(dataT>.1)dataT=0;requestAnimationFrame(loop);}
+applyLang();setTab(+(store.get('nl6-tab')||1)||1);requestAnimationFrame(loop);
+</script>
+</body>
+</html>

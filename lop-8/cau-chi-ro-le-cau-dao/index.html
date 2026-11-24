@@ -1,0 +1,1188 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Cầu chì, cầu dao, rơ le</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Cầu chì, cầu dao tự động, rơ le, chuông điện (KHTN 8). Dải video thực tế, sân khấu canvas bên trái, sổ ghi chép bên phải; điện thoại xếp một cột.
+   Cùng hệ màu, phông với bộ mô phỏng KHTN 6–9. */
+:root{
+  --bg:#edf0f3; --panel:#ffffff; --lane:#f4f6f9; --ink:#141c26; --muted:#556170; --line:#c9d1db;
+  --accent:#1d5fa8; --accent-ink:#ffffff; --ok:#1d8a4b; --warn:#c2410c;
+  --force:#d1323b; --vel:#1f6fd1; --live:#c62828; --neu:#1f5fbf; --copper:#c0702a; --copper2:#8a4a17;
+  --metal:#8b96a3; --metal2:#5b6673; --space:#0d1626; --star:#e9eef7; --ceramic:#ece6da; --ceramic2:#b9ae9b;
+  --gold:#c99a2e; --spark:#f2b705; --heat:#e4572e; --water:#4f9be0; --lampOn:#ffd34d; --smoke:#6b6b6b;
+  --font-ui:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-num:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Consolas,monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0e131a; --panel:#161e28; --lane:#111821; --ink:#e3e9f0; --muted:#97a3b2; --line:#2a3644;
+  --accent:#5ea6ec; --accent-ink:#04182c; --ok:#47c47d; --warn:#f08a4b;
+  --force:#ff5f67; --vel:#5aa2ff; --live:#ff5a5a; --neu:#5b9bff; --copper:#e08a3c; --copper2:#b06a2a;
+  --metal:#7c8794; --metal2:#a9b4c1; --space:#060a12; --star:#cfd8e6; --ceramic:#3a3630; --ceramic2:#6e6556;
+  --gold:#e0b24a; --spark:#ffd23f; --heat:#ff7a50; --water:#3f8fd8; --lampOn:#ffd84d; --smoke:#9a9a9a;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e131a; --panel:#161e28; --lane:#111821; --ink:#e3e9f0; --muted:#97a3b2; --line:#2a3644;
+  --accent:#5ea6ec; --accent-ink:#04182c; --ok:#47c47d; --warn:#f08a4b;
+  --force:#ff5f67; --vel:#5aa2ff; --live:#ff5a5a; --neu:#5b9bff; --copper:#e08a3c; --copper2:#b06a2a;
+  --metal:#7c8794; --metal2:#a9b4c1; --space:#060a12; --star:#cfd8e6; --ceramic:#3a3630; --ceramic2:#6e6556;
+  --gold:#e0b24a; --spark:#ffd23f; --heat:#ff7a50; --water:#3f8fd8; --lampOn:#ffd84d; --smoke:#9a9a9a;
+  color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-ui);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px 40px}
+.wrap{max-width:1320px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.hbtns{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.eyebrow{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{margin:0;font-size:clamp(25px,3.4vw,36px);line-height:1.15;font-weight:800;text-wrap:balance;letter-spacing:-.01em}
+h2{margin:0;font-size:17px;font-weight:700;text-wrap:balance}
+.btn{font:inherit;font-weight:600;font-size:15px;min-height:44px;padding:8px 14px;border-radius:8px;border:1px solid var(--line);
+  background:var(--panel);color:var(--ink);cursor:pointer;touch-action:manipulation}
+.btn:hover{border-color:var(--accent)}
+.btn:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible,a:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn.sm{min-height:40px;padding:4px 12px;font-size:14px}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
+.seg .btn{border:0;border-radius:0;min-width:52px}
+nav.tabs{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line)}
+nav.tabs button{font:inherit;font-size:15px;font-weight:600;white-space:nowrap;min-height:46px;padding:8px 14px;border:0;border-bottom:3px solid transparent;
+  background:none;color:var(--muted);cursor:pointer;margin-bottom:-1px}
+nav.tabs button.on{color:var(--ink);border-bottom-color:var(--accent)}
+.req{margin:0;font-size:14px;color:var(--muted);max-width:110ch}
+.req b{color:var(--ink);font-weight:600}
+.lab{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:14px;align-items:start}
+@media (max-width:1020px){.lab{grid-template-columns:minmax(0,1fr)}}
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.col{display:flex;flex-direction:column;gap:12px;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card p{margin:0}
+canvas{display:block;width:100%;border-radius:8px;background:var(--lane);touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.hint{margin:0;font-size:14px;color:var(--muted)}
+.status{margin:0;font-weight:600;min-height:1.5em}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chk{display:inline-flex;align-items:center;gap:8px;min-height:44px;font-size:15px;cursor:pointer}
+.chk input{width:22px;height:22px;accent-color:var(--accent)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:14px;color:var(--muted)}
+.legend i{display:inline-block;width:18px;height:5px;border-radius:3px;margin-right:6px;vertical-align:middle}
+.sl{display:flex;flex-direction:column;gap:4px}
+.sl .top{display:flex;justify-content:space-between;gap:8px;font-size:15px}
+.sl .val{font-family:var(--font-num);font-weight:600;text-align:right}
+input[type=range]{width:100%;height:44px;accent-color:var(--accent);margin:0}
+.kv{display:grid;grid-template-columns:minmax(0,1fr) max-content;gap:4px 12px;font-size:15px;margin:0}
+.kv dt{color:var(--muted)} .kv dd{margin:0;font-family:var(--font-num);font-variant-numeric:tabular-nums;text-align:right;overflow-wrap:anywhere}
+.kv dd{white-space:nowrap}.kv dd.t{font-family:var(--font-ui);font-weight:600;white-space:normal;grid-column:1/-1;text-align:left;margin:-2px 0 4px 12px}
+.opts{display:flex;flex-direction:column;gap:6px}
+.opts .btn{text-align:left;font-size:14px}
+.opts .btn.picked{border:2px solid var(--accent)}
+.opts .btn.right{background:color-mix(in srgb,var(--ok) 18%,var(--panel));border-color:var(--ok)}
+.ans{background:var(--lane);border-left:4px solid var(--ok);padding:8px 12px;border-radius:6px;font-size:15px}
+.muted{color:var(--muted);font-size:14px}
+details{border:1px solid var(--line);border-radius:var(--r);background:var(--panel);padding:0 14px}
+details[open]{padding-bottom:12px}
+summary{cursor:pointer;font-weight:700;min-height:44px;display:flex;align-items:center;font-size:15px}
+details p,details ul,details ol{margin:6px 0;font-size:15px;max-width:95ch}
+details ul,details ol{padding-left:22px}
+details li{margin:3px 0}
+.fine{font-size:13px;color:var(--muted);margin:0}
+.tblwrap{overflow-x:auto}
+table.log{border-collapse:collapse;width:100%;font-size:14px}
+table.log th,table.log td{padding:6px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+table.log th{color:var(--muted);font-weight:600}
+table.log tr.sel td{background:color-mix(in srgb,var(--accent) 12%,var(--panel))}
+table.log td.case{cursor:pointer;font-weight:600}
+.yn{display:flex;gap:4px}
+.yn .btn{min-height:40px;padding:4px 10px;font-size:14px;min-width:54px}
+.yn .btn.picked{border:2px solid var(--accent);background:color-mix(in srgb,var(--accent) 14%,var(--panel))}
+.res-ok{color:var(--ok);font-weight:700}.res-no{color:var(--warn);font-weight:700}
+.big{font-family:var(--font-num);font-size:clamp(26px,4vw,40px);font-weight:600;line-height:1.1}
+.zones{display:flex;flex-direction:column;gap:4px}
+.zone{display:grid;grid-template-columns:110px 1fr;gap:10px;padding:6px 10px;border-radius:8px;border:1px solid var(--line);font-size:14px}
+.zone b{font-family:var(--font-num)}
+.zone.on{border:2px solid var(--warn);background:color-mix(in srgb,var(--warn) 14%,var(--panel))}
+.warnbox{border-left:4px solid var(--warn);background:var(--lane);padding:8px 12px;border-radius:6px;font-size:15px;margin:0}
+/* Dải video thực tế: thumbnail bấm là phát ngay trong trang */
+.vbox{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:14px;align-items:start;background:var(--space);color:var(--star);border-radius:var(--r);padding:12px}
+.vbox.playing{grid-template-columns:minmax(0,1fr)}
+@media (max-width:720px){.vbox{grid-template-columns:minmax(0,1fr)}}
+.vmedia{position:relative;width:100%;aspect-ratio:16/9;border-radius:8px;overflow:hidden;background:linear-gradient(135deg,#1e2c44,#0b111c)}
+.vbox.playing .vmedia{max-width:860px}
+.thumb{all:unset;cursor:pointer;position:absolute;inset:0;display:block}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb .ph{position:absolute;left:10px;bottom:8px;font-size:13px;opacity:.75}
+.thumb .pbtn{position:absolute;left:50%;top:50%;width:64px;height:64px;margin:-32px 0 0 -32px;border-radius:50%;background:var(--force);box-shadow:0 2px 12px rgba(0,0,0,.4)}
+.thumb .pbtn::before{content:"";position:absolute;left:25px;top:20px;border-style:solid;border-width:12px 0 12px 20px;border-color:transparent transparent transparent #fff}
+.thumb .dur{position:absolute;right:8px;bottom:8px;background:rgba(0,0,0,.75);color:#fff;font:600 13px var(--font-num);padding:2px 6px;border-radius:4px}
+.thumb:focus-visible{outline:3px solid var(--star);outline-offset:-3px}
+.player{position:absolute;inset:0}
+.player video,.player iframe{width:100%;height:100%;border:0;display:block;background:#000}
+.vt{display:flex;flex-direction:column;gap:4px;min-width:0}
+.vt .lbl{font-size:12px;letter-spacing:.06em;text-transform:uppercase;opacity:.75;font-weight:600}
+.vt .ttl{font-weight:700;font-size:16px;line-height:1.3}
+.vt .look{font-size:14px;opacity:.92}
+.vt .src{font-size:12.5px;opacity:.7}
+.vchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.chip{font:inherit;font-size:14px;font-weight:600;min-height:40px;padding:6px 12px;border-radius:8px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;
+  background:transparent;color:var(--star);border:1px solid color-mix(in srgb,var(--star) 45%,transparent)}
+.chip.on{background:var(--star);color:var(--space)}
+/* Chế độ giáo viên: che số liệu để lớp dự đoán */
+body.hideNums .num{filter:blur(7px);user-select:none}
+body.hideNums .num:hover{filter:none}
+/* Riêng mô phỏng này */
+.apps{display:flex;flex-wrap:wrap;gap:6px}
+.apps .btn{font-size:14px;min-height:44px;padding:4px 10px;display:inline-flex;flex-direction:column;align-items:flex-start;line-height:1.2}
+.apps .btn small{font-family:var(--font-num);font-weight:500;font-size:12px;opacity:.8}
+.apps .btn[aria-pressed="true"]{background:color-mix(in srgb,var(--lampOn) 40%,var(--panel));color:var(--ink);border-color:var(--gold)}
+.btn.danger{border-color:var(--live);color:var(--live)}
+.btn.danger[aria-pressed="true"]{background:var(--live);color:#fff}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.status.bad{color:var(--warn)} .status.good{color:var(--ok)}
+.meter{height:12px;border-radius:6px;background:var(--lane);border:1px solid var(--line);overflow:hidden}
+.meter i{display:block;height:100%;background:var(--heat);width:0}
+.scgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+@media (max-width:420px){.scgrid{grid-template-columns:minmax(0,1fr)}}
+.sc .opts{flex-direction:row;flex-wrap:wrap}
+.sc .opts .btn{flex:1 1 auto}
+.sc .opts .btn.wrong{background:color-mix(in srgb,var(--warn) 16%,var(--panel));border-color:var(--warn)}
+table.cmp{border-collapse:collapse;width:100%;font-size:14px;min-width:620px}
+table.cmp th,table.cmp td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+table.cmp th{background:var(--lane)}
+.holdbtn{user-select:none;-webkit-user-select:none;touch-action:none}
+.holdbtn.down{background:var(--live);color:#fff;border-color:var(--live)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow" data-i18n="eyebrow"></div>
+      <h1 data-i18n="title"></h1>
+    </div>
+    <div class="hbtns">
+      <button class="btn" id="gvBtn" aria-pressed="false" data-i18n="gvBtn"></button>
+      <button class="btn" id="langBtn">EN</button>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="1" data-i18n="tab1"></button>
+    <button role="tab" data-tab="2" data-i18n="tab2"></button>
+    <button role="tab" data-tab="3" data-i18n="tab3"></button>
+    <button role="tab" data-tab="4" data-i18n="tab4"></button>
+    <button role="tab" data-tab="5" data-i18n="tab5"></button>
+  </nav>
+
+  <!-- ===================== TAB 1: CẦU CHÌ ===================== -->
+  <section id="t1" class="col">
+    <p class="req" data-i18n-html="req1"></p>
+    <div class="vbox" id="v1"></div>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" data-i18n="hint1"></p>
+        <p class="status" id="st1"></p>
+        <canvas id="cv1" aria-label="household circuit with a fuse, cable and appliances"></canvas>
+        <div class="apps" id="apps1"></div>
+        <div class="controls">
+          <span class="muted" data-i18n="fuseRating"></span><div class="seg" id="fz1"></div>
+        </div>
+        <div class="controls">
+          <button class="btn danger" id="sh1" aria-pressed="false"></button>
+          <button class="btn primary" id="rp1" data-i18n="replace"></button>
+          <button class="btn" id="rst1" data-i18n="reset"></button>
+          <span class="muted" data-i18n="speed"></span><div class="seg" id="sp1"></div>
+        </div>
+        <canvas id="gr1" aria-label="graph of current and temperatures against time"></canvas>
+        <div class="legend">
+          <span><i style="background:var(--vel)"></i><span data-i18n="lgI"></span></span>
+          <span><i style="background:var(--heat)"></i><span data-i18n="lgTf"></span></span>
+          <span><i style="background:var(--copper2)"></i><span data-i18n="lgTc"></span></span>
+        </div>
+        <p class="fine" data-i18n="assume1"></p>
+      </div>
+      <div class="col">
+        <div class="card" id="p1"></div>
+        <div class="card"><h2 data-i18n="data"></h2><dl class="kv" id="kv1"></dl></div>
+        <div class="card"><h2 data-i18n="log1T"></h2><p class="muted" data-i18n="log1H"></p><div class="tblwrap"><table class="log" id="log1"></table></div></div>
+        <div class="card" id="p1b"></div>
+        <div class="card" id="c1"></div>
+      </div>
+    </div>
+    <details><summary data-i18n="whyT"></summary><div data-i18n-html="why1"></div></details>
+    <details><summary data-i18n="misT"></summary><div data-i18n-html="mis1"></div></details>
+  </section>
+
+  <!-- ===================== TAB 2: CẦU DAO TỰ ĐỘNG ===================== -->
+  <section id="t2" class="col" hidden>
+    <p class="req" data-i18n-html="req2"></p>
+    <div class="vbox" id="v2"></div>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" data-i18n="hint2"></p>
+        <p class="status" id="st2"></p>
+        <canvas id="cv2" aria-label="cutaway of a miniature circuit breaker with bimetal strip and coil"></canvas>
+        <div class="apps" id="apps2"></div>
+        <div class="controls">
+          <span class="muted" data-i18n="cbRating"></span><div class="seg" id="cb2"></div>
+        </div>
+        <div class="controls">
+          <button class="btn danger" id="sh2" aria-pressed="false"></button>
+          <button class="btn danger" id="tc2" aria-pressed="false"></button>
+          <label class="chk"><input type="checkbox" id="rcd2"><span data-i18n="rcd"></span></label>
+        </div>
+        <div class="controls">
+          <button class="btn primary" id="rs2"></button>
+          <button class="btn" id="rst2" data-i18n="reset"></button>
+          <span class="muted" data-i18n="speed"></span><div class="seg" id="sp2"></div>
+        </div>
+        <canvas id="gr2" aria-label="time-current trip curve of the breaker"></canvas>
+        <div class="legend">
+          <span><i style="background:var(--accent)"></i><span data-i18n="lgCB"></span></span>
+          <span><i style="background:var(--heat)"></i><span data-i18n="lgFuse"></span></span>
+          <span><i style="background:var(--force)"></i><span data-i18n="lgNow"></span></span>
+        </div>
+        <p class="fine" data-i18n="assume2"></p>
+      </div>
+      <div class="col">
+        <div class="card" id="p2"></div>
+        <div class="card"><h2 data-i18n="data"></h2><dl class="kv" id="kv2"></dl>
+          <div class="muted" data-i18n="bimHeat"></div><div class="meter"><i id="bm2"></i></div></div>
+        <div class="card" id="p2b"></div>
+        <div class="card" id="c2"></div>
+      </div>
+    </div>
+    <details><summary data-i18n="whyT"></summary><div data-i18n-html="why2"></div></details>
+    <details><summary data-i18n="misT"></summary><div data-i18n-html="mis2"></div></details>
+  </section>
+
+  <!-- ===================== TAB 3: RƠ LE ===================== -->
+  <section id="t3" class="col" hidden>
+    <p class="req" data-i18n-html="req3"></p>
+    <div class="vbox" id="v3"></div>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" id="hint3"></p>
+        <p class="status" id="st3"></p>
+        <div class="controls"><div class="seg" id="md3"></div></div>
+        <canvas id="cv3" aria-label="electromagnetic relay with control circuit and 220 V load circuit"></canvas>
+        <div class="controls">
+          <button class="btn primary" id="k3"></button>
+          <span class="muted" data-i18n="contactT"></span><div class="seg" id="ct3"></div>
+          <span class="muted" id="ldL3" data-i18n="loadT"></span><div class="seg" id="ld3"></div>
+        </div>
+        <div class="sl"><div class="top"><span data-i18n="setUc"></span><span class="val" id="u3V"></span></div>
+          <input type="range" id="u3" min="0" max="6" step="0.05" value="5"></div>
+        <canvas id="gr3" aria-label="relay state against control voltage, showing pull-in and drop-out"></canvas>
+        <div class="legend">
+          <span><i style="background:var(--muted)"></i><span data-i18n="lgLoop"></span></span>
+          <span><i style="background:var(--accent)"></i><span data-i18n="lgPath"></span></span>
+        </div>
+        <p class="fine" data-i18n="assume3"></p>
+      </div>
+      <div class="col">
+        <div class="card" id="p3"></div>
+        <div class="card"><h2 data-i18n="data"></h2><dl class="kv" id="kv3"></dl></div>
+        <div class="card" id="p3b"></div>
+        <div class="card" id="c3"></div>
+      </div>
+    </div>
+    <details><summary data-i18n="whyT"></summary><div data-i18n-html="why3"></div></details>
+    <details><summary data-i18n="misT"></summary><div data-i18n-html="mis3"></div></details>
+  </section>
+
+  <!-- ===================== TAB 4: CHUÔNG ĐIỆN ===================== -->
+  <section id="t4" class="col" hidden>
+    <p class="req" data-i18n-html="req4"></p>
+    <div class="vbox" id="v4"></div>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" data-i18n="hint4"></p>
+        <p class="status" id="st4"></p>
+        <canvas id="cv4" aria-label="electric bell: battery, push button, electromagnet, armature, hammer, gong, contact screw"></canvas>
+        <div class="controls">
+          <button class="btn primary holdbtn" id="pb4" data-i18n="press"></button>
+          <label class="chk"><input type="checkbox" id="hold4"><span data-i18n="hold"></span></label>
+          <label class="chk"><input type="checkbox" id="by4"><span data-i18n="bypass"></span></label>
+          <label class="chk"><input type="checkbox" id="snd4" checked><span data-i18n="sound"></span></label>
+        </div>
+        <div class="controls"><span class="muted" data-i18n="speed"></span><div class="seg" id="sp4"></div></div>
+        <div class="sl"><div class="top"><span data-i18n="setUb"></span><span class="val" id="u4V"></span></div>
+          <input type="range" id="u4" min="1.5" max="12" step="0.5" value="6"></div>
+        <canvas id="gr4" aria-label="graph of coil current and armature position against time"></canvas>
+        <div class="legend">
+          <span><i style="background:var(--vel)"></i><span data-i18n="lgIc"></span></span>
+          <span><i style="background:var(--copper2)"></i><span data-i18n="lgX"></span></span>
+          <span><i style="background:var(--spark)"></i><span data-i18n="lgHit"></span></span>
+        </div>
+        <p class="fine" data-i18n="assume4"></p>
+      </div>
+      <div class="col">
+        <div class="card" id="p4"></div>
+        <div class="card"><h2 data-i18n="data"></h2><dl class="kv" id="kv4"></dl></div>
+        <div class="card" id="p4b"></div>
+        <div class="card" id="c4"></div>
+      </div>
+    </div>
+    <details><summary data-i18n="whyT"></summary><div data-i18n-html="why4"></div></details>
+    <details><summary data-i18n="misT"></summary><div data-i18n-html="mis4"></div></details>
+  </section>
+
+  <!-- ===================== TAB 5: TÌNH HUỐNG ===================== -->
+  <section id="t5" class="col" hidden>
+    <p class="req" data-i18n-html="req5"></p>
+    <div class="vbox" id="v5"></div>
+    <div class="card"><h2 data-i18n="sc5T"></h2><p class="muted" data-i18n="sc5H"></p><p class="status" id="score5"></p></div>
+    <div class="scgrid" id="sc5"></div>
+    <div class="card"><h2 data-i18n="cmpT"></h2><div class="tblwrap" data-i18n-html="cmp"></div></div>
+    <div class="card" id="c5"></div>
+  </section>
+
+  <details><summary data-i18n="originT"></summary><div data-i18n-html="origin"></div></details>
+  <details><summary data-i18n="mediaT"></summary><p data-i18n-html="mediaIntro"></p><div class="tblwrap"><table class="log" id="mediaTbl"></table></div></details>
+  <footer data-i18n="footer"></footer>
+</div>
+<script>
+const I18N={vi:{
+eyebrow:'KHTN 8 · Năng lượng điện · Ứng dụng vật lí',
+title:'Cầu chì, cầu dao tự động, rơ le và chuông điện',
+gvBtn:'Ẩn số liệu (GV)',
+tab1:'1. Cầu chì',tab2:'2. Cầu dao tự động',tab3:'3. Rơ le',tab4:'4. Chuông điện',tab5:'5. Tình huống',
+req1:'<b>Yêu cầu cần đạt (KHTN 8):</b> Mô tả được sơ lược công dụng của cầu chì, rơ le, cầu dao tự động, chuông điện. <b>Tab này:</b> cầu chì ngắt mạch khi quá tải và khi ngắn mạch.',
+req2:'<b>Yêu cầu cần đạt:</b> Mô tả được sơ lược công dụng của cầu dao tự động. <b>Tab này:</b> nhìn vào bên trong cầu dao tự động (CB, aptomat): phiến lưỡng kim cắt khi quá tải, nam châm điện cắt khi ngắn mạch; vì sao CB không chống giật.',
+req3:'<b>Yêu cầu cần đạt:</b> Mô tả được sơ lược công dụng của rơ le. <b>Tab này:</b> dòng điện nhỏ ở mạch điều khiển đóng, ngắt dòng điện lớn ở mạch 220 V.',
+req4:'<b>Yêu cầu cần đạt:</b> Mô tả được sơ lược công dụng của chuông điện. <b>Tab này:</b> vì sao chỉ cần giữ nút mà búa gõ liên tục.',
+req5:'<b>Vận dụng:</b> chọn đúng thiết bị cho từng tình huống trong nhà và trong đời sống.',
+data:'Số liệu',whyT:'Cơ chế: vì sao như vậy?',misT:'Học sinh hay hiểu sai',
+predTitle:'Dự đoán trước',predThen:'Giờ hãy làm thử trên mô phỏng rồi xem đáp án.',showAns:'Xem đáp án',hideAns:'Ẩn đáp án',conclTitle:'Rút ra kết luận',
+reset:'Đặt lại',speed:'Tốc độ:',
+/* tab 1 */
+hint1:'Bấm vào thiết bị (trên hình hoặc các nút) để bật, tắt. Theo dõi dòng điện và nhiệt độ của dây chì.',
+fuseRating:'Cầu chì:',fuseCu:'Dây đồng to (thay bậy)',
+shortOn:'Gây chập mạch (ngắn mạch)',shortOff:'Sửa chỗ chập',replace:'Thay dây chì mới',
+a_led:'Đèn LED',a_fan:'Quạt',a_tv:'Ti vi',a_rice:'Nồi cơm',a_iron:'Bàn là',a_kettle:'Ấm siêu tốc',a_heater:'Bình nóng lạnh',
+src:'Nguồn 220 V',live:'Dây pha',neu:'Dây trung tính',fuse:'Cầu chì',cable:'Dây dẫn 1,5 mm²',noPower:'mất điện',
+lgI:'Cường độ dòng điện I (A)',lgTf:'Nhiệt độ dây chì (°C)',lgTc:'Nhiệt độ dây dẫn (°C)',
+kI:'Cường độ dòng điện I',kP:'Tổng công suất đang bật',kIn:'Dòng định mức của cầu chì',kRatio:'I so với định mức',kTf:'Nhiệt độ dây chì',kTm:'Nhiệt độ nóng chảy',kTc:'Nhiệt độ dây dẫn',kState:'Trạng thái',
+s1ok:'Mạch bình thường. Dây chì ấm nhưng còn xa nhiệt độ nóng chảy.',s1over:'Quá tải: dòng điện lớn hơn định mức, dây chì đang nóng dần…',s1short:'NGẮN MẠCH: dòng điện rất lớn!',
+s1blown:'Dây chì đã đứt: mạch hở, mọi thiết bị mất điện. Tìm nguyên nhân rồi mới thay dây chì mới.',s1blownShort:'Dây chì đứt rất nhanh vì ngắn mạch. Sửa chỗ chập trước khi thay dây chì.',
+s1hot:'Dây dẫn trong tường đang quá nóng (trên 70 °C)!',s1melt:'Vỏ nhựa dây dẫn bắt đầu mềm, chảy (trên 100 °C)!',s1fire:'Dây dẫn bốc khói, có thể cháy nhà (trên 150 °C)! Dây đồng to không chịu đứt nên không bảo vệ được.',
+log1T:'Nhật kí lần đứt',log1H:'Mỗi lần dây chì đứt được ghi lại: dòng điện và thời gian từ lúc dòng điện đổi đến lúc đứt.',
+lgN:'Lần',lgCur:'I (A)',lgRat:'I / Iđm',lgTime:'Thời gian đến khi đứt',lgCause:'Lý do',cOver:'quá tải',cShort:'ngắn mạch',noLog:'Chưa có lần đứt nào.',
+assume1:'Giả thiết mô phỏng: thiết bị coi như điện trở thuần, I = P/U với U = 220 V. Dây chì nóng lên theo tác dụng nhiệt của dòng điện và toả nhiệt ra ngoài; đứt khi đạt khoảng 230 °C (hợp kim chì – thiếc). Dây chì đứt chắc chắn khi I vượt khoảng 1,6 lần định mức. Ngắn mạch: điện trở cả mạch chỉ khoảng 0,4 Ω nên I ≈ 550 A. Dây dẫn trong mô phỏng nóng nhanh hơn thực tế để kịp quan sát.',
+p1q:'Cầu chì 10 A. Em bật thêm dần các thiết bị. Khi nào dây chì đứt?',p1a:'Ngay khi bật thêm bất kì thiết bị nào.',p1b:'Khi tổng dòng điện vượt khá nhiều so với 10 A; vượt càng nhiều thì đứt càng nhanh.',p1c:'Không bao giờ, dây chì chỉ đứt khi bị chập điện.',
+p1e:'Dây chì nóng lên do tác dụng nhiệt của dòng điện. Ở dòng định mức nó chỉ ấm. Khi dòng vượt khoảng 1,6 lần định mức, nó đạt nhiệt độ nóng chảy và đứt: quá tải nhẹ thì sau vài giây đến vài phút, ngắn mạch thì chỉ vài phần nghìn giây. Xem bảng nhật kí.',
+p1bq:'Có người thay dây chì bằng một đoạn dây đồng to cho “khỏi đứt”. Khi quá tải hoặc chập mạch, điều gì xảy ra?',p1ba:'An toàn hơn, vì điện không bị ngắt.',p1bb:'Dây đồng không đứt, nên dây dẫn trong tường nóng lên, vỏ nhựa chảy, có thể cháy nhà.',p1bc:'Thiết bị chạy khoẻ hơn.',
+p1be:'Đồng nóng chảy ở 1085 °C và dây to nên rất khó đứt. Cầu chì mất tác dụng bảo vệ; phần yếu nhất của mạch giờ là dây dẫn trong tường. Chọn “Dây đồng to”, bật hết thiết bị, đặt tốc độ ×10 hoặc gây chập mạch để thấy.',
+c1q:'Cầu chì bảo vệ mạch điện bằng cách nào? Vì sao dây chì phải dễ nóng chảy hơn dây dẫn?',
+c1a:'Cầu chì mắc nối tiếp trên dây pha. Khi dòng điện vượt quá mức cho phép (quá tải hoặc ngắn mạch), dây chì nóng chảy và đứt trước, làm mạch hở, dòng điện bị ngắt, nên dây dẫn và thiết bị không bị hỏng, không gây cháy. Dây chì phải nóng chảy ở nhiệt độ thấp hơn dây dẫn để nó luôn đứt trước. Cầu chì đứt rồi phải thay dây mới, đúng loại.',
+why1:'<p><b>Nguyên lí:</b> tác dụng nhiệt của dòng điện. Dòng điện càng lớn thì dây dẫn nóng càng nhanh (lớp 9 sẽ học: nhiệt lượng toả ra Q = I²·R·t, tăng theo bình phương cường độ dòng điện).</p><ul><li>Dây chì làm bằng hợp kim chì – thiếc, nóng chảy ở khoảng 200 – 300 °C, thấp hơn nhiều so với đồng (1085 °C). Dây chì lại mảnh, nên nó là chỗ nóng nhất của mạch.</li><li>Cầu chì mắc <b>nối tiếp</b> trên <b>dây pha</b>. Dây chì đứt thì cả mạch hở.</li><li><b>Quá tải</b>: bật quá nhiều thiết bị, dòng điện lớn hơn định mức một ít. Dây chì nóng dần và đứt sau vài giây đến vài phút.</li><li><b>Ngắn mạch</b> (chập mạch): dây pha chạm dây trung tính, dòng điện không qua thiết bị nên rất lớn, hàng trăm ampe. Dây chì đứt gần như ngay lập tức.</li><li>Cầu chì 10 A không đứt ở 10 A. Theo tiêu chuẩn, nó phải đứt khi dòng điện khoảng 1,6 lần định mức kéo dài.</li></ul><p><b>Nói với học sinh:</b> cầu chì là “mắt xích yếu nhất” được cố ý đặt vào mạch. Có sự cố thì nó hi sinh trước để bảo vệ dây dẫn và đồ dùng.</p>',
+mis1:'<ul><li><b>“Cầu chì đứt là cầu chì bị hỏng.”</b> Không. Nó vừa làm đúng việc. Phải tìm nguyên nhân (quá tải hay chập) trước khi thay.</li><li><b>“Thay dây đồng to cho bền.”</b> Rất nguy hiểm: mạch mất bảo vệ, dây dẫn trong tường cháy trước (thử ở mô phỏng).</li><li><b>“Cầu chì chống điện giật.”</b> Không. Dòng qua người chỉ khoảng 0,1 – 0,2 A, quá nhỏ để làm đứt cầu chì 10 A, nhưng đủ gây chết người. Xem tab 2.</li><li><b>“Lắp cầu chì ở dây nào cũng được.”</b> Phải lắp ở dây pha. Nếu lắp ở dây trung tính, khi cầu chì đứt thiết bị vẫn còn nối với dây pha, chạm vào vẫn bị giật.</li></ul>',
+/* tab 2 */
+hint2:'Bật thiết bị, gây chập mạch hoặc cho người chạm vào dây pha. Quan sát bộ phận nào trong cầu dao tự động hoạt động.',
+cbRating:'Cầu dao tự động (CB):',
+shortOn2:'Gây chập mạch',shortOff2:'Sửa chỗ chập',touchOn:'Người chạm vào dây pha',touchOff:'Kéo người ra',rcd:'Có thêm CB chống giật (RCD 30 mA)',
+cbOn:'Gạt CB xuống (tắt)',cbOff:'Gạt CB lên (bật lại)',
+lgCB:'Đường đặc tính ngắt của CB',lgFuse:'Cầu chì cùng định mức (so sánh)',lgNow:'Dòng điện lúc này',
+bimHeat:'Phiến lưỡng kim đã nóng tới ngưỡng ngắt:',
+kIcb:'Dòng điện qua CB',kInCb:'Dòng định mức',kTb:'Nhiệt độ phiến lưỡng kim',kTrip:'Dự kiến CB ngắt sau',kNever:'không ngắt',kInst:'ngay (dưới 0,01 s)',kIb:'Dòng điện qua người',kLeak:'Dòng rò (chênh lệch dòng đi – dòng về)',kShock:'Thời gian bị điện giật',
+s2ok:'CB đóng. Mạch bình thường.',s2over:'Quá tải: phiến lưỡng kim nóng dần và cong lại…',s2thermal:'CB đã ngắt nhờ phiến lưỡng kim (quá tải). Tắt bớt thiết bị rồi gạt lên.',
+s2mag:'CB ngắt ngay nhờ nam châm điện (ngắn mạch). Sửa chỗ chập rồi gạt lên.',s2rcd:'RCD ngắt trong vài chục mili giây vì có dòng rò qua người. Người được cứu!',
+s2shock:'NGUY HIỂM: dòng điện khoảng {i} mA đang qua người, nhưng CB không ngắt vì dòng này nhỏ hơn nhiều so với {n} A.',s2off:'CB đang tắt.',
+s2hot:'Phiến lưỡng kim còn nóng, chốt chưa móc lại được. Chờ nguội rồi gạt lên.',
+p_handle:'Cần gạt',p_contact:'Tiếp điểm',p_arc:'Buồng dập hồ quang',p_coil:'Cuộn dây (nam châm điện)',p_coil2:'cắt khi ngắn mạch',p_bim:'Phiến lưỡng kim',p_bim2:'cắt khi quá tải',p_latch:'Chốt ngắt',p_in:'Vào (từ nguồn)',p_out:'Ra (tới thiết bị)',on:'BẬT',off:'TẮT',person:'Người chạm dây',
+assume2:'Giả thiết mô phỏng: CB loại C. Phiến lưỡng kim ngắt khi dòng vượt khoảng 1,3 lần định mức kéo dài; thời gian ngắt khi quá tải được rút ngắn (thực tế có thể tới vài phút, vài chục phút). Nam châm điện ngắt khi dòng từ khoảng 7 lần định mức trở lên. Điện trở người khoảng 1500 Ω (da khô hơn thì lớn hơn). RCD ngắt khi dòng rò từ 30 mA.',
+p2q:'CB 16 A. Em bật cùng lúc ấm siêu tốc, bình nóng lạnh và nồi cơm (khoảng 23 A). CB có ngắt không, nhờ bộ phận nào, nhanh hay chậm?',p2a:'Ngắt ngay lập tức nhờ nam châm điện.',p2b:'Ngắt sau một lúc nhờ phiến lưỡng kim nóng lên và cong.',p2c:'Không ngắt.',
+p2e:'23 A ≈ 1,4 lần định mức: chưa đủ lớn để nam châm điện hút (cần khoảng 7 lần), nhưng làm phiến lưỡng kim nóng dần, cong và đẩy chốt ngắt sau một lúc. Thử lại với nút “Gây chập mạch”: lần này nam châm điện cắt ngay.',
+p2bq:'Một người chạm tay vào dây pha bị hở vỏ. CB 16 A có ngắt điện không?',p2ba:'Có, ngắt ngay lập tức.',p2bb:'Không, vì dòng qua người chỉ khoảng 0,15 A, nhỏ hơn rất nhiều so với 16 A.',p2bc:'Có, nhưng chậm hơn khi quá tải.',
+p2be:'CB chỉ “cảm nhận” được dòng điện lớn. Khoảng 0,15 A qua người không làm phiến lưỡng kim nóng, cũng không làm nam châm điện hút, nhưng dòng trên 50 mA qua tim đã có thể gây chết người. Muốn chống giật phải dùng thêm CB chống giật (RCD, ELCB), ngắt khi dòng rò từ 30 mA. Bật ô “Có thêm CB chống giật” rồi thử lại.',
+c2q:'Cầu dao tự động có hai bộ phận ngắt. Mỗi bộ phận phát hiện sự cố nào? So với cầu chì, CB có lợi gì?',
+c2a:'Phiến lưỡng kim (dựa vào tác dụng nhiệt và sự nở vì nhiệt khác nhau của hai kim loại) cong lại khi dòng hơi lớn kéo dài, cắt khi quá tải. Nam châm điện (dựa vào tác dụng từ) hút mạnh ngay khi dòng tăng vọt, cắt khi ngắn mạch. Ngắt xong chỉ cần sửa nguyên nhân rồi gạt lên dùng lại, không phải thay dây chì. CB thường không chống điện giật; cần thêm RCD.',
+why2:'<p><b>Nguyên lí:</b> cầu dao tự động (CB, aptomat) có hai bộ phận ngắt mắc nối tiếp trên đường dòng điện, cùng tác động vào một <b>chốt ngắt</b>. Khi chốt bị đẩy, lò xo bật tiếp điểm ra và cần gạt sập xuống.</p><ul><li><b>Phiến lưỡng kim</b> (tác dụng nhiệt): hai lá kim loại nở vì nhiệt khác nhau được ghép chặt (xem bài Sự nở vì nhiệt). Dòng điện làm phiến nóng lên, lá nở nhiều hơn làm phiến cong về phía lá nở ít. Phải nóng một lúc mới cong đủ, nên bộ phận này cắt <b>chậm</b>, hợp với <b>quá tải</b>. Còn nóng thì chưa gạt lên lại được.</li><li><b>Cuộn dây – nam châm điện</b> (tác dụng từ): dòng tăng vọt khi <b>ngắn mạch</b> làm lực từ hút lõi sắt đập vào chốt ngắt trong khoảng 0,01 s.</li><li><b>Buồng dập hồ quang</b>: khi tiếp điểm tách ra dưới dòng lớn sẽ có tia lửa (hồ quang). Các lá thép chia nhỏ và làm nguội hồ quang để nó tắt nhanh.</li><li><b>RCD (CB chống giật)</b> so sánh dòng đi trên dây pha và dòng về trên dây trung tính. Nếu có một phần dòng điện rò qua người xuống đất (từ 30 mA), hai dòng lệch nhau và RCD ngắt trong vài chục mili giây.</li></ul><p><b>Nói với học sinh:</b> CB là “cầu chì thông minh, dùng lại được”: nóng quá thì lá kim loại cong lại bật công tắc; dòng tăng vọt thì nam châm giật công tắc. Nó bảo vệ dây điện và đồ dùng, chưa chắc bảo vệ người.</p>',
+mis2:'<ul><li><b>“Aptomat là chống giật.”</b> CB thường (MCB) không chống giật. Dòng qua người quá nhỏ so với định mức. Chống giật cần RCD hoặc RCBO.</li><li><b>“CB nhảy thì cứ gạt lên.”</b> Phải tắt bớt thiết bị hoặc tìm chỗ chập trước. Gạt lên khi đang chập thì CB lại nhảy ngay.</li><li><b>“CB hay nhảy thì thay CB to hơn.”</b> Nguy hiểm. CB được chọn theo dây dẫn chịu được bao nhiêu ampe; thay CB to hơn thì dây dẫn có thể quá nóng mà CB không ngắt.</li></ul>',
+/* tab 3 */
+hint3m:'Bấm công tắc K (trên hình hoặc nút) và kéo thanh trượt hiệu điện thế của pin. Xem dòng điện nhỏ ở mạch điều khiển bật, tắt mạch 220 V.',
+hint3a:'Ứng dụng: phao trong bể đóng mạch điều khiển khi nước cạn, rơ le bật máy bơm 220 V; nước đầy thì phao ngắt.',
+mdMan:'Thí nghiệm: công tắc K',mdApp:'Ứng dụng: bơm nước tự động',
+kOn:'Đóng công tắc K',kOff:'Mở công tắc K',contactT:'Nối tải vào:',loadT:'Tải:',ldLamp:'Đèn 100 W',ldPump:'Máy bơm 750 W',
+setUc:'Hiệu điện thế pin ở mạch điều khiển',
+ctrl:'Mạch điều khiển',load:'Mạch tải 220 V',iso:'hai mạch tách biệt về điện',coil:'Cuộn dây',core:'Lõi sắt',arm:'Thanh sắt (phần ứng)',spring:'Lò xo',com:'COM',no:'NO',nc:'NC',tank:'Bể nước',float:'Phao',pump:'Máy bơm',lamp:'Đèn',
+Fm:'Lực từ',Fs:'Lực lò xo',
+lgLoop:'Ngưỡng hút, ngưỡng nhả của rơ le',lgPath:'Các trạng thái em đã thử',grU:'U pin (V)',grOpen:'Nhả',grClose:'Hút',
+kUc:'U ở mạch điều khiển',kIc:'Dòng qua cuộn dây',kPc:'Công suất mạch điều khiển',kRel:'Rơ le',kIl:'Dòng điện mạch tải',kPl:'Công suất mạch tải',kRat:'Dòng tải gấp dòng điều khiển',kLvl:'Mực nước trong bể',
+relOn:'hút (đóng NO)',relOff:'nhả (đóng NC)',
+s3on:'Rơ le hút: thanh sắt bị hút xuống, tiếp điểm chuyển sang NO.',s3off:'Rơ le nhả: lò xo kéo thanh sắt lên, tiếp điểm ở NC.',s3loadOn:'Tải 220 V đang chạy.',s3loadOff:'Tải 220 V tắt.',
+s3weak:'Có dòng qua cuộn dây nhưng lực từ chưa thắng lực lò xo.',
+assume3:'Giả thiết mô phỏng: rơ le 5 V, cuộn dây 70 Ω. Lực từ tỉ lệ với bình phương dòng điện và giảm mạnh khi khe hở lớn. Rơ le hút ở khoảng 3,75 V, nhả ở khoảng 1,5 V (theo số liệu rơ le thật). Thanh sắt được vẽ chuyển động chậm lại để dễ quan sát (thật ra khoảng 0,01 s). Phao có hai nấc: đóng khi nước còn 20 %, ngắt khi nước đầy 90 %.',
+p3q:'Đóng K. Pin chỉ 5 V, dòng qua cuộn dây khoảng 0,07 A. Bóng đèn 220 V – 100 W ở mạch bên kia có sáng không?',p3a:'Không, vì 5 V quá nhỏ để thắp đèn 220 V.',p3b:'Có, vì nam châm điện hút thanh sắt làm đóng tiếp điểm của mạch 220 V.',p3c:'Có, vì dòng điện từ pin chạy sang mạch đèn.',
+p3e:'Hai mạch không nối điện với nhau. Dòng nhỏ chỉ biến lõi sắt thành nam châm điện; lực từ kéo thanh sắt, thanh sắt đóng tiếp điểm, và nguồn 220 V của mạch tải thắp đèn. Đó là công dụng của rơ le: dùng dòng điện nhỏ, an toàn để đóng ngắt dòng điện lớn.',
+p3bq:'Rơ le đang hút ở 5 V. Em giảm dần U. Rơ le nhả ra ở đúng giá trị U mà nó bắt đầu hút (khoảng 3,75 V) không?',p3ba:'Đúng, cùng một giá trị.',p3bb:'Không, nó còn giữ đến khi U thấp hơn nhiều (khoảng 1,5 V).',p3bc:'Không bao giờ nhả.',
+p3be:'Khi thanh sắt đã bị hút, nó nằm sát lõi sắt nên lực từ mạnh hơn nhiều so với lúc còn xa. Vì vậy cần giảm U khá nhiều thì lò xo mới thắng. Nhờ “độ trễ” này rơ le không bị rung, đóng ngắt liên tục khi U dao động nhẹ. Kéo thanh trượt lên, xuống và xem đồ thị.',
+c3q:'Rơ le gồm những bộ phận chính nào? Công dụng của rơ le là gì?',
+c3a:'Rơ le điện từ gồm cuộn dây quấn quanh lõi sắt (nam châm điện), thanh sắt (phần ứng), lò xo và các tiếp điểm. Có dòng điện qua cuộn dây thì nam châm điện hút thanh sắt làm đóng (hoặc ngắt) tiếp điểm của mạch khác. Công dụng: tự động đóng, ngắt mạch điện; dùng dòng điện nhỏ, điện áp thấp ở mạch điều khiển để điều khiển mạch có dòng lớn, điện áp cao, hai mạch tách biệt nên an toàn.',
+why3:'<p><b>Nguyên lí:</b> tác dụng từ của dòng điện. Cuộn dây quấn quanh lõi sắt thành nam châm điện khi có dòng điện chạy qua và mất từ tính khi ngắt dòng.</p><ul><li>Có dòng điện: lực từ hút thanh sắt thắng lực lò xo, tiếp điểm động rời <b>NC</b> (thường đóng) và chạm <b>NO</b> (thường mở).</li><li>Ngắt dòng: lõi sắt mất từ tính, lò xo kéo thanh sắt về.</li><li>Mạch điều khiển (pin 5 V, khoảng 0,07 A, 0,36 W) và mạch tải (220 V, có thể vài ampe, hàng trăm oát) <b>không nối điện với nhau</b>; chúng chỉ liên hệ qua lực từ. Người chỉ chạm vào mạch điện áp thấp.</li><li>Ứng dụng: bơm nước tự động, còi và đèn pha ô tô, máy giặt, điều hoà, tủ điện, mạch Arduino bật thiết bị 220 V. Khi nối với cảm biến (nhiệt độ, dòng điện), rơ le còn dùng để tự động ngắt bảo vệ thiết bị.</li></ul><p><b>Nói với học sinh:</b> rơ le là một công tắc do nam châm điện bấm hộ. Tay em (dòng điện nhỏ) chỉ ra lệnh, nam châm điện làm việc nặng là đóng mạch lớn.</p>',
+mis3:'<ul><li><b>“Điện từ pin chạy sang mạch đèn.”</b> Không. Hai mạch tách biệt; chỉ có lực từ “truyền tin” qua thanh sắt.</li><li><b>“Rơ le biến 5 V thành 220 V.”</b> Không. Rơ le không tạo ra điện áp; điện 220 V có sẵn ở mạch tải. Rơ le chỉ là công tắc.</li><li><b>“Rơ le hút và nhả ở cùng một hiệu điện thế.”</b> Không. Nhả ở hiệu điện thế thấp hơn nhiều (xem đồ thị).</li></ul>',
+/* tab 4 */
+hint4:'Nhấn và giữ nút chuông (hoặc bật ô “Giữ nút”). Đặt tốc độ chậm để xem từng bước.',
+press:'Nhấn giữ nút chuông',hold:'Giữ nút',bypass:'Nối tắt vít tiếp điểm',sound:'Âm thanh',
+setUb:'Hiệu điện thế pin',
+lgIc:'Dòng điện qua cuộn dây (A)',lgX:'Vị trí búa',lgHit:'Búa gõ chuông',
+b_bat:'Pin',b_btn:'Nút nhấn',b_coil:'Nam châm điện',b_arm:'Thanh thép đàn hồi',b_ham:'Búa',b_gong:'Chuông',b_screw:'Vít tiếp điểm',b_spring:'Lò xo lá',
+kIb4:'Dòng điện qua cuộn dây',kMc:'Tiếp điểm',cClosed:'chạm (mạch kín)',cOpen:'rời (mạch hở)',kHits:'Số lần gõ mỗi giây',kCount:'Tổng số lần gõ',
+s4idle:'Chưa nhấn nút: mạch hở, búa đứng yên, tựa vào vít tiếp điểm.',s4ring:'Chuông đang reo: mạch tự đóng, tự ngắt liên tục.',s4weak:'Pin yếu: lực từ không đủ kéo búa tới chuông.',s4stuck:'Vít tiếp điểm bị nối tắt: búa bị hút giữ chặt vào chuông, chỉ gõ một tiếng.',
+assume4:'Giả thiết mô phỏng: cuộn dây 4 Ω; lực từ tỉ lệ bình phương dòng điện, tăng khi khe hở giữa thanh thép và nam châm hẹp lại. Dòng điện tăng dần khi đóng mạch (cuộn dây có lõi sắt) và tắt nhanh khi mạch hở. Chuyển động của búa được vẽ phóng to khoảng 15 lần.',
+p4q:'Khi nhấn và giữ nút, nam châm điện hút búa gõ vào chuông. Vì sao búa lại bật ra, rồi gõ tiếp, liên tục?',p4a:'Vì dòng điện từ pin lúc mạnh lúc yếu.',p4b:'Vì khi bị hút, thanh thép rời vít tiếp điểm làm mạch hở, nam châm điện mất từ tính, lò xo kéo về, chạm vít thì mạch lại kín.',p4c:'Vì búa nảy lên khi đập vào chuông.',
+p4e:'Chuông điện tự ngắt mạch. Thanh thép vừa là phần bị hút vừa là một phần của mạch điện, chạm vào vít tiếp điểm. Bị hút đi thì nó rời vít, mạch hở; nam châm điện mất từ tính; lò xo lá kéo về; chạm vít, mạch kín lại. Chu trình lặp lại hàng chục lần mỗi giây. Đặt tốc độ ×0,02 để xem từng bước.',
+p4bq:'Nếu nối tắt vít tiếp điểm (mạch luôn kín khi nhấn nút) thì chuông thế nào?',p4ba:'Kêu to hơn.',p4bb:'Chỉ gõ một tiếng rồi búa bị hút giữ chặt.',p4bc:'Kêu nhanh hơn.',
+p4be:'Mạch luôn kín nên nam châm điện luôn có từ tính và giữ chặt thanh thép. Không có lúc mất từ tính thì lò xo không kéo búa về được. Bật ô “Nối tắt vít tiếp điểm” để thử.',
+c4q:'Mô tả hoạt động của chuông điện. Bộ phận nào giúp búa gõ liên tục?',
+c4a:'Nhấn nút, mạch kín, nam châm điện hút thanh thép làm búa gõ vào chuông. Lúc đó thanh thép rời vít tiếp điểm, mạch hở, nam châm điện mất từ tính, lò xo lá kéo thanh thép về chạm vít, mạch lại kín, và quá trình lặp lại. Vít tiếp điểm (cùng thanh thép đàn hồi) tự động đóng, ngắt mạch nên búa gõ liên tục khi còn giữ nút.',
+why4:'<p><b>Nguyên lí:</b> tác dụng từ của dòng điện và cơ chế <b>tự ngắt mạch</b>.</p><ol><li>Nhấn nút: mạch kín, dòng qua cuộn dây, lõi sắt thành nam châm điện.</li><li>Nam châm điện hút thanh thép, búa đập vào chuông: <i>keng</i>.</li><li>Thanh thép bị kéo đi nên rời vít tiếp điểm: mạch hở, có tia lửa nhỏ ở tiếp điểm.</li><li>Mất dòng, lõi sắt mất từ tính. Lò xo lá kéo thanh thép về.</li><li>Thanh thép chạm lại vít: mạch kín, quay về bước 1.</li></ol><p>Pin mạnh hơn thì lực từ lớn hơn, búa đi nhanh hơn, chuông reo dồn hơn. Pin quá yếu thì thanh thép có thể rung nhưng không tới được chuông. Còi điện kiểu cũ, chuông trường kiểu cũ làm theo cách này; chuông cửa ngày nay thường là mạch điện tử và loa.</p><p><b>Nói với học sinh:</b> chuông điện tự “bật – tắt” chính nó. Mỗi lần búa gõ cũng là một lần nó tự cắt điện của mình.</p>',
+mis4:'<ul><li><b>“Có thể dùng nam châm vĩnh cửu.”</b> Không. Phải là nam châm điện, vì cần lúc có lúc mất từ tính.</li><li><b>“Chuông reo liên tục vì dòng điện xoay chiều.”</b> Chuông dùng pin (một chiều) vẫn reo. Nhịp rung do mạch tự ngắt.</li><li><b>“Nối tắt tiếp điểm thì chuông kêu to hơn.”</b> Chỉ gõ được một tiếng.</li></ul>',
+/* tab 5 */
+sc5T:'Chọn thiết bị phù hợp',sc5H:'Mỗi tình huống chọn một thiết bị. Bấm vào lựa chọn để xem giải thích.',
+score:'Đúng {a}/{n} tình huống.',
+d_fuse:'Cầu chì',d_cb:'Cầu dao tự động (CB)',d_rcd:'CB chống giật (RCD)',d_relay:'Rơ le',d_bell:'Chuông điện',
+q1:'Mùa hè, cả nhà bật điều hoà, bình nóng lạnh, bếp từ cùng lúc. Cần thiết bị tự ngắt khi quá tải và gạt lên dùng lại được.',e1:'CB: phiến lưỡng kim cắt khi quá tải; ngắt xong gạt lên dùng lại, không phải thay dây.',
+q2:'Ổ cắm ở phòng tắm hay bị ẩm. Cần bảo vệ người không bị điện giật khi lỡ chạm vào chỗ hở điện.',e2:'RCD: so sánh dòng đi và dòng về; chênh từ 30 mA (dòng rò qua người) là ngắt. CB và cầu chì thường không ngắt với dòng nhỏ như vậy.',
+q3:'Một mạch cảm biến 12 V cần bật, tắt máy bơm 220 V – 750 W ở trang trại.',e3:'Rơ le: dòng nhỏ ở mạch 12 V hút thanh sắt đóng tiếp điểm mạch 220 V; hai mạch tách biệt.',
+q4:'Ổ cắm kéo dài giá rẻ cần một bộ phận bảo vệ nhỏ, đơn giản; khi có sự cố thì nó đứt và được thay mới.',e4:'Cầu chì: rẻ, nhỏ, đứt khi quá tải hoặc ngắn mạch; đứt rồi phải thay.',
+q5:'Trường cần báo giờ ra chơi bằng tiếng kêu to khi bác bảo vệ nhấn nút.',e5:'Chuông điện: nhấn nút, mạch tự đóng ngắt, búa gõ liên tục.',
+q6:'Công tắc đèn pha trên vô lăng ô tô chỉ chịu được dòng nhỏ, còn đèn pha cần dòng khoảng 10 A.',e6:'Rơ le: công tắc nhỏ chỉ cấp dòng cho cuộn dây rơ le; tiếp điểm của rơ le mới chịu dòng lớn của đèn pha.',
+q7:'Dây pha chạm vào dây trung tính trong ổ cắm làm dòng điện tăng vọt. Muốn ngắt trong khoảng 0,01 s rồi sau khi sửa thì gạt lên dùng tiếp.',e7:'CB: nam châm điện cắt ngắn mạch gần như tức thì; sửa xong gạt lên. (Cầu chì cũng ngắt rất nhanh nhưng phải thay dây.)',
+ok:'Đúng!',no:'Chưa đúng.',
+cmpT:'So sánh nhanh',
+cmp:'<table class="cmp"><tr><th>Thiết bị</th><th>Dựa trên tác dụng nào</th><th>Công dụng chính</th><th>Sau khi tác động</th></tr><tr><td>Cầu chì</td><td>Tác dụng nhiệt (dây chì nóng chảy)</td><td>Ngắt mạch khi quá tải, ngắn mạch</td><td>Phải thay dây chì mới</td></tr><tr><td>Cầu dao tự động (CB)</td><td>Nhiệt (phiến lưỡng kim) và từ (nam châm điện)</td><td>Ngắt mạch khi quá tải, ngắn mạch; đóng ngắt bằng tay</td><td>Gạt lên dùng lại</td></tr><tr><td>CB chống giật (RCD)</td><td>Tác dụng từ (so sánh dòng đi, dòng về)</td><td>Ngắt khi có dòng rò từ 30 mA, chống điện giật</td><td>Gạt lên dùng lại</td></tr><tr><td>Rơ le</td><td>Tác dụng từ (nam châm điện hút thanh sắt)</td><td>Tự động đóng, ngắt mạch; dòng nhỏ điều khiển dòng lớn</td><td>Tự trở về khi mất dòng điều khiển</td></tr><tr><td>Chuông điện</td><td>Tác dụng từ, mạch tự ngắt</td><td>Phát âm thanh báo hiệu</td><td>Reo khi còn giữ nút</td></tr></table>',
+c5q:'Bốn thiết bị trong bài giống nhau ở điểm nào, khác nhau ở điểm nào?',
+c5a:'Cả bốn đều dùng tác dụng của dòng điện để tự động đóng, ngắt mạch. Cầu chì và CB là thiết bị bảo vệ (ngắt khi dòng quá lớn). Rơ le là công tắc điều khiển bằng nam châm điện. Chuông điện dùng nam châm điện và mạch tự ngắt để tạo tiếng kêu. Chống điện giật cần RCD.',
+/* chung */
+originT:'Nguồn gốc thuật ngữ',
+origin:'<ul><li><b>Cầu chì</b>: “cầu” là nhịp nối, “chì” là kim loại chì: một đoạn dây chì bắc nối hai đầu mạch. Tiếng Anh <i>fuse</i>, từ <i>fusible</i> (Latinh <i>fundere, fusus</i>: nấu chảy, đúc), cùng gốc với <i>fusion</i> (nóng chảy, hợp nhất). Pháp <i>fusible</i>; Trung 保险丝 (bảo hiểm ti: sợi dây bảo hiểm); Nga <i>предохранитель</i> (cái giữ gìn trước).</li><li><b>Cầu dao</b>: cầu dao kiểu cũ có lưỡi dao bằng đồng đóng vào ngàm kẹp (tiếng Anh <i>knife switch</i>). <b>Cầu dao tự động</b> = <i>circuit breaker</i> (CB, “cái cắt mạch”), loại nhỏ là MCB (<i>miniature</i>). Người Việt hay gọi <b>aptomat</b>, từ tiếng Nga <i>автомат</i> (tự động), gốc Hy Lạp <i>automatos</i> “tự hành động”. Trung 断路器 (đoạn lộ khí: khí cụ cắt đường điện).</li><li><b>Rơ le</b>: từ tiếng Pháp <i>relais</i>, trạm đổi ngựa trên đường thư. Rơ le đầu tiên (Joseph Henry, 1835; dùng trong điện báo Morse) “tiếp sức” cho tín hiệu yếu trên đường dây dài, đúng như trạm thay ngựa mới. Anh <i>relay</i>; Trung 继电器 (kế điện khí: khí cụ tiếp nối điện).</li><li><b>Lưỡng kim</b> (兩金): hai kim loại. Anh <i>bimetal</i>: <i>bi-</i> (hai) + <i>metallum</i>.</li><li><b>Ngắn mạch</b> (<i>short circuit</i>): dòng điện đi theo đường “tắt” gần như không có điện trở, bỏ qua thiết bị. <b>Quá tải</b> (<i>overload</i>): thiết bị dùng nhiều hơn mức dây dẫn chịu được.</li><li><b>Hồ quang</b> (弧光: ánh sáng hình cung), Anh <i>arc</i>: tia lửa điện uốn cong giữa hai tiếp điểm.</li></ul>',
+mediaT:'Danh sách video (dùng cho bản offline)',
+mediaIntro:'Bản offline: tạo thư mục <b>media</b> cạnh file <b>index.html</b>, tải từng video về và đặt đúng tên file trong bảng (có thể thêm ảnh bìa cùng tên, đuôi <b>.jpg</b>). Khi bấm hình, trang sẽ phát file trong <b>media/</b> trước; nếu không có file thì phát YouTube (cần mạng). Thời lượng ghi “?” là chưa kiểm tra được, thầy cô nên xem trước.',
+mTab:'Tab',mFile:'Tên file',mVideo:'Video',mDur:'Thời lượng',mType:'Loại',
+vLbl:'Video thực tế',vLook:'Để ý:',vMain:'Video chính',vAlt:'Video phụ',vAlt2:'Video phụ 2',vDurUnk:'chưa kiểm tra thời lượng',vNoThumb:'Bấm để phát video',
+vNote:'Video tiếng Anh trên YouTube. Đã kiểm tra tiêu đề và kênh, chưa xem hết nội dung; thầy cô nên xem trước.',
+vt_exp:'Thí nghiệm',vt_phen:'Hiện tượng',vt_app:'Ứng dụng',
+footer:'Mô phỏng KHTN 8 · Năng lượng điện · Chương trình GDPT 2018. Số liệu theo đơn vị SI; các chỗ đơn giản hoá ghi ở dòng “Giả thiết mô phỏng” của từng tab. Không tự làm thí nghiệm chập mạch với điện 220 V.'
+},
+en:{
+eyebrow:'Science 8 · Electricity · Applications',
+title:'Fuses, circuit breakers, relays and electric bells',
+gvBtn:'Hide numbers (teacher)',
+tab1:'1. Fuse',tab2:'2. Circuit breaker',tab3:'3. Relay',tab4:'4. Electric bell',tab5:'5. Scenarios',
+req1:'<b>Learning outcome (Science 8):</b> Briefly describe what fuses, relays, circuit breakers and electric bells are used for. <b>This tab:</b> a fuse breaks the circuit on overload and on a short circuit.',
+req2:'<b>Learning outcome:</b> Describe what a circuit breaker does. <b>This tab:</b> inside a miniature circuit breaker (MCB): the bimetal strip trips on overload, the electromagnet trips on a short circuit; why an MCB does not protect people from shocks.',
+req3:'<b>Learning outcome:</b> Describe what a relay does. <b>This tab:</b> a small current in the control circuit switches a large current in a 220 V circuit.',
+req4:'<b>Learning outcome:</b> Describe what an electric bell does. <b>This tab:</b> why holding the button makes the hammer strike again and again.',
+req5:'<b>Apply it:</b> choose the right device for each situation at home and in daily life.',
+data:'Readings',whyT:'Mechanism: why does it happen?',misT:'Common misconceptions',
+predTitle:'Predict first',predThen:'Now try it in the simulation, then check the answer.',showAns:'Show answer',hideAns:'Hide answer',conclTitle:'Conclusion',
+reset:'Reset',speed:'Speed:',
+hint1:'Click an appliance (in the picture or the buttons) to switch it on or off. Watch the current and the fuse wire temperature.',
+fuseRating:'Fuse:',fuseCu:'Thick copper wire (bad repair)',
+shortOn:'Cause a short circuit',shortOff:'Repair the short',replace:'Fit a new fuse wire',
+a_led:'LED lamp',a_fan:'Fan',a_tv:'TV',a_rice:'Rice cooker',a_iron:'Iron',a_kettle:'Kettle',a_heater:'Water heater',
+src:'220 V supply',live:'Live wire',neu:'Neutral wire',fuse:'Fuse',cable:'1.5 mm² cable',noPower:'no power',
+lgI:'Current I (A)',lgTf:'Fuse wire temperature (°C)',lgTc:'Cable temperature (°C)',
+kI:'Current I',kP:'Total power switched on',kIn:'Fuse rating',kRatio:'I compared with rating',kTf:'Fuse wire temperature',kTm:'Melting point',kTc:'Cable temperature',kState:'State',
+s1ok:'Normal. The fuse wire is warm but far below its melting point.',s1over:'Overload: the current is above the rating and the fuse wire is heating up…',s1short:'SHORT CIRCUIT: huge current!',
+s1blown:'The fuse has blown: the circuit is open and every appliance is off. Find the cause before fitting a new wire.',s1blownShort:'The fuse blew almost instantly because of the short circuit. Repair it before fitting a new wire.',
+s1hot:'The cable in the wall is overheating (above 70 °C)!',s1melt:'The cable insulation is softening and melting (above 100 °C)!',s1fire:'The cable is smoking and could start a fire (above 150 °C)! Thick copper wire will not melt, so it gives no protection.',
+log1T:'Fuse log',log1H:'Each time the fuse blows, the current and the time from the change in current to the break are recorded.',
+lgN:'#',lgCur:'I (A)',lgRat:'I / rating',lgTime:'Time to blow',lgCause:'Cause',cOver:'overload',cShort:'short circuit',noLog:'No blown fuse yet.',
+assume1:'Model: appliances treated as resistors, I = P/U with U = 220 V. The fuse wire is heated by the current and loses heat to the surroundings; it melts at about 230 °C (lead–tin alloy). It blows for sure when I exceeds about 1.6 × rating. Short circuit: the whole loop is about 0.4 Ω, so I ≈ 550 A. The cable heats faster than in reality so it can be watched.',
+p1q:'A 10 A fuse. You switch on more and more appliances. When does the fuse blow?',p1a:'As soon as any extra appliance is switched on.',p1b:'When the total current is well above 10 A; the bigger the excess, the faster it blows.',p1c:'Never; a fuse only blows on a short circuit.',
+p1e:'The fuse wire is heated by the current. At its rated current it is only warm. Above about 1.6 × rating it reaches its melting point and breaks: after seconds to minutes for a small overload, in milliseconds for a short circuit. See the log.',
+p1bq:'Someone replaces the fuse wire with a thick copper wire “so it never blows”. What happens on an overload or a short circuit?',p1ba:'Safer, because the power is never cut.',p1bb:'The copper does not melt, so the cable in the wall overheats, its insulation melts and a fire may start.',p1bc:'Appliances work better.',
+p1be:'Copper melts at 1085 °C and the wire is thick, so it hardly ever breaks. The fuse no longer protects; the weakest part is now the cable in the wall. Choose “Thick copper wire”, switch everything on, set speed ×10 or cause a short to see it.',
+c1q:'How does a fuse protect a circuit? Why must the fuse wire melt more easily than the cable?',
+c1a:'The fuse is connected in series in the live wire. When the current is too high (overload or short circuit) the fuse wire melts first and breaks, opening the circuit and stopping the current, so cables and appliances are not damaged and no fire starts. It must melt at a lower temperature than the cable so that it always breaks first. A blown fuse must be replaced with the correct type.',
+why1:'<p><b>Principle:</b> the heating effect of current. A larger current heats a wire much faster (in grade 9: heat Q = I²·R·t grows with the square of the current).</p><ul><li>Fuse wire is a lead–tin alloy melting at about 200 – 300 °C, far below copper (1085 °C), and it is thin, so it is the hottest spot in the circuit.</li><li>The fuse is in <b>series</b> in the <b>live</b> wire; when it breaks the whole circuit opens.</li><li><b>Overload</b>: too many appliances; the current is a bit above the rating and the fuse blows after seconds to minutes.</li><li><b>Short circuit</b>: live touches neutral; the current bypasses the appliances and reaches hundreds of amperes; the fuse blows almost instantly.</li><li>A 10 A fuse does not blow at 10 A. Standards require it to blow when about 1.6 × rating flows for a while.</li></ul><p><b>For students:</b> a fuse is a deliberately weak link. When something goes wrong it sacrifices itself to protect the cables and appliances.</p>',
+mis1:'<ul><li><b>“A blown fuse is a faulty fuse.”</b> No, it did its job. Find the cause (overload or short) before replacing it.</li><li><b>“Use thick copper wire so it lasts.”</b> Very dangerous: no protection, the cable burns first (try it).</li><li><b>“A fuse protects people from shocks.”</b> No. Current through a person is only about 0.1 – 0.2 A, too small to blow a 10 A fuse but enough to kill. See tab 2.</li><li><b>“A fuse can go in either wire.”</b> It must be in the live wire; in the neutral, a blown fuse still leaves the appliance connected to live.</li></ul>',
+hint2:'Switch on appliances, cause a short circuit or let a person touch the live wire. Watch which part of the breaker acts.',
+cbRating:'Circuit breaker (MCB):',
+shortOn2:'Cause a short circuit',shortOff2:'Repair the short',touchOn:'Person touches live wire',touchOff:'Pull the person away',rcd:'Add a residual current device (RCD 30 mA)',
+cbOn:'Switch MCB off',cbOff:'Switch MCB back on',
+lgCB:'Breaker trip curve',lgFuse:'Fuse with the same rating (compare)',lgNow:'Present current',
+bimHeat:'Bimetal strip heating towards trip point:',
+kIcb:'Current through MCB',kInCb:'Rated current',kTb:'Bimetal temperature',kTrip:'Expected trip after',kNever:'no trip',kInst:'instantly (< 0.01 s)',kIb:'Current through person',kLeak:'Leakage (live minus neutral current)',kShock:'Shock duration',
+s2ok:'MCB on. Circuit normal.',s2over:'Overload: the bimetal strip is heating and bending…',s2thermal:'The MCB tripped through the bimetal strip (overload). Switch some appliances off, then switch it back on.',
+s2mag:'The MCB tripped instantly through the electromagnet (short circuit). Repair the short, then switch back on.',s2rcd:'The RCD tripped within tens of milliseconds because current leaked through the person. Saved!',
+s2shock:'DANGER: about {i} mA is flowing through the person, but the MCB does not trip because this is far below {n} A.',s2off:'MCB is off.',
+s2hot:'The bimetal strip is still hot, so the latch cannot reset. Wait for it to cool.',
+p_handle:'Handle',p_contact:'Contacts',p_arc:'Arc chute',p_coil:'Coil (electromagnet)',p_coil2:'trips on short circuit',p_bim:'Bimetal strip',p_bim2:'trips on overload',p_latch:'Trip latch',p_in:'In (from supply)',p_out:'Out (to appliances)',on:'ON',off:'OFF',person:'Person touching',
+assume2:'Model: type C MCB. The bimetal trips when the current stays above about 1.3 × rating; overload trip times are shortened (in reality minutes or tens of minutes). The electromagnet trips from about 7 × rating. Body resistance about 1500 Ω (more for dry skin). The RCD trips at 30 mA leakage.',
+p2q:'16 A MCB. You switch on the kettle, water heater and rice cooker together (about 23 A). Does it trip, by which part, fast or slow?',p2a:'Instantly, by the electromagnet.',p2b:'After a while, as the bimetal strip heats and bends.',p2c:'It does not trip.',
+p2e:'23 A ≈ 1.4 × rating: not enough for the electromagnet (needs about 7 ×) but the bimetal heats up, bends and pushes the latch after a while. Try “Cause a short circuit”: this time the electromagnet trips at once.',
+p2bq:'A person touches a bare live wire. Does a 16 A MCB cut the power?',p2ba:'Yes, instantly.',p2bb:'No: only about 0.15 A flows through the person, far below 16 A.',p2bc:'Yes, but more slowly than an overload.',
+p2be:'An MCB only responds to large currents. About 0.15 A through a person neither heats the bimetal nor pulls the electromagnet, yet more than 50 mA through the heart can kill. Shock protection needs an RCD, which trips at 30 mA leakage. Tick “Add an RCD” and try again.',
+c2q:'A circuit breaker has two trip parts. Which fault does each detect? What is its advantage over a fuse?',
+c2a:'The bimetal strip (heating effect, different expansion of two metals) bends when a moderately high current lasts, tripping on overload. The electromagnet (magnetic effect) pulls hard as soon as the current surges, tripping on a short circuit. Afterwards you fix the cause and switch it back on; no wire to replace. An MCB does not protect against shocks; an RCD does.',
+why2:'<p><b>Principle:</b> an MCB has two trip parts in series with the current path, both acting on one <b>trip latch</b>. When the latch is pushed, a spring snaps the contacts apart and the handle drops.</p><ul><li><b>Bimetal strip</b> (heating effect): two metals with different expansion bonded together. Current heats it; the side that expands more makes it bend. It takes time to bend enough, so it trips <b>slowly</b>, suited to <b>overload</b>. While hot it cannot be reset.</li><li><b>Coil / electromagnet</b> (magnetic effect): the current surge of a <b>short circuit</b> pulls an iron plunger into the latch within about 0.01 s.</li><li><b>Arc chute</b>: separating contacts under a large current make an arc; steel plates split and cool it so it goes out quickly.</li><li><b>RCD</b>: compares the current going out on live with the current returning on neutral. If some current leaks through a person to earth (30 mA or more), they differ and the RCD trips within tens of milliseconds.</li></ul><p><b>For students:</b> an MCB is a reusable smart fuse: too hot and a metal strip bends to flip the switch; a sudden surge and a magnet yanks it. It protects wires and appliances, not necessarily people.</p>',
+mis2:'<ul><li><b>“An MCB stops electric shocks.”</b> A normal MCB does not; the current through a person is too small. You need an RCD or RCBO.</li><li><b>“If it trips, just switch it back on.”</b> First reduce the load or find the short; with the short still there it trips again at once.</li><li><b>“If it keeps tripping, fit a bigger one.”</b> Dangerous: the rating is chosen for the cable; a bigger MCB lets the cable overheat.</li></ul>',
+hint3m:'Click switch K (in the picture or the button) and move the battery voltage slider. A small control current switches the 220 V circuit.',
+hint3a:'Application: a float in the tank closes the control circuit when the water is low and the relay starts the 220 V pump; when full, the float opens it.',
+mdMan:'Experiment: switch K',mdApp:'Application: automatic pump',
+kOn:'Close switch K',kOff:'Open switch K',contactT:'Load connected to:',loadT:'Load:',ldLamp:'100 W lamp',ldPump:'750 W pump',
+setUc:'Battery voltage in the control circuit',
+ctrl:'Control circuit',load:'220 V load circuit',iso:'electrically separate circuits',coil:'Coil',core:'Iron core',arm:'Iron armature',spring:'Spring',com:'COM',no:'NO',nc:'NC',tank:'Tank',float:'Float',pump:'Pump',lamp:'Lamp',
+Fm:'Magnetic force',Fs:'Spring force',
+lgLoop:'Pull-in and drop-out thresholds',lgPath:'States you have tried',grU:'Battery U (V)',grOpen:'Released',grClose:'Pulled in',
+kUc:'Control voltage',kIc:'Coil current',kPc:'Control circuit power',kRel:'Relay',kIl:'Load current',kPl:'Load power',kRat:'Load current ÷ control current',kLvl:'Water level',
+relOn:'pulled in (NO closed)',relOff:'released (NC closed)',
+s3on:'Relay pulled in: the armature is attracted down and the contact moves to NO.',s3off:'Relay released: the spring holds the armature up, contact on NC.',s3loadOn:'The 220 V load is running.',s3loadOff:'The 220 V load is off.',
+s3weak:'Current flows in the coil but the magnetic force has not beaten the spring.',
+assume3:'Model: 5 V relay, 70 Ω coil. Magnetic force grows with the square of the current and drops sharply with the gap. Pull-in about 3.75 V, drop-out about 1.5 V (real relay data). The armature is drawn slowed down (really about 0.01 s). Two-level float: on at 20 %, off at 90 %.',
+p3q:'Close K. The battery is only 5 V and the coil current about 0.07 A. Does the 220 V, 100 W lamp in the other circuit light?',p3a:'No, 5 V is far too little for a 220 V lamp.',p3b:'Yes: the electromagnet pulls the armature, which closes the contacts of the 220 V circuit.',p3c:'Yes, because current from the battery flows into the lamp circuit.',
+p3e:'The two circuits are not electrically connected. The small current only magnetises the core; the magnetic force pulls the armature, the armature closes the contacts, and the 220 V supply of the load circuit lights the lamp. That is what a relay is for: a small, safe current switching a large one.',
+p3bq:'The relay is pulled in at 5 V. You slowly lower U. Does it release at the same U at which it pulled in (about 3.75 V)?',p3ba:'Yes, the same value.',p3bb:'No, it holds until U is much lower (about 1.5 V).',p3bc:'It never releases.',
+p3be:'Once pulled in, the armature sits close to the core, where the magnetic force is much stronger than across the open gap. So U must fall a lot before the spring wins. This hysteresis stops the relay chattering when U wobbles. Move the slider up and down and watch the graph.',
+c3q:'What are the main parts of a relay? What is it used for?',
+c3a:'An electromagnetic relay has a coil on an iron core (electromagnet), an iron armature, a spring and contacts. Current in the coil makes the electromagnet pull the armature, closing (or opening) the contacts of another circuit. Use: switching circuits automatically; a small, low-voltage control current controls a high-current, high-voltage circuit, and the two circuits are separate, which is safe.',
+why3:'<p><b>Principle:</b> the magnetic effect of current. A coil on an iron core becomes an electromagnet when current flows and loses its magnetism when it stops.</p><ul><li>With current: the magnetic force beats the spring; the moving contact leaves <b>NC</b> (normally closed) and touches <b>NO</b> (normally open).</li><li>Without current: the spring pulls the armature back.</li><li>The control circuit (5 V, about 0.07 A, 0.36 W) and the load circuit (220 V, several amperes, hundreds of watts) are <b>not electrically connected</b>; they are linked only by the magnetic force.</li><li>Uses: automatic pumps, car horns and headlights, washing machines, air conditioners, switchboards, Arduino boards switching mains devices. With a sensor (temperature, current) a relay can also cut power to protect equipment.</li></ul><p><b>For students:</b> a relay is a switch pressed for you by an electromagnet. Your small current gives the order; the magnet does the heavy work.</p>',
+mis3:'<ul><li><b>“Battery current flows into the lamp circuit.”</b> No. The circuits are separate; only the magnetic force passes the message.</li><li><b>“A relay turns 5 V into 220 V.”</b> No. It produces no voltage; the 220 V is already in the load circuit. It is only a switch.</li><li><b>“It pulls in and releases at the same voltage.”</b> No, it releases at a much lower voltage (see the graph).</li></ul>',
+hint4:'Press and hold the bell push (or tick “Hold”). Use slow speed to watch each step.',
+press:'Press and hold bell push',hold:'Hold',bypass:'Bypass the contact screw',sound:'Sound',
+setUb:'Battery voltage',
+lgIc:'Coil current (A)',lgX:'Hammer position',lgHit:'Hammer hits gong',
+b_bat:'Battery',b_btn:'Push',b_coil:'Electromagnet',b_arm:'Springy steel armature',b_ham:'Hammer',b_gong:'Gong',b_screw:'Contact screw',b_spring:'Leaf spring',
+kIb4:'Coil current',kMc:'Contact',cClosed:'touching (closed)',cOpen:'apart (open)',kHits:'Strikes per second',kCount:'Total strikes',
+s4idle:'Button not pressed: circuit open, hammer at rest against the contact screw.',s4ring:'Ringing: the circuit makes and breaks itself again and again.',s4weak:'Battery too weak: the magnetic force cannot pull the hammer to the gong.',s4stuck:'Contact bypassed: the hammer is held against the gong and strikes only once.',
+assume4:'Model: 4 Ω coil; magnetic force proportional to current squared and stronger as the gap closes. The current rises gradually when the circuit closes (iron-cored coil) and dies quickly when it opens. Hammer motion is drawn about 15 × larger.',
+p4q:'When you hold the button, the electromagnet pulls the hammer onto the gong. Why does it spring back and strike again and again?',p4a:'Because the battery current goes strong and weak.',p4b:'Because when pulled, the armature leaves the contact screw, opening the circuit; the electromagnet loses its magnetism, the spring pulls it back, it touches the screw and the circuit closes again.',p4c:'Because the hammer bounces off the gong.',
+p4e:'An electric bell breaks its own circuit. The armature is both the part being pulled and part of the circuit, touching the contact screw. Pulled away, it leaves the screw; the circuit opens; the electromagnet loses its magnetism; the leaf spring pulls it back; it touches the screw and the circuit closes again, tens of times a second. Set speed ×0.02 to see each step.',
+p4bq:'If the contact screw is bypassed (circuit always closed while pressed), what happens?',p4ba:'It rings louder.',p4bb:'One strike, then the hammer is held tight.',p4bc:'It rings faster.',
+p4be:'The circuit stays closed, so the electromagnet stays on and holds the armature. With no off moment the spring cannot pull it back. Tick “Bypass the contact screw” to try.',
+c4q:'Describe how an electric bell works. Which part makes the hammer strike repeatedly?',
+c4a:'Pressing the button closes the circuit; the electromagnet pulls the armature and the hammer hits the gong. The armature leaves the contact screw, the circuit opens, the electromagnet loses its magnetism, the leaf spring pulls the armature back to the screw, the circuit closes and it repeats. The contact screw (with the springy armature) makes and breaks the circuit automatically, so the hammer keeps striking while the button is held.',
+why4:'<p><b>Principle:</b> the magnetic effect of current plus a <b>self-interrupting</b> circuit.</p><ol><li>Press: circuit closed, current in the coil, the core becomes an electromagnet.</li><li>The electromagnet pulls the armature; the hammer hits the gong: <i>ding</i>.</li><li>The armature leaves the contact screw: circuit open, a small spark at the contact.</li><li>No current, no magnetism; the leaf spring pulls the armature back.</li><li>It touches the screw again: circuit closed, back to step 1.</li></ol><p>A stronger battery gives a larger force, a faster hammer and quicker ringing. Too weak a battery may make the armature buzz without reaching the gong. Old horns and school bells work this way; modern doorbells usually use electronics and a speaker.</p><p><b>For students:</b> the bell switches itself on and off; every strike is also the moment it cuts its own power.</p>',
+mis4:'<ul><li><b>“A permanent magnet would do.”</b> No; it must be an electromagnet so the magnetism can switch off.</li><li><b>“It rings because of alternating current.”</b> A battery (direct current) bell rings too; the rhythm comes from self-interruption.</li><li><b>“Bypassing the contact makes it louder.”</b> It strikes only once.</li></ul>',
+sc5T:'Choose the right device',sc5H:'Pick one device for each scenario. Click an option to see the explanation.',
+score:'{a}/{n} scenarios correct.',
+d_fuse:'Fuse',d_cb:'Circuit breaker (MCB)',d_rcd:'RCD (shock protection)',d_relay:'Relay',d_bell:'Electric bell',
+q1:'In summer the family runs the air conditioner, water heater and induction hob together. You need something that cuts off on overload and can be switched back on.',e1:'MCB: the bimetal trips on overload; afterwards switch it back on, no wire to replace.',
+q2:'A bathroom socket is often damp. You need to protect people from shocks if they touch a live part.',e2:'RCD: compares outgoing and returning current; a 30 mA difference (leakage through a person) trips it. MCBs and fuses do not respond to such small currents.',
+q3:'A 12 V sensor circuit must switch a 220 V, 750 W farm pump on and off.',e3:'Relay: the small 12 V current pulls the armature closing the 220 V contacts; the circuits stay separate.',
+q4:'A cheap extension lead needs a small, simple protective part that breaks on a fault and is then replaced.',e4:'Fuse: cheap and small, blows on overload or short circuit, then is replaced.',
+q5:'The school needs a loud signal for break time when the caretaker presses a button.',e5:'Electric bell: press, the circuit makes and breaks itself, the hammer keeps striking.',
+q6:'A car’s headlight switch on the steering column can carry only a small current, but the headlights need about 10 A.',e6:'Relay: the small switch only feeds the relay coil; the relay contacts carry the large headlight current.',
+q7:'Live touches neutral in a socket and the current surges. You want it cut in about 0.01 s and to switch back on after repair.',e7:'MCB: its electromagnet clears a short almost instantly; switch on after repair. (A fuse is also fast but must be replaced.)',
+ok:'Correct!',no:'Not quite.',
+cmpT:'Quick comparison',
+cmp:'<table class="cmp"><tr><th>Device</th><th>Effect used</th><th>Main use</th><th>After operating</th></tr><tr><td>Fuse</td><td>Heating (wire melts)</td><td>Breaks the circuit on overload, short circuit</td><td>Replace the fuse wire</td></tr><tr><td>Circuit breaker (MCB)</td><td>Heating (bimetal) and magnetic (electromagnet)</td><td>Breaks on overload, short circuit; manual switch</td><td>Switch back on</td></tr><tr><td>RCD</td><td>Magnetic (compares out and return current)</td><td>Trips on 30 mA leakage, shock protection</td><td>Switch back on</td></tr><tr><td>Relay</td><td>Magnetic (electromagnet pulls armature)</td><td>Switches circuits automatically; small current controls large</td><td>Returns when control current stops</td></tr><tr><td>Electric bell</td><td>Magnetic, self-interrupting circuit</td><td>Sound signal</td><td>Rings while held</td></tr></table>',
+c5q:'How are the four devices alike, and how do they differ?',
+c5a:'All four use an effect of current to make or break a circuit automatically. Fuses and MCBs are protective devices (cut off when current is too high). A relay is a switch operated by an electromagnet. An electric bell uses an electromagnet and a self-interrupting circuit to make sound. Shock protection needs an RCD.',
+originT:'Where the words come from',
+origin:'<ul><li><b>Fuse</b>: from <i>fusible</i>, Latin <i>fundere, fusus</i> “to melt, to cast”, the same root as <i>fusion</i>. Vietnamese <i>cầu chì</i>: a “bridge” of lead (<i>chì</i>) wire. Chinese 保险丝 “safety wire”; Russian <i>предохранитель</i> “pre-guard”.</li><li><b>Circuit breaker</b> (MCB = miniature circuit breaker). Vietnamese also say <i>aptomat</i>, from Russian <i>автомат</i> “automatic”, Greek <i>automatos</i> “acting by itself”. <i>Cầu dao</i> originally meant a knife switch (copper blade pushed into clips).</li><li><b>Relay</b>: French <i>relais</i>, a post station where tired horses were swapped for fresh ones. The first relays (Joseph Henry, 1835; Morse telegraph) “refreshed” weak signals on long lines. Chinese 继电器 “current-continuing device”.</li><li><b>Bimetal</b>: <i>bi-</i> (two) + <i>metallum</i>; Vietnamese <i>lưỡng kim</i> 兩金.</li><li><b>Short circuit</b>: current takes a short cut with almost no resistance, bypassing the appliance. <b>Overload</b>: drawing more current than the cable is designed for.</li><li><b>Arc</b>: the curved spark between separating contacts; Vietnamese <i>hồ quang</i> 弧光 “arc light”.</li></ul>',
+mediaT:'Video list (for the offline version)',
+mediaIntro:'Offline version: make a folder <b>media</b> next to <b>index.html</b>, download each video and save it with the file name in the table (optionally add a cover image with the same name ending in <b>.jpg</b>). Clicking a video plays the file in <b>media/</b> first, otherwise YouTube (needs internet). Durations marked “?” were not checked; please preview them.',
+mTab:'Tab',mFile:'File name',mVideo:'Video',mDur:'Length',mType:'Type',
+vLbl:'Real-world video',vLook:'Look for:',vMain:'Main video',vAlt:'Second video',vAlt2:'Third video',vDurUnk:'length not checked',vNoThumb:'Click to play',
+vNote:'English YouTube video. Title and channel checked, content not fully reviewed; please preview.',
+vt_exp:'Experiment',vt_phen:'Phenomenon',vt_app:'Application',
+footer:'Science 8 simulation · Electricity · Vietnam 2018 curriculum. SI units; simplifications are listed in each tab’s “Model” line. Never try short circuits on 220 V mains.'
+}};
+
+/* ================= Tiện ích chung ================= */
+const $=id=>document.getElementById(id);
+let lang='vi';
+const T=k=>{const v=I18N[lang][k];return v!=null?v:(I18N.vi[k]!=null?I18N.vi[k]:k);};
+const Tf=(k,o)=>T(k).replace(/\{(\w+)\}/g,(_,n)=>o[n]);
+const nf=(x,d=2,mn=0)=>{if(!isFinite(x))x=0;if(Math.abs(x)<0.5*Math.pow(10,-d))x=0;return new Intl.NumberFormat(lang==='vi'?'vi-VN':'en-US',{maximumFractionDigits:d,minimumFractionDigits:mn}).format(x);};
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const lerp=(a,b,t)=>a+(b-a)*t;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const store={get(k){try{return localStorage.getItem(k);}catch(e){return null;}},set(k,v){try{localStorage.setItem(k,v);}catch(e){}}};
+let CS={};
+function readColors(){const s=getComputedStyle(document.documentElement);
+  ['bg','panel','lane','ink','muted','line','accent','ok','warn','force','vel','live','neu','copper','copper2','metal','metal2','space','star','ceramic','ceramic2','gold','spark','heat','water','lampOn','smoke']
+  .forEach(k=>CS[k]=s.getPropertyValue('--'+k).trim());}
+readColors();
+try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',readColors);}catch(e){}
+const isPhone=()=>innerWidth<640;
+function fit(cv,asp){const w=Math.max(260,cv.clientWidth|0);const h=Math.round(w*asp);const d=Math.min(2.5,window.devicePixelRatio||1);
+  if(cv._w!==w||cv._h!==h||cv._d!==d){cv.width=Math.round(w*d);cv.height=Math.round(h*d);cv.style.height=h+'px';cv._w=w;cv._h=h;cv._d=d;}
+  const c=cv.getContext('2d');c.setTransform(d,0,0,d,0,0);c.clearRect(0,0,w,h);return{c,w,h};}
+function arrowHead(c,x,y,ang,sz,col){c.save();c.translate(x,y);c.rotate(ang);c.fillStyle=col;c.beginPath();c.moveTo(sz,0);c.lineTo(-sz*.7,sz*.6);c.lineTo(-sz*.7,-sz*.6);c.closePath();c.fill();c.restore();}
+function arrow(c,x1,y1,x2,y2,col,lw=3){const L=Math.hypot(x2-x1,y2-y1);if(L<2)return;const a=Math.atan2(y2-y1,x2-x1),hs=Math.min(10,L*.5);
+  c.strokeStyle=col;c.lineWidth=lw;c.beginPath();c.moveTo(x1,y1);c.lineTo(x2-Math.cos(a)*hs*.6,y2-Math.sin(a)*hs*.6);c.stroke();arrowHead(c,x2,y2,a,hs,col);}
+function txt(c,s,x,y,o={}){c.font=`${o.w||600} ${o.sz||13}px ${o.mono?'"IBM Plex Mono",monospace':'"Be Vietnam Pro",system-ui,sans-serif'}`;c.fillStyle=o.col||CS.ink;c.textAlign=o.al||'center';c.textBaseline=o.bl||'middle';c.fillText(s,x,y);}
+function txtBg(c,s,x,y,o={}){c.font=`${o.w||600} ${o.sz||13}px "Be Vietnam Pro",system-ui,sans-serif`;const m=c.measureText(s).width,al=o.al||'center',sz=o.sz||13;
+  const x0=al==='left'?x:al==='right'?x-m:x-m/2;c.fillStyle=CS.panel;c.globalAlpha=.85;c.fillRect(x0-3,y-sz*.7,m+6,sz*1.4);c.globalAlpha=1;txt(c,s,x,y,o);}
+function rrect(c,x,y,w,h,r){r=Math.min(r,w/2,h/2);c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath();}
+function line(c,pts,col,lw=2,dash){c.strokeStyle=col;c.lineWidth=lw;c.setLineDash(dash||[]);c.beginPath();pts.forEach((p,i)=>i?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1]));c.stroke();c.setLineDash([]);}
+function dot(c,x,y,r,col){c.fillStyle=col;c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.fill();}
+function seg(id,items,cur,pick){const el=$(id);el.innerHTML='';items.forEach(it=>{const b=document.createElement('button');b.className='btn';b.textContent=it.label;
+  b.setAttribute('aria-pressed',String(it.k===cur));if(it.dis)b.disabled=true;b.onclick=()=>pick(it.k);el.appendChild(b);});}
+/* chấm điện tích chạy dọc một đường gấp khúc */
+function polyLen(P){let L=0;for(let i=1;i<P.length;i++)L+=Math.hypot(P[i][0]-P[i-1][0],P[i][1]-P[i-1][1]);return L;}
+function polyAt(P,s){for(let i=1;i<P.length;i++){const l=Math.hypot(P[i][0]-P[i-1][0],P[i][1]-P[i-1][1]);if(s<=l||i===P.length-1){const t=l?clamp(s/l,0,1):0;return[lerp(P[i-1][0],P[i][0],t),lerp(P[i-1][1],P[i][1],t)];}s-=l;}return P[P.length-1];}
+function flowDots(c,P,phase,col,gap=18,r=3){const L=polyLen(P);if(L<4)return;let s=((phase%gap)+gap)%gap;c.fillStyle=col;for(;s<L;s+=gap){const [x,y]=polyAt(P,s);c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.fill();}}
+function hexRgb(h){h=(h||'').trim();if(h[0]==='#'){if(h.length===4)h='#'+h[1]+h[1]+h[2]+h[2]+h[3]+h[3];return[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];}return[128,128,128];}
+function mix(a,b,t){const A=hexRgb(a),B=hexRgb(b);t=clamp(t,0,1);return`rgb(${Math.round(lerp(A[0],B[0],t))},${Math.round(lerp(A[1],B[1],t))},${Math.round(lerp(A[2],B[2],t))})`;}
+/* màu kim loại nóng: xám → đỏ sẫm → cam → vàng trắng */
+function hotColor(base,T){if(T<300)return mix(base,'#8a2a1a',clamp((T-80)/400,0,.5));const k=clamp((T-300)/900,0,1);
+  return k<.4?mix('#a01e10','#ff6a1a',k/.4):mix('#ff6a1a','#fff3b0',(k-.4)/.6);}
+function fmtT(s){if(!isFinite(s))return '—';if(s<1)return nf(s*1000,s<0.01?1:0)+' ms';if(s<120)return nf(s,1)+' s';return nf(s/60,1)+(lang==='vi'?' phút':' min');}
+/* Đồ thị theo thời gian */
+function plot(c,x,y,w,h,o){const {t0,t1,ymin,ymax}=o;
+  c.save();c.fillStyle=CS.panel;c.fillRect(x,y,w,h);c.strokeStyle=CS.line;c.lineWidth=1;c.strokeRect(x+.5,y+.5,w-1,h-1);
+  const X=t=>x+(t-t0)/(t1-t0)*w,Y=v=>y+h-(v-ymin)/(ymax-ymin)*h;
+  (o.hl||[]).forEach(v=>{c.strokeStyle=CS.muted;c.globalAlpha=.5;c.setLineDash([4,4]);c.beginPath();c.moveTo(x,Y(v[0]));c.lineTo(x+w,Y(v[0]));c.stroke();c.setLineDash([]);c.globalAlpha=1;
+    if(v[1])txt(c,v[1],x+w-4,Y(v[0])-8,{al:'right',sz:11,col:CS.muted});});
+  c.beginPath();c.rect(x,y,w,h);c.clip();
+  (o.marks||[]).forEach(t=>{if(t<t0)return;c.strokeStyle=CS.spark;c.lineWidth=2;c.beginPath();c.moveTo(X(t),y);c.lineTo(X(t),y+h);c.stroke();});
+  for(const s of o.series){if(!s.d.length)continue;c.strokeStyle=s.col;c.lineWidth=s.w||2;c.setLineDash(s.dash||[]);c.beginPath();
+    let first=true;for(const p of s.d){const t=p[0],v=p[s.i||1];if(t<t0-1e-9)continue;const px=X(t),py=Y(clamp(v,ymin-(ymax-ymin),ymax+(ymax-ymin)));first?c.moveTo(px,py):c.lineTo(px,py);first=false;}c.stroke();}
+  c.setLineDash([]);c.restore();
+  txt(c,o.ylab||'',x+6,y+12,{al:'left',sz:12,col:CS.muted});
+  if(o.xlab)txt(c,o.xlab,x+w-6,y+h-10,{al:'right',sz:12,col:CS.muted});
+  if(o.ytick){txt(c,o.ytick[0],x-4,Y(ymax),{al:'right',sz:11,col:CS.muted,mono:1,bl:'top'});txt(c,o.ytick[1],x-4,Y(ymin),{al:'right',sz:11,col:CS.muted,mono:1,bl:'bottom'});}
+  return{X,Y};}
+function canvasXY(cv,e){const r=cv.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top];}
+function hitTest(cv,e){const [x,y]=canvasXY(cv,e);return(cv._hits||[]).find(h=>x>=h.x&&x<=h.x+h.w&&y>=h.y&&y<=h.y+h.h);}
+
+/* ================= Dự đoán, kết luận ================= */
+const PRED={p1:{q:'p1q',o:['p1a','p1b','p1c'],c:1,e:'p1e'},p1b:{q:'p1bq',o:['p1bb','p1ba','p1bc'],c:0,e:'p1be'},
+  p2:{q:'p2q',o:['p2a','p2c','p2b'],c:2,e:'p2e'},p2b:{q:'p2bq',o:['p2ba','p2bb','p2bc'],c:1,e:'p2be'},
+  p3:{q:'p3q',o:['p3a','p3c','p3b'],c:2,e:'p3e'},p3b:{q:'p3bq',o:['p3ba','p3bb','p3bc'],c:1,e:'p3be'},
+  p4:{q:'p4q',o:['p4a','p4c','p4b'],c:2,e:'p4e'},p4b:{q:'p4bq',o:['p4ba','p4bb','p4bc'],c:1,e:'p4be'}};
+function predHTML(P){return `<h2>${T('predTitle')}</h2><p>${T(P.q)}</p><div class="opts">${P.o.map((k,i)=>`<button class="btn ${P.pick===i?'picked':''} ${P.show&&i===P.c?'right':''}" data-i="${i}">${T(k)}</button>`).join('')}</div>`+
+  (P.pick==null?'':`<p class="muted">${T('predThen')}</p><div><button class="btn sm rv">${T(P.show?'hideAns':'showAns')}</button></div>`)+(P.show?`<div class="ans">${T(P.e)}</div>`:'');}
+function renderPred(id){$(id).innerHTML=predHTML(PRED[id]);}
+Object.keys(PRED).forEach(id=>$(id).addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const P=PRED[id];
+  if(b.classList.contains('rv'))P.show=!P.show;else if(b.dataset.i!=null)P.pick=+b.dataset.i;renderPred(id);}));
+const CONC={c1:{q:'c1q',a:'c1a'},c2:{q:'c2q',a:'c2a'},c3:{q:'c3q',a:'c3a'},c4:{q:'c4q',a:'c4a'},c5:{q:'c5q',a:'c5a'}};
+function renderConc(id){const C=CONC[id];$(id).innerHTML=`<h2>${T('conclTitle')}</h2><p>${T(C.q)}</p><div><button class="btn sm">${T(C.show?'hideAns':'showAns')}</button></div>${C.show?`<div class="ans">${T(C.a)}</div>`:''}`;}
+Object.keys(CONC).forEach(id=>$(id).addEventListener('click',e=>{if(e.target.closest('button')){CONC[id].show=!CONC[id].show;renderConc(id);}}));
+
+/* ================= Thiết bị điện dùng chung (tab 1, 2) ================= */
+const U_MAINS=220;
+const APPS=[{k:'led',P:10},{k:'fan',P:60},{k:'tv',P:120},{k:'rice',P:700},{k:'iron',P:1000},{k:'kettle',P:1800},{k:'heater',P:2500}];
+const loadP=S=>APPS.reduce((s,a)=>s+(S.on.has(a.k)?a.P:0),0);
+function appsUI(id,S,onChange){const el=$(id);el.innerHTML='';APPS.forEach(a=>{const b=document.createElement('button');b.className='btn';
+  b.innerHTML=`${esc(T('a_'+a.k))}<small>${nf(a.P,0)} W</small>`;b.setAttribute('aria-pressed',String(S.on.has(a.k)));
+  b.onclick=()=>{S.on.has(a.k)?S.on.delete(a.k):S.on.add(a.k);onChange();};el.appendChild(b);});}
+function syncApps(id,S){[...$(id).children].forEach((b,i)=>b.setAttribute('aria-pressed',String(S.on.has(APPS[i].k))));}
+/* Vẽ dãy thiết bị mắc song song giữa dây pha (yL) và dây trung tính (yN); trả về vùng bấm */
+function drawLoads(c,x0,x1,yL,yN,yTop,yBot,S,powered,small){const n=APPS.length,cw=(x1-x0)/n,bw=Math.min(cw-6,120),bh=yBot-yTop,hits=[];
+  APPS.forEach((a,i)=>{const cx=x0+cw*(i+.5),bx=cx-bw/2,on=S.on.has(a.k),lit=on&&powered,xl=cx-bw*.22,xn=cx+bw*.22;
+    /* dây xuống: dây pha có "cầu vượt" qua dây trung tính */
+    c.strokeStyle=CS.live;c.lineWidth=2;c.beginPath();c.moveTo(xl,yL);c.lineTo(xl,yN-6);c.arc(xl,yN,6,-Math.PI/2,Math.PI/2,false);c.lineTo(xl,yTop);c.stroke();
+    dot(c,xl,yL,3.5,CS.live);line(c,[[xn,yN],[xn,yTop]],CS.neu,2);dot(c,xn,yN,3.5,CS.neu);
+    rrect(c,bx,yTop,bw,bh,8);c.fillStyle=lit?CS.lampOn:on?CS.lane:CS.panel;c.fill();c.lineWidth=on?2.5:1.5;c.strokeStyle=on?CS.gold:CS.line;c.setLineDash(on&&!powered?[5,4]:[]);c.stroke();c.setLineDash([]);
+    if(lit){c.save();c.globalAlpha=.25;c.shadowColor=CS.lampOn;c.shadowBlur=18;rrect(c,bx,yTop,bw,bh,8);c.fillStyle=CS.lampOn;c.fill();c.restore();}
+    const tc=lit?'#3a2a00':on?CS.ink:CS.muted;
+    if(!small)txt(c,T('a_'+a.k),cx,yTop+bh*.36,{sz:clamp(bw/8,10,14),col:tc});
+    if(small){const kw=a.P>=1000;txt(c,kw?nf(a.P/1000,1):nf(a.P,0),cx,yTop+bh*.42,{sz:clamp(bw/3.6,8,12),mono:1,col:tc});txt(c,kw?'kW':'W',cx,yTop+bh*.42+13,{sz:clamp(bw/3.6,8,11),mono:1,col:tc});}
+    else txt(c,nf(a.P,0)+' W',cx,yTop+bh*.68,{sz:clamp(bw/7,10,13),mono:1,col:tc});
+    if(on&&!powered&&!small)txt(c,T('noPower'),cx,yTop+bh*(small?.75:.88),{sz:10,col:CS.warn});
+    hits.push({x:bx,y:yTop,w:bw,h:bh,act:'app:'+a.k});});
+  return hits;}
+
+/* ================= TAB 1: Cầu chì ================= */
+/* Dây chì: θ' = (θss − θ)/τ, θss = θ0 + (θm − θ0)(I/If)², If ≈ 1,6·Iđm (dòng chảy quy ước). Dây dẫn 1,5 mm²: θss = θ0 + 40·(I/16)², τ = 60 s. */
+const T0=30,R_SHORT=0.4,I_CABLE=16,TAU_CAB=60;
+const fuseP=r=>r==='cu'?{If:200,Tm:1085,tau:6}:{If:1.6*r,Tm:230,tau:3};
+const S1={on:new Set(['led','fan','tv']),rating:10,Tf:T0,Tc:T0,blown:false,short:false,t:0,tChg:0,lastI:-1,H:[],hT:0,log:[],speed:1,fire:false,phase:0,flash:0,smoke:[]};
+function reset1(){Object.assign(S1,{Tf:T0,Tc:T0,blown:false,short:false,t:0,tChg:0,lastI:-1,H:[],hT:0,log:[],fire:false,flash:0,smoke:[]});ui1(true);}
+const I1=()=>S1.blown?0:S1.short?U_MAINS/R_SHORT:loadP(S1)/U_MAINS;
+function step1(dt){let Tsim=dt*S1.speed;let I=I1();if(Math.abs(I-S1.lastI)>1e-9){S1.tChg=S1.t;S1.lastI=I;}
+  const F=fuseP(S1.rating);let guard=0;
+  while(Tsim>1e-12&&guard++<30000){const r=I/F.If,rc=I/I_CABLE;const h=Math.min(Tsim,0.02,F.tau/(1+r*r)/25,TAU_CAB/(1+rc*rc)/25);
+    const Tssf=T0+(F.Tm-T0)*r*r,Tssc=T0+40*rc*rc;S1.Tf+=(Tssf-S1.Tf)*h/F.tau;S1.Tc+=(Tssc-S1.Tc)*h/TAU_CAB;S1.t+=h;Tsim-=h;
+    if(!S1.blown&&S1.Tf>=F.Tm){S1.blown=true;S1.Tf=F.Tm;S1.flash=1;S1.log.unshift({I,rat:S1.rating==='cu'?null:I/S1.rating,dt:S1.t-S1.tChg,cause:S1.short?'cShort':'cOver',cu:S1.rating==='cu'});
+      if(S1.log.length>8)S1.log.pop();I=0;S1.lastI=0;S1.tChg=S1.t;ui1(true);}
+    if(S1.Tc>150)S1.fire=true;}
+  S1.hT+=dt;if(S1.hT>0.05){S1.hT=0;S1.H.push([S1.t,I1(),S1.Tf,S1.Tc]);const win=30*S1.speed;while(S1.H.length&&S1.H[0][0]<S1.t-win)S1.H.shift();}
+  const Inow=I1();S1.phase+=dt*(S1.short&&!S1.blown?320:Math.min(200,6+5*Inow));S1.flash=Math.max(0,S1.flash-dt*1.2);
+  if(S1.Tc>100&&Math.random()<dt*(S1.Tc>150?30:6))S1.smoke.push({u:Math.random(),y:0,a:1});
+  S1.smoke.forEach(p=>{p.y+=dt*30;p.a-=dt*.5;});S1.smoke=S1.smoke.filter(p=>p.a>0);}
+const cv1=$('cv1');
+cv1.addEventListener('pointerdown',e=>{const h=hitTest(cv1,e);if(!h)return;e.preventDefault();
+  if(h.act.startsWith('app:')){const k=h.act.slice(4);S1.on.has(k)?S1.on.delete(k):S1.on.add(k);syncApps('apps1',S1);ui1();}
+  else if(h.act==='fuse'&&S1.blown){S1.blown=false;S1.Tf=T0;ui1(true);}});
+function cableCol(Tc){return Tc<70?CS.copper:Tc<100?mix(CS.copper,'#ff7a1a',(Tc-70)/30):Tc<150?mix('#ff7a1a','#d01010',(Tc-100)/50):mix('#d01010','#2a1a10',clamp((Tc-150)/150,0,1));}
+function drawFuse(c,x0,x1,y,hh,S,F){const w=x1-x0;rrect(c,x0,y-hh/2,w,hh,6);c.fillStyle=CS.ceramic;c.fill();c.strokeStyle=CS.ceramic2;c.lineWidth=1.5;c.stroke();
+  const sx0=x0+w*.13,sx1=x1-w*.13;[sx0,sx1].forEach(sx=>{dot(c,sx,y,hh*.16,CS.metal2);line(c,[[sx-hh*.1,y],[sx+hh*.1,y]],CS.panel,1.5);});
+  const col=S.rating==='cu'?hotColor(CS.copper,S.Tf):hotColor(CS.metal,S.Tf*(1085/F.Tm)*0.6);const lw=S.rating==='cu'?5:2.2;
+  if(!S.blown){if(S.Tf>120){c.save();c.shadowColor=col;c.shadowBlur=clamp((S.Tf-120)/8,0,20);line(c,[[sx0,y],[sx1,y]],col,lw);c.restore();}else line(c,[[sx0,y],[sx1,y]],col,lw);}
+  else{const g=(sx1-sx0)*.18,mx=(sx0+sx1)/2;line(c,[[sx0,y],[mx-g,y+2]],CS.metal,lw);line(c,[[mx+g,y+2],[sx1,y]],CS.metal,lw);dot(c,mx-g,y+2,3.5,CS.metal);dot(c,mx+g,y+2,3.5,CS.metal);
+    if(S.flash>0){c.save();c.globalAlpha=S.flash;for(let i=0;i<10;i++){const a=i/10*Math.PI*2;line(c,[[mx+Math.cos(a)*6,y+Math.sin(a)*6],[mx+Math.cos(a)*(10+18*S.flash),y+Math.sin(a)*(10+18*S.flash)]],CS.spark,2.5);}c.restore();}}}
+function draw1(){const ph=isPhone();const {c,w,h}=fit(cv1,ph?.95:.5);const hits=[];
+  const yL=h*(ph?.17:.16),yN=h*(ph?.44:.42),xS=w*.02,xS1=w*(ph?.16:.13),xf0=w*(ph?.18:.16),xf1=w*(ph?.34:.30),xe=w*.98,F=fuseP(S1.rating),I=I1();
+  /* nguồn */
+  rrect(c,xS,yL-h*.09,xS1-xS,yN-yL+h*.18,8);c.fillStyle=CS.lane;c.fill();c.strokeStyle=CS.ink;c.lineWidth=1.5;c.stroke();
+  txt(c,'220 V',(xS+xS1)/2,(yL+yN)/2-8,{sz:ph?12:15,w:800});txt(c,'~',(xS+xS1)/2,(yL+yN)/2+12,{sz:20,w:800});
+  txt(c,'L',xS1-8,yL,{sz:12,col:CS.live,w:800});txt(c,'N',xS1-8,yN,{sz:12,col:CS.neu,w:800});
+  /* dây pha tới cầu chì, cầu chì, dây dẫn */
+  line(c,[[xS1,yL],[xf0,yL]],CS.live,4);
+  const cc=cableCol(S1.Tc),lw=ph?5:7;
+  c.lineCap='round';line(c,[[xf1,yL],[xe,yL]],cc,lw);line(c,[[xS1,yN],[xe,yN]],cc,lw);c.lineCap='butt';
+  line(c,[[xf1,yL],[xe,yL]],CS.live,1.5);line(c,[[xS1,yN],[xe,yN]],CS.neu,1.5);
+  const fh=h*(ph?.11:.13);drawFuse(c,xf0,xf1,yL,fh,S1,F);hits.push({x:xf0,y:yL-fh/2,w:xf1-xf0,h:fh,act:'fuse'});
+  txt(c,`${T('fuse')} ${S1.rating==='cu'?'Cu':S1.rating+' A'}`,(xf0+xf1)/2,yL-fh/2-11,{sz:ph?11:13});
+  txt(c,S1.blown?'✕':nf(S1.Tf,0)+' °C',(xf0+xf1)/2,yL+fh/2+11,{sz:ph?11:13,mono:1,col:S1.Tf>F.Tm*.7?CS.warn:CS.muted,cls:'num'});
+  txt(c,`${T('cable')}: ${nf(S1.Tc,0)} °C`,(xf1+xe)/2,yN+(ph?15:20),{sz:ph?11:13,col:S1.Tc>70?CS.warn:CS.muted});
+  /* khói */
+  S1.smoke.forEach(p=>{const x=lerp(xf1,xe,p.u);c.globalAlpha=clamp(p.a,0,1)*.6;dot(c,x,yL-6-p.y,5+p.y*.2,CS.smoke);c.globalAlpha=1;});
+  if(S1.fire){txtBg(c,'⚠ '+T('s1fire').split('(')[0].trim(),(xf1+xe)/2,yL-h*.08,{sz:ph?11:14,col:CS.warn,w:800});}
+  /* chập mạch */
+  const xs=w*.66;
+  if(S1.short){const on=!S1.blown;c.save();c.globalAlpha=on?.6+.4*Math.random():.5;let y=yL,x=xs;c.strokeStyle=on?CS.spark:CS.muted;c.lineWidth=on?3:2;c.beginPath();c.moveTo(x,y);
+    for(let k=1;k<=6;k++){y=lerp(yL,yN,k/6);x=xs+(k<6?(Math.random()-.5)*14:0);c.lineTo(x,y);}c.stroke();c.restore();
+    txtBg(c,T('shortOn').split('(')[0].trim(),xs,(yL+yN)/2,{sz:ph?11:12,col:CS.warn,w:800});}
+  /* dòng điện */
+  if(I>0){const xEnd=S1.short?xs:xe;flowDots(c,[[xS1,yL],[xEnd,yL]],S1.phase,CS.vel,18,2.6);flowDots(c,[[xEnd,yN],[xS1,yN]],S1.phase,CS.vel,18,2.6);}
+  txt(c,'I = '+nf(I,I<10?2:0)+' A',(xS+xS1)/2,yN+h*.055,{sz:ph?10:13,col:CS.vel,w:700});
+  /* thiết bị */
+  hits.push(...drawLoads(c,xf1+w*.01,xe,yL,yN,h*(ph?.58:.56),h*.96,S1,!S1.blown&&!S1.short,ph));
+  cv1._hits=hits;}
+function drawG1(){const ph=isPhone();const {c,w,h}=fit($('gr1'),ph?.6:.26);const L=44,R=8,gap=10,ph2=(h-gap-6)/2,win=30*S1.speed,t1=Math.max(win,S1.t),t0=t1-win;
+  const Imax=Math.max(20,...S1.H.map(p=>Math.min(p[1],600)));const F=fuseP(S1.rating);const Tm=Math.min(F.Tm,1100),Tmax=Math.max(260,Math.min(1150,Math.max(Tm*1.1,...S1.H.map(p=>p[3]))));
+  plot(c,L,3,w-L-R,ph2,{t0,t1,ymin:0,ymax:Imax,series:[{d:S1.H,col:CS.vel,i:1}],ylab:'I (A)',ytick:[nf(Imax,0),'0'],hl:[[S1.rating==='cu'?null:S1.rating,S1.rating==='cu'?'':T('kIn')]].filter(v=>v[0]!=null)});
+  plot(c,L,3+ph2+gap,w-L-R,ph2,{t0,t1,ymin:0,ymax:Tmax,series:[{d:S1.H,col:CS.heat,i:2},{d:S1.H,col:CS.copper2,i:3,dash:[6,4]}],ylab:'θ (°C)',xlab:'t (s)',ytick:[nf(Tmax,0),'0'],hl:[[Tm,T('kTm')+' '+nf(F.Tm,0)+' °C'],[150,'150 °C']]});}
+let st1=null;
+function ui1(full){const I=I1(),F=fuseP(S1.rating),P=loadP(S1);
+  if(full){seg('fz1',[{k:5,label:'5 A'},{k:10,label:'10 A'},{k:15,label:'15 A'},{k:'cu',label:T('fuseCu')}],S1.rating,k=>{S1.rating=k;S1.lastI=-1;ui1(true);});
+    seg('sp1',[{k:1,label:'×1'},{k:10,label:'×10'}],S1.speed,k=>{S1.speed=k;S1.H=[];ui1(true);});
+    $('sh1').textContent=T(S1.short?'shortOff':'shortOn');$('sh1').setAttribute('aria-pressed',String(S1.short));$('rp1').disabled=!S1.blown;
+    const L=S1.log;$('log1').innerHTML=L.length?`<thead><tr><th>${T('lgN')}</th><th>${T('lgCur')}</th><th>${T('lgRat')}</th><th>${T('lgTime')}</th><th>${T('lgCause')}</th></tr></thead><tbody>`+
+      L.map((r,i)=>`<tr><td>${L.length-i}</td><td class="num">${nf(r.I,r.I<100?1:0)}</td><td class="num">${r.rat==null?'—':nf(r.rat,r.rat<10?2:0)}</td><td class="num">${fmtT(r.dt)}</td><td>${T(r.cause)}${r.cu?' (Cu)':''}</td></tr>`).join('')+'</tbody>':`<tbody><tr><td class="muted">${T('noLog')}</td></tr></tbody>`;}
+  let s,cls='';
+  if(S1.fire){s=T('s1fire');cls='bad';}else if(S1.blown){s=T(S1.log[0]&&S1.log[0].cause==='cShort'?'s1blownShort':'s1blown');cls='bad';}
+  else if(S1.short){s=T('s1short');cls='bad';}else if(S1.Tc>100){s=T('s1melt');cls='bad';}else if(S1.Tc>70){s=T('s1hot');cls='bad';}
+  else if(S1.rating!=='cu'&&I>S1.rating){s=T('s1over');cls='bad';}else{s=T('s1ok');cls='good';}
+  if(s!==st1){$('st1').textContent=s;$('st1').className='status '+cls;st1=s;}
+  $('kv1').innerHTML=`<dt>${T('kI')}</dt><dd class="num">${nf(I,I<100?2:0)} A</dd><dt>${T('kP')}</dt><dd class="num">${nf(P,0)} W</dd>`+
+    `<dt>${T('kIn')}</dt><dd>${S1.rating==='cu'?'—':S1.rating+' A'}</dd><dt>${T('kRatio')}</dt><dd class="num">${S1.rating==='cu'?'—':nf(I/S1.rating,2)+' ×'}</dd>`+
+    `<dt>${T('kTf')}</dt><dd class="num">${S1.blown?'—':nf(S1.Tf,0)+' °C'}</dd><dt>${T('kTm')}</dt><dd>${nf(F.Tm,0)} °C</dd><dt>${T('kTc')}</dt><dd class="num">${nf(S1.Tc,0)} °C</dd>`;}
+appsUI('apps1',S1,()=>ui1());
+$('sh1').onclick=()=>{S1.short=!S1.short;ui1(true);};
+$('rp1').onclick=()=>{if(S1.blown){S1.blown=false;S1.Tf=T0;ui1(true);}};
+$('rst1').onclick=()=>{reset1();};
+
+/* ================= TAB 2: Cầu dao tự động ================= */
+/* Phiến lưỡng kim: θ' = (θss − θ)/τ, θss = 30 + 60·(I/(1,3·Iđm))², ngắt ở 90 °C, τ = 20 s (rút ngắn).
+   Nam châm điện: I ≥ 7·Iđm (loại C) → ngắt sau 8 ms. RCD: dòng rò ≥ 30 mA trong 30 ms → ngắt. */
+const TB_TRIP=90,TB_TAU=20,K_TH=1.3,K_MAG=7,R_BODY=1500,MAG_DELAY=0.008,RCD_I=0.03,RCD_T=0.03;
+const S2={on:new Set(['led','fan','tv','rice']),In:16,Tb:T0,closed:true,short:false,touch:false,rcd:false,t:0,tChg:0,lastI:-1,trip:null,magT:0,rcdT:0,shock:0,plunger:0,arc:0,speed:1,msg:null,trips:[],phase:0};
+function reset2(){Object.assign(S2,{Tb:T0,closed:true,short:false,touch:false,t:0,tChg:0,lastI:-1,trip:null,magT:0,rcdT:0,shock:0,plunger:0,arc:0,msg:null,trips:[]});ui2(true);}
+const Ib2=()=>S2.closed&&S2.touch?U_MAINS/R_BODY:0;
+const Iload2=()=>S2.closed?(S2.short?U_MAINS/R_SHORT:loadP(S2)/U_MAINS):0;
+const I2=()=>Iload2()+Ib2();
+const tTripCB=r=>r>=K_MAG?MAG_DELAY:r>K_TH?-TB_TAU*Math.log(1-(K_TH/r)**2):Infinity;
+const tTripFuse=r=>r>1.6?-3*Math.log(1-(1.6/r)**2):Infinity;
+function trip2(why){if(!S2.closed)return;const I=I2();S2.trips.push({r:I/S2.In,t:S2.t-S2.tChg,why});if(S2.trips.length>12)S2.trips.shift();
+  S2.closed=false;S2.trip=why;S2.arc=I>1?.35:0;S2.msg=null;ui2(true);}
+function step2(dt){let Tsim=dt*S2.speed,guard=0;
+  while(Tsim>1e-12&&guard++<20000){const I=I2();if(Math.abs(I-S2.lastI)>1e-9){S2.tChg=S2.t;S2.lastI=I;}
+    const r=I/(K_TH*S2.In),h=Math.min(Tsim,0.002,TB_TAU/(1+r*r)/25);
+    S2.Tb+=((T0+60*r*r)-S2.Tb)*h/TB_TAU;S2.t+=h;Tsim-=h;
+    if(S2.closed){if(I>=K_MAG*S2.In){S2.magT+=h;if(S2.magT>=MAG_DELAY){trip2('mag');continue;}}else S2.magT=0;
+      if(S2.Tb>=TB_TRIP){trip2('thermal');continue;}
+      const Ib=Ib2();if(Ib>0)S2.shock+=h;
+      if(S2.rcd&&Ib>=RCD_I){S2.rcdT+=h;if(S2.rcdT>=RCD_T){trip2('rcd');continue;}}else S2.rcdT=0;}}
+  S2.plunger=clamp(S2.plunger+(S2.trip==='mag'&&!S2.closed?dt*8:-dt*3),0,1);S2.arc=Math.max(0,S2.arc-dt);
+  S2.phase+=dt*(S2.short&&S2.closed?320:Math.min(200,6+5*I2()));}
+const cv2=$('cv2');
+cv2.addEventListener('pointerdown',e=>{const h=hitTest(cv2,e);if(!h)return;e.preventDefault();
+  if(h.act.startsWith('app:')){const k=h.act.slice(4);S2.on.has(k)?S2.on.delete(k):S2.on.add(k);syncApps('apps2',S2);ui2();}
+  else if(h.act==='handle')toggleCB();else if(h.act==='person'){S2.touch=!S2.touch;S2.shock=0;ui2(true);}});
+function toggleCB(){if(S2.closed){S2.closed=false;S2.trip='manual';S2.msg=null;}
+  else if(S2.Tb>TB_TRIP-10){S2.msg='s2hot';}
+  else{S2.closed=true;S2.trip=null;S2.msg=null;S2.magT=0;S2.rcdT=0;S2.shock=0;}ui2(true);}
+function drawCB(c,X,Y,W,H,ph){/* X..: vùng vẽ; vỏ chiếm 58 % bên trái, nhãn bên phải */
+  const hw=W*(ph?.52:.6),P=(u,v)=>[X+u*hw,Y+v*H],fs=ph?10:12.5,lx=X+hw+8;
+  rrect(c,X,Y,hw,H,12);c.fillStyle=CS.lane;c.fill();c.strokeStyle=CS.ink;c.lineWidth=2;c.stroke();
+  const lab=(s,u,v,yy,sub)=>{const [x,y]=P(u,v);line(c,[[x,y],[lx-4,yy]],CS.muted,1,[3,3]);txt(c,s,lx,yy-(sub?7:0),{al:'left',sz:fs,w:700});if(sub)txt(c,sub,lx,yy+8,{al:'left',sz:fs-1,col:CS.muted,w:500});};
+  const I=I2(),hot=clamp((S2.Tb-T0)/(TB_TRIP-T0),0,1.15);
+  /* đường dòng điện: vào → tiếp điểm tĩnh │ tiếp điểm động → cuộn dây → phiến lưỡng kim → ra */
+  const pin=P(.5,.04),fc=P(.5,.24),piv=P(.78,.34),open=!S2.closed,ang=open?.42:0;
+  const tip0=[fc[0]+4,fc[1]+6],dx=tip0[0]-piv[0],dy=tip0[1]-piv[1],tip=[piv[0]+dx*Math.cos(ang)-dy*Math.sin(ang),piv[1]+dx*Math.sin(ang)+dy*Math.cos(ang)];
+  const cT=P(.78,.46),cB=P(.78,.62),bimB=P(.62,.9),bimTop0=P(.62,.68),pout=P(.5,.97);
+  const bend=hot*hw*.13,bimTip=[bimTop0[0]-bend,bimTop0[1]+Math.abs(bend)*.15];
+  const path=[pin,fc,tip,piv,cT,cB,[cB[0],cB[1]+H*.04],bimTip,bimB,[pout[0],bimB[1]],pout];
+  line(c,[pin,fc],CS.copper,3);line(c,[piv,cT],CS.copper,3);line(c,[cB,[cB[0],cB[1]+H*.04]],CS.copper,3);
+  c.strokeStyle=CS.copper;c.lineWidth=2;c.setLineDash([2,3]);c.beginPath();c.moveTo(cB[0],cB[1]+H*.04);c.quadraticCurveTo(bimTip[0]+hw*.12,bimTip[1]-H*.02,bimTip[0],bimTip[1]);c.stroke();c.setLineDash([]);
+  line(c,[bimB,[pout[0],bimB[1]],pout],CS.copper,3);
+  /* đầu nối */
+  [pin,pout].forEach(p=>{dot(c,p[0],p[1],7,CS.metal2);line(c,[[p[0]-4,p[1]],[p[0]+4,p[1]]],CS.panel,1.5);});
+  /* tiếp điểm, cần tiếp điểm động */
+  c.fillStyle=CS.metal;c.fillRect(fc[0]-8,fc[1]-3,16,6);line(c,[piv,tip],CS.metal2,5);dot(c,piv[0],piv[1],4,CS.ink);dot(c,tip[0],tip[1],4.5,CS.metal);
+  if(S2.arc>0){c.save();c.globalAlpha=clamp(S2.arc*3,0,1);for(let k=0;k<3;k++){c.strokeStyle=k?CS.spark:'#fff';c.lineWidth=3-k;c.beginPath();c.moveTo(fc[0],fc[1]+3);
+    for(let j=1;j<=5;j++)c.lineTo(lerp(fc[0],tip[0],j/5)+(Math.random()-.5)*8,lerp(fc[1]+3,tip[1],j/5)+(Math.random()-.5)*8);c.stroke();}c.restore();}
+  /* buồng dập hồ quang */
+  for(let k=0;k<5;k++){const a=P(.14+k*.045,.27),b=P(.2+k*.045,.4);line(c,[a,b],CS.metal2,2.5);}
+  /* cuộn dây + lõi sắt */
+  const cx0=P(.64,.46),cx1=P(.92,.62);c.fillStyle=CS.panel;c.fillRect(cx0[0],cx0[1],cx1[0]-cx0[0],cx1[1]-cx0[1]);
+  for(let k=0;k<=9;k++){const x=lerp(cx0[0],cx1[0],k/9);line(c,[[x,cx0[1]],[x+3,cx1[1]]],CS.copper,2.2);}
+  const plL=lerp(P(.56,0)[0],P(.47,0)[0],S2.plunger),plY=(cx0[1]+cx1[1])/2;c.fillStyle=CS.metal2;c.fillRect(plL,plY-4,cx1[0]-plL-6,8);
+  if(I>=K_MAG*S2.In*.3&&S2.closed){c.save();c.globalAlpha=.35;c.strokeStyle=CS.heat;c.lineWidth=1.5;for(let k=1;k<=2;k++){c.beginPath();c.ellipse((cx0[0]+cx1[0])/2,plY,(cx1[0]-cx0[0])/2+k*7,(cx1[1]-cx0[1])/2+k*6,0,0,Math.PI*2);c.stroke();}c.restore();}
+  /* phiến lưỡng kim (hai lớp) */
+  const drawStrip=(off,col)=>{c.strokeStyle=col;c.lineWidth=4;c.beginPath();c.moveTo(bimB[0]+off,bimB[1]);c.quadraticCurveTo(bimB[0]+off,lerp(bimB[1],bimTip[1],.5),bimTip[0]+off,bimTip[1]);c.stroke();};
+  drawStrip(-2.5,hot>.85?hotColor(CS.copper,400+hot*200):CS.copper);drawStrip(2.5,CS.metal2);c.fillStyle=CS.ink;c.fillRect(bimB[0]-9,bimB[1]-2,18,8);
+  /* chốt ngắt */
+  const lt=P(.4,.36),lb=P(.4,.76),trp=lerp(bimTop0[0],bimTop0[0]-hw*.13,1);
+  line(c,[[trp,lt[1]+H*.2],[trp,lb[1]]],CS.force,3);line(c,[[trp,lt[1]+H*.2],lt,P(.22,.2)],CS.force,2,[5,4]);
+  /* cần gạt */
+  const hp=P(.2,.16),hl=Math.min(hw,H)*.16,ha=S2.closed?-Math.PI/2-.55:Math.PI/2+.55;const he=[hp[0]+Math.cos(ha)*hl,hp[1]+Math.sin(ha)*hl];
+  line(c,[hp,he],S2.closed?CS.ok:CS.warn,9);dot(c,hp[0],hp[1],7,CS.ink);
+  txt(c,T(S2.closed?'on':'off'),hp[0]+hl*.9,hp[1]+(S2.closed?-hl*.55:hl*.55),{sz:fs,w:800,col:S2.closed?CS.ok:CS.warn});
+  /* dòng điện */
+  if(I>0)flowDots(c,path,S2.phase,CS.vel,16,2.4);
+  /* nhãn */
+  lab(T('p_handle'),.2,.16,Y+H*.06);lab(T('p_contact'),.5,.24,Y+H*.17);lab(T('p_arc'),.3,.34,Y+H*.28);
+  lab(T('p_coil'),.92,.54,Y+H*.44,T('p_coil2'));lab(T('p_latch'),(trp-X)/hw,.62,Y+H*.62);lab(T('p_bim'),.62,.8,Y+H*.79,T('p_bim2'));
+  txt(c,T('p_in'),pin[0]+12,pin[1]+1,{al:'left',sz:fs-1,col:CS.muted,w:500});txt(c,T('p_out'),pout[0]+12,pout[1]-2,{al:'left',sz:fs-1,col:CS.muted,w:500});
+  txt(c,'θ = '+nf(S2.Tb,0)+' °C',bimB[0]+16,bimB[1]-H*.1,{al:'left',sz:fs,mono:1,col:hot>.8?CS.warn:CS.muted});
+  return [{x:hp[0]-hl,y:hp[1]-hl,w:hl*2,h:hl*2,act:'handle'}];}
+function drawHouse2(c,X,Y,W,H,ph){const hits=[];const yL=Y+H*.12,yN=Y+H*.34,x0=X,xe=X+W,I=I2(),on=S2.closed;
+  line(c,[[x0,yL],[xe,yL]],CS.live,4);line(c,[[x0,yN],[xe,yN]],CS.neu,4);
+  txt(c,'L',x0+8,yL-12,{sz:12,col:CS.live,w:800});txt(c,'N',x0+8,yN-12,{sz:12,col:CS.neu,w:800});
+  if(S2.rcd){const bx=x0+W*.06,bw=Math.min(90,W*.18);rrect(c,bx,yL-14,bw,yN-yL+28,6);c.fillStyle=CS.panel;c.fill();c.strokeStyle=S2.trip==='rcd'?CS.warn:CS.accent;c.lineWidth=2;c.stroke();
+    txt(c,'RCD',bx+bw/2,(yL+yN)/2-7,{sz:12,w:800,col:CS.accent});txt(c,'30 mA',bx+bw/2,(yL+yN)/2+8,{sz:11,mono:1,col:CS.muted});}
+  const xs=X+W*.55;
+  if(S2.short){c.save();c.globalAlpha=on?.6+.4*Math.random():.45;let x=xs;c.strokeStyle=on?CS.spark:CS.muted;c.lineWidth=on?3:2;c.beginPath();c.moveTo(xs,yL);
+    for(let k=1;k<=6;k++){x=xs+(k<6?(Math.random()-.5)*14:0);c.lineTo(x,lerp(yL,yN,k/6));}c.stroke();c.restore();}
+  if(I>0){const xEnd=S2.short?xs:xe;flowDots(c,[[x0,yL],[xEnd,yL]],S2.phase,CS.vel,18,2.4);flowDots(c,[[xEnd,yN],[x0,yN]],S2.phase,CS.vel,18,2.4);}
+  /* người chạm dây pha */
+  const px=X+W*.86,py=yL,sc=Math.min(H*.32,70);
+  if(S2.touch){const hy=py+4,bodyTop=yN+sc*.25,feet=bodyTop+sc*1.2;c.strokeStyle=CS.ink;c.lineWidth=3;
+    dot(c,px,bodyTop-sc*.18,sc*.13,CS.ink);line(c,[[px,bodyTop],[px,bodyTop+sc*.6]],CS.ink,3);line(c,[[px,bodyTop+sc*.12],[px-sc*.12,hy+2]],CS.ink,3);
+    line(c,[[px,bodyTop+sc*.6],[px-sc*.2,feet]],CS.ink,3);line(c,[[px,bodyTop+sc*.6],[px+sc*.2,feet]],CS.ink,3);
+    line(c,[[px-sc*.5,feet+3],[px+sc*.5,feet+3]],CS.muted,3);for(let k=0;k<4;k++)line(c,[[px-sc*.4+k*sc*.25,feet+3],[px-sc*.5+k*sc*.25,feet+10]],CS.muted,1.5);
+    if(Ib2()>0){c.save();c.globalAlpha=.5+.5*Math.random();arrow(c,px+sc*.25,bodyTop,px+sc*.25,feet-6,CS.spark,3);c.restore();
+      txtBg(c,nf(Ib2()*1000,0)+' mA',px,bodyTop-sc*.45,{al:'center',sz:12,mono:1,col:CS.warn});}
+    hits.push({x:px-sc*.5,y:bodyTop-sc*.35,w:sc,h:feet-bodyTop+sc*.4,act:'person'});}
+  hits.push(...drawLoads(c,x0+W*.02,X+(S2.touch?W*.72:W),yL,yN,Y+H*(S2.touch?.5:.52),Y+H*.96,S2,on&&!S2.short,ph||W<520));
+  return hits;}
+function draw2(){const ph=isPhone();const {c,w,h}=fit(cv2,ph?1.45:.56);let hits=[];
+  if(ph){hits=drawCB(c,4,6,w-8,h*.56,ph);const y0=h*.6;line(c,[[w*.28,h*.56+2],[w*.28,y0+h*.4*.12],[8,y0+h*.4*.12]],CS.live,3);hits.push(...drawHouse2(c,8,y0,w-16,h*.4,ph));}
+  else{const cw=w*.5;hits=drawCB(c,8,8,cw,h-16,ph);const pout=[8+cw*.6*.5,8+(h-16)*.97],hx=8+cw+14,hy=h*.1;
+    line(c,[pout,[pout[0],h-4],[hx-6,h-4],[hx-6,hy+(h*.8)*.12],[hx,hy+(h*.8)*.12]],CS.live,3);hits.push(...drawHouse2(c,hx,hy,w-hx-8,h*.8,ph));}
+  cv2._hits=hits;}
+function drawG2(){const ph=isPhone();const {c,w,h}=fit($('gr2'),ph?.75:.34);const L=52,B=30,Tp=10,R=12,pw=w-L-R,phh=h-B-Tp;
+  const r0=Math.log10(.5),r1=Math.log10(30),t0=Math.log10(.003),t1=Math.log10(3000);
+  const X=r=>L+(Math.log10(r)-r0)/(r1-r0)*pw,Y=t=>Tp+phh-(Math.log10(t)-t0)/(t1-t0)*phh;
+  c.fillStyle=CS.panel;c.fillRect(L,Tp,pw,phh);c.strokeStyle=CS.line;c.strokeRect(L+.5,Tp+.5,pw-1,phh-1);
+  [1,2,5,10,20].forEach(r=>{line(c,[[X(r),Tp],[X(r),Tp+phh]],CS.line,1);txt(c,nf(r,0)+'×',X(r),Tp+phh+11,{sz:11,mono:1,col:CS.muted});});
+  [0.01,0.1,1,10,100,1000].forEach(t=>{line(c,[[L,Y(t)],[L+pw,Y(t)]],CS.line,1);txt(c,t<1?nf(t,2):nf(t,0),L-5,Y(t),{al:'right',sz:11,mono:1,col:CS.muted});});
+  txt(c,lang==='vi'?'I / Iđm':'I / rating',L+pw-4,Tp+phh+24,{al:'right',sz:12,col:CS.muted});txt(c,lang==='vi'?'thời gian ngắt (s)':'trip time (s)',L+6,Tp+12,{al:'left',sz:12,col:CS.muted});
+  c.save();c.beginPath();c.rect(L,Tp,pw,phh);c.clip();
+  const curve=(f,col,dash)=>{c.strokeStyle=col;c.lineWidth=2.5;c.setLineDash(dash||[]);c.beginPath();let first=true;
+    for(let i=0;i<=400;i++){const r=Math.pow(10,lerp(r0,r1,i/400)),t=f(r);if(!isFinite(t)||t>4000){first=true;continue;}const x=X(r),y=Y(Math.max(t,.003));first?c.moveTo(x,y):c.lineTo(x,y);first=false;}c.stroke();c.setLineDash([]);};
+  curve(tTripFuse,CS.heat,[6,4]);curve(tTripCB,CS.accent);
+  S2.trips.forEach(p=>{const r=clamp(p.r,.5,30);dot(c,X(r),Y(clamp(p.t,.003,3000)),4,CS.muted);});
+  c.restore();
+  const I=I2(),r=I/S2.In;if(I>0){const rr=clamp(r,.5,30),t=tTripCB(r);const y=isFinite(t)?Y(clamp(t,.003,3000)):Tp+8;
+    line(c,[[X(rr),Tp],[X(rr),Tp+phh]],CS.force,1.5,[3,3]);dot(c,X(rr),y,6,CS.force);
+    txtBg(c,isFinite(t)?fmtT(t):T('kNever'),X(rr)+(rr>8?-8:8),y+(isFinite(t)?-14:10),{al:rr>8?'right':'left',sz:12,col:CS.force,w:700});}}
+let st2=null;
+function ui2(full){const I=I2(),Ib=Ib2();
+  if(full){seg('cb2',[10,16,20,32].map(k=>({k,label:k+' A'})),S2.In,k=>{S2.In=k;ui2(true);});
+    seg('sp2',[{k:1,label:'×1'},{k:10,label:'×10'}],S2.speed,k=>{S2.speed=k;ui2(true);});
+    $('sh2').textContent=T(S2.short?'shortOff2':'shortOn2');$('sh2').setAttribute('aria-pressed',String(S2.short));
+    $('tc2').textContent=T(S2.touch?'touchOff':'touchOn');$('tc2').setAttribute('aria-pressed',String(S2.touch));
+    $('rs2').textContent=T(S2.closed?'cbOn':'cbOff');$('rcd2').checked=S2.rcd;}
+  let s,cls='bad';
+  if(S2.msg){s=T(S2.msg);}else if(!S2.closed){s=S2.trip==='thermal'?T('s2thermal'):S2.trip==='mag'?T('s2mag'):S2.trip==='rcd'?T('s2rcd'):T('s2off');cls=S2.trip==='rcd'?'good':S2.trip==='manual'?'':'bad';}
+  else if(Ib>0)s=Tf('s2shock',{i:nf(Ib*1000,0),n:S2.In});else if(I>K_TH*S2.In)s=T('s2over');else{s=T('s2ok');cls='good';}
+  if(s!==st2){$('st2').textContent=s;$('st2').className='status '+cls;st2=s;}
+  const Tss=T0+60*(I/(K_TH*S2.In))**2;let tr=Infinity;if(S2.closed){if(I>=K_MAG*S2.In)tr=0;else if(Tss>TB_TRIP)tr=TB_TAU*Math.log((Tss-S2.Tb)/(Tss-TB_TRIP));}
+  $('kv2').innerHTML=`<dt>${T('kIcb')}</dt><dd class="num">${nf(I,I<100?2:0)} A</dd><dt>${T('kInCb')}</dt><dd>${S2.In} A (${nf(I/S2.In,2)} ×)</dd>`+
+    `<dt>${T('kTb')}</dt><dd class="num">${nf(S2.Tb,0)} °C / ${TB_TRIP} °C</dd><dt>${T('kTrip')}</dt><dd class="num">${!S2.closed?'—':tr===0?T('kInst'):isFinite(tr)?fmtT(Math.max(0,tr)):T('kNever')}</dd>`+
+    `<dt>${T('kIb')}</dt><dd class="num">${nf(Ib*1000,0)} mA</dd><dt>${T('kLeak')}</dt><dd class="num">${nf(Ib*1000,0)} mA</dd>`+(S2.touch?`<dt>${T('kShock')}</dt><dd class="num">${fmtT(S2.shock)}</dd>`:'');
+  $('bm2').style.width=clamp((S2.Tb-T0)/(TB_TRIP-T0)*100,0,100)+'%';}
+appsUI('apps2',S2,()=>ui2());
+$('sh2').onclick=()=>{S2.short=!S2.short;ui2(true);};
+$('tc2').onclick=()=>{S2.touch=!S2.touch;S2.shock=0;ui2(true);};
+$('rcd2').onchange=e=>{S2.rcd=e.target.checked;ui2(true);};
+$('rs2').onclick=toggleCB;$('rst2').onclick=reset2;
+
+/* ================= TAB 3: Rơ le ================= */
+/* Rơ le 5 V, cuộn dây 70 Ω. Lực từ Fm = kM·I²/(g0 + G(1−s))², lò xo Fs = F0(1 + 0,44 s); s = 0 nhả, s = 1 hút.
+   Chọn kM để hút ở 3,75 V; với các tham số này nhả ở 1,5 V. */
+const RC=70,G0=0.25e-3,GG=0.5e-3,F0=0.10,UP=3.75,KM=F0*(G0+GG)**2/((UP/RC)**2);
+const S3={mode:'man',K:false,U:5,ct:'NO',ld:'lamp',s:0,closed:false,lvl:.55,flt:false,H:[],phase:0,pumpA:0};
+const Ic3=()=>(S3.mode==='man'?S3.K:S3.flt)?S3.U/RC:0;
+const Fm3=s=>KM*Ic3()**2/(G0+GG*(1-s))**2,Fs3=s=>F0*(1+.44*s);
+const loadOn3=()=>S3.ct==='NO'?S3.s>.95:S3.s<.05;
+const PL3=()=>S3.mode==='app'||S3.ld==='pump'?750:100;
+function step3(dt){if(!S3.closed&&Fm3(0)>Fs3(0))S3.closed=true;else if(S3.closed&&Fm3(1)<Fs3(1))S3.closed=false;
+  S3.s=clamp(S3.s+(S3.closed?1:-1)*dt/.12,0,1);
+  if(S3.mode==='app'){S3.lvl=clamp(S3.lvl-.025*dt+(loadOn3()?.09*dt:0),0,1);if(S3.lvl<.2)S3.flt=true;if(S3.lvl>.9)S3.flt=false;}
+  const last=S3.H[S3.H.length-1],st=S3.closed?1:0,ue=Ic3()>0?S3.U:0;if(!last||Math.abs(last[0]-ue)>.04||last[1]!==st){S3.H.push([ue,st]);if(S3.H.length>300)S3.H.shift();}
+  S3.phase+=dt*60;if(loadOn3())S3.pumpA+=dt*12;}
+const cv3=$('cv3');
+cv3.addEventListener('pointerdown',e=>{const h=hitTest(cv3,e);if(!h)return;e.preventDefault();if(h.act==='K'&&S3.mode==='man'){S3.K=!S3.K;ui3(true);}});
+function drawLamp(c,x,y,r,on){if(on){c.save();c.shadowColor=CS.lampOn;c.shadowBlur=30;dot(c,x,y,r,CS.lampOn);c.restore();}
+  c.strokeStyle=CS.ink;c.lineWidth=2;c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.stroke();line(c,[[x-r*.7,y-r*.7],[x+r*.7,y+r*.7]],CS.ink,2);line(c,[[x-r*.7,y+r*.7],[x+r*.7,y-r*.7]],CS.ink,2);}
+function drawPump(c,x,y,r,on,a){c.fillStyle=on?CS.water:CS.panel;c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.fill();c.strokeStyle=CS.ink;c.lineWidth=2;c.stroke();
+  for(let k=0;k<4;k++){const an=a+k*Math.PI/2;line(c,[[x,y],[x+Math.cos(an)*r*.75,y+Math.sin(an)*r*.75]],on?CS.panel:CS.muted,3);}txt(c,'M',x,y+r+11,{sz:11,w:800,col:CS.muted});}
+function draw3(){const ph=isPhone();const {c,w,h}=fit(cv3,ph?.95:.52);const P=(u,v)=>[u*w,v*h],fs=ph?10:12.5,hits=[],Ic=Ic3(),on=loadOn3();
+  /* --- mạch điều khiển --- */
+  const lx0=.05,lx1=.29,ly0=.48,ly1=.84,coilX0=.35,coilX1=.45,coilY0=.47,coilY1=.80,coreX0=.38,coreX1=.42;
+  const ctrlPath=[P(lx1,.52),P(lx0+.0,.52),P(lx0,ly1),P(lx1,ly1)];
+  line(c,[P(coilX0,.52),P(lx0,.52),P(lx0,ly1),P(lx1,ly1),P(lx1,ly1-.06),P(coilX0,ly1-.06)],CS.ink,2);
+  /* pin trên cạnh dưới */
+  const bx=P((lx0+lx1)/2,ly1);c.clearRect(bx[0]-10,bx[1]-14,20,28);c.fillStyle=CS.lane;c.fillRect(bx[0]-10,bx[1]-14,20,28);
+  line(c,[[bx[0]-5,bx[1]-14],[bx[0]-5,bx[1]+14]],CS.ink,3);line(c,[[bx[0]+5,bx[1]-8],[bx[0]+5,bx[1]+8]],CS.ink,5);
+  txt(c,nf(S3.U,2)+' V',bx[0],bx[1]+24,{sz:fs,mono:1,w:700});
+  /* công tắc K hoặc phao */
+  const kx0=P(lx0+.06,.52),kx1=P(lx0+.16,.52),closedSw=S3.mode==='man'?S3.K:S3.flt;
+  c.clearRect(kx0[0]+1,kx0[1]-3,kx1[0]-kx0[0]-2,6);c.fillStyle=CS.lane;c.fillRect(kx0[0]+1,kx0[1]-3,kx1[0]-kx0[0]-2,6);
+  dot(c,kx0[0],kx0[1],4,CS.ink);dot(c,kx1[0],kx1[1],4,CS.ink);
+  line(c,[kx0,closedSw?kx1:[kx1[0]-4,kx1[1]-(kx1[0]-kx0[0])*.55]],closedSw?CS.ok:CS.warn,3);
+  txt(c,S3.mode==='man'?'K':T('float'),(kx0[0]+kx1[0])/2,kx0[1]+16,{sz:fs,w:800});
+  if(S3.mode==='man')hits.push({x:kx0[0]-12,y:kx0[1]-40,w:kx1[0]-kx0[0]+24,h:70,act:'K'});
+  /* bể nước + phao (chế độ ứng dụng) */
+  if(S3.mode==='app'){const t0=P(.04,.06),t1=P(.22,.36);c.fillStyle=CS.panel;c.fillRect(t0[0],t0[1],t1[0]-t0[0],t1[1]-t0[1]);
+    const wy=lerp(t1[1],t0[1]+6,S3.lvl);c.fillStyle=CS.water;c.globalAlpha=.6;c.fillRect(t0[0],wy,t1[0]-t0[0],t1[1]-wy);c.globalAlpha=1;
+    c.strokeStyle=CS.ink;c.lineWidth=2;c.beginPath();c.moveTo(t0[0],t0[1]);c.lineTo(t0[0],t1[1]);c.lineTo(t1[0],t1[1]);c.lineTo(t1[0],t0[1]);c.stroke();
+    [.2,.9].forEach(v=>{const yy=lerp(t1[1],t0[1]+6,v);line(c,[[t0[0],yy],[t0[0]+8,yy]],CS.muted,1.5);txt(c,nf(v*100,0)+'%',t0[0]+10,yy,{al:'left',sz:10,mono:1,col:CS.muted});});
+    const fx=(t0[0]+t1[0])/2+10;rrect(c,fx-9,wy-7,18,12,4);c.fillStyle=CS.gold;c.fill();line(c,[[fx,wy-7],[fx,t0[1]-4],[(kx0[0]+kx1[0])/2,t0[1]-4],[(kx0[0]+kx1[0])/2,kx0[1]-6]],CS.muted,1.5,[4,3]);
+    txt(c,T('tank')+' '+nf(S3.lvl*100,0)+'%',(t0[0]+t1[0])/2,t1[1]+12,{sz:fs,w:700});}
+  txt(c,T('ctrl'),P((lx0+lx1)/2,.95)[0],P(0,.95)[1],{sz:fs,w:800,col:CS.accent});
+  if(Ic>0)flowDots(c,[P(lx0+.16,.52),P(coilX0,.52)],S3.phase,CS.vel,14,2.4),flowDots(c,[P(coilX0,ly1-.06),P(lx1,ly1-.06),P(lx1,ly1),P(lx0,ly1),P(lx0,.52),P(lx0+.06,.52)],S3.phase,CS.vel,14,2.4);
+  /* --- rơ le --- */
+  const yokeB=P(.40,.86),pv=P(.33,.40);line(c,[P(.40,coilY1),yokeB,P(.33,.86),pv],CS.metal2,6);
+  c.fillStyle=CS.metal2;const ct=P(coreX0,.44),cb=P(coreX1,coilY1);c.fillRect(ct[0],ct[1],cb[0]-ct[0],cb[1]-ct[1]);
+  const cc0=P(coilX0,coilY0+.04),cc1=P(coilX1,coilY1);for(let k=0;k<=11;k++){const y=lerp(cc0[1],cc1[1],k/11);line(c,[[cc0[0],y],[cc1[0],y+3]],Ic>0?CS.copper:CS.copper2,3);}
+  if(Ic>0){c.save();c.globalAlpha=.3*clamp(Ic/.07,0,1.4);c.strokeStyle=CS.heat;c.lineWidth=1.5;for(let k=1;k<=3;k++){c.beginPath();c.ellipse((ct[0]+cb[0])/2,ct[1],10+k*9,6+k*6,0,Math.PI,0);c.stroke();}c.restore();}
+  /* thanh sắt (phần ứng) */
+  const endU=.60,yUp=.30,yDn=.42,yEnd=lerp(yUp,yDn,S3.s),endP=P(endU,yEnd);line(c,[pv,endP],CS.metal,7);dot(c,pv[0],pv[1],5,CS.ink);
+  const armAt=u=>lerp(pv[1],endP[1],(u*w-pv[0])/(endP[0]-pv[0]));
+  /* lò xo */
+  const spX=.52*w,spTop=P(.52,.12)[1],spBot=armAt(.52);c.strokeStyle=CS.ok;c.lineWidth=2;c.beginPath();c.moveTo(spX,spTop);
+  for(let k=1;k<=10;k++)c.lineTo(spX+(k%2?7:-7),lerp(spTop,spBot,k/10.5));c.lineTo(spX,spBot);c.stroke();line(c,[[spX-14,spTop],[spX+14,spTop]],CS.ink,3);
+  /* tiếp điểm NC, NO, COM */
+  const ncP=P(endU,yUp-.03),noP=P(endU,yDn+.03);c.fillStyle=CS.gold;c.fillRect(ncP[0]-8,ncP[1]-4,16,5);c.fillRect(noP[0]-8,noP[1]-1,16,5);dot(c,endP[0],endP[1],5,CS.gold);
+  const tNC=P(.68,yUp-.03),tNO=P(.68,yDn+.03),tCOM=P(.68,.36);
+  line(c,[ncP,tNC],CS.ink,2);line(c,[noP,tNO],CS.ink,2);
+  c.strokeStyle=CS.ink;c.lineWidth=1.5;c.setLineDash([2,2]);c.beginPath();c.moveTo(endP[0],endP[1]);c.quadraticCurveTo(endP[0]+w*.04,endP[1]+h*.08,tCOM[0],tCOM[1]);c.stroke();c.setLineDash([]);
+  [[tNC,'NC'],[tNO,'NO'],[tCOM,'COM']].forEach(([p,s])=>{dot(c,p[0],p[1],4,CS.ink);txt(c,s,p[0]-4,p[1]-9,{al:'right',sz:fs-1,w:700,col:CS.muted});});
+  /* lực */
+  const fsc=ph?260:420,fxm=(ct[0]+cb[0])/2+w*.05,ay=armAt(fxm/w);arrow(c,fxm,ay,fxm,ay+Math.min(80,Fm3(S3.s)*fsc),CS.force,3);arrow(c,spX+16,spBot,spX+16,spBot-Math.min(80,Fs3(S3.s)*fsc),CS.ok,3);
+  txt(c,T('Fm'),fxm+6,ay+Math.min(80,Fm3(S3.s)*fsc)+10,{al:'left',sz:fs-1,col:CS.force,w:700});txt(c,T('Fs'),spX+22,spBot-Math.min(80,Fs3(S3.s)*fsc)+2,{al:'left',sz:fs-1,col:CS.ok,w:700});
+  if(!ph){txt(c,T('coil'),cc1[0]+4,cc1[1]+12,{al:'right',sz:fs-1,col:CS.muted});txt(c,T('arm'),pv[0]-4,pv[1]-28,{al:'left',sz:fs-1,col:CS.muted});}
+  /* --- mạch tải 220 V --- */
+  const term=S3.ct==='NO'?tNO:tNC,xa=.74,xb=.95,yS=.78,yLd=.18;
+  line(c,[tCOM,P(xa,.36),P(xa,yS),P(xb,yS),P(xb,yLd),P(xa+.08,yLd)],CS.live,2.5);line(c,[P(xa+.04,yLd),[P(xa+.04,0)[0],term[1]],term],CS.live,2.5);
+  line(c,[P(xa+.04,yLd),P(xa+.08,yLd)],CS.live,2.5);
+  const sP=P((xa+xb)/2,yS);c.fillStyle=CS.panel;c.beginPath();c.arc(sP[0],sP[1],16,0,Math.PI*2);c.fill();c.strokeStyle=CS.ink;c.lineWidth=2;c.stroke();txt(c,'~',sP[0],sP[1],{sz:18,w:800});
+  txt(c,'220 V',sP[0],sP[1]+26,{sz:fs,mono:1,w:700});
+  const lP=P(xa+.12,yLd);if(S3.mode==='app'||S3.ld==='pump')drawPump(c,lP[0],lP[1],16,on,S3.pumpA);else drawLamp(c,lP[0],lP[1],14,on);
+  if(S3.mode==='app'){const pipeY=P(0,.04)[1];line(c,[[lP[0],lP[1]-16],[lP[0],pipeY],[P(.13,0)[0],pipeY],[P(.13,0)[0],P(0,.07)[1]]],CS.water,5);
+    if(on){c.fillStyle=CS.water;for(let k=0;k<3;k++){const yy=P(0,.07)[1]+((S3.pumpA*8+k*12)%30);dot(c,P(.13,0)[0],yy,2.5,CS.water);}}}
+  if(on){const lp=[tCOM,P(xa,.36),P(xa,yS),P(xb,yS),P(xb,yLd),P(xa+.04,yLd),[P(xa+.04,0)[0],term[1]],term];flowDots(c,lp,S3.phase*(S3.mode==='app'||S3.ld==='pump'?2:1),CS.vel,16,2.6);}
+  txt(c,T('load'),P((xa+xb)/2,.94)[0],P(0,.94)[1],{sz:fs+1,w:800,col:CS.live});
+  c.save();c.globalAlpha=.6;line(c,[P(.66,.08),P(.66,.98)],CS.muted,1.5,[6,5]);c.restore();
+  if(!ph)txtBg(c,'⟂ '+T('iso'),P(.66,0)[0],P(0,.985)[1]-6,{sz:11,col:CS.muted,w:600});
+  cv3._hits=hits;}
+function drawG3(){const ph=isPhone();const {c,w,h}=fit($('gr3'),ph?.5:.22);const L=56,R=12,Tp=8,B=26,pw=w-L-R,phh=h-Tp-B;
+  const X=u=>L+u/6*pw,Y=s=>Tp+phh-(.15+s*.7)*phh;c.fillStyle=CS.panel;c.fillRect(L,Tp,pw,phh);c.strokeStyle=CS.line;c.strokeRect(L+.5,Tp+.5,pw-1,phh-1);
+  for(let u=0;u<=6;u++)txt(c,nf(u,0),X(u),Tp+phh+11,{sz:11,mono:1,col:CS.muted});txt(c,T('grU'),L+pw-2,Tp+phh+22,{al:'right',sz:11,col:CS.muted});
+  txt(c,T('grClose'),L-6,Y(1),{al:'right',sz:12,col:CS.muted});txt(c,T('grOpen'),L-6,Y(0),{al:'right',sz:12,col:CS.muted});
+  const UR=G0*Math.sqrt(F0*1.44/KM)*RC;
+  line(c,[[X(0),Y(0)],[X(UP),Y(0)],[X(UP),Y(1)],[X(6),Y(1)]],CS.muted,2,[6,4]);line(c,[[X(6),Y(1)],[X(UR),Y(1)],[X(UR),Y(0)]],CS.muted,2,[6,4]);
+  arrowHead(c,X(UP),Y(.55),-Math.PI/2,8,CS.muted);arrowHead(c,X(UR),Y(.45),Math.PI/2,8,CS.muted);
+  txt(c,nf(UP,2)+' V',X(UP)+4,Y(.5),{al:'left',sz:11,mono:1,col:CS.muted});txt(c,nf(UR,2)+' V',X(UR)-4,Y(.5),{al:'right',sz:11,mono:1,col:CS.muted});
+  S3.H.forEach(p=>dot(c,X(p[0]),Y(p[1]),2.5,CS.accent));const ue=Ic3()>0?S3.U:0;dot(c,X(ue),Y(S3.closed?1:0),6,CS.force);}
+let st3=null;
+function ui3(full){const Ic=Ic3(),on=loadOn3(),PL=PL3(),IL=on?PL/U_MAINS:0;
+  if(full){seg('md3',[{k:'man',label:T('mdMan')},{k:'app',label:T('mdApp')}],S3.mode,k=>{S3.mode=k;S3.H=[];ui3(true);});
+    seg('ct3',[{k:'NO',label:'NO'},{k:'NC',label:'NC'}],S3.ct,k=>{S3.ct=k;ui3(true);});
+    seg('ld3',[{k:'lamp',label:T('ldLamp'),dis:S3.mode==='app'},{k:'pump',label:T('ldPump'),dis:S3.mode==='app'}],S3.mode==='app'?'pump':S3.ld,k=>{S3.ld=k;ui3(true);});
+    $('k3').textContent=T(S3.K?'kOff':'kOn');$('k3').hidden=S3.mode==='app';$('hint3').textContent=T(S3.mode==='app'?'hint3a':'hint3m');$('u3').value=S3.U;$('u3V').textContent=nf(S3.U,2)+' V';}
+  let s=S3.closed?T('s3on'):(Ic>0?T('s3weak'):T('s3off'));s+=' '+T(on?'s3loadOn':'s3loadOff');
+  if(s!==st3){$('st3').textContent=s;$('st3').className='status '+(on?'good':'');st3=s;}
+  $('kv3').innerHTML=`<dt>${T('kUc')}</dt><dd class="num">${nf(Ic>0?S3.U:0,2)} V</dd><dt>${T('kIc')}</dt><dd class="num">${nf(Ic*1000,0)} mA</dd><dt>${T('kPc')}</dt><dd class="num">${nf(Ic*Ic*RC,2)} W</dd>`+
+    `<dt>${T('Fm')} / ${T('Fs')}</dt><dd class="num">${nf(Fm3(S3.s),3)} / ${nf(Fs3(S3.s),3)} N</dd><dt>${T('kRel')}</dt><dd>${T(S3.closed?'relOn':'relOff')}</dd>`+
+    `<dt>${T('kIl')}</dt><dd class="num">${nf(IL,2)} A</dd><dt>${T('kPl')}</dt><dd class="num">${nf(on?PL:0,0)} W</dd><dt>${T('kRat')}</dt><dd class="num">${Ic>0&&on?nf(IL/Ic,0)+' ×':'—'}</dd>`+
+    (S3.mode==='app'?`<dt>${T('kLvl')}</dt><dd class="num">${nf(S3.lvl*100,0)} %</dd>`:'');}
+$('k3').onclick=()=>{S3.K=!S3.K;ui3(true);};
+$('u3').oninput=e=>{S3.U=+e.target.value;$('u3V').textContent=nf(S3.U,2)+' V';ui3();};
+
+/* ================= TAB 4: Chuông điện ================= */
+/* x: độ dịch của thanh thép về phía nam châm (m). m x'' = Fm − Fp − k x − b v.
+   Fm = c·I²/(gm − x)². Mạch kín khi nhấn nút và x < xc (thanh thép còn chạm vít). L dI/dt = U − R I khi kín; I tắt nhanh (τ ≈ 0,3 ms) khi hở. */
+const B4={m:0.02,k:40,Fp:0.03,b:0.3,c:5.33e-7*0.35,gm:0.002,xc:0.0008,xg:0.0011,R:4,L:0.008,toff:0.0003,e:0.4};
+const S4={U:6,press:false,hold:false,bypass:false,x:0,v:0,I:0,t:0,hits:[],count:0,H:[],hT:0,speed:1,spark:0,ring:0,snd:true,pressT:0,wasClosed:false,phase:0,stuckHit:false};
+const pressed4=()=>S4.press||S4.hold;
+const closed4=()=>pressed4()&&(S4.bypass||S4.x<B4.xc);
+let AC=null,lastDing=0;
+function ding(){if(!S4.snd)return;const now=performance.now();if(now-lastDing<28)return;lastDing=now;
+  try{if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();const t=AC.currentTime,g=AC.createGain();g.connect(AC.destination);
+    g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.18,t+0.004);g.gain.exponentialRampToValueAtTime(0.0001,t+0.45);
+    [1480,3720,5100].forEach((f,i)=>{const o=AC.createOscillator();o.frequency.value=f;const gg=AC.createGain();gg.gain.value=[1,.35,.15][i];o.connect(gg);gg.connect(g);o.start(t);o.stop(t+0.5);});}catch(e){}}
+function step4(dt){const P=B4;let n=Math.min(4000,Math.max(1,Math.round(dt*S4.speed/2e-5)));const h=dt*S4.speed/n;
+  for(let i=0;i<n;i++){const cl=closed4();if(S4.wasClosed&&!cl&&S4.I>0.05)S4.spark=.18;S4.wasClosed=cl;
+    S4.I+=(cl?(S4.U-P.R*S4.I)/P.L:-S4.I/P.toff)*h;if(S4.I<0)S4.I=0;
+    const F=P.c*S4.I*S4.I/Math.pow(P.gm-S4.x,2);const a=(F-P.Fp-P.k*S4.x-P.b*S4.v)/P.m;S4.v+=a*h;S4.x+=S4.v*h;
+    if(S4.x<=0&&S4.v<0){S4.x=0;S4.v=0;}
+    if(S4.x>=P.xg){if(S4.v>0.004){S4.hits.push(S4.t);S4.count++;S4.ring=1;ding();}S4.x=P.xg;S4.v=S4.v>0?-P.e*S4.v:S4.v;}
+    S4.t+=h;}
+  while(S4.hits.length&&S4.hits[0]<S4.t-1)S4.hits.shift();
+  S4.hT+=dt*S4.speed;if(S4.hT>=2.5e-4||S4.speed<1){S4.hT=0;S4.H.push([S4.t,S4.I,S4.x]);while(S4.H.length&&S4.H[0][0]<S4.t-0.15)S4.H.shift();}
+  if(pressed4())S4.pressT+=dt*S4.speed;else S4.pressT=0;
+  S4.spark=Math.max(0,S4.spark-dt);S4.ring=Math.max(0,S4.ring-dt*2.5);S4.phase+=dt*60;}
+const cv4=$('cv4');
+const press4=v=>{S4.press=v;$('pb4').classList.toggle('down',v);if(v&&!AC&&S4.snd){try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}};
+cv4.addEventListener('pointerdown',e=>{const h=hitTest(cv4,e);if(h&&h.act==='btn'){e.preventDefault();cv4.setPointerCapture(e.pointerId);press4(true);}});
+['pointerup','pointercancel'].forEach(ev=>cv4.addEventListener(ev,()=>{if(S4.press)press4(false);}));
+const pb=$('pb4');pb.addEventListener('pointerdown',e=>{e.preventDefault();pb.setPointerCapture(e.pointerId);press4(true);});
+['pointerup','pointercancel','lostpointercapture'].forEach(ev=>pb.addEventListener(ev,()=>press4(false)));
+pb.addEventListener('keydown',e=>{if((e.key===' '||e.key==='Enter')&&!e.repeat){e.preventDefault();press4(true);}});
+pb.addEventListener('keyup',e=>{if(e.key===' '||e.key==='Enter')press4(false);});
+function draw4(){const ph=isPhone();const {c,w,h}=fit(cv4,ph?.95:.55);const P=(u,v)=>[u*w,v*h],fs=ph?10:12.5,hits=[];
+  const k=S4.x/B4.xg,armX=.56,baseY=.9,topY=.2,magY=.55,D=w*.11,dxAt=v=>-k*D*(baseY-v)/(baseY-topY);
+  const hamR=Math.max(9,w*.02),gongR=Math.max(26,w*.07),hx=P(armX,topY)[0]+dxAt(topY),hy=P(0,topY)[1];
+  const gx=P(armX,0)[0]-D-hamR-gongR*.97-2,gy=hy+gongR*.25;
+  /* chuông */
+  c.save();const jit=S4.ring*2*Math.sin(S4.phase*7);c.translate(jit,0);
+  c.fillStyle=CS.gold;c.beginPath();c.arc(gx,gy,gongR,Math.PI,0);c.closePath();c.fill();c.strokeStyle=CS.ink;c.lineWidth=2;c.stroke();dot(c,gx,gy,4,CS.ink);c.restore();
+  if(S4.ring>0){c.save();c.globalAlpha=S4.ring;c.strokeStyle=CS.gold;c.lineWidth=2;for(let r=1;r<=3;r++){c.beginPath();c.arc(gx,gy,gongR+r*10*(1.4-S4.ring*.4),Math.PI*.7,Math.PI*1.3);c.stroke();}c.restore();}
+  /* nam châm điện chữ U */
+  const pf=P(armX,0)[0]-D*.52*(baseY-magY)/(baseY-topY)*2-8,backX=P(.3,0)[0],y1=P(0,magY-.07)[1],y2=P(0,magY+.07)[1],arm=Math.max(10,h*.035);
+  c.fillStyle=CS.metal2;c.fillRect(backX,y1-arm/2,pf-backX,arm);c.fillRect(backX,y2-arm/2,pf-backX,arm);c.fillRect(backX-arm,y1-arm/2,arm,y2-y1+arm);
+  [y1,y2].forEach(yy=>{const c0=backX+(pf-backX)*.15,c1=backX+(pf-backX)*.8;for(let j=0;j<=8;j++){const x=lerp(c0,c1,j/8);line(c,[[x,yy-arm*.9],[x+3,yy+arm*.9]],S4.I>.05?CS.copper:CS.copper2,3);}});
+  if(S4.I>.05){c.save();c.globalAlpha=clamp(S4.I/1.5,0,1)*.45;c.strokeStyle=CS.heat;c.lineWidth=2;for(let r=1;r<=3;r++){c.beginPath();c.ellipse(pf,(y1+y2)/2,6+r*7*.6+ (P(armX,0)[0]+dxAt(magY)-pf)*.5,(y2-y1)/2+r*4,0,-Math.PI/2,Math.PI/2);c.stroke();}c.restore();}
+  /* thanh thép + búa */
+  const ab=P(armX,baseY),at=[hx,hy];line(c,[ab,[P(armX,0)[0]+dxAt(magY),P(0,magY)[1]],at],CS.metal,7);dot(c,hx,hy,hamR,CS.ink);
+  c.fillStyle=CS.ink;c.fillRect(ab[0]-16,ab[1],32,12);
+  /* vít tiếp điểm */
+  const sy=P(0,magY+.12)[1],ax=P(armX,0)[0]+dxAt(magY+.12)+4,sx1=P(armX+.12,0)[0],cl=closed4(),touching=S4.x<B4.xc;
+  line(c,[[P(armX,0)[0]+5,sy],[sx1,sy]],CS.metal2,5);c.fillStyle=CS.metal2;c.fillRect(sx1,sy-14,10,28);dot(c,P(armX,0)[0]+5,sy,3.5,touching?CS.gold:CS.metal);
+  if(!touching){/* khe hở nhỏ */}
+  if(S4.spark>0){c.save();c.globalAlpha=clamp(S4.spark*6,0,1);for(let j=0;j<6;j++){const a=Math.random()*Math.PI*2;line(c,[[ax+2,sy],[ax+2+Math.cos(a)*12,sy+Math.sin(a)*12]],CS.spark,2);}c.restore();}
+  if(S4.bypass){line(c,[[ab[0]+16,ab[1]+6],[sx1+18,ab[1]+6],[sx1+18,sy],[sx1+10,sy]],CS.warn,2.5,[6,3]);}
+  /* mạch: pin → nút → cuộn dây ...→ chân thanh thép ... vít → giá vít → về pin */
+  const bx=P(.1,.62),btn=P(.1,.28);
+  const wire1=[[bx[0],bx[1]-16],[btn[0],btn[1]+12]],wire2=[[btn[0],btn[1]-12],[btn[0],P(0,.1)[1]],[backX-arm,P(0,.1)[1]],[backX-arm,y1-arm]],
+    wire3=[[backX-arm-2,y2+arm],[backX-arm-2,P(0,.94)[1]],[ab[0],P(0,.94)[1]],[ab[0],ab[1]+12]],wire4=[[sx1+10,sy],[P(.82,0)[0],sy],[P(.82,0)[0],P(0,.985)[1]],[bx[0],P(0,.985)[1]],[bx[0],bx[1]+16]];
+  [wire1,wire2,wire3,wire4].forEach(p=>line(c,p,CS.ink,2));
+  /* pin */
+  c.fillStyle=CS.lane;c.fillRect(bx[0]-16,bx[1]-14,32,28);line(c,[[bx[0]-14,bx[1]-6],[bx[0]+14,bx[1]-6]],CS.ink,3);line(c,[[bx[0]-8,bx[1]+5],[bx[0]+8,bx[1]+5]],CS.ink,5);
+  txt(c,nf(S4.U,1)+' V',bx[0]+20,bx[1],{al:'left',sz:fs,mono:1,w:700});txt(c,T('b_bat'),bx[0]+20,bx[1]+16,{al:'left',sz:fs-1,col:CS.muted});
+  /* nút nhấn */
+  const pr=pressed4();c.fillStyle=CS.lane;c.fillRect(btn[0]-18,btn[1]-12,36,24);dot(c,btn[0],btn[1]-12,3.5,CS.ink);dot(c,btn[0],btn[1]+12,3.5,CS.ink);
+  line(c,pr?[[btn[0]-12,btn[1]-12],[btn[0]+12,btn[1]-12]]:[[btn[0]-12,btn[1]-22],[btn[0]+12,btn[1]-22]],pr?CS.ok:CS.warn,4);line(c,[[btn[0],pr?btn[1]-12:btn[1]-22],[btn[0],btn[1]-34]],CS.ink,3);
+  rrect(c,btn[0]-14,btn[1]-46,28,12,5);c.fillStyle=pr?CS.live:CS.panel;c.fill();c.strokeStyle=CS.ink;c.lineWidth=1.5;c.stroke();
+  txt(c,T('b_btn'),btn[0],btn[1]+24,{sz:fs-1,col:CS.muted});hits.push({x:btn[0]-34,y:btn[1]-56,w:68,h:80,act:'btn'});
+  /* dòng điện */
+  if(S4.I>.05&&cl){[wire1,wire2,wire3,[[ab[0],ab[1]],[P(armX,0)[0],sy]],[[P(armX,0)[0]+5,sy],[sx1,sy]],wire4].forEach(p=>flowDots(c,p,S4.phase*clamp(S4.I,0.3,2),CS.vel,16,2.4));}
+  /* nhãn */
+  txt(c,T('b_gong'),gx,gy+14,{sz:fs,w:700});txt(c,T('b_ham'),hx+hamR+4,hy-hamR-4,{al:'left',sz:fs-1,col:CS.muted});
+  txt(c,T('b_coil'),(backX+pf)/2,y2+arm+14,{sz:fs-1,col:CS.muted});txt(c,T('b_arm'),P(armX,0)[0]+14,P(0,.36)[1],{al:'left',sz:fs-1,col:CS.muted});
+  txt(c,T('b_screw'),sx1+16,sy-20,{al:'left',sz:fs-1,col:CS.muted});txt(c,T('b_spring'),ab[0]+20,ab[1]+6,{al:'left',sz:fs-1,col:CS.muted});
+  txtBg(c,(touching||S4.bypass)&&pr?T('cClosed'):pr?T('cOpen'):'',P(armX+.02,0)[0],sy+24,{al:'left',sz:fs-1,col:touching?CS.ok:CS.warn,w:700});
+  cv4._hits=hits;}
+function drawG4(){const ph=isPhone();const {c,w,h}=fit($('gr4'),ph?.6:.26);const L=44,R=8,gap=10,ph2=(h-gap-6)/2,t1=Math.max(.15,S4.t),t0=t1-.15;
+  const marks=S4.hits.filter(t=>t>=t0);const Im=Math.max(.5,S4.U/B4.R*1.05);
+  plot(c,L,3,w-L-R,ph2,{t0,t1,ymin:0,ymax:Im,series:[{d:S4.H,col:CS.vel,i:1}],ylab:'I (A)',ytick:[nf(Im,1),'0'],marks});
+  plot(c,L,3+ph2+gap,w-L-R,ph2,{t0,t1,ymin:0,ymax:B4.xg*1.1,series:[{d:S4.H,col:CS.copper2,i:2}],ylab:'x',xlab:'t (s) · 0,15 s',ytick:['',''],marks,
+    hl:[[B4.xg,T('b_gong')],[B4.xc,T('b_screw')]]});}
+let st4=null;
+function ui4(full){if(full){seg('sp4',[{k:1,label:'×1'},{k:.1,label:'×0,1'},{k:.02,label:'×0,02'}].map(o=>({k:o.k,label:lang==='vi'?o.label:o.label.replace(',','.')})),S4.speed,k=>{S4.speed=k;S4.H=[];ui4(true);});
+    $('u4V').textContent=nf(S4.U,1)+' V';}
+  const pr=pressed4(),recent=S4.hits.filter(t=>t>S4.t-.5).length;let s,cls='';
+  if(!pr)s=T('s4idle');else if(S4.bypass&&S4.x>=B4.xg-1e-6)s=T('s4stuck'),cls='bad';else if(S4.pressT>.25&&recent===0)s=T('s4weak'),cls='bad';else{s=T('s4ring');cls='good';}
+  if(s!==st4){$('st4').textContent=s;$('st4').className='status '+cls;st4=s;}
+  const f=S4.hits.filter(t=>t>S4.t-.5).length*2;
+  $('kv4').innerHTML=`<dt>${T('kIb4')}</dt><dd class="num">${nf(S4.I,2,2)} A</dd><dt>${T('kMc')}</dt><dd>${S4.x<B4.xc?T('cClosed'):T('cOpen')}</dd>`+
+    `<dt>${T('kHits')}</dt><dd class="num">${S4.speed<1?'—':nf(f,0)}</dd><dt>${T('kCount')}</dt><dd class="num">${nf(S4.count,0)}</dd>`;}
+$('hold4').onchange=e=>{S4.hold=e.target.checked;if(S4.hold&&!AC&&S4.snd){try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(err){}}};
+$('by4').onchange=e=>{S4.bypass=e.target.checked;};$('snd4').onchange=e=>{S4.snd=e.target.checked;};
+$('u4').oninput=e=>{S4.U=+e.target.value;$('u4V').textContent=nf(S4.U,1)+' V';};
+
+/* ================= TAB 5: Tình huống ================= */
+const DEV=['fuse','cb','rcd','relay','bell'];
+const SC5=[{q:'q1',a:'cb',e:'e1'},{q:'q2',a:'rcd',e:'e2'},{q:'q3',a:'relay',e:'e3'},{q:'q4',a:'fuse',e:'e4'},{q:'q5',a:'bell',e:'e5'},{q:'q6',a:'relay',e:'e6'},{q:'q7',a:'cb',e:'e7'}];
+function render5(){$('sc5').innerHTML=SC5.map((s,i)=>`<div class="card sc"><p><b>${i+1}.</b> ${T(s.q)}</p><div class="opts">${DEV.map(d=>{const cls=s.pick===d?(d===s.a?'right':'wrong'):'';
+    return `<button class="btn ${cls}" data-sc="${i}" data-d="${d}">${T('d_'+d)}</button>`;}).join('')}</div>${s.pick?`<div class="ans" style="border-left-color:var(--${s.pick===s.a?'ok':'warn'})"><b>${T(s.pick===s.a?'ok':'no')}</b> ${s.pick===s.a?T(s.e):''}</div>`:''}</div>`).join('');
+  const n=SC5.filter(s=>s.pick).length,a=SC5.filter(s=>s.pick===s.a).length;$('score5').textContent=n?Tf('score',{a,n:SC5.length}):'';}
+$('sc5').addEventListener('click',e=>{const b=e.target.closest('button[data-sc]');if(!b)return;SC5[+b.dataset.sc].pick=b.dataset.d;render5();});
+
+/* ================= Video thực tế ================= */
+const VIDEOS={
+1:[{id:'4JivJokeYU0',file:'tab1-hien-tuong.mp4',t:'Fuse wire melting demonstration',c:'Mr Smith’s Physics online',d:'?',type:'phen',
+   look:{vi:'Video ngắn. Một đoạn dây chì mảnh nối vào nguồn, tăng dần dòng điện. Để ý: dây nóng đỏ rồi đứt, mạch hở, dòng điện mất ngay.',en:'Short clip. A thin fuse wire is connected and the current is raised. Notice: it glows, then melts and breaks, and the current stops at once.'}},
+  {id:'b75_Scz5Ijc',file:'tab1-thi-nghiem.mp4',t:'Fuse Wire',c:'QuantumBoffin',d:'?',type:'exp',
+   look:{vi:'Thí nghiệm dây chì trong phòng thí nghiệm. Để ý: dòng điện càng lớn thì dây đứt càng nhanh, giống bảng nhật kí trong mô phỏng.',en:'A lab fuse-wire experiment. Notice: the larger the current, the sooner the wire breaks, like the log in the simulation.'}},
+  {id:'W770Z1yvXs8',file:'tab1-ung-dung.mp4',t:'What is a fuse? the basics explained',c:'The Engineering Mindset',d:'?',type:'app',
+   look:{vi:'Giải thích cầu chì bằng hoạt hình và cầu chì thật (ống thuỷ tinh, cầu chì ô tô). Để ý: cầu chì luôn mắc nối tiếp và có ghi số ampe định mức.',en:'Animated explanation with real fuses (glass, car blade). Notice: a fuse is always in series and is marked with its rated current.'}}],
+2:[{id:'wGFnooeA6Iw',file:'tab2-quay-cham.mp4',t:'How a Circuit Breaker Works in Slow Motion – 4K',c:'Warped Perception',d:'?',type:'phen',
+   look:{vi:'Cầu dao tự động bị cắt mở, quay chậm khi ngắt. Để ý: tiếp điểm bật ra, tia lửa (hồ quang) bị đẩy vào các lá thép của buồng dập hồ quang.',en:'A breaker cut open and filmed in slow motion. Notice: the contacts spring apart and the arc is pushed into the steel plates of the arc chute.'}},
+  {id:'SNBfppriDjc',file:'tab2-nguyen-li.mp4',t:'Circuit Breaker Explained | Working Principle',c:'RealPars',d:'?',type:'app',
+   look:{vi:'Hoạt hình bên trong CB. Để ý hai bộ phận: phiến lưỡng kim cong khi quá tải, cuộn dây hút khi ngắn mạch, như trong mô phỏng.',en:'Animation inside a breaker. Notice the two parts: the bimetal bends on overload, the coil pulls on a short circuit, as in the simulation.'}}],
+3:[{id:'T12PQRW2V10',file:'tab3-thi-nghiem.mp4',t:'How to use a relay as a switch (#23 AC and Switching Circuits)',c:'Aaron Danner',d:'?',type:'exp',
+   look:{vi:'Thí nghiệm thật: một mạch điện áp thấp bật, tắt thiết bị qua rơ le. Để ý tiếng “tách” khi rơ le hút và nhả.',en:'A real experiment: a low-voltage circuit switches a device through a relay. Listen for the click as it pulls in and releases.'}},
+  {id:'n594CkrP6xE',file:'tab3-nguyen-li.mp4',t:'How Relays Work – Basic working principle',c:'The Engineering Mindset',d:'?',type:'app',
+   look:{vi:'Hoạt hình bên trong rơ le: cuộn dây, phần ứng, lò xo, tiếp điểm NO, NC, COM. Để ý hai mạch không nối điện với nhau.',en:'Animation inside a relay: coil, armature, spring, NO, NC and COM contacts. Notice the two circuits are not electrically connected.'}}],
+4:[{id:'YBKdY3APPVI',file:'tab4-thi-nghiem.mp4',t:'Large model electric bell demonstration',c:'Physics with Simon Poliakoff',d:'?',type:'exp',
+   look:{vi:'Mô hình chuông điện cỡ lớn, rung chậm nên dễ nhìn. Để ý lúc thanh thép rời vít tiếp điểm thì có tia lửa nhỏ.',en:'A large model bell that vibrates slowly enough to see. Notice the small spark as the armature leaves the contact screw.'}},
+  {id:'ClQXKBzZh6Y',file:'tab4-thuc-hanh.mp4',t:'GCSE Physics: DC Bell Practical',c:'Burrows Physics',d:'?',type:'exp',
+   look:{vi:'Học sinh lắp chuông điện một chiều. Để ý cách nối dây qua vít tiếp điểm.',en:'Students build a DC bell. Notice how the wiring runs through the contact screw.'}},
+  {id:'HpTp227586s',file:'tab4-hoat-hinh.mp4',t:'Science – Electricity – How an electric bell functions',c:'Bodhaguru',d:'?',type:'app',
+   look:{vi:'Hoạt hình từng bước của chuông điện. So sánh với chế độ ×0,02 trong mô phỏng.',en:'Step-by-step animation of an electric bell. Compare with speed ×0.02 in the simulation.'}}],
+5:[{id:'gqEu9t8HwW0',file:'tab5-chong-giat.mp4',t:'Why Circuit Breakers DON’T Protect People (electric shocks)',c:'The Engineering Mindset',d:'?',type:'app',
+   look:{vi:'Vì sao CB thường không cứu được người bị điện giật và RCD làm được. Để ý con số 30 mA.',en:'Why an ordinary breaker does not save a person from a shock but an RCD does. Notice the 30 mA figure.'}}]};
+const VSEL={1:0,2:0,3:0,4:0,5:0},VPLAY={};
+function renderVideo(n){const list=VIDEOS[n],V=list[VSEL[n]],el=$('v'+n),pl=!!VPLAY[n];el.classList.toggle('playing',pl);
+  const dur=V.d==='?'?T('vDurUnk'):V.d;
+  el.innerHTML=`<div class="vmedia">${pl?`<div class="player" id="pl${n}"></div>`:`<button class="thumb" data-play="${n}" aria-label="${esc(V.t)}"><span class="ph">${T('vNoThumb')}</span><img alt="" src="media/${V.file.replace('.mp4','.jpg')}"><span class="pbtn"></span>${V.d!=='?'?`<span class="dur">${V.d}</span>`:''}</button>`}</div>
+  <div class="vt"><span class="lbl">${T('vLbl')} · ${T('vt_'+V.type)} · ${esc(V.c)} · ${dur}</span><span class="ttl">${esc(V.t)}</span>
+  <span class="look"><b>${T('vLook')}</b> ${esc(V.look[lang])}</span>
+  <div class="vchips">${list.length>1?list.map((x,i)=>`<button class="chip ${i===VSEL[n]?'on':''}" data-vsel="${n}:${i}">${T(['vMain','vAlt','vAlt2'][i])}</button>`).join(''):''}<a class="chip" href="https://www.youtube.com/watch?v=${V.id}" target="_blank" rel="noopener">YouTube ↗</a></div>
+  <span class="src">${T('vNote')}</span></div>`;
+  const img=el.querySelector('img');if(img){img.onerror=()=>{if(!img.dataset.t){img.dataset.t=1;img.src='https://i.ytimg.com/vi/'+V.id+'/hqdefault.jpg';}else img.remove();};}
+  if(pl){const box=$('pl'+n),vid=document.createElement('video');vid.controls=true;vid.autoplay=true;vid.playsInline=true;
+    vid.onerror=()=>{const f=document.createElement('iframe');f.src='https://www.youtube-nocookie.com/embed/'+V.id+'?autoplay=1&rel=0&playsinline=1';
+      f.allow='autoplay; encrypted-media; picture-in-picture; fullscreen';f.allowFullscreen=true;f.title=V.t;box.replaceChildren(f);};
+    vid.src='media/'+V.file;box.replaceChildren(vid);}}
+document.addEventListener('click',e=>{const p=e.target.closest('[data-play]'),s=e.target.closest('[data-vsel]');
+  if(p){VPLAY[+p.dataset.play]=true;renderVideo(+p.dataset.play);}
+  else if(s){const [n,i]=s.dataset.vsel.split(':').map(Number);VSEL[n]=i;VPLAY[n]=false;renderVideo(n);}});
+function renderMedia(){let h=`<thead><tr><th>${T('mTab')}</th><th>${T('mFile')}</th><th>${T('mVideo')}</th><th>${T('mDur')}</th><th>${T('mType')}</th></tr></thead><tbody>`;
+  for(const n of [1,2,3,4,5])VIDEOS[n].forEach((V,i)=>{h+=`<tr><td>${n}${i?' ('+T(['vMain','vAlt','vAlt2'][i]).toLowerCase()+')':''}</td><td><code>media/${V.file}</code></td><td><a href="https://www.youtube.com/watch?v=${V.id}" target="_blank" rel="noopener">${esc(V.t)}</a> · ${esc(V.c)}</td><td>${V.d}</td><td>${T('vt_'+V.type)}</td></tr>`;});
+  $('mediaTbl').innerHTML=h+'</tbody>';}
+
+/* ================= Tab, ngôn ngữ, chế độ GV ================= */
+let tab=1;
+function setTab(n){tab=n;document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.toggle('on',+b.dataset.tab===n));
+  for(let k=1;k<=5;k++)$('t'+k).hidden=k!==n;store.set('ccrl-tab',String(n));if(n!==4&&S4.press)press4(false);}
+document.querySelectorAll('nav.tabs button').forEach(b=>b.onclick=()=>setTab(+b.dataset.tab));
+$('gvBtn').onclick=()=>{const on=!document.body.classList.contains('hideNums');document.body.classList.toggle('hideNums',on);$('gvBtn').setAttribute('aria-pressed',on);};
+function applyLang(){document.documentElement.lang=lang;document.title=lang==='vi'?'Cầu chì, cầu dao, rơ le':'Fuses, breakers, relays';
+  document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=T(el.dataset.i18n));
+  document.querySelectorAll('[data-i18n-html]').forEach(el=>el.innerHTML=T(el.dataset.i18nHtml));
+  $('langBtn').textContent=lang==='vi'?'EN':'VI';
+  Object.keys(PRED).forEach(renderPred);Object.keys(CONC).forEach(renderConc);[1,2,3,4,5].forEach(renderVideo);renderMedia();
+  appsUI('apps1',S1,()=>ui1());appsUI('apps2',S2,()=>ui2());render5();
+  st1=st2=st3=st4=null;ui1(true);ui2(true);ui3(true);ui4(true);}
+$('langBtn').onclick=()=>{lang=lang==='vi'?'en':'vi';applyLang();};
+
+/* ================= Vòng lặp ================= */
+applyLang();
+{const t=+store.get('ccrl-tab');setTab(t>=1&&t<=5?t:1);}
+let last=performance.now(),uiT=0;
+function loop(now){const dt=Math.min((now-last)/1000,.05);last=now;uiT+=dt;
+  try{
+    if(tab===1){step1(dt);draw1();drawG1();if(uiT>.12){uiT=0;ui1();}}
+    else if(tab===2){step2(dt);draw2();drawG2();if(uiT>.12){uiT=0;ui2();}}
+    else if(tab===3){step3(dt);draw3();drawG3();if(uiT>.12){uiT=0;ui3();}}
+    else if(tab===4){step4(dt);draw4();drawG4();if(uiT>.12){uiT=0;ui4();}}
+  }catch(err){console.error(err);}
+  requestAnimationFrame(loop);}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

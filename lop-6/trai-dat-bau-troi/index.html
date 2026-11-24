@@ -1,0 +1,1054 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Trái Đất và bầu trời</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Trái Đất và bầu trời (KHTN 6): Mặt Trời mọc lặn, thiên thể tự phát sáng và phản xạ, Tuần Trăng, hệ Mặt Trời, Ngân Hà.
+   Cùng hệ màu, phông với bộ mô phỏng KHTN 6–9. */
+:root{
+  --bg:#edf0f3; --panel:#ffffff; --lane:#f4f6f9; --ink:#141c26; --muted:#556170; --line:#c9d1db;
+  --accent:#1d5fa8; --accent-ink:#ffffff; --ok:#1d8a4b; --warn:#c2410c;
+  --laser:#e0262f; --ray:#f2b632; --ray2:#e57a12; --mirror:#6fa8d6; --img:#7a3fc2; --obj:#1d5fa8;
+  --room:#10151e; --space:#0d1626; --star:#e9eef7; --gold:#c99a2e; --wood:#8a6a4a;
+  --font-ui:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-num:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Consolas,monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0e131a; --panel:#161e28; --lane:#111821; --ink:#e3e9f0; --muted:#97a3b2; --line:#2a3644;
+  --accent:#5ea6ec; --accent-ink:#04182c; --ok:#47c47d; --warn:#f08a4b;
+  --laser:#ff4d55; --ray:#ffc94a; --ray2:#ff9a3d; --mirror:#7fb8e6; --img:#b28cff; --obj:#5ea6ec;
+  --room:#0a0e15; --space:#060a12; --star:#cfd8e6; --gold:#e0b24a; --wood:#9a7a58;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e131a; --panel:#161e28; --lane:#111821; --ink:#e3e9f0; --muted:#97a3b2; --line:#2a3644;
+  --accent:#5ea6ec; --accent-ink:#04182c; --ok:#47c47d; --warn:#f08a4b;
+  --laser:#ff4d55; --ray:#ffc94a; --ray2:#ff9a3d; --mirror:#7fb8e6; --img:#b28cff; --obj:#5ea6ec;
+  --room:#0a0e15; --space:#060a12; --star:#cfd8e6; --gold:#e0b24a; --wood:#9a7a58;
+  color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-ui);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px 40px}
+.wrap{max-width:1320px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.hbtns{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.eyebrow{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{margin:0;font-size:clamp(25px,3.4vw,36px);line-height:1.15;font-weight:800;text-wrap:balance;letter-spacing:-.01em}
+h2{margin:0;font-size:17px;font-weight:700;text-wrap:balance}
+.btn{font:inherit;font-weight:600;font-size:15px;min-height:44px;padding:8px 14px;border-radius:8px;border:1px solid var(--line);
+  background:var(--panel);color:var(--ink);cursor:pointer;touch-action:manipulation;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+.btn:hover{border-color:var(--accent)}
+.btn:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible,a:focus-visible,.vcard:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
+.seg .btn{border:0;border-radius:0}
+nav.tabs{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line)}
+nav.tabs button{font:inherit;font-size:15px;font-weight:600;white-space:nowrap;min-height:46px;padding:8px 14px;border:0;border-bottom:3px solid transparent;
+  background:none;color:var(--muted);cursor:pointer;margin-bottom:-1px}
+nav.tabs button.on{color:var(--ink);border-bottom-color:var(--accent)}
+.req{margin:0;font-size:14px;color:var(--muted);max-width:110ch}
+.req b{color:var(--ink);font-weight:600}
+.lab{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:14px;align-items:start}
+@media (max-width:1020px){.lab{grid-template-columns:minmax(0,1fr)}}
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.col{display:flex;flex-direction:column;gap:12px;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card p{margin:0}
+canvas{display:block;width:100%;border-radius:8px;background:var(--lane);touch-action:none;user-select:none;-webkit-user-select:none}
+.hint{margin:0;font-size:14px;color:var(--muted)}
+.status{margin:0;font-weight:600;min-height:1.5em}
+.status.ok{color:var(--ok)} .status.no{color:var(--warn)}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chk{display:inline-flex;align-items:center;gap:8px;min-height:44px;font-size:15px;cursor:pointer}
+.chk input{width:22px;height:22px;accent-color:var(--accent)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:14px;color:var(--muted)}
+.legend i{display:inline-block;width:18px;height:5px;border-radius:3px;margin-right:6px;vertical-align:middle}
+.sl{display:flex;flex-direction:column;gap:4px}
+.sl .top{display:flex;justify-content:space-between;gap:8px;font-size:15px}
+.sl .val{font-family:var(--font-num);font-weight:600;text-align:right}
+input[type=range]{width:100%;height:44px;accent-color:var(--accent);margin:0}
+.kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;font-size:15px;margin:0}
+.kv dt{color:var(--muted)} .kv dd{margin:0;font-family:var(--font-num);font-variant-numeric:tabular-nums;text-align:right;overflow-wrap:anywhere}
+.big{font-family:var(--font-num);font-size:clamp(22px,2.6vw,30px);font-weight:600;line-height:1.2}
+.opts{display:flex;flex-direction:column;gap:6px}
+.opts .btn{text-align:left;font-size:14px;justify-content:flex-start}
+.opts .btn.picked{border:2px solid var(--accent)}
+.opts .btn.right{background:color-mix(in srgb,var(--ok) 18%,var(--panel));border-color:var(--ok)}
+.ans{background:var(--lane);border-left:4px solid var(--ok);padding:8px 12px;border-radius:6px;font-size:15px}
+.muted{color:var(--muted);font-size:14px}
+details{border:1px solid var(--line);border-radius:var(--r);background:var(--panel);padding:0 14px}
+details[open]{padding-bottom:12px}
+summary{cursor:pointer;font-weight:700;min-height:44px;display:flex;align-items:center;font-size:15px}
+details p,details ul{margin:6px 0;font-size:15px;max-width:95ch}
+details ul{padding-left:20px}
+.fine{font-size:13px;color:var(--muted);margin:0}
+.tblwrap{overflow-x:auto}
+table.log{border-collapse:collapse;width:100%;font-size:14px}
+table.log th,table.log td{padding:4px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+table.log th:first-child,table.log td:first-child{text-align:left}
+table.log td{font-family:var(--font-num);font-variant-numeric:tabular-nums}
+table.log th{color:var(--muted);font-weight:600}
+table.log.wide td{font-family:var(--font-ui);white-space:normal;text-align:left}
+table.log.wide th{text-align:left}
+table.log a{color:var(--accent)}
+.quiz{display:flex;flex-direction:column;gap:12px}
+.qz{display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--line);padding-top:10px}
+.qz:first-child{border-top:0;padding-top:0}
+.qz .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.qz input{font:inherit;font-family:var(--font-num);font-size:16px;width:110px;min-height:44px;padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+.qz .unit{font-family:var(--font-num);color:var(--muted)}
+.qz .res{font-weight:700}
+.qz .res.ok{color:var(--ok)} .qz .res.no{color:var(--warn)}
+/* Video thực tế: thẻ có ảnh thu nhỏ, bấm là phát trong trang */
+.vsec{display:flex;flex-direction:column;gap:8px}
+.vsec h2{font-size:15px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.vids{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.vcard{display:flex;flex-direction:column;background:var(--space);color:var(--star);border-radius:var(--r);overflow:hidden;border:0;padding:0;text-align:left;cursor:pointer;font:inherit}
+.vthumb{position:relative;aspect-ratio:16/9;background:linear-gradient(135deg,#1d2a44,#4a3418)}
+.vthumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.vthumb .pl{position:absolute;inset:0;margin:auto;width:56px;height:56px;border-radius:50%;background:rgba(209,40,48,.92);display:grid;place-items:center}
+.vthumb .pl::before{content:"";border-style:solid;border-width:11px 0 11px 18px;border-color:transparent transparent transparent #fff;margin-left:5px}
+.vthumb .tag,.vthumb .dur{position:absolute;font-size:12px;font-weight:700;padding:2px 8px;border-radius:5px;background:rgba(0,0,0,.72);color:#fff}
+.vthumb .tag{left:8px;top:8px} .vthumb .dur{right:8px;bottom:8px;font-family:var(--font-num)}
+.vthumb .dur.unk{background:#9a3412}
+.vbody{padding:10px 12px;display:flex;flex-direction:column;gap:4px}
+.vbody .ttl{font-weight:700;font-size:15px;line-height:1.3}
+.vbody .ch{font-size:13px;opacity:.75}
+.vbody .look{font-size:14px;opacity:.92}
+.vbody .look b{color:var(--ray)}
+.vmodal{position:fixed;inset:0;background:rgba(5,8,14,.82);z-index:50;display:grid;place-items:center;padding:16px}
+.vbox{background:var(--panel);color:var(--ink);border-radius:var(--r);width:min(960px,100%);max-height:100%;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+.vhead{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.vstage{position:relative;aspect-ratio:16/9;background:#000;border-radius:8px;overflow:hidden;display:grid;place-items:center;color:#fff}
+.vstage video,.vstage iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.vstage .msg{padding:18px;text-align:center;max-width:56ch;font-size:15px}
+body.hideNums .num{filter:blur(7px);user-select:none}
+body.hideNums .num:hover{filter:none}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:640px){.split{grid-template-columns:1fr}}
+.lab .kv{grid-template-columns:minmax(0,1.3fr) minmax(min-content,1fr)}
+.lab .kv dd.num{white-space:nowrap}
+#ph3,#nm4{font-family:var(--font-ui);font-weight:800}
+.cls{display:flex;flex-direction:column;gap:6px}
+.cls .it{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px;align-items:center;border-top:1px solid var(--line);padding-top:6px}
+.cls .it:first-child{border-top:0;padding-top:0}
+.cls .seg .btn{font-size:13px;padding:6px 10px}
+.cls .mark{font-weight:700;font-size:14px}
+.cls .mark.ok{color:var(--ok)} .cls .mark.no{color:var(--warn)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow" data-i18n="eyebrow"></div>
+      <h1 data-i18n="title"></h1>
+    </div>
+    <div class="hbtns">
+      <button class="btn" id="gvBtn" aria-pressed="false" data-i18n="gvBtn"></button>
+      <button class="btn" id="langBtn">EN</button>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="1" data-i18n="tab1"></button>
+    <button role="tab" data-tab="2" data-i18n="tab2"></button>
+    <button role="tab" data-tab="3" data-i18n="tab3"></button>
+    <button role="tab" data-tab="4" data-i18n="tab4"></button>
+    <button role="tab" data-tab="5" data-i18n="tab5"></button>
+  </nav>
+
+  <!-- ===================== TAB 1: MẶT TRỜI MỌC VÀ LẶN ===================== -->
+  <section id="t1" class="col">
+    <p class="req" data-i18n-html="req1"></p>
+    <div class="vsec"><h2 data-i18n="vHead"></h2><div class="vids" id="v1"></div></div>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" data-i18n="hint1"></p>
+        <canvas id="cv1" aria-label="Earth seen from above the North Pole, and the sky dome seen by an observer"></canvas>
+        <div class="controls">
+          <button class="btn primary" id="play1" data-i18n="play"></button>
+          <div class="seg" id="spd1"></div>
+        </div>
+        <div class="sl"><div class="top"><span data-i18n="time1"></span><span class="val num" id="tV1"></span></div>
+          <input type="range" id="t1r" min="0" max="24" step="0.05" value="6"></div>
+        <div class="controls">
+          <label class="chk"><input type="checkbox" id="path1" checked> <span data-i18n="path1"></span></label>
+          <label class="chk"><input type="checkbox" id="stick1" checked> <span data-i18n="stick1"></span></label>
+        </div>
+        <p class="fine" data-i18n="assume1"></p>
+      </div>
+      <div class="col">
+        <div class="card">
+          <h2 data-i18n="place1"></h2>
+          <div class="controls" id="pl1"></div>
+          <h2 data-i18n="date1"></h2>
+          <div class="controls" id="dt1"></div>
+        </div>
+        <div class="card">
+          <h2 data-i18n="obs"></h2>
+          <dl class="kv" id="o1"></dl>
+          <p class="status" id="st1"></p>
+        </div>
+        <div class="card" id="p1"></div>
+        <div class="card" id="p1b"></div>
+      </div>
+    </div>
+    <details open><summary data-i18n="concT"></summary><div data-i18n-html="conc1"></div></details>
+    <details><summary data-i18n="mechT"></summary><div data-i18n-html="mech1"></div></details>
+    <details><summary data-i18n="misT"></summary><div data-i18n-html="mis1"></div></details>
+    <details><summary data-i18n="wordT"></summary><div data-i18n-html="word1"></div></details>
+  </section>
+
+  <!-- ===================== TAB 2: TỰ PHÁT SÁNG HAY PHẢN XẠ ===================== -->
+  <section id="t2" class="col" hidden>
+    <p class="req" data-i18n-html="req2"></p>
+    <div class="vsec"><h2 data-i18n="vHead"></h2><div class="vids" id="v2"></div></div>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" data-i18n="hint2"></p>
+        <canvas id="cv2" aria-label="the Sun, planets, the Moon, a comet and stars"></canvas>
+        <div class="controls">
+          <label class="chk"><input type="checkbox" id="off2"> <span data-i18n="off2"></span></label>
+          <label class="chk"><input type="checkbox" id="ray2" checked> <span data-i18n="ray2"></span></label>
+        </div>
+        <p class="fine" data-i18n="assume2"></p>
+      </div>
+      <div class="col">
+        <div class="card">
+          <h2 data-i18n="cls2"></h2>
+          <p class="hint" data-i18n="cls2h"></p>
+          <div class="cls" id="cls2"></div>
+          <div class="controls"><button class="btn primary" id="chk2" data-i18n="check"></button><button class="btn" id="rst2" data-i18n="reset"></button></div>
+          <p class="status" id="st2"></p>
+        </div>
+        <div class="card" id="p2"></div>
+      </div>
+    </div>
+    <details open><summary data-i18n="concT"></summary><div data-i18n-html="conc2"></div></details>
+    <details><summary data-i18n="mechT"></summary><div data-i18n-html="mech2"></div></details>
+    <details><summary data-i18n="misT"></summary><div data-i18n-html="mis2"></div></details>
+    <details><summary data-i18n="wordT"></summary><div data-i18n-html="word2"></div></details>
+  </section>
+
+  <!-- ===================== TAB 3: TUẦN TRĂNG ===================== -->
+  <section id="t3" class="col" hidden>
+    <p class="req" data-i18n-html="req3"></p>
+    <div class="vsec"><h2 data-i18n="vHead"></h2><div class="vids" id="v3"></div></div>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" data-i18n="hint3"></p>
+        <canvas id="cv3" aria-label="Sun, Earth and the Moon’s orbit seen from above, and the Moon’s shape seen from Earth"></canvas>
+        <div class="controls">
+          <button class="btn primary" id="play3" data-i18n="play"></button>
+          <div class="seg" id="spd3"></div>
+        </div>
+        <div class="sl"><div class="top"><span data-i18n="age3"></span><span class="val num" id="aV3"></span></div>
+          <input type="range" id="a3r" min="0" max="29.53" step="0.01" value="3"></div>
+        <canvas id="cv3s" aria-label="the Moon’s shape on each day of the lunar month"></canvas>
+        <div class="controls">
+          <label class="chk"><input type="checkbox" id="half3" checked> <span data-i18n="half3"></span></label>
+          <label class="chk"><input type="checkbox" id="shad3"> <span data-i18n="shad3"></span></label>
+        </div>
+        <p class="fine" data-i18n="assume3"></p>
+      </div>
+      <div class="col">
+        <div class="card">
+          <h2 data-i18n="obs"></h2>
+          <div class="big" id="ph3"></div>
+          <dl class="kv" id="o3"></dl>
+        </div>
+        <div class="card" id="p3"></div>
+        <div class="card" id="p3b"></div>
+        <div class="card">
+          <h2 data-i18n="quizT"></h2>
+          <div class="quiz" id="quiz3"></div>
+        </div>
+      </div>
+    </div>
+    <details open><summary data-i18n="concT"></summary><div data-i18n-html="conc3"></div></details>
+    <details><summary data-i18n="mechT"></summary><div data-i18n-html="mech3"></div></details>
+    <details><summary data-i18n="misT"></summary><div data-i18n-html="mis3"></div></details>
+    <details><summary data-i18n="wordT"></summary><div data-i18n-html="word3"></div></details>
+  </section>
+
+  <!-- ===================== TAB 4: HỆ MẶT TRỜI ===================== -->
+  <section id="t4" class="col" hidden>
+    <p class="req" data-i18n-html="req4"></p>
+    <div class="vsec"><h2 data-i18n="vHead"></h2><div class="vids" id="v4"></div></div>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" data-i18n="hint4"></p>
+        <canvas id="cv4" aria-label="planets moving on their orbits around the Sun, seen from above"></canvas>
+        <div class="controls">
+          <button class="btn primary" id="play4" data-i18n="play"></button>
+          <div class="seg" id="spd4"></div>
+        </div>
+        <div class="controls">
+          <div class="seg" id="vw4"></div>
+          <div class="seg" id="sc4"></div>
+          <label class="chk"><input type="checkbox" id="trail4" checked> <span data-i18n="trail4"></span></label>
+        </div>
+        <p class="fine" data-i18n="assume4"></p>
+      </div>
+      <div class="col">
+        <div class="card">
+          <h2 data-i18n="sel4"></h2>
+          <div class="big" id="nm4"></div>
+          <dl class="kv" id="o4"></dl>
+          <p class="status" id="st4"></p>
+        </div>
+        <div class="card" id="p4"></div>
+        <div class="card" id="p4b"></div>
+      </div>
+    </div>
+    <div class="split">
+      <div class="card">
+        <h2 data-i18n="gr4"></h2>
+        <div class="seg" id="ax4"></div>
+        <canvas id="cv4g" aria-label="graph of orbital period against distance from the Sun"></canvas>
+        <p class="hint" data-i18n="gr4h"></p>
+      </div>
+      <div class="card">
+        <h2 data-i18n="sz4"></h2>
+        <canvas id="cv4s" aria-label="the Sun and planets drawn to the same size scale"></canvas>
+        <p class="hint" data-i18n="sz4h"></p>
+      </div>
+    </div>
+    <div class="card">
+      <h2 data-i18n="yard4"></h2>
+      <p class="hint" data-i18n="yard4h"></p>
+      <div class="sl"><div class="top"><span data-i18n="sunD4"></span><span class="val num" id="sdV4"></span></div>
+        <input type="range" id="sd4" min="5" max="100" step="1" value="20"></div>
+      <div class="tblwrap"><table class="log" id="yt4"></table></div>
+    </div>
+    <details open><summary data-i18n="concT"></summary><div data-i18n-html="conc4"></div></details>
+    <details><summary data-i18n="mechT"></summary><div data-i18n-html="mech4"></div></details>
+    <details><summary data-i18n="misT"></summary><div data-i18n-html="mis4"></div></details>
+    <details><summary data-i18n="wordT"></summary><div data-i18n-html="word4"></div></details>
+  </section>
+
+  <!-- ===================== TAB 5: NGÂN HÀ ===================== -->
+  <section id="t5" class="col" hidden>
+    <p class="req" data-i18n-html="req5"></p>
+    <div class="vsec"><h2 data-i18n="vHead"></h2><div class="vids" id="v5"></div></div>
+    <div class="lab">
+      <div class="stage">
+        <p class="hint" data-i18n="hint5"></p>
+        <canvas id="cv5" aria-label="zooming out from the Earth to the whole Milky Way"></canvas>
+        <div class="sl"><div class="top"><span data-i18n="zoom5"></span><span class="val num" id="zV5"></span></div>
+          <input type="range" id="z5" min="5.6" max="18.3" step="0.01" value="6.1"></div>
+        <div class="controls" id="pre5"></div>
+        <p class="fine" data-i18n="assume5"></p>
+      </div>
+      <div class="col">
+        <div class="card">
+          <h2 data-i18n="obs"></h2>
+          <dl class="kv" id="o5"></dl>
+          <p class="status" id="st5"></p>
+        </div>
+        <div class="card" id="p5"></div>
+        <div class="card">
+          <h2 data-i18n="quizT"></h2>
+          <div class="quiz" id="quiz5"></div>
+        </div>
+      </div>
+    </div>
+    <details open><summary data-i18n="concT"></summary><div data-i18n-html="conc5"></div></details>
+    <details><summary data-i18n="mechT"></summary><div data-i18n-html="mech5"></div></details>
+    <details><summary data-i18n="misT"></summary><div data-i18n-html="mis5"></div></details>
+    <details><summary data-i18n="wordT"></summary><div data-i18n-html="word5"></div></details>
+  </section>
+
+  <details><summary data-i18n="offT"></summary><div id="offline"></div></details>
+  <details><summary data-i18n="currT"></summary><div data-i18n-html="curr"></div></details>
+</div>
+
+<div class="vmodal" id="vmodal" hidden role="dialog" aria-modal="true">
+  <div class="vbox">
+    <div class="vhead"><b id="vmT"></b><button class="btn" id="vmX" aria-label="close">✕</button></div>
+    <div class="vstage" id="vmS"></div>
+    <p class="hint" id="vmL"></p>
+    <div class="controls"><a class="btn" id="vmYT" target="_blank" rel="noopener"></a><span class="fine" id="vmN"></span></div>
+  </div>
+</div>
+<script>
+/* ================= Ngôn ngữ: mỗi khoá là [tiếng Việt, English] ================= */
+const L={
+eyebrow:['KHTN 6 · Trái Đất và bầu trời · mô phỏng tương tác','Science 6 · Earth and sky · interactive simulation'],
+title:['Mặt Trời, Mặt Trăng và hệ Mặt Trời','The Sun, the Moon and the Solar System'],
+gvBtn:['Che số liệu','Hide numbers'],
+tab1:['1. Mặt Trời mọc và lặn','1. Sunrise and sunset'],tab2:['2. Ai tự phát sáng?','2. Who makes light?'],tab3:['3. Tuần Trăng','3. Phases of the Moon'],
+tab4:['4. Hệ Mặt Trời','4. The Solar System'],tab5:['5. Ngân Hà','5. The Milky Way'],
+vHead:['Video thực tế (tiếng Anh)','Real-world videos'],
+play:['▶ Chạy','▶ Play'],pause:['⏸ Dừng','⏸ Pause'],obs:['Quan sát','Observations'],
+concT:['Kết luận','Conclusion'],mechT:['Cơ chế khoa học (cho giáo viên)','Scientific mechanism (for teachers)'],misT:['Học sinh hay hiểu sai','Common misconceptions'],wordT:['Nguồn gốc thuật ngữ','Where the words come from'],
+predTitle:['Dự đoán trước','Predict first'],predThen:['Giờ hãy thử trên mô phỏng rồi xem đáp án.','Now try it in the simulation, then check.'],showAns:['Xem đáp án','Show answer'],hideAns:['Ẩn đáp án','Hide answer'],
+quizT:['Thử thách','Challenge'],check:['Kiểm tra','Check'],reset:['Làm lại','Reset'],right:['Đúng!','Correct!'],wrong:['Chưa đúng, thử lại.','Not yet, try again.'],showHint:['Gợi ý / lời giải','Hint / solution'],
+
+/* ---------- TAB 1 ---------- */
+req1:['<b>Yêu cầu cần đạt:</b> Giải thích được một cách định tính và sơ lược: từ Trái Đất thấy Mặt Trời mọc và lặn hằng ngày.','<b>Goal:</b> Explain qualitatively why, from the Earth, we see the Sun rise and set every day.'],
+hint1:['Kéo quả địa cầu bên trái cho nó quay, hoặc kéo Mặt Trời trên vòm trời bên phải. Người quan sát quay cùng Trái Đất, còn Mặt Trời đứng yên.','Drag the globe on the left to spin it, or drag the Sun across the sky dome on the right. The observer turns with the Earth; the Sun stays still.'],
+time1:['Giờ Mặt Trời tại nơi quan sát','Local solar time'],
+path1:['Vẽ đường đi của Mặt Trời trong ngày','Show the Sun’s path for the day'],stick1:['Cọc 1 m và bóng của nó','1 m stick and its shadow'],
+place1:['Nơi quan sát','Where you stand'],date1:['Ngày trong năm','Day of the year'],
+plHN:['Hà Nội','Hanoi'],plHCM:['TP Hồ Chí Minh','Ho Chi Minh City'],plEq:['Xích đạo','Equator'],plNP:['Bắc Cực','North Pole'],
+dXP:['Xuân phân 20/3','Equinox 20 Mar'],dHC:['Hạ chí 21/6','Solstice 21 Jun'],dTP:['Thu phân 23/9','Equinox 23 Sep'],dDC:['Đông chí 21/12','Solstice 21 Dec'],
+spdS:['Chậm','Slow'],spdM:['Vừa','Medium'],spdF:['Nhanh','Fast'],
+kLat:['Vĩ độ','Latitude'],kAlt:['Độ cao Mặt Trời','Sun’s altitude'],kDir:['Hướng Mặt Trời','Sun’s direction'],kRise:['Mặt Trời mọc lúc','Sunrise'],kSet:['Mặt Trời lặn lúc','Sunset'],
+kRiseDir:['Hướng mọc','Rises in the'],kDay:['Độ dài ban ngày','Length of day'],kShadow:['Bóng cọc 1 m','Shadow of 1 m stick'],kSpin:['Tốc độ quay của mặt đất nơi đứng','Speed of the ground (Earth’s spin)'],
+none:['không có','none'],noRise:['Không mọc (đêm địa cực)','Never rises (polar night)'],noSet:['Không lặn (ngày địa cực)','Never sets (polar day)'],
+N:['Bắc','N'],S:['Nam','S'],E:['Đông','E'],W:['Tây','W'],NE:['Đông Bắc','NE'],SE:['Đông Nam','SE'],NW:['Tây Bắc','NW'],SW:['Tây Nam','SW'],
+nNE:['Bắc – Đông Bắc','NNE'],eNE:['Đông – Đông Bắc','ENE'],eSE:['Đông – Đông Nam','ESE'],sSE:['Nam – Đông Nam','SSE'],sSW:['Nam – Tây Nam','SSW'],wSW:['Tây – Tây Nam','WSW'],wNW:['Tây – Tây Bắc','WNW'],nNW:['Bắc – Tây Bắc','NNW'],
+day:['Ban ngày','Daytime'],night:['Ban đêm','Night-time'],dawn:['Bình minh / hoàng hôn','Twilight'],
+g1Space:['Nhìn từ trên Bắc Cực xuống','Seen from above the North Pole'],g1Sky:['Người đứng nhìn về hướng Nam','Observer facing south'],
+g1Light:['Ánh sáng Mặt Trời','Sunlight'],g1Spin:['Trái Đất tự quay','Earth spins'],g1Obs:['Người quan sát','Observer'],
+st1day:['Người quan sát đang ở nửa Trái Đất được chiếu sáng: ban ngày.','The observer is on the lit half of the Earth: daytime.'],
+st1night:['Người quan sát đã quay sang nửa tối của Trái Đất: ban đêm, Mặt Trời ở dưới đường chân trời.','The observer has turned into the dark half: night, the Sun is below the horizon.'],
+st1rise:['Người quan sát vừa quay từ nửa tối sang nửa sáng: Mặt Trời mọc.','The observer is turning from the dark half into the lit half: sunrise.'],
+st1set:['Người quan sát đang quay từ nửa sáng sang nửa tối: Mặt Trời lặn.','The observer is turning from the lit half into the dark half: sunset.'],
+assume1:['Giả thiết mô phỏng: Mặt Trời coi như đứng yên rất xa; dùng giờ Mặt Trời (12 giờ là lúc Mặt Trời cao nhất), bỏ qua khúc xạ của không khí (thực tế thấy Mặt Trời mọc sớm và lặn muộn hơn khoảng 2–3 phút). Quả địa cầu không vẽ lục địa.','Model assumptions: the Sun is treated as fixed and very far away; solar time is used (12:00 = Sun highest); atmospheric refraction is ignored (it makes sunrise 2–3 min earlier, sunset later). Continents are not drawn.'],
+p1q:['Trái Đất tự quay từ Tây sang Đông. Vậy người đứng ở Hà Nội thấy Mặt Trời di chuyển trên bầu trời theo hướng nào?','The Earth spins from west to east. Which way does an observer in Hanoi see the Sun move across the sky?'],
+p1a:['Từ Tây sang Đông, cùng chiều Trái Đất quay','West to east, the same way the Earth spins'],p1b:['Từ Đông sang Tây, ngược chiều Trái Đất quay','East to west, opposite to the Earth’s spin'],p1c:['Đứng yên trên đỉnh đầu cả ngày','Stays overhead all day'],
+p1e:['Mặt Trời gần như đứng yên; chính ta quay cùng Trái Đất về phía Đông. Giống như ngồi trên ô tô chạy về phía trước thì thấy cây bên đường “chạy” lùi, ta thấy Mặt Trời “chạy” ngược lại: mọc ở phía Đông, lên cao dần, rồi lặn ở phía Tây.','The Sun is almost still; we are carried east by the spinning Earth. Just as trees seem to rush backwards when you ride in a car, the Sun seems to move the other way: it rises in the east, climbs, and sets in the west.'],
+p1bq:['Ngày hạ chí (21/6), ở Hà Nội Mặt Trời mọc ở hướng nào? Chọn “Hạ chí” để kiểm tra.','On the June solstice, where does the Sun rise in Hanoi? Pick “Solstice 21 Jun” to check.'],
+p1ba:['Đúng hướng Đông','Exactly due east'],p1bb:['Lệch về phía Đông Bắc','Towards the north-east'],p1bc:['Lệch về phía Đông Nam','Towards the south-east'],
+p1be:['Mặt Trời chỉ mọc đúng hướng Đông vào hai ngày xuân phân và thu phân. Mùa hè nó mọc lệch về Đông Bắc (ngày dài), mùa đông lệch về Đông Nam (ngày ngắn). Lí do: trục Trái Đất nghiêng khoảng 23,4° so với mặt phẳng quỹ đạo. Thử thêm: ở Hà Nội vào hạ chí, buổi trưa Mặt Trời còn hơi lệch về phía Bắc!','The Sun rises due east only at the equinoxes. In summer it rises towards the north-east (long days), in winter towards the south-east (short days), because the Earth’s axis is tilted about 23.4°. Bonus: in Hanoi at the June solstice the noon Sun is slightly to the north!'],
+conc1:['<ul><li>Trái Đất <b>tự quay quanh trục</b> từ Tây sang Đông, mỗi vòng khoảng <b>24 giờ</b>. Nửa Trái Đất hướng về Mặt Trời là ban ngày, nửa kia là ban đêm.</li><li>Người trên mặt đất quay theo Trái Đất nên thấy Mặt Trời <b>mọc ở phía Đông, lặn ở phía Tây</b>. Đó là chuyển động <b>nhìn thấy</b> của Mặt Trời, không phải Mặt Trời quay quanh Trái Đất.</li><li>Mặt Trời mọc = người quan sát quay từ nửa tối sang nửa sáng; Mặt Trời lặn = quay từ nửa sáng sang nửa tối.</li></ul>','<ul><li>The Earth <b>spins on its axis</b> from west to east, once every <b>24 hours</b>. The half facing the Sun has day, the other half night.</li><li>People on the ground turn with the Earth, so they see the Sun <b>rise in the east and set in the west</b>. This is the Sun’s <b>apparent</b> motion; the Sun is not going round the Earth.</li><li>Sunrise = the observer turns from the dark half into the lit half; sunset = from the lit half into the dark half.</li></ul>'],
+mech1:['<p><b>Cơ chế:</b> Trái Đất quay quanh trục đi qua hai cực với chu kì 23 giờ 56 phút so với các sao (ngày sao). Vì trong lúc đó Trái Đất cũng đi được gần 1° trên quỹ đạo quanh Mặt Trời, nó phải quay thêm khoảng 4 phút nữa mới hướng lại đúng về Mặt Trời: ngày Mặt Trời trung bình 24 giờ. Ta không cảm thấy chuyển động quay vì nó gần như đều, mọi vật quanh ta (nhà, cây, không khí) cùng quay; tốc độ mặt đất ở xích đạo khoảng 1670 km/h, ở Hà Nội khoảng 1560 km/h (bằng 1670 km/h nhân cos vĩ độ).</p><p>Độ cao <i>h</i> của Mặt Trời trên đường chân trời tính theo vĩ độ φ, xích vĩ δ của Mặt Trời trong ngày và góc giờ H = 15°·(t − 12): sin h = sin φ·sin δ + cos φ·cos δ·cos H. Mô phỏng dùng đúng công thức này. Xích vĩ δ thay đổi từ +23,4° (hạ chí) đến −23,4° (đông chí) do trục Trái Đất nghiêng; vì thế hướng mọc, độ cao giữa trưa và độ dài ngày thay đổi theo mùa (phần mở rộng, lớp 6 chưa yêu cầu).</p><p><b>Nói với học sinh:</b> “Mặt Trời đứng yên như ngọn đèn, Trái Đất là quả bóng đang xoay. Mình đứng trên quả bóng nên thấy ngọn đèn hiện ra ở mép bên này (mọc), đi qua trên đầu rồi khuất ở mép bên kia (lặn).” Cho học sinh tự xoay quanh mình trước bóng đèn lớp học: khi quay, bóng đèn “xuất hiện” rồi “biến mất”.</p>','<p><b>Mechanism:</b> the Earth turns on its polar axis once every 23 h 56 min relative to the stars. Meanwhile it moves about 1° along its orbit, so it must turn about 4 more minutes to face the Sun again: the mean solar day is 24 h. We do not feel the spin because it is nearly uniform and everything around us turns with us; the ground moves at about 1670 km/h at the equator, about 1560 km/h in Hanoi (1670 km/h × cos latitude).</p><p>The Sun’s altitude <i>h</i> follows from latitude φ, the Sun’s declination δ and hour angle H = 15°·(t − 12): sin h = sin φ sin δ + cos φ cos δ cos H, which the simulation uses. δ ranges from +23.4° to −23.4° because of the axial tilt, which changes the rising direction, noon height and day length with the seasons (extension only).</p><p><b>For students:</b> “The Sun is like a lamp that stays still and the Earth is a spinning ball. Standing on the ball, we see the lamp appear at one edge (sunrise), pass overhead, and disappear at the other edge (sunset).” Let students turn slowly on the spot in front of the classroom lamp.</p>'],
+mis1:['<ul><li><b>“Mặt Trời quay quanh Trái Đất mỗi ngày.”</b> Chuyển động hằng ngày của Mặt Trời là do Trái Đất tự quay. (Mặt Trời không quay quanh Trái Đất; ngược lại, Trái Đất đi quanh Mặt Trời mỗi năm một vòng.)</li><li><b>“Mặt Trời luôn mọc đúng hướng Đông, lặn đúng hướng Tây.”</b> Chỉ đúng vào xuân phân, thu phân. Hãy đổi ngày trong năm để thấy.</li><li><b>“Buổi trưa Mặt Trời luôn ở ngay đỉnh đầu.”</b> Ở Hà Nội, chỉ có khoảng hai ngày trong năm (cuối tháng 5 và giữa tháng 7) Mặt Trời lên thiên đỉnh. Mùa đông, giữa trưa Mặt Trời chỉ cao khoảng 45°.</li><li><b>“Ban đêm Mặt Trời tắt hoặc đi xuống dưới đất.”</b> Mặt Trời vẫn chiếu sáng nửa bên kia Trái Đất; lúc Hà Nội nửa đêm thì ở Brazil đang giữa trưa.</li></ul>','<ul><li><b>“The Sun goes round the Earth every day.”</b> The daily motion is caused by the Earth spinning (the Earth goes round the Sun once a year).</li><li><b>“The Sun always rises due east.”</b> Only at the equinoxes; change the date to see.</li><li><b>“At noon the Sun is always straight overhead.”</b> In Hanoi that happens only on about two days a year; in winter the noon Sun is only about 45° high.</li><li><b>“At night the Sun switches off or goes under the ground.”</b> It is lighting the other side of the Earth; at midnight in Hanoi it is noon in Brazil.</li></ul>'],
+word1:['<ul><li><b>Mặt Trời</b>: từ thuần Việt (“mặt” của “trời”). Hán Việt gọi là <b>Thái Dương</b> 太陽: “thái” = rất, lớn; “dương” = phía sáng, ấm (đối lập với “âm”). Tiếng Anh <i>Sun</i> (tiếng Anh cổ <i>sunne</i>); tiếng Latinh <i>Sol</i> → <i>solar</i> (thuộc Mặt Trời); tiếng Hy Lạp <i>Hēlios</i> → <i>helium</i> (khí heli được phát hiện trong ánh sáng Mặt Trời trước khi tìm thấy trên Trái Đất).</li><li><b>Đông</b> 東: cách giải thích dân gian quen thuộc là chữ “nhật” 日 (Mặt Trời) lấp ló sau chữ “mộc” 木 (cây), tức lúc Mặt Trời mọc sau rặng cây. Tiếng Anh <i>east</i> cùng gốc Ấn–Âu với <i>aurora</i> (rạng đông). <i>Orient</i> (phương Đông) từ Latinh <i>oriri</i> = mọc lên; <i>Occident</i> (phương Tây) từ <i>occidere</i> = rơi xuống, lặn.</li><li><b>Tự quay</b> = quay quanh trục của chính mình (tiếng Anh <i>rotation</i>, Latinh <i>rota</i> = bánh xe), khác với <b>quay quanh</b> một vật khác (<i>revolution</i>, Latinh <i>revolvere</i> = cuộn trở lại).</li></ul>','<ul><li><b>Sun</b>: Old English <i>sunne</i>; Latin <i>Sol</i> → <i>solar</i>; Greek <i>Hēlios</i> → <i>helium</i> (found in sunlight before it was found on Earth). Vietnamese <i>Mặt Trời</i> = “face of the sky”; Sino-Vietnamese 太陽 <i>Thái Dương</i> “great light”.</li><li><b>East</b> shares an Indo-European root with <i>aurora</i> (dawn). <i>Orient</i> from Latin <i>oriri</i> (to rise), <i>Occident</i> from <i>occidere</i> (to fall, set). The Chinese character 東 is popularly read as the Sun 日 behind a tree 木.</li><li><b>Rotation</b> (Latin <i>rota</i>, wheel) = spinning on one’s own axis; <b>revolution</b> (Latin <i>revolvere</i>) = going round something else.</li></ul>'],
+/* ---------- TAB 2 ---------- */
+req2:['<b>Yêu cầu cần đạt:</b> Nêu được Mặt Trời và sao là các thiên thể phát sáng; Mặt Trăng, các hành tinh và sao chổi phản xạ ánh sáng Mặt Trời.','<b>Goal:</b> State that the Sun and stars give out light, while the Moon, planets and comets reflect sunlight.'],
+hint2:['Kéo Mặt Trời đi chỗ khác: phía sáng của mỗi vật thay đổi thế nào? Rồi bật “Tắt Mặt Trời” để kiểm tra phân loại của em.','Drag the Sun around: how does the bright side of each object change? Then switch the Sun off to test your sorting.'],
+off2:['Tắt Mặt Trời (thí nghiệm tưởng tượng)','Switch the Sun off (thought experiment)'],ray2:['Vẽ đường truyền ánh sáng tới mắt người ở Trái Đất','Show light paths to an eye on Earth'],
+cls2:['Phân loại các thiên thể','Sort the objects'],cls2h:['Với mỗi vật, chọn: nó tự phát ra ánh sáng, hay chỉ hắt lại (phản xạ) ánh sáng Mặt Trời?','For each object: does it make its own light, or only reflect sunlight?'],
+own:['Tự phát sáng','Makes light'],refl:['Phản xạ','Reflects'],
+o_sun:['Mặt Trời','Sun'],o_star:['Sao Thiên Lang (Sirius)','Sirius (a star)'],o_moon:['Mặt Trăng','Moon'],o_venus:['Sao Kim (Sao Hôm, Sao Mai)','Venus (evening/morning star)'],
+o_mars:['Sao Hoả','Mars'],o_jup:['Sao Mộc','Jupiter'],o_comet:['Sao chổi','Comet'],o_earth:['Trái Đất (nhìn từ vũ trụ)','Earth (seen from space)'],
+st2all:['Em đã chọn đúng cả {n} vật!','All {n} correct!'],st2some:['Đúng {k}/{n}. Những dòng có dấu ✗ cần xem lại: bật “Tắt Mặt Trời” để kiểm tra.','{k}/{n} correct. Re-check the rows marked ✗: switch the Sun off to test.'],st2none:['Hãy chọn cho mọi vật trước khi kiểm tra.','Choose for every object first.'],
+offNote:['Mặt Trời tắt: chỉ còn các ngôi sao tự phát sáng. Mặt Trăng, hành tinh và sao chổi tối hẳn (đường viền chỉ để em biết chúng ở đâu).','Sun off: only the stars still shine. The Moon, planets and comet go dark (the outlines only show where they are).'],
+tail:['đuôi luôn hướng ra xa Mặt Trời','tail points away from the Sun'],eyeE:['mắt ở Trái Đất','eye on Earth'],
+assume2:['Giả thiết mô phỏng: kích thước và khoảng cách không theo tỉ lệ; Mặt Trăng, Trái Đất được vẽ to và xa để dễ nhìn. “Tắt Mặt Trời” là thí nghiệm tưởng tượng; thực tế ánh sáng còn đi tiếp thêm vài phút sau khi tắt (8 phút 20 giây mới tới Trái Đất).','Model assumptions: sizes and distances are not to scale. “Switching the Sun off” is a thought experiment; in reality light already on its way would keep arriving for minutes (8 min 20 s to reach Earth).'],
+p2q:['Nếu Mặt Trời đột nhiên tắt (thí nghiệm tưởng tượng), một lúc sau, nhìn lên bầu trời đêm ta còn thấy những gì?','If the Sun suddenly switched off (a thought experiment), what would we still see in the night sky a while later?'],
+p2a:['Vẫn thấy Mặt Trăng và các ngôi sao','The Moon and the stars'],p2b:['Chỉ còn thấy các ngôi sao','Only the stars'],p2c:['Không thấy gì cả','Nothing at all'],
+p2e:['Các ngôi sao là những “mặt trời” ở rất xa, tự phát sáng nên vẫn sáng. Mặt Trăng và các hành tinh chỉ hắt lại ánh sáng Mặt Trời: khi không còn ánh sáng tới thì chúng tối. (Sau khi tắt, khoảng 8 phút sau Trái Đất mới tối; Mặt Trăng tối sau Trái Đất một chút; Sao Mộc ở xa nên khoảng 40 phút sau mới tối.)','Stars are distant “suns” that make their own light, so they keep shining. The Moon and planets only reflect sunlight, so with no light arriving they go dark. (The Earth would go dark about 8 min after the switch-off; Jupiter about 40 min later.)'],
+conc2:['<ul><li><b>Mặt Trời và các ngôi sao</b> là thiên thể <b>tự phát sáng</b>. Mặt Trời là một ngôi sao, ở gần ta nhất.</li><li><b>Mặt Trăng, các hành tinh (kể cả Trái Đất) và sao chổi</b> không tự phát sáng; chúng <b>phản xạ ánh sáng Mặt Trời</b>. Phía sáng của chúng luôn quay về phía Mặt Trời.</li><li>Ta nhìn thấy một vật khi có ánh sáng từ vật đó truyền tới mắt: với ngôi sao, ánh sáng đi thẳng từ ngôi sao; với Mặt Trăng, ánh sáng đi từ Mặt Trời tới Mặt Trăng rồi mới hắt về mắt ta.</li></ul>','<ul><li><b>The Sun and stars</b> <b>give out their own light</b>. The Sun is a star, the closest one to us.</li><li><b>The Moon, the planets (Earth included) and comets</b> do not; they <b>reflect sunlight</b>, and their bright side always faces the Sun.</li><li>We see an object when light from it reaches our eyes: from a star directly; from the Moon, sunlight first travels to the Moon and then bounces to us.</li></ul>'],
+mech2:['<p><b>Vì sao sao phát sáng:</b> trong lõi Mặt Trời (khoảng 15 triệu °C), hạt nhân hiđrô kết hợp thành heli (phản ứng nhiệt hạch), giải phóng năng lượng. Năng lượng truyền ra bề mặt có nhiệt độ khoảng 5500 °C; vật rất nóng thì phát ra ánh sáng (như dây tóc bóng đèn). Các ngôi sao khác cũng vậy.</p><p><b>Vì sao hành tinh, Mặt Trăng không tự phát sáng:</b> chúng quá nhỏ, không đủ nóng ở bề mặt để phát ra ánh sáng nhìn thấy. Ta thấy chúng vì bề mặt hắt lại ánh sáng Mặt Trời theo mọi hướng (phản xạ khuếch tán, học kĩ ở lớp 7). Bằng chứng: (1) phía sáng luôn hướng về Mặt Trời; (2) Sao Kim có pha khuyết – tròn như Mặt Trăng (Galilei quan sát năm 1610); (3) khi nguyệt thực, Trái Đất chắn ánh sáng Mặt Trời thì Mặt Trăng tối đi.</p><p><b>Sao chổi:</b> nhân là khối băng và bụi vài km. Khi tới gần Mặt Trời, băng thăng hoa thành khí, kéo theo bụi tạo đầu và đuôi dài; đuôi bị gió Mặt Trời và áp lực ánh sáng đẩy nên luôn hướng ra xa Mặt Trời. Bụi phản xạ ánh sáng Mặt Trời; khí trong đuôi còn phát sáng yếu khi bị bức xạ Mặt Trời kích thích (vẫn là nhờ Mặt Trời). Ở THCS ta nói gọn: sao chổi phản xạ ánh sáng Mặt Trời.</p><p><b>Nói với học sinh:</b> “Ngọn nến tự cháy sáng; cái gương, bức tường chỉ sáng khi có đèn chiếu vào. Mặt Trời và sao giống ngọn nến; Mặt Trăng và hành tinh giống bức tường.”</p>','<p><b>Why stars shine:</b> in the Sun’s core (about 15 million °C) hydrogen nuclei fuse into helium, releasing energy that reaches the 5500 °C surface; very hot objects glow. Other stars work the same way.</p><p><b>Why planets and the Moon do not:</b> they are far too small and cool to glow in visible light. We see them because their surfaces scatter sunlight in all directions. Evidence: the lit side always faces the Sun; Venus shows phases like the Moon (Galileo, 1610); during a lunar eclipse the Moon darkens when Earth blocks the sunlight.</p><p><b>Comets:</b> a nucleus of ice and dust a few km across. Near the Sun the ice turns to gas, dragging dust into a head and a long tail that the solar wind and sunlight push away from the Sun. The dust reflects sunlight; the gas also glows faintly when excited by sunlight (still powered by the Sun).</p><p><b>For students:</b> “A candle makes its own light; a wall only shines when a lamp lights it. The Sun and stars are candles; the Moon and planets are walls.”</p>'],
+mis2:['<ul><li><b>“Sao Hôm, Sao Mai là ngôi sao.”</b> Đó là Sao Kim, một hành tinh, sáng vì phản xạ ánh sáng Mặt Trời. Gọi là “sao” chỉ vì trông giống chấm sáng.</li><li><b>“Mặt Trăng tự phát sáng.”</b> Mặt Trăng chỉ phản xạ khoảng 12% ánh sáng chiếu tới, đất đá trên đó xám như nhựa đường; nó trông sáng vì xung quanh là bầu trời đen.</li><li><b>“Ban ngày các ngôi sao tắt.”</b> Sao vẫn sáng, nhưng bầu trời ban ngày sáng hơn rất nhiều nên ta không thấy.</li><li><b>“Sao băng là ngôi sao rơi.”</b> Đó là hạt bụi, đá nhỏ từ vũ trụ lao vào khí quyển, bị nóng lên và cháy sáng.</li><li><b>“Mặt Trời không phải là ngôi sao.”</b> Mặt Trời là một ngôi sao bình thường, chỉ vì ở rất gần nên trông to và sáng.</li></ul>','<ul><li><b>“The evening star is a star.”</b> It is Venus, a planet reflecting sunlight.</li><li><b>“The Moon makes its own light.”</b> It reflects only about 12% of the light, its rock is as grey as asphalt; it looks bright against a black sky.</li><li><b>“Stars switch off in the daytime.”</b> They still shine, but the daytime sky is far brighter.</li><li><b>“A shooting star is a falling star.”</b> It is a grain of space dust burning up in the air.</li><li><b>“The Sun is not a star.”</b> It is an ordinary star that is very close to us.</li></ul>'],
+word2:['<ul><li><b>Thiên thể</b> 天體: “thiên” = trời, “thể” = vật thể; vật thể trên bầu trời (tiếng Anh <i>celestial body</i>, Latinh <i>caelum</i> = bầu trời).</li><li><b>Hành tinh</b> 行星: “hành” = đi, “tinh” = sao, tức “sao đi”. Tiếng Hy Lạp <i>planētēs</i> = kẻ lang thang → <i>planet</i>. Người xưa thấy chúng đổi chỗ giữa các ngôi sao đứng yên.</li><li><b>Hằng tinh</b> 恒星 (ngôi sao): “hằng” = không đổi; sao giữ nguyên vị trí với nhau. Tiếng Anh <i>star</i>, Latinh <i>stella</i>, Hy Lạp <i>astēr</i> → <i>astronomy</i> (thiên văn học).</li><li><b>Sao chổi</b>: đuôi giống cái chổi. Hán Việt <b>tuệ tinh</b> 彗星, “tuệ” chính là cái chổi. Tiếng Hy Lạp <i>komētēs</i> = (sao) có tóc dài → <i>comet</i>.</li></ul>','<ul><li><b>Planet</b>: Greek <i>planētēs</i>, “wanderer”, because planets move among the fixed stars. Sino-Vietnamese 行星 <i>hành tinh</i> = “walking star”.</li><li><b>Star</b>: Latin <i>stella</i>, Greek <i>astēr</i> → <i>astronomy</i>. Vietnamese 恒星 <i>hằng tinh</i> = “constant star”.</li><li><b>Comet</b>: Greek <i>komētēs</i>, “long-haired”. Vietnamese <i>sao chổi</i> and 彗星 <i>tuệ tinh</i> both mean “broom star”.</li></ul>'],
+/* ---------- TAB 3 ---------- */
+req3:['<b>Yêu cầu cần đạt:</b> Thiết kế mô hình thực tế (hoặc vẽ hình) để giải thích được một số hình dạng nhìn thấy của Mặt Trăng trong Tuần Trăng.','<b>Goal:</b> Use a model (or drawing) to explain some of the shapes of the Moon we see during a lunar month.'],
+hint3:['Kéo Mặt Trăng quanh Trái Đất (bên trái) và xem hình dạng nhìn thấy từ Trái Đất (bên phải). Bấm vào một ngày trên dải lịch âm để nhảy tới ngày đó.','Drag the Moon around the Earth (left) and watch the shape seen from Earth (right). Tap a day on the lunar-calendar strip to jump there.'],
+age3:['Tuổi Trăng (số ngày từ trăng non)','Moon’s age (days since new moon)'],
+half3:['Tô nửa Mặt Trăng hướng về Trái Đất','Mark the half of the Moon facing Earth'],shad3:['Vẽ bóng tối của Trái Đất','Show the Earth’s shadow'],
+g3Top:['Nhìn từ trên cao (phía Bắc)','Seen from high above (north)'],g3See:['Người ở Việt Nam nhìn lên','Seen from Vietnam'],g3Sun:['ánh sáng Mặt Trời','sunlight'],
+g3Lit:['nửa được chiếu sáng','lit half'],g3Face:['nửa hướng về Trái Đất','half facing Earth'],g3Shadow:['bóng Trái Đất','Earth’s shadow'],g3Orbit:['Mặt Trăng quay quanh Trái Đất','Moon orbits Earth'],
+ph0:['Trăng non (không trăng)','New moon'],ph1:['Trăng lưỡi liềm đầu tháng','Waxing crescent'],ph2:['Trăng bán nguyệt đầu tháng (thượng huyền)','First quarter'],ph3:['Trăng khuyết đầu tháng','Waxing gibbous'],
+ph4:['Trăng tròn (trăng rằm)','Full moon'],ph5:['Trăng khuyết cuối tháng','Waning gibbous'],ph6:['Trăng bán nguyệt cuối tháng (hạ huyền)','Third quarter'],ph7:['Trăng lưỡi liềm cuối tháng','Waning crescent'],
+kLunar:['Ngày âm lịch (gần đúng)','Lunar-calendar day (approx.)'],kLitF:['Phần mặt nhìn thấy được chiếu sáng','Fraction of the visible face lit'],kLitAll:['Phần cả Mặt Trăng được chiếu sáng','Fraction of the whole Moon lit'],
+kAngle:['Góc Mặt Trời – Trái Đất – Mặt Trăng','Sun–Earth–Moon angle'],kMRise:['Trăng mọc khoảng','Moonrise about'],kMHigh:['Trăng lên cao nhất khoảng','Highest about'],kMSet:['Trăng lặn khoảng','Moonset about'],kBest:['Dễ thấy nhất','Best seen'],
+lunarD:['mùng {d}','day {d}'],lunarR:['{d} (rằm)','{d} (full)'],
+bestNone:['không thấy (Trăng ở cùng phía Mặt Trời)','not visible (Moon is next to the Sun)'],bestEve:['chiều tối, ở phía Tây','early evening, in the west'],bestEveS:['chiều và đầu hôm, phía Nam','afternoon and evening, to the south'],bestNight:['suốt đêm','all night'],bestLate:['nửa đêm về sáng','after midnight'],bestMorn:['sáng sớm, ở phía Đông','before dawn, in the east'],bestMornS:['nửa đêm và buổi sáng, phía Nam','late night and morning, to the south'],
+assume3:['Giả thiết mô phỏng: quỹ đạo Mặt Trăng coi là tròn và nằm cùng mặt phẳng; giờ mọc, lặn là gần đúng (giờ Mặt Trời, vĩ độ Việt Nam); khoảng cách và kích thước không theo tỉ lệ (thật ra Mặt Trăng cách Trái Đất khoảng 30 lần đường kính Trái Đất). Thật ra quỹ đạo nghiêng khoảng 5°, nên đa số tháng Mặt Trăng đi qua phía trên hoặc phía dưới bóng Trái Đất.','Model assumptions: circular orbit in one plane; rise/set times are approximate (solar time, Vietnam’s latitude); not to scale (the Moon is about 30 Earth-diameters away). The real orbit is tilted about 5°, so in most months the full Moon passes above or below the Earth’s shadow.'],
+p3q:['Vì sao có những ngày ta chỉ thấy một phần Mặt Trăng (trăng khuyết)?','Why do we see only part of the Moon on some days?'],
+p3a:['Bóng của Trái Đất che bớt một phần Mặt Trăng','The Earth’s shadow covers part of it'],p3b:['Mặt Trăng luôn sáng một nửa, ta chỉ thấy một phần của nửa sáng đó','Half the Moon is always lit; we only see part of that half'],p3c:['Mây che bớt Mặt Trăng','Clouds cover part of it'],
+p3e:['Lúc nào Mặt Trời cũng chiếu sáng đúng một nửa Mặt Trăng. Mặt Trăng đi quanh Trái Đất nên nửa hướng về ta lúc thì gồm cả nửa sáng (trăng tròn), lúc thì gồm toàn nửa tối (trăng non), lúc thì một phần. Bật “Vẽ bóng tối của Trái Đất”: bóng chỉ chạm Mặt Trăng vào đêm rằm khi ba thiên thể thẳng hàng, đó là nguyệt thực, không phải trăng khuyết.','The Sun always lights exactly half the Moon. As the Moon orbits, the half facing us contains all of the lit half (full), none of it (new) or part of it. Switch on the Earth’s shadow: it only reaches the Moon at full moon when all three line up, which is a lunar eclipse, not a phase.'],
+p3bq:['Trăng tròn (đêm rằm) mọc vào lúc nào?','When does the full Moon rise?'],
+p3ba:['Lúc bình minh, khoảng 6 giờ sáng','At dawn, about 6 am'],p3bb:['Lúc hoàng hôn, khoảng 6 giờ chiều','At sunset, about 6 pm'],p3bc:['Lúc nửa đêm','At midnight'],
+p3be:['Trăng tròn ở phía đối diện Mặt Trời. Khi Mặt Trời lặn ở phía Tây thì trăng tròn mọc ở phía Đông, ở trên trời suốt đêm và lặn lúc bình minh. Mỗi ngày Mặt Trăng mọc trễ hơn hôm trước khoảng 50 phút, vì nó đi được thêm khoảng 12° trên quỹ đạo.','The full Moon is opposite the Sun: as the Sun sets in the west, the full Moon rises in the east, stays up all night and sets at dawn. The Moon rises about 50 min later each day because it moves about 12° further along its orbit.'],
+q3a:['Hôm nay là ngày rằm (trăng tròn). Khoảng bao nhiêu ngày nữa thì đến trăng non?','Today is full moon. In about how many days is new moon?'],q3ah:['Một Tuần Trăng khoảng 29,5 ngày; trăng tròn ở giữa tuần trăng nên còn khoảng 29,5 : 2 ≈ 15 ngày.','A lunar month is about 29.5 days; full moon is halfway, so about 15 days remain.'],
+q3b:['Trăng bán nguyệt đầu tháng (thượng huyền) mọc lúc khoảng mấy giờ?','About what time does the first-quarter Moon rise?'],q3bh:['Thượng huyền: góc Mặt Trời – Trái Đất – Mặt Trăng là 90°, tức Mặt Trăng mọc sau Mặt Trời 90° : 15° = 6 giờ, vào khoảng 12 giờ trưa. Vì vậy chiều nào cũng có thể thấy trăng thượng huyền trên trời!','At first quarter the angle is 90°, so the Moon rises 90° ÷ 15° per hour = 6 h after the Sun, around noon. You can see it in the afternoon sky!'],
+q3c:['Vào ngày trăng non, bao nhiêu phần trăm bề mặt của cả quả cầu Mặt Trăng đang được Mặt Trời chiếu sáng?','At new moon, what percentage of the whole Moon’s surface is sunlit?'],q3ch:['Vẫn là 50%! Mặt Trời luôn chiếu sáng một nửa Mặt Trăng; vào trăng non, nửa sáng quay hết về phía Mặt Trời, ta chỉ nhìn thấy nửa tối.','Still 50%! Half is always lit; at new moon the lit half faces away from us.'],
+conc3:['<ul><li>Mặt Trăng không tự phát sáng; Mặt Trời <b>luôn chiếu sáng một nửa</b> Mặt Trăng.</li><li>Mặt Trăng quay quanh Trái Đất. Từ Trái Đất ta chỉ thấy <b>nửa Mặt Trăng hướng về mình</b>; phần sáng của nửa đó thay đổi theo vị trí Mặt Trăng nên ta thấy hình dạng thay đổi: trăng non → lưỡi liềm → bán nguyệt → khuyết → tròn → khuyết → bán nguyệt → lưỡi liềm → trăng non.</li><li>Chu kì lặp lại khoảng <b>29,5 ngày</b>, gọi là một <b>Tuần Trăng</b>. Lịch âm dựa vào Tuần Trăng: mùng 1 là trăng non, rằm (ngày 15) là trăng tròn.</li><li>Ở Việt Nam (Bắc bán cầu), trăng đầu tháng sáng ở <b>phía bên phải</b>, trăng cuối tháng sáng ở <b>phía bên trái</b>.</li></ul>','<ul><li>The Moon makes no light; the Sun <b>always lights half</b> of it.</li><li>The Moon orbits the Earth. We only see <b>the half facing us</b>, and how much of that half is lit changes with the Moon’s position: new → crescent → quarter → gibbous → full → gibbous → quarter → crescent → new.</li><li>The cycle repeats every <b>29.5 days</b> (a lunar month). The lunar calendar follows it: day 1 is new moon, day 15 full moon.</li><li>From the northern hemisphere a waxing Moon is lit on the <b>right</b>, a waning Moon on the <b>left</b>.</li></ul>'],
+mech3:['<p><b>Cơ chế:</b> Mặt Trăng quay quanh Trái Đất một vòng so với các sao mất 27,3 ngày. Trong thời gian đó Trái Đất cũng đi được gần 1/12 vòng quanh Mặt Trời, nên Mặt Trăng phải đi thêm khoảng 2,2 ngày nữa mới trở lại đúng vị trí so với Mặt Trời: <b>Tuần Trăng</b> (tháng giao hội) trung bình 29,53 ngày. Phần mặt nhìn thấy được chiếu sáng = (1 − cos θ) : 2, với θ là góc Mặt Trời – Trái Đất – Mặt Trăng (θ = 0° trăng non, 90° thượng huyền, 180° trăng tròn).</p><p>Mặt Trăng tự quay quanh trục cũng đúng 27,3 ngày, nên <b>luôn quay một mặt về phía Trái Đất</b> (các vết tối “chú Cuội ngồi gốc cây đa” lúc nào cũng thấy như nhau). Mỗi ngày Mặt Trăng đi thêm khoảng 360° : 29,5 ≈ 12° về phía Đông so với Mặt Trời, nên mọc trễ khoảng 12° : 15°/giờ ≈ 50 phút.</p><p><b>Mô hình làm ở lớp:</b> phòng tối, một bóng đèn sáng (Mặt Trời), học sinh cầm quả bóng trắng (Mặt Trăng) giơ cao trước mặt, đầu học sinh là Trái Đất. Xoay người ngược chiều kim đồng hồ: quả bóng lần lượt hiện hình lưỡi liềm, bán nguyệt, tròn… Đây chính là mô hình yêu cầu cần đạt nhắc tới. Chú ý: giơ bóng cao hơn đầu để đầu không che ánh đèn, nếu không sẽ thành “nguyệt thực”.</p><p><b>Nói với học sinh:</b> “Quả bóng lúc nào cũng sáng một nửa. Em đứng ở giữa nhìn ra, có lúc em nhìn thẳng vào nửa sáng, có lúc nhìn vào nửa tối, có lúc nhìn nghiêng thấy một mẩu.”</p>','<p><b>Mechanism:</b> the Moon orbits the Earth in 27.3 days relative to the stars. Meanwhile the Earth moves about 1/12 of its orbit, so the Moon needs about 2.2 more days to line up with the Sun again: the synodic month averages 29.53 days. Lit fraction of the visible face = (1 − cos θ)/2, where θ is the Sun–Earth–Moon angle.</p><p>The Moon also spins once every 27.3 days, so it <b>always shows the same face</b> to Earth. Each day it moves about 12° east relative to the Sun and so rises about 50 min later.</p><p><b>Classroom model:</b> a dark room, one bright lamp (Sun), a white ball held up at arm’s length (Moon), the student’s head (Earth). Turning anticlockwise, the student sees crescent, quarter, full… Hold the ball above head height, or you make an “eclipse”.</p><p><b>For students:</b> “The ball is always half lit. From the middle you sometimes look straight at the lit half, sometimes at the dark half, sometimes sideways at a sliver.”</p>'],
+mis3:['<ul><li><b>“Trăng khuyết là do bóng Trái Đất che.”</b> Sai phổ biến nhất. Bóng Trái Đất chỉ che Mặt Trăng khi nguyệt thực, xảy ra vào đêm rằm và chỉ vài lần mỗi năm. Trăng lưỡi liềm thì Mặt Trăng ở gần phía Mặt Trời, không thể nằm trong bóng Trái Đất.</li><li><b>“Mặt Trăng chỉ xuất hiện ban đêm.”</b> Trăng thượng huyền thấy rõ vào buổi chiều, trăng hạ huyền thấy vào buổi sáng.</li><li><b>“Mặt Trăng tự thay đổi hình dạng.”</b> Mặt Trăng luôn là quả cầu, luôn sáng một nửa; chỉ có góc nhìn của ta thay đổi.</li><li><b>“Ở mọi nơi trên Trái Đất, trăng đầu tháng đều sáng bên phải.”</b> Ở Nam bán cầu (Úc) thì ngược lại, sáng bên trái; gần xích đạo trăng lưỡi liềm nằm ngửa như cái thuyền.</li></ul>','<ul><li><b>“Phases are caused by the Earth’s shadow.”</b> The most common error. The shadow only reaches the Moon in a lunar eclipse, at full moon, a few times a year. At crescent the Moon is on the Sun’s side and cannot be in Earth’s shadow.</li><li><b>“The Moon only comes out at night.”</b> A first-quarter Moon is easy to see in the afternoon.</li><li><b>“The Moon changes shape.”</b> It is always a half-lit ball; only our viewing angle changes.</li><li><b>“A waxing Moon is lit on the right everywhere.”</b> In the southern hemisphere it is the other way round; near the equator the crescent lies like a boat.</li></ul>'],
+word3:['<ul><li><b>Tuần Trăng</b>: một vòng các hình dạng của Mặt Trăng lặp lại. Hán Việt gọi tháng âm lịch là <b>tháng</b> vì xưa đo tháng bằng Mặt Trăng; tiếng Anh <i>month</i> cũng cùng gốc với <i>moon</i> (tiếng Đức <i>Mond</i> = Mặt Trăng, <i>Monat</i> = tháng).</li><li><b>Thượng huyền</b> 上弦, <b>hạ huyền</b> 下弦: “huyền” là dây cung. Trăng bán nguyệt giống cây cung, mép thẳng là dây cung; “thượng” = đầu tháng, “hạ” = cuối tháng.</li><li><b>Sóc</b> 朔 = ngày trăng non (mùng 1); <b>vọng</b> 望 = ngày trăng tròn (rằm), nghĩa đen là “ngóng trông”.</li><li>Tiếng Anh: <i>phase</i> từ Hy Lạp <i>phasis</i> = sự xuất hiện; <i>crescent</i> từ Latinh <i>crescere</i> = lớn lên; <i>gibbous</i> từ Latinh <i>gibbus</i> = cái bướu (trăng “gù”). Latinh <i>luna</i> → <i>lunar</i>; Hy Lạp <i>selēnē</i> → nguyên tố selen.</li></ul>','<ul><li><b>Month</b> shares its root with <b>moon</b> (German <i>Mond</i>/<i>Monat</i>).</li><li><b>Phase</b>: Greek <i>phasis</i>, “appearance”. <b>Crescent</b>: Latin <i>crescere</i>, “to grow”. <b>Gibbous</b>: Latin <i>gibbus</i>, “hump”. Latin <i>luna</i> → <i>lunar</i>; Greek <i>selēnē</i> → selenium.</li><li>Vietnamese 上弦/下弦 <i>thượng/hạ huyền</i> = “upper/lower bowstring”: the half Moon looks like a drawn bow. 朔 <i>sóc</i> = new moon, 望 <i>vọng</i> = full moon (“gazing”).</li></ul>'],
+/* ---------- TAB 4 ---------- */
+req4:['<b>Yêu cầu cần đạt:</b> Mô tả được sơ lược cấu trúc của hệ Mặt Trời, nêu được các hành tinh cách Mặt Trời các khoảng cách khác nhau và có chu kì quay khác nhau.','<b>Goal:</b> Describe the structure of the Solar System; state that the planets are at different distances from the Sun and have different orbital periods.'],
+hint4:['Bấm Chạy để thời gian trôi, hoặc kéo một hành tinh dọc quỹ đạo (cả hệ đi theo thời gian). Chạm vào hành tinh để xem số liệu.','Press Play, or drag any planet along its orbit (the whole system follows the clock). Tap a planet to see its data.'],
+trail4:['Vẽ quỹ đạo','Show orbits'],
+vIn:['Các hành tinh đá','Inner planets'],vAll:['Toàn hệ','Whole system'],scT:['Khoảng cách đúng tỉ lệ','True distances'],scC:['Thu gọn cho dễ nhìn','Compressed'],
+sp1:['1 ngày/giây','1 day/s'],sp2:['1 tháng/giây','1 month/s'],sp3:['1 năm/giây','1 year/s'],sp4:['10 năm/giây','10 years/s'],
+sel4:['Hành tinh đang chọn','Selected planet'],
+kDist:['Khoảng cách trung bình tới Mặt Trời','Mean distance from the Sun'],kAU:['So với Trái Đất','Compared with Earth'],kPer:['Chu kì quay quanh Mặt Trời','Orbital period'],kSpd:['Tốc độ trên quỹ đạo','Orbital speed'],
+kDiam:['Đường kính','Diameter'],kType:['Loại hành tinh','Type'],kLight:['Ánh sáng Mặt Trời đi tới mất','Sunlight takes'],kLaps:['Số vòng đã đi từ khi bắt đầu','Laps since start'],kDate:['Ngày mô phỏng','Simulated date'],
+mkm:['triệu km','million km'],xEarth:['{x} lần','{x} ×'],days:['ngày','days'],years:['năm','years'],kms:['km/s','km/s'],min:['phút','min'],hour:['giờ','h'],
+tRock:['hành tinh đá','rocky planet'],tGas:['hành tinh khí khổng lồ','gas giant'],tIce:['hành tinh băng khổng lồ','ice giant'],
+pMe:['Sao Thuỷ','Mercury'],pVe:['Sao Kim','Venus'],pEa:['Trái Đất','Earth'],pMa:['Sao Hoả','Mars'],pJu:['Sao Mộc','Jupiter'],pSa:['Sao Thổ','Saturn'],pUr:['Sao Thiên Vương','Uranus'],pNe:['Sao Hải Vương','Neptune'],sun:['Mặt Trời','Sun'],belt:['vành đai tiểu hành tinh','asteroid belt'],
+st4:['Trong lúc Trái Đất đi 1 vòng, Sao Thuỷ đi được khoảng 4 vòng, còn Sao Hải Vương mới đi được 1/165 vòng.','While Earth makes 1 lap, Mercury makes about 4, and Neptune only 1/165 of a lap.'],
+gr4:['Đồ thị: chu kì theo khoảng cách','Graph: period against distance'],gr4h:['Mỗi chấm là một hành tinh. Càng xa Mặt Trời (sang phải), chu kì càng dài (lên cao), và tăng nhanh hơn khoảng cách.','Each dot is a planet. Further from the Sun (right) means a longer period (up), growing faster than the distance.'],
+axLin:['Trục thường','Linear axes'],axLog:['Trục chia theo bậc 10','Log axes'],axX:['khoảng cách (lần Trái Đất)','distance (Earth = 1)'],axY:['chu kì (năm)','period (years)'],
+sz4:['Kích thước đúng tỉ lệ','Sizes to scale'],sz4h:['Mặt Trời và các hành tinh vẽ cùng một tỉ lệ. Đường kính Mặt Trời gấp khoảng 109 lần Trái Đất; trong hình quỹ đạo phía trên, Mặt Trời và hành tinh phải vẽ to hơn nhiều so với thật.','The Sun and planets at one scale. The Sun is about 109 Earths across; in the orbit picture above everything is drawn far larger than true.'],
+yard4:['Mô hình hệ Mặt Trời trên sân trường','A Solar System model for the schoolyard'],yard4h:['Chọn đường kính quả bóng làm Mặt Trời; bảng cho biết mỗi hành tinh to bao nhiêu và phải đặt cách quả bóng bao xa (cùng tỉ lệ).','Choose the size of the ball used as the Sun; the table gives each planet’s size and how far from the ball to put it (same scale).'],
+sunD4:['Đường kính quả bóng “Mặt Trời”','Diameter of the “Sun” ball'],
+thPl:['Thiên thể','Object'],thSz:['Cỡ trong mô hình','Model size'],thDi:['Đặt cách “Mặt Trời”','Distance from “Sun”'],thLike:['To cỡ','About as big as'],
+lk1:['hạt cát','a grain of sand'],lk2:['hạt mè (vừng)','a sesame seed'],lk3:['hạt đậu xanh','a mung bean'],lk4:['hạt đậu phộng','a peanut'],lk5:['viên bi','a marble'],lk6:['quả bóng bàn','a ping-pong ball'],lk7:['quả cam','an orange'],lk8:['quả bóng','a ball'],
+nearStar:['Sao gần nhất (Proxima)','Nearest star (Proxima)'],
+assume4:['Giả thiết mô phỏng: quỹ đạo coi là đường tròn cùng một mặt phẳng (thật ra là elip hơi dẹt, hơi nghiêng); vị trí ban đầu gần đúng với ngày hôm nay. Mặt Trời và hành tinh vẽ to hơn thật rất nhiều. Số liệu: NASA Planetary Fact Sheet.','Model assumptions: circular orbits in one plane (really slightly elliptical and tilted); starting positions roughly match today. The Sun and planets are drawn far larger than true. Data: NASA Planetary Fact Sheet.'],
+p4q:['Hành tinh ở xa Mặt Trời hơn thì đi hết một vòng quanh Mặt Trời mất thời gian thế nào?','How does a planet’s time to go once round the Sun change with distance?'],
+p4a:['Ngắn hơn','Shorter'],p4b:['Bằng nhau, đều là 1 năm','The same, 1 year for all'],p4c:['Dài hơn','Longer'],
+p4e:['Càng xa Mặt Trời, quỹ đạo càng dài và hành tinh lại đi càng chậm (lực hút của Mặt Trời yếu hơn), nên chu kì dài hơn nhiều: Sao Thuỷ 88 ngày, Trái Đất 1 năm, Sao Mộc gần 12 năm, Sao Hải Vương gần 165 năm.','Further out the orbit is longer and the planet also moves more slowly (the Sun’s pull is weaker), so the period is much longer: Mercury 88 days, Earth 1 year, Jupiter almost 12 years, Neptune almost 165 years.'],
+p4bq:['Sao Hải Vương ở xa Mặt Trời gấp khoảng 30 lần Trái Đất. Chu kì của nó gấp khoảng bao nhiêu lần 1 năm?','Neptune is about 30 times further from the Sun than Earth. Its period is about how many years?'],
+p4ba:['Khoảng 30 lần','About 30'],p4bb:['Khoảng 165 lần','About 165'],p4bc:['Khoảng 900 lần','About 900'],
+p4be:['Khoảng 165 năm. Đường đi dài gấp 30 lần, mà tốc độ chỉ bằng khoảng 1/5,5 của Trái Đất (5,4 km/s so với 29,8 km/s), nên thời gian gấp khoảng 30 × 5,5 ≈ 165 lần. Từ khi được phát hiện năm 1846 đến nay, Sao Hải Vương mới đi được hơn một vòng!','About 165 years: the path is 30 times longer and Neptune moves at only about 1/5.5 of Earth’s speed (5.4 vs 29.8 km/s), so 30 × 5.5 ≈ 165. Since its discovery in 1846 Neptune has made just over one lap!'],
+conc4:['<ul><li><b>Hệ Mặt Trời</b> gồm Mặt Trời ở trung tâm và các thiên thể quay quanh nó: <b>8 hành tinh</b>, các hành tinh lùn (như Diêm Vương), tiểu hành tinh, sao chổi, cùng các vệ tinh quay quanh hành tinh (như Mặt Trăng).</li><li>Thứ tự từ gần đến xa: <b>Thuỷ, Kim, Trái Đất, Hoả</b> (hành tinh đá, nhỏ) – vành đai tiểu hành tinh – <b>Mộc, Thổ, Thiên Vương, Hải Vương</b> (hành tinh khổng lồ).</li><li>Các hành tinh cách Mặt Trời <b>những khoảng rất khác nhau</b>: từ 58 triệu km (Sao Thuỷ) đến 4,5 tỉ km (Sao Hải Vương).</li><li>Hành tinh càng xa Mặt Trời thì <b>chu kì quay quanh Mặt Trời càng dài</b>.</li></ul>','<ul><li>The <b>Solar System</b> is the Sun with everything that orbits it: <b>8 planets</b>, dwarf planets (like Pluto), asteroids, comets, and moons orbiting the planets.</li><li>From the Sun outwards: <b>Mercury, Venus, Earth, Mars</b> (small, rocky) – the asteroid belt – <b>Jupiter, Saturn, Uranus, Neptune</b> (giants).</li><li>The planets are at <b>very different distances</b>, from 58 million km (Mercury) to 4.5 billion km (Neptune).</li><li>The further a planet is from the Sun, the <b>longer its orbital period</b>.</li></ul>'],
+mech4:['<p><b>Cơ chế:</b> lực hấp dẫn của Mặt Trời (khối lượng gấp khoảng 333 000 lần Trái Đất, chiếm 99,8% khối lượng cả hệ) hút các hành tinh về phía nó. Hành tinh đang chuyển động theo phương ngang nên không rơi thẳng vào Mặt Trời mà đi vòng quanh, giống quả bóng buộc dây quay vòng (lực hấp dẫn đóng vai sợi dây). Ở xa, lực hút yếu hơn nên chỉ cần tốc độ nhỏ hơn là đủ đi vòng: Sao Thuỷ 47 km/s, Trái Đất 30 km/s, Sao Hải Vương 5,4 km/s.</p><p>Kepler (1619) tìm ra quy luật: bình phương chu kì tỉ lệ với lập phương khoảng cách, T² ∝ a³ (T tính bằng năm, a tính bằng lần khoảng cách Trái Đất thì T² = a³). Trên đồ thị “trục chia theo bậc 10”, tám chấm nằm thẳng hàng. Phần này để giáo viên tham khảo; lớp 6 chỉ cần “xa hơn thì chu kì dài hơn”.</p><p><b>Đơn vị thiên văn</b> (au) = khoảng cách trung bình Trái Đất – Mặt Trời ≈ 150 triệu km. Ánh sáng đi quãng đó mất 8 phút 20 giây.</p><p><b>Nói với học sinh:</b> “Hãy tưởng tượng đường chạy điền kinh có nhiều làn tròn. Bạn chạy làn trong cùng vừa chạy nhanh nhất vừa có vòng ngắn nhất; bạn làn ngoài cùng vừa chạy chậm vừa có vòng dài nhất, nên rất lâu mới hết một vòng.”</p>','<p><b>Mechanism:</b> the Sun’s gravity (333 000 Earth masses, 99.8% of the system’s mass) pulls the planets. Moving sideways, they fall around the Sun instead of into it, like a ball whirled on a string. Further out the pull is weaker, so a lower speed is enough: Mercury 47 km/s, Earth 30 km/s, Neptune 5.4 km/s.</p><p>Kepler’s third law (1619): T² ∝ a³ (T in years, a in au gives T² = a³). On the log axes the eight dots lie on a straight line. Teachers’ background only.</p><p><b>Astronomical unit</b> (au) ≈ 150 million km, the mean Earth–Sun distance; light takes 8 min 20 s to cross it.</p><p><b>For students:</b> “Picture a running track with many lanes. The inside runner is fastest and has the shortest lap; the outside runner is slowest with the longest lap.”</p>'],
+mis4:['<ul><li><b>“Các hành tinh cách đều nhau, gần nhau như trong tranh.”</b> Tranh SGK vẽ để vừa trang giấy. Chọn “Khoảng cách đúng tỉ lệ” và “Toàn hệ”: bốn hành tinh đá chen chúc sát Mặt Trời, còn khoảng trống ngoài xa rất lớn.</li><li><b>“Mặt Trời và hành tinh to xấp xỉ nhau.”</b> Xem hình “Kích thước đúng tỉ lệ”: Trái Đất chỉ như một chấm nhỏ cạnh Mặt Trời.</li><li><b>“Hành tinh nào cũng quay quanh Mặt Trời 1 năm một vòng.”</b> Chỉ Trái Đất mất 1 năm; “năm” của mỗi hành tinh dài khác nhau.</li><li><b>“Diêm Vương là hành tinh thứ 9.”</b> Từ năm 2006, Diêm Vương được xếp là hành tinh lùn.</li><li><b>“Sao Thuỷ gần Mặt Trời nhất nên nóng nhất.”</b> Thực tế Sao Kim nóng nhất (khoảng 465 °C) vì khí quyển dày CO₂ giữ nhiệt (hiệu ứng nhà kính).</li></ul>','<ul><li><b>“The planets are evenly spaced and close together.”</b> Book pictures are squeezed to fit. Choose “True distances” and “Whole system”.</li><li><b>“The Sun and planets are similar sizes.”</b> See “Sizes to scale”: Earth is a dot beside the Sun.</li><li><b>“Every planet takes a year to orbit.”</b> Only Earth does.</li><li><b>“Pluto is the ninth planet.”</b> Since 2006 it is a dwarf planet.</li><li><b>“Mercury is the hottest, being closest.”</b> Venus is hotter (about 465 °C) because its thick CO₂ atmosphere traps heat.</li></ul>'],
+word4:['<ul><li><b>Thuỷ, Kim, Hoả, Mộc, Thổ</b>: người Trung Hoa xưa đặt tên năm hành tinh nhìn thấy bằng mắt thường theo <b>Ngũ hành</b> (nước, kim loại, lửa, gỗ, đất). Tiếng Việt dùng lại các tên Hán Việt này.</li><li>Tên châu Âu theo các vị thần La Mã: <i>Mercury</i> (thần đưa tin chạy nhanh, vì Sao Thuỷ đi nhanh nhất), <i>Venus</i> (nữ thần sắc đẹp, vì Sao Kim sáng đẹp nhất), <i>Mars</i> (thần chiến tranh, vì Sao Hoả đỏ như máu), <i>Jupiter</i> (vua các thần, vì Sao Mộc lớn nhất), <i>Saturn</i> (thần nông, cha của Jupiter).</li><li><b>Thiên Vương</b> 天王 = “vua trời”, dịch từ <i>Uranus</i> (thần bầu trời Hy Lạp Ouranos). <b>Hải Vương</b> 海王 = “vua biển”, dịch từ <i>Neptune</i> (thần biển La Mã). Hai hành tinh này phát hiện bằng kính thiên văn (1781, 1846).</li><li><b>Hệ Mặt Trời</b> = <i>Solar System</i>, Latinh <i>sol</i> = Mặt Trời.</li></ul>','<ul><li>Chinese/Vietnamese names of the five naked-eye planets follow the <b>Five Elements</b>: Water (Mercury), Metal (Venus), Fire (Mars), Wood (Jupiter), Earth (Saturn).</li><li>European names are Roman gods: Mercury the fast messenger, Venus goddess of beauty, Mars god of war (red), Jupiter king of the gods (largest), Saturn god of farming.</li><li>Vietnamese 天王 <i>Thiên Vương</i> “king of the sky” translates <i>Uranus</i>; 海王 <i>Hải Vương</i> “king of the sea” translates <i>Neptune</i>.</li><li><i>Solar</i> from Latin <i>sol</i>, Sun.</li></ul>'],
+/* ---------- TAB 5 ---------- */
+req5:['<b>Yêu cầu cần đạt:</b> Sử dụng tranh ảnh (hình vẽ hoặc học liệu điện tử) chỉ ra được hệ Mặt Trời là một phần nhỏ của Ngân Hà.','<b>Goal:</b> Use pictures or digital resources to show that the Solar System is a tiny part of the Milky Way.'],
+hint5:['Kéo thanh “Thu phóng” (hoặc kéo ngón tay lên/xuống trên hình, cuộn chuột) để lùi ra xa dần: từ Trái Đất và Mặt Trăng đến cả Ngân Hà.','Move the zoom slider (or drag up/down on the picture, or scroll) to pull back step by step from the Earth and Moon to the whole Milky Way.'],
+zoom5:['Thu phóng: bề rộng khung hình','Zoom: width of the view'],
+z1:['Trái Đất – Mặt Trăng','Earth–Moon'],z2:['Các hành tinh đá','Inner planets'],z3:['Hệ Mặt Trời','Solar System'],z4:['Đám mây Oort','Oort cloud'],z5:['Các sao lân cận','Nearby stars'],z6:['Ngân Hà','Milky Way'],
+kW:['Bề rộng khung hình','View width'],kWly:['Tính theo năm ánh sáng','In light-years'],kWau:['Tính theo khoảng cách Trái Đất – Mặt Trời','In Earth–Sun distances'],kCross:['Ánh sáng đi ngang khung hình mất','Light crosses the view in'],kSS:['Hệ Mặt Trời (tới Sao Hải Vương) trên màn hình','Solar System (to Neptune) on screen'],
+px:['điểm ảnh','px'],tooSmall:['nhỏ hơn 1 điểm ảnh','under 1 pixel'],
+s_:['giây','s'],mi_:['phút','min'],h_:['giờ','h'],d_:['ngày','days'],y_:['năm','years'],
+km:['km','km'],bil:['tỉ','billion'],mil:['triệu','million'],thou:['nghìn','thousand'],
+lMoon:['Mặt Trăng','Moon'],lEarth:['Trái Đất','Earth'],lSun:['Mặt Trời','Sun'],lOort:['Đám mây Oort (sao chổi)','Oort cloud (comets)'],lHere:['Hệ Mặt Trời ở đây','The Solar System is here'],lCenter:['Tâm Ngân Hà','Galactic centre'],lArm:['nhánh xoắn ốc','spiral arm'],
+lPrx:['Proxima Centauri','Proxima Centauri'],lAC:['Alpha Centauri A, B','Alpha Centauri A, B'],lBar:['Sao Barnard','Barnard’s Star'],lSir:['Sao Thiên Lang (Sirius)','Sirius'],lWolf:['Wolf 359','Wolf 359'],lEps:['Epsilon Eridani','Epsilon Eridani'],lPro:['Sao Nam Hà (Procyon)','Procyon'],lAlt:['Sao Ngưu Lang (Altair)','Altair'],lVega:['Sao Chức Nữ (Vega)','Vega'],
+st5a:['Khung hình nhỏ hơn cả hệ Mặt Trời.','The view is smaller than the Solar System.'],st5b:['Cả hệ Mặt Trời nằm gọn trong khung hình.','The whole Solar System fits in the view.'],st5c:['Hệ Mặt Trời đã thu nhỏ thành một chấm; ánh sáng phải đi nhiều năm mới tới các sao khác.','The Solar System has shrunk to a dot; light takes years to reach other stars.'],st5d:['Mỗi chấm sáng ở đây là cả một vùng có hàng triệu ngôi sao. Hệ Mặt Trời nhỏ hơn nhiều so với 1 điểm ảnh.','Each speck here stands for millions of stars. The Solar System is far smaller than one pixel.'],
+assume5:['Giả thiết mô phỏng: hình Ngân Hà là hình vẽ minh hoạ dựa trên hiểu biết của các nhà khoa học (chưa có tàu vũ trụ nào bay ra ngoài để chụp được). Các sao lân cận đặt đúng khoảng cách nhưng hướng chỉ gần đúng; ở tỉ lệ lớn mỗi chấm sáng đại diện cho rất nhiều sao.','Model assumptions: the Milky Way picture is an artist’s model based on scientific data (no spacecraft has photographed it from outside). Nearby stars are at true distances, directions approximate; at large scales each dot stands for many stars.'],
+p5q:['Nếu thu nhỏ cả hệ Mặt Trời (tới quỹ đạo Sao Hải Vương) bằng một đồng xu rộng 2 cm, thì Ngân Hà rộng cỡ nào?','If the whole Solar System (out to Neptune’s orbit) were shrunk to a 2 cm coin, how wide would the Milky Way be?'],
+p5a:['Cỡ một sân bóng đá','About a football pitch'],p5b:['Cỡ một thành phố','About a city'],p5c:['Dài hơn cả chiều dài nước Việt Nam','Longer than Vietnam'],
+p5e:['Khoảng 2100 km! Hệ Mặt Trời tới Sao Hải Vương rộng khoảng 9 tỉ km; Ngân Hà rộng khoảng 100 000 năm ánh sáng, tức gần 1 tỉ tỉ km, gấp khoảng 100 triệu lần. 2 cm × 100 triệu = 2000 km, dài hơn quãng đường Bắc – Nam Việt Nam (khoảng 1650 km theo đường chim bay).','About 2100 km! The Solar System to Neptune is about 9 billion km across; the Milky Way about 100 000 light-years, nearly a billion billion km, about 100 million times larger. 2 cm × 100 million = 2000 km, longer than Vietnam from north to south (about 1650 km).'],
+q5a:['Ánh sáng đi từ Mặt Trời tới Trái Đất (150 triệu km) mất khoảng bao nhiêu phút? (tốc độ ánh sáng 300 000 km/s)','How many minutes does sunlight take to reach Earth (150 million km)? (light speed 300 000 km/s)'],q5ah:['150 000 000 km : 300 000 km/s = 500 s ≈ 8,3 phút.','150 000 000 km ÷ 300 000 km/s = 500 s ≈ 8.3 min.'],
+q5b:['Nếu đi ô tô 100 km/h, chạy không nghỉ, thì sau bao nhiêu năm mới tới Mặt Trời?','Driving at 100 km/h non-stop, how many years would it take to reach the Sun?'],q5bh:['150 000 000 km : 100 km/h = 1 500 000 giờ; chia cho 24 giờ và 365 ngày ≈ 171 năm.','150 000 000 km ÷ 100 km/h = 1 500 000 h; ÷ 24 ÷ 365 ≈ 171 years.'],
+q5c:['Sao Proxima cách ta 4,24 năm ánh sáng. Ánh sáng từ sao đó tới mắt ta đã đi trong bao nhiêu năm?','Proxima is 4.24 light-years away. How many years has its light travelled to reach us?'],q5ch:['4,24 năm. “Năm ánh sáng” là quãng đường ánh sáng đi trong 1 năm (khoảng 9 460 tỉ km), là đơn vị đo độ dài chứ không phải thời gian. Ta luôn nhìn thấy các ngôi sao như chúng đã từng là trong quá khứ.','4.24 years. A light-year is the distance light travels in a year (about 9.46 trillion km): a length, not a time. We always see stars as they were in the past.'],
+conc5:['<ul><li><b>Ngân Hà</b> là một thiên hà: một hệ gồm khoảng <b>100 – 400 tỉ ngôi sao</b> cùng khí và bụi, có hình đĩa xoắn ốc, đường kính khoảng <b>100 000 năm ánh sáng</b>.</li><li><b>Mặt Trời chỉ là một ngôi sao</b> trong Ngân Hà, nằm trên một nhánh xoắn ốc, cách tâm khoảng 26 000 năm ánh sáng.</li><li>Cả hệ Mặt Trời (tới Sao Hải Vương) rộng khoảng 9 tỉ km, nhưng so với Ngân Hà thì chỉ là <b>một phần rất nhỏ</b>: nhỏ hơn khoảng 100 triệu lần.</li><li>Vì ta ở bên trong đĩa, nhìn dọc theo đĩa vào ban đêm ta thấy Ngân Hà như một <b>dải sáng mờ vắt ngang bầu trời</b> (“sông Ngân”).</li></ul>','<ul><li>The <b>Milky Way</b> is a galaxy of about <b>100–400 billion stars</b> with gas and dust, a spiral disc about <b>100 000 light-years</b> across.</li><li><b>The Sun is just one star</b> in it, on a spiral arm about 26 000 light-years from the centre.</li><li>The Solar System to Neptune is about 9 billion km wide, yet <b>tiny</b> next to the Milky Way: about 100 million times smaller.</li><li>We live inside the disc, so looking along it on a dark night we see a <b>faint band of light across the sky</b>.</li></ul>'],
+mech5:['<p><b>Ngân Hà</b> là thiên hà xoắn ốc có thanh. Đĩa sao dày khoảng 1000 năm ánh sáng nhưng rộng khoảng 100 000 năm ánh sáng, giống một chiếc bánh đa mỏng. Ở tâm có lỗ đen siêu nặng Sagittarius A* (khoảng 4 triệu lần khối lượng Mặt Trời). Mặt Trời cùng hệ Mặt Trời quay quanh tâm Ngân Hà với tốc độ khoảng 230 km/s, một vòng mất khoảng 230 triệu năm.</p><p>Các nhà khoa học biết hình dạng Ngân Hà nhờ đo khoảng cách và chuyển động của rất nhiều sao, đám mây khí (kính thiên văn vô tuyến, vệ tinh Gaia), và so sánh với các thiên hà xoắn ốc khác nhìn thấy từ xa. Mọi “ảnh Ngân Hà nhìn từ trên” đều là <b>hình vẽ</b>.</p><p><b>Năm ánh sáng</b> = quãng đường ánh sáng đi trong một năm: 300 000 km/s × 31,6 triệu giây ≈ 9,46 × 10¹² km. Thanh thu phóng của mô phỏng đổi bề rộng khung hình theo cấp số nhân: mỗi vạch là gấp 10 lần, nên đi hết thanh là gấp khoảng 10¹³ lần.</p><p><b>Nói với học sinh:</b> “Nếu Ngân Hà là cả nước Việt Nam, thì hệ Mặt Trời chỉ bằng đồng xu rơi ở đâu đó, còn Trái Đất nhỏ hơn hạt bụi.”</p>','<p><b>The Milky Way</b> is a barred spiral galaxy: a disc about 1000 light-years thick and 100 000 wide, with a supermassive black hole (Sagittarius A*, about 4 million solar masses) at the centre. The Sun orbits the centre at about 230 km/s, once every 230 million years.</p><p>Its shape is known from the distances and motions of huge numbers of stars and gas clouds (radio telescopes, the Gaia satellite) and by comparison with other spiral galaxies. Every “top view” of the Milky Way is a <b>drawing</b>.</p><p><b>Light-year</b> = 300 000 km/s × 31.6 million s ≈ 9.46 × 10¹² km. The zoom slider is logarithmic: each step is ×10.</p><p><b>For students:</b> “If the Milky Way were the size of Vietnam, the Solar System would be a coin dropped somewhere, and the Earth smaller than a speck of dust.”</p>'],
+mis5:['<ul><li><b>“Hệ Mặt Trời, Ngân Hà và vũ trụ là một.”</b> Hệ Mặt Trời là một phần rất nhỏ của Ngân Hà; Ngân Hà lại chỉ là một trong hàng trăm tỉ thiên hà của vũ trụ.</li><li><b>“Năm ánh sáng là đơn vị thời gian.”</b> Đó là đơn vị đo <b>độ dài</b> (khoảng cách).</li><li><b>“Dải Ngân Hà trên trời là mây.”</b> Đó là ánh sáng của hàng tỉ ngôi sao ở rất xa, quá mờ để mắt tách riêng từng sao.</li><li><b>“Ảnh Ngân Hà xoắn ốc là ảnh chụp.”</b> Là hình vẽ; ta ở bên trong nên không thể chụp toàn cảnh.</li><li><b>“Các sao trên trời ở gần nhau.”</b> Ngôi sao gần nhất sau Mặt Trời đã xa gấp khoảng 270 000 lần khoảng cách Trái Đất – Mặt Trời.</li></ul>','<ul><li><b>“The Solar System, the Milky Way and the Universe are the same.”</b> The Solar System is a tiny part of the Milky Way, which is one of hundreds of billions of galaxies.</li><li><b>“A light-year is a time.”</b> It is a <b>distance</b>.</li><li><b>“The Milky Way band is a cloud.”</b> It is the light of billions of distant stars.</li><li><b>“Spiral Milky Way pictures are photos.”</b> They are drawings; we are inside it.</li><li><b>“Stars are close together.”</b> The nearest one after the Sun is about 270 000 times further than the Sun.</li></ul>'],
+word5:['<ul><li><b>Ngân Hà</b> 銀河: “ngân” = bạc, “hà” = sông; “sông bạc” trên trời. Người Việt còn gọi là <b>sông Ngân</b>, gắn với chuyện Ngưu Lang – Chức Nữ bị sông Ngân ngăn cách (sao Ngưu Lang là Altair, sao Chức Nữ là Vega, hai bên dải Ngân Hà; mô phỏng có cả hai sao này).</li><li>Tiếng Anh <i>Milky Way</i> = “đường sữa”, dịch từ Latinh <i>via lactea</i>. Tiếng Hy Lạp <i>galaxias kyklos</i> = “vòng sữa” (<i>gala</i> = sữa) → <b>galaxy</b> (thiên hà). Như vậy “thiên hà” (sông trời) và “galaxy” (sữa) đều đến từ cùng một hình ảnh: dải sáng mờ trên trời đêm.</li><li><b>Thiên hà</b> 天河 = “sông trời”.</li></ul>','<ul><li><b>Milky Way</b>: Latin <i>via lactea</i>; Greek <i>galaxias kyklos</i>, “milky circle” (<i>gala</i>, milk) → <b>galaxy</b>.</li><li>Vietnamese 銀河 <i>Ngân Hà</i> = “silver river”; in the folk tale the river separates the Herdsman (Altair) and the Weaver Girl (Vega), both shown in this simulation.</li></ul>'],
+
+/* ---------- Video & phụ lục ---------- */
+kexp:['Thí nghiệm','Experiment'],kphen:['Hiện tượng','Phenomenon'],kapp:['Ứng dụng','Application'],kexpl:['Giải thích','Explainer'],
+unk:['chưa rõ thời lượng','length unchecked'],lookLbl:['Để ý:','Watch for:'],
+vYT:['Mở trên YouTube ↗','Open on YouTube ↗'],
+vClaude:['Trang này đang mở trên claude.ai nên chưa phát YouTube ngay tại chỗ được. Bấm nút bên dưới để xem ở thẻ mới. Khi trang được đưa lên web riêng, hoặc có file video trong thư mục media/, video sẽ phát ngay tại đây.','This page is open on claude.ai, where YouTube cannot play inline. Use the button below to watch in a new tab. On its own website, or with the file in the media/ folder, the video plays right here.'],
+vLocal:['Đang phát file trong thư mục media/.','Playing the file from the media/ folder.'],vOnline:['Đang phát từ YouTube (cần mạng).','Playing from YouTube (needs internet).'],
+offT:['Danh sách video và cách dùng bản offline','Video list and offline use'],
+offIntro:['<p>Mỗi video có tên file riêng. Để dùng khi mất mạng: tạo thư mục <b>media</b> cạnh file index.html, tải video về và đặt đúng tên file như bảng. Khi bấm vào thẻ video, trang tìm file trong media/ trước; không có thì phát từ YouTube.</p><p>Video đánh dấu “chưa rõ thời lượng” là video chưa kiểm tra được độ dài và nội dung chi tiết; thầy cô nên xem trước.</p>','<p>Each video has its own file name. For offline use, create a <b>media</b> folder next to index.html and save each video under the name in the table. Clicking a card tries media/ first, then YouTube.</p><p>Videos marked “length unchecked” could not be fully checked; please preview them.</p>'],
+thTab:['Tab','Tab'],thType:['Loại','Type'],thVid:['Video','Video'],thDur:['Thời lượng','Length'],thFile:['Tên file trong media/','File name in media/'],
+currT:['Yêu cầu cần đạt trong chương trình KHTN 6 (2018)','Curriculum goals (Vietnam Science 6, 2018)'],
+curr:['<p>Chủ đề <b>Trái Đất và bầu trời</b>: chuyển động nhìn thấy của Mặt Trời, của Mặt Trăng; hệ Mặt Trời; Ngân Hà. Mô phỏng phủ đủ năm yêu cầu cần đạt:</p><ul><li>Giải thích được một cách định tính và sơ lược: từ Trái Đất thấy Mặt Trời mọc và lặn hằng ngày (tab 1).</li><li>Nêu được Mặt Trời và sao là các thiên thể phát sáng; Mặt Trăng, các hành tinh và sao chổi phản xạ ánh sáng Mặt Trời (tab 2).</li><li>Thiết kế mô hình thực tế (hoặc vẽ hình) để giải thích được một số hình dạng nhìn thấy của Mặt Trăng trong Tuần Trăng (tab 3; phần “Cơ chế” có cách làm mô hình đèn và quả bóng).</li><li>Mô tả được sơ lược cấu trúc của hệ Mặt Trời, nêu được các hành tinh cách Mặt Trời các khoảng cách khác nhau và có chu kì quay khác nhau (tab 4).</li><li>Sử dụng tranh ảnh (hình vẽ hoặc học liệu điện tử) chỉ ra được hệ Mặt Trời là một phần nhỏ của Ngân Hà (tab 5).</li></ul><p>Chương trình cũng gợi ý dùng mô phỏng “hình dạng nhìn thấy của Mặt Trăng trong Tuần Trăng” và “trật tự, kích thước tương đối của Mặt Trời và các hành tinh”. Phần mở rộng (không bắt buộc): hướng mọc theo mùa, định luật Kepler, nguyệt thực.</p>','<p>Topic <b>Earth and sky</b>. The five goals covered: sunrise and sunset from the Earth’s spin (tab 1); the Sun and stars give out light, the Moon, planets and comets reflect it (tab 2); a model explaining the Moon’s phases (tab 3); the structure of the Solar System, different distances and periods (tab 4); the Solar System as a tiny part of the Milky Way (tab 5). Extensions: seasonal sunrise direction, Kepler’s law, eclipses.</p>']
+};
+
+let lang='vi';
+const $=id=>document.getElementById(id);
+const store={get(k){try{return localStorage.getItem(k);}catch(e){return null;}},set(k,v){try{localStorage.setItem(k,v);}catch(e){}}};
+const T=k=>{const e=L[k];return e?e[lang==='vi'?0:1]:k;};
+const Tf=(k,o)=>T(k).replace(/\{(\w+)\}/g,(m,n)=>o[n]);
+const nf=(x,d=1,mn=0)=>new Intl.NumberFormat(lang==='vi'?'vi-VN':'en-US',{maximumFractionDigits:d,minimumFractionDigits:mn}).format(Math.abs(x)<1e-12?0:x);
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const lerp=(a,b,f)=>a+(b-a)*f;
+const sstep=(x,a,b)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t);};
+const DEG=Math.PI/180;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const FONT='"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif',MONO='"IBM Plex Mono",ui-monospace,Consolas,monospace';
+const C={};
+function readColors(){const cs=getComputedStyle(document.documentElement);
+  ['bg','panel','lane','ink','muted','line','accent','ok','warn','laser','ray','ray2','mirror','img','obj','room','space','star','gold','wood']
+  .forEach(k=>C[k]=cs.getPropertyValue('--'+k).trim());draw();}
+/* Màu cố định cho cảnh vũ trụ (luôn nền tối, không đổi theo chế độ sáng/tối) */
+const K={space:'#070b14',sun:'#ffcf3f',sunCore:'#fff4c2',ray:'#ffd34d',night:'#0f1a2e',ocean:'#2f72b8',land:'#5e8a4e',text:'#e7edf6',dim:'#8d9ab0',moon:'#d9d6cf',moonDark:'#1d2433',sky:'#7fb6ea',ground:'#7a9a5a',face:'#46d1e6',warn:'#ff8a5c'};
+
+/* ================= Hàm vẽ chung ================= */
+function size(cv,ratio,maxH,minH=160){
+  const w=cv.clientWidth||300; let h=Math.round(w*ratio); if(maxH)h=Math.min(h,maxH); h=Math.max(h,minH);
+  if(cv._h!==h){cv.style.height=h+'px';cv._h=h;}
+  const d=window.devicePixelRatio||1,W=Math.round(w*d),H=Math.round(h*d);
+  if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H;}
+  const ctx=cv.getContext('2d');ctx.setTransform(d,0,0,d,0,0);ctx.clearRect(0,0,w,h);return {ctx,w,h};
+}
+function txt(ctx,s,x,y,col,sz=14,wt=600,al='left',bl='middle',font=FONT){ctx.fillStyle=col;ctx.font=`${wt} ${sz}px ${font}`;ctx.textAlign=al;ctx.textBaseline=bl;ctx.fillText(s,x,y);}
+function pill(ctx,s,x,y,col,sz=13,al='center',bg='rgba(7,11,20,.78)'){ctx.font=`700 ${sz}px ${FONT}`;const tw=ctx.measureText(s).width;let x0=al==='center'?x-tw/2:al==='right'?x-tw:x;
+  ctx.fillStyle=bg;ctx.beginPath();ctx.roundRect(x0-5,y-sz*.75,tw+10,sz*1.5,5);ctx.fill();txt(ctx,s,x0,y,col,sz,700,'left');}
+function line(ctx,pts,col,lw=3,dash){if(pts.length<2)return;ctx.strokeStyle=col;ctx.lineWidth=lw;ctx.lineJoin='round';ctx.lineCap='round';ctx.setLineDash(dash||[]);
+  ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.stroke();ctx.setLineDash([]);}
+function dot(ctx,x,y,r,fill,stroke,lw=2){ctx.beginPath();ctx.arc(x,y,Math.max(r,.1),0,7);if(fill){ctx.fillStyle=fill;ctx.fill();}if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=lw;ctx.stroke();}}
+function arrowHead(ctx,x1,y1,x2,y2,col,s=12){const a=Math.atan2(y2-y1,x2-x1);ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(x2,y2);
+  ctx.lineTo(x2-s*Math.cos(a-.42),y2-s*Math.sin(a-.42));ctx.lineTo(x2-s*Math.cos(a+.42),y2-s*Math.sin(a+.42));ctx.fill();}
+function arrowMid(ctx,x1,y1,x2,y2,col,s=8,f=.55){const x=x1+(x2-x1)*f,y=y1+(y2-y1)*f,a=Math.atan2(y2-y1,x2-x1);
+  ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(x+s*Math.cos(a),y+s*Math.sin(a));ctx.lineTo(x+s*Math.cos(a+2.5),y+s*Math.sin(a+2.5));ctx.lineTo(x+s*Math.cos(a-2.5),y+s*Math.sin(a-2.5));ctx.fill();}
+function eyeIcon(ctx,x,y,dir,col,s=12){ctx.save();ctx.translate(x,y);ctx.rotate(dir);ctx.strokeStyle=col;ctx.lineWidth=2;ctx.fillStyle='#fff';
+  ctx.beginPath();ctx.moveTo(-s,0);ctx.quadraticCurveTo(0,-s*.95,s,0);ctx.quadraticCurveTo(0,s*.95,-s,0);ctx.fill();ctx.stroke();
+  dot(ctx,s*.25,0,s*.36,'#1b2a44');ctx.restore();}
+function sunGlow(ctx,x,y,r){const g=ctx.createRadialGradient(x,y,r*.2,x,y,r*2.6);g.addColorStop(0,'rgba(255,220,90,.55)');g.addColorStop(1,'rgba(255,200,60,0)');
+  ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,r*2.6,0,7);ctx.fill();const g2=ctx.createRadialGradient(x-r*.3,y-r*.3,r*.1,x,y,r);g2.addColorStop(0,K.sunCore);g2.addColorStop(1,K.sun);dot(ctx,x,y,r,g2);}
+/* Quả cầu được chiếu sáng từ hướng a (rad, toạ độ màn hình): nửa sáng quay về nguồn sáng */
+function litBall(ctx,x,y,r,a,dayCol,nightCol,on=true){dot(ctx,x,y,r,nightCol);if(!on)return;
+  ctx.save();ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.clip();ctx.fillStyle=dayCol;ctx.beginPath();ctx.arc(x,y,r,a-Math.PI/2,a+Math.PI/2);ctx.closePath();ctx.fill();
+  const g=ctx.createLinearGradient(x+Math.cos(a)*r,y+Math.sin(a)*r,x,y);g.addColorStop(0,'rgba(255,255,255,.28)');g.addColorStop(1,'rgba(255,255,255,0)');ctx.fillStyle=g;ctx.fill();ctx.restore();}
+function stars(ctx,w,h,n,seed,alpha=1){let s=seed;const r=()=>{s=(s*16807)%2147483647;return s/2147483647;};ctx.fillStyle='#fff';
+  for(let i=0;i<n;i++){const x=r()*w,y=r()*h,b=r();ctx.globalAlpha=alpha*(.25+.75*b*b);ctx.fillRect(x,y,b>.92?2:1.2,b>.92?2:1.2);}ctx.globalAlpha=1;}
+function pos(cv,e){const r=cv.getBoundingClientRect();return {x:e.clientX-r.left,y:e.clientY-r.top};}
+function onDrag(cv,down,move,up){
+  cv.addEventListener('pointerdown',e=>{const p=pos(cv,e);if(down(p,e)){cv.setPointerCapture(e.pointerId);cv._d=true;e.preventDefault();}});
+  cv.addEventListener('pointermove',e=>{const p=pos(cv,e);if(cv._d){move(p,e);draw();}else if(cv._hover)cv.style.cursor=cv._hover(p)?'grab':'default';});
+  const end=e=>{if(cv._d){cv._d=false;up&&up(pos(cv,e),e);draw();}};
+  cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);}
+function seg(id,items,cur,pick){const el=$(id);el.innerHTML='';items.forEach(it=>{const b=document.createElement('button');b.className='btn';b.textContent=it.label;
+  b.setAttribute('aria-pressed',String(it.k===cur));b.onclick=()=>pick(it.k);el.appendChild(b);});}
+const kv=rows=>rows.map(([k,v,cls])=>`<dt>${k}</dt><dd class="${cls||'num'}">${v}</dd>`).join('');
+const hm=t=>{t=((t%24)+24)%24;let h=Math.floor(t),m=Math.round((t-h)*60);if(m===60){h=(h+1)%24;m=0;}return h+':'+String(m).padStart(2,'0');};
+let raf=0;function draw(){if(raf)return;raf=requestAnimationFrame(()=>{raf=0;try{[0,render1,render2,render3,render4,render5][tab]();}catch(err){console.error(err);}});}
+
+/* ================= Tab ================= */
+let tab=1;
+function setTab(n){tab=n;document.querySelectorAll('nav.tabs button').forEach(b=>{const on=+b.dataset.tab===n;b.classList.toggle('on',on);b.setAttribute('aria-selected',on);});
+  [1,2,3,4,5].forEach(i=>$('t'+i).hidden=i!==n);store.set('tdbt-tab',n);draw();}
+document.querySelectorAll('nav.tabs button').forEach(b=>b.onclick=()=>setTab(+b.dataset.tab));
+$('gvBtn').onclick=()=>{const on=!document.body.classList.contains('hideNums');document.body.classList.toggle('hideNums',on);$('gvBtn').setAttribute('aria-pressed',on);};
+
+/* ================= Video thực tế ================= */
+const VIDS={
+1:[{id:'vMtqgVGxSVo',k:'kphen',d:null,ch:'YouTube',t:'Earth’s Rotation Visualized in a Timelapse of the Sunset',f:'tab1-hien-tuong.mp4',
+    look:['Máy quay được giữ cho Mặt Trời đứng yên giữa khung hình: em sẽ thấy chính mặt đất (đường chân trời) nghiêng và quay lên che Mặt Trời. Đó là điều thật sự xảy ra khi Mặt Trời “lặn”.','The camera keeps the Sun fixed in the frame, so you see the ground tilt up and cover the Sun. That is what really happens at “sunset”.']},
+   {id:'k7WoQcwVWDE',k:'kphen',d:null,ch:'YouTube',t:'All Day Sun Across the Sky Time Lapse',f:'tab1-hien-tuong-2.mp4',
+    look:['Quay nhanh cả một ngày: Mặt Trời mọc, lên cao dần rồi lặn ở phía đối diện; bóng của các vật quay theo và ngắn nhất vào giữa trưa.','A whole day sped up: the Sun rises, climbs and sets on the other side; shadows swing round and are shortest at noon.']}],
+2:[{id:'WGVZ4ZsOCHU',k:'kphen',d:null,ch:'YouTube (amateur astronomer)',t:'Venus Phases Timelapse over 7 Months through a 6-inch telescope',f:'tab2-hien-tuong.mp4',
+    look:['Qua kính thiên văn, Sao Kim (Sao Hôm) cũng có hình khuyết, hình lưỡi liềm như Mặt Trăng. Nếu nó tự phát sáng thì lúc nào cũng tròn; nó khuyết vì chỉ phản xạ ánh sáng Mặt Trời.','Through a telescope Venus shows crescent phases like the Moon. If it made its own light it would always look round; it only reflects sunlight.']},
+   {id:'mRD83wbWeDs',k:'kexpl',d:null,ch:'YouTube',t:'Moonlight is Reflected Sunlight – Lesson for Kids',f:'tab2-giai-thich.mp4',
+    look:['Ánh sáng đi từ Mặt Trời tới Mặt Trăng rồi mới hắt về mắt ta, giống tia sáng vẽ trong mô phỏng.','Light goes from the Sun to the Moon and then bounces to our eyes, like the rays drawn in the simulation.']}],
+3:[{id:'BtPvEpSyRUs',k:'kphen',d:null,ch:'NASA',t:'See the Moon Phases in 2024 – full-year time-lapse',f:'tab3-hien-tuong.mp4',
+    look:['Mặt Trăng chụp ghép theo từng giờ trong một năm. Để ý: phần sáng lớn dần từ bên phải rồi khuyết dần từ bên phải; các vết tối trên Mặt Trăng lúc nào cũng ở nguyên chỗ (Mặt Trăng luôn quay một mặt về phía ta).','The Moon hour by hour for a year. The lit part grows from the right, then shrinks from the right; the dark patches never move (the Moon always shows us the same face).']},
+   {id:'Dnj6fQJjVXY',k:'kexp',d:null,ch:'YouTube',t:'Classroom Demonstrations: Phases of the Moon',f:'tab3-thi-nghiem.mp4',
+    look:['Mô hình đèn và quả bóng mà lớp mình có thể tự làm. Để ý vị trí quả bóng khi nó trông như trăng tròn, bán nguyệt, lưỡi liềm, rồi so với hình bên trái của mô phỏng.','The lamp-and-ball model you can make in class. Note where the ball is when it looks full, half or crescent, and compare with the left picture in the simulation.']}],
+4:[{id:'zR3Igc3Rhfg',k:'kexp',d:'7:07',ch:'Wylie Overstreet & Alex Gorosh',t:'To Scale: The Solar System',f:'tab4-thi-nghiem.mp4',
+    look:['Hai bạn trẻ dựng mô hình hệ Mặt Trời đúng tỉ lệ trên sa mạc: Trái Đất bằng viên bi thì quỹ đạo Sao Hải Vương rộng 11 km. Giống bảng “Mô hình trên sân trường” ở dưới. (Video dài hơn 5 phút; có thể chiếu đoạn 2:30–6:00.)','A to-scale Solar System built in the desert: with Earth as a marble, Neptune’s orbit is 11 km wide. Like the schoolyard table below. (Over 5 minutes; 2:30–6:00 works on its own.)']},
+   {id:'TgZylYU9P4g',k:'kexpl',d:null,ch:'YouTube',t:'Solar system to scale (size and distance)',f:'tab4-giai-thich.mp4',
+    look:['So sánh kích thước và khoảng cách thật của các hành tinh; để ý khoảng trống rất lớn giữa các hành tinh ngoài.','Compares the true sizes and distances of the planets; notice the huge gaps between the outer planets.']}],
+5:[{id:'x896_J1k8rM',k:'kexpl',d:null,ch:'YouTube',t:'Zooming out from Earth to the Observable Universe',f:'tab5-giai-thich.mp4',
+    look:['Lùi dần ra xa giống thanh thu phóng của mô phỏng. Dừng lại ở khung có Ngân Hà và tìm xem hệ Mặt Trời nằm ở đâu.','Pulling back like the zoom slider in the simulation. Pause at the Milky Way and find where the Solar System is.']},
+   {id:'Zbc0FhcVwx0',k:'kphen',d:null,ch:'YouTube',t:'Rotation of the Earth Visualized with a Stabilized Milky Way Galaxy',f:'tab5-hien-tuong.mp4',
+    look:['Dải sáng mờ vắt ngang trời là Ngân Hà nhìn từ bên trong. Máy quay giữ Ngân Hà đứng yên nên mặt đất quay: lại thấy Trái Đất tự quay như ở tab 1.','The faint band across the sky is the Milky Way seen from inside. The camera holds the stars still, so the ground turns: the Earth’s spin again, as in tab 1.']}]
+};
+const ON_CLAUDE=/claude|anthropic/i.test(location.hostname)||(location.ancestorOrigins&&[...location.ancestorOrigins].some(o=>/claude|anthropic/i.test(o)));
+const ytUrl=id=>'https://www.youtube.com/watch?v='+id;
+function renderVids(n){$('v'+n).innerHTML=VIDS[n].map((v,i)=>`<button class="vcard" data-n="${n}" data-i="${i}">
+  <span class="vthumb"><img src="https://i.ytimg.com/vi/${v.id}/mqdefault.jpg" alt="" loading="lazy" onerror="this.remove()"><span class="pl"></span>
+  <span class="tag">${T(v.k)}</span><span class="dur ${v.d?'':'unk'}">${v.d||T('unk')}</span></span>
+  <span class="vbody"><span class="ttl">${esc(v.t)}</span><span class="ch">${esc(v.ch)}</span><span class="look"><b>${T('lookLbl')}</b> ${v.look[lang==='vi'?0:1]}</span></span></button>`).join('');}
+document.addEventListener('click',e=>{const c=e.target.closest('.vcard');if(c)openVid(VIDS[c.dataset.n][c.dataset.i]);});
+function openVid(v){const S=$('vmS');S.innerHTML='';$('vmT').textContent=v.t;$('vmYT').href=ytUrl(v.id);$('vmYT').textContent=T('vYT');$('vmN').textContent='';
+  $('vmL').innerHTML=`<b>${T('lookLbl')}</b> ${v.look[lang==='vi'?0:1]}`;$('vmodal').hidden=false;
+  const vid=document.createElement('video');vid.controls=true;vid.playsInline=true;vid.autoplay=true;vid.preload='auto';
+  let ok=false,gone=false;
+  const fallback=()=>{if(ok||gone)return;gone=true;vid.removeAttribute('src');vid.remove();
+    if(ON_CLAUDE){S.innerHTML=`<img src="https://i.ytimg.com/vi/${v.id}/hqdefault.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.35" onerror="this.remove()"><div class="msg" style="position:relative">${T('vClaude')}</div>`;}
+    else{const f=document.createElement('iframe');f.src=`https://www.youtube-nocookie.com/embed/${v.id}?autoplay=1&rel=0`;f.allow='autoplay; encrypted-media; picture-in-picture; fullscreen';f.allowFullscreen=true;S.appendChild(f);$('vmN').textContent=T('vOnline');}};
+  vid.addEventListener('loadeddata',()=>{ok=true;$('vmN').textContent=T('vLocal');});
+  vid.addEventListener('error',fallback);
+  vid.src='media/'+v.f;S.appendChild(vid);
+  setTimeout(()=>{if(!ok&&vid.readyState===0)fallback();},2500);}
+function closeVid(){const v=$('vmS').querySelector('video');if(v)v.pause();$('vmS').innerHTML='';$('vmodal').hidden=true;}
+$('vmX').onclick=closeVid;$('vmodal').addEventListener('click',e=>{if(e.target.id==='vmodal')closeVid();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('vmodal').hidden)closeVid();});
+function renderOffline(){let rows='';[1,2,3,4,5].forEach(n=>VIDS[n].forEach(v=>{rows+=`<tr><td>${n}</td><td>${T(v.k)}</td><td><a href="${ytUrl(v.id)}" target="_blank" rel="noopener">${esc(v.t)}</a><br><span class="muted">${esc(v.ch)}</span></td><td>${v.d||T('unk')}</td><td><code>${v.f}</code></td></tr>`;}));
+  $('offline').innerHTML=T('offIntro')+`<div class="tblwrap"><table class="log wide"><tr><th>${T('thTab')}</th><th>${T('thType')}</th><th>${T('thVid')}</th><th>${T('thDur')}</th><th>${T('thFile')}</th></tr>${rows}</table></div>`;}
+
+/* ================= Dự đoán ================= */
+const PRED={p1:{q:'p1q',o:['p1a','p1b','p1c'],c:1,e:'p1e'},p1b:{q:'p1bq',o:['p1ba','p1bb','p1bc'],c:1,e:'p1be'},
+  p2:{q:'p2q',o:['p2a','p2b','p2c'],c:1,e:'p2e'},
+  p3:{q:'p3q',o:['p3a','p3b','p3c'],c:1,e:'p3e'},p3b:{q:'p3bq',o:['p3ba','p3bb','p3bc'],c:1,e:'p3be'},
+  p4:{q:'p4q',o:['p4a','p4b','p4c'],c:2,e:'p4e'},p4b:{q:'p4bq',o:['p4ba','p4bb','p4bc'],c:1,e:'p4be'},
+  p5:{q:'p5q',o:['p5a','p5b','p5c'],c:2,e:'p5e'}};
+function renderPred(id){const P=PRED[id],el=$(id);
+  el.innerHTML=`<h2>${T('predTitle')}</h2><p>${T(P.q)}</p><div class="opts">${P.o.map((k,i)=>`<button class="btn ${P.pick===i?'picked':''} ${P.show&&i===P.c?'right':''}" data-i="${i}">${T(k)}</button>`).join('')}</div>`+
+  (P.pick==null?'':`<p class="muted">${T('predThen')}</p><div><button class="btn rv">${T(P.show?'hideAns':'showAns')}</button></div>`)+(P.show?`<div class="ans">${T(P.e)}</div>`:'');}
+Object.keys(PRED).forEach(id=>$(id).addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const P=PRED[id];
+  if(b.classList.contains('rv'))P.show=!P.show;else P.pick=+b.dataset.i;renderPred(id);}));
+
+/* ================= Thử thách (nhập số) ================= */
+const QZ={quiz3:[{q:'q3a',a:15,tol:1.6,u:'days',hk:'q3ah'},{q:'q3b',a:12,tol:1.1,u:'hour',hk:'q3bh'},{q:'q3c',a:50,tol:.6,u:'%',hk:'q3ch'}],
+  quiz5:[{q:'q5a',a:8.33,tol:.5,u:'min',hk:'q5ah'},{q:'q5b',a:171,tol:6,u:'years',hk:'q5bh'},{q:'q5c',a:4.24,tol:.1,u:'years',hk:'q5ch'}]};
+function renderQuiz(id){$(id).innerHTML=QZ[id].map((z,i)=>`<div class="qz"><p>${i+1}. ${T(z.q)}</p><div class="row"><input inputmode="decimal" data-i="${i}" value="${esc(z.v||'')}"><span class="unit">${L[z.u]?T(z.u):z.u}</span>
+  <button class="btn" data-c="${i}">${T('check')}</button><span class="res ${z.ok===true?'ok':z.ok===false?'no':''}">${z.ok===true?T('right'):z.ok===false?T('wrong'):''}</span></div>
+  ${z.ok!=null?`<details><summary>${T('showHint')}</summary><p>${T(z.hk)}</p></details>`:''}</div>`).join('');}
+Object.keys(QZ).forEach(id=>$(id).addEventListener('click',e=>{const b=e.target.closest('button[data-c]');if(!b)return;const i=+b.dataset.c,z=QZ[id][i],inp=$(id).querySelector(`input[data-i="${i}"]`);
+  z.v=inp.value;const x=parseFloat(String(inp.value).replace(/\s/g,'').replace(',','.'));z.ok=isFinite(x)&&Math.abs(x-z.a)<=z.tol;renderQuiz(id);}));
+
+/* ================= TAB 1: Mặt Trời mọc và lặn =================
+   Toạ độ chân trời: e (Đông), n (Bắc), u (lên). φ vĩ độ, δ xích vĩ Mặt Trời, H = 15°(t − 12) góc giờ.
+   e = −cos δ sin H; n = cos φ sin δ − sin φ cos δ cos H; u = sin φ sin δ + cos φ cos δ cos H (= sin độ cao). */
+const PL1={plHN:21.03,plHCM:10.78,plEq:0,plNP:90};
+const DT1={dXP:0,dHC:23.44,dTP:0,dDC:-23.44};
+const S1={t:6,lat:21.03,pl:'plHN',dk:'dXP',dec:0,play:false,spd:1.5,drag:null,img:null,imgKey:''};
+function sunVec(lat,dec,t){const f=lat*DEG,d=dec*DEG,H=15*(t-12)*DEG;
+  return {e:-Math.cos(d)*Math.sin(H),n:Math.cos(f)*Math.sin(d)-Math.sin(f)*Math.cos(d)*Math.cos(H),u:Math.sin(f)*Math.sin(d)+Math.cos(f)*Math.cos(d)*Math.cos(H)};}
+function riseSet(lat,dec){if(lat>89.5)return dec>0.05?{mode:'day'}:dec<-0.05?{mode:'night'}:{mode:'hz'};
+  const c=-Math.tan(lat*DEG)*Math.tan(dec*DEG);if(c<-1)return {mode:'day'};if(c>1)return {mode:'night'};
+  const H0=Math.acos(c)/DEG;const az=Math.acos(clamp(Math.sin(dec*DEG)/Math.cos(lat*DEG),-1,1))/DEG;return {mode:'rs',rise:12-H0/15,set:12+H0/15,len:2*H0/15,az};}
+const DIR16=['N','nNE','NE','eNE','E','eSE','SE','sSE','S','sSW','SW','wSW','W','wNW','NW','nNW'];
+const dirName=az=>T(DIR16[Math.round((((az%360)+360)%360)/22.5)%16]);
+const azOf=v=>((Math.atan2(v.e,v.n)/DEG)+360)%360;
+function layout1(w,h){if(w>=620){const gw=Math.min(h,w*.42);return {wide:true,g:{x:0,y:0,w:gw,h},s:{x:gw,y:0,w:w-gw,h}};}
+  const gh=Math.round(h*.5);return {wide:false,g:{x:0,y:0,w,h:gh},s:{x:0,y:gh,w,h:h-gh}};}
+function globeImg1(R){const key=R+'|'+S1.dec;if(S1.imgKey===key)return S1.img;
+  const s=2,N=Math.ceil(2*R/s),cv=document.createElement('canvas');cv.width=cv.height=N;const cx=cv.getContext('2d'),im=cx.createImageData(N,N),d=im.data;
+  const sd=Math.sin(S1.dec*DEG),cd=Math.cos(S1.dec*DEG),day=[47,114,184],nig=[15,26,46];
+  for(let j=0;j<N;j++)for(let i=0;i<N;i++){const dx=(i+.5)/N*2-1,dy=(j+.5)/N*2-1,rr=Math.hypot(dx,dy);if(rr>1)continue;
+    const lat=(90-rr*120)*DEG,lam=Math.atan2(-dy,dx);const v=Math.sin(lat)*sd+Math.cos(lat)*cd*Math.cos(lam);const b=sstep(v,-.07,.07);
+    const o=(j*N+i)*4;for(let c=0;c<3;c++)d[o+c]=nig[c]+(day[c]-nig[c])*b;d[o+3]=255;}
+  cx.putImageData(im,0,0);S1.img=cv;S1.imgKey=key;return cv;}
+function render1(){const cv=$('cv1'),w0=cv.clientWidth||600,{ctx,w,h}=size(cv,w0>=620?.5:1.25,w0>=620?470:760,300),Lo=layout1(w,h);S1.L=Lo;
+  const fs=w<520?12:14;
+  /* --- quả địa cầu nhìn từ trên Bắc Cực --- */
+  const g=Lo.g;ctx.fillStyle=K.space;ctx.fillRect(g.x,g.y,g.w,g.h);stars(ctx,g.w,g.h,70,7,.7);
+  const R=Math.min(g.w,g.h)*.34,gx=g.x+g.w*.46,gy=g.y+g.h*.54;S1.G={x:gx,y:gy,R};
+  /* tia sáng Mặt Trời từ bên phải */
+  for(let k=-2;k<=2;k++){const y=gy+k*R*.42;line(ctx,[[g.x+g.w-6,y],[gx+R*1.08,y]],K.ray,2);arrowHead(ctx,g.x+g.w-6,y,gx+R*1.08,y,K.ray,9);}
+  txt(ctx,'☀ '+T('g1Light'),g.x+g.w-8,gy-R-16,K.ray,fs,700,'right');
+  ctx.drawImage(globeImg1(R),gx-R,gy-R,2*R,2*R);
+  /* kinh tuyến quay theo Trái Đất, vĩ tuyến xích đạo */
+  const lamObs=(S1.t-12)*15*DEG;ctx.save();ctx.beginPath();ctx.arc(gx,gy,R,0,7);ctx.clip();ctx.strokeStyle='rgba(255,255,255,.22)';ctx.lineWidth=1;
+  for(let k=0;k<12;k++){const a=lamObs+k*30*DEG;ctx.beginPath();ctx.moveTo(gx,gy);ctx.lineTo(gx+Math.cos(a)*R,gy-Math.sin(a)*R);ctx.stroke();}
+  ctx.setLineDash([4,4]);dot(ctx,gx,gy,R*.75,null,'rgba(255,255,255,.35)',1);ctx.setLineDash([]);
+  const rObs=(90-S1.lat)/120*R;ctx.setLineDash([2,4]);if(rObs>1)dot(ctx,gx,gy,rObs,null,K.face,1.5);ctx.setLineDash([]);ctx.restore();
+  dot(ctx,gx,gy,R,null,'rgba(255,255,255,.5)',1.5);dot(ctx,gx,gy,2.5,'#fff');
+  /* người quan sát */
+  const ox=gx+Math.cos(lamObs)*rObs,oy=gy-Math.sin(lamObs)*rObs;dot(ctx,ox,oy,7,K.warn,'#fff',2);
+  pill(ctx,T(S1.pl),ox,oy-18,'#fff',fs-1);
+  /* mũi tên chiều quay (ngược chiều kim đồng hồ khi nhìn từ Bắc Cực) */
+  const ra=R+14;ctx.strokeStyle=K.face;ctx.lineWidth=3;ctx.beginPath();ctx.arc(gx,gy,ra,-Math.PI*.95,-Math.PI*.55);ctx.stroke();
+  {const a=-Math.PI*.95;arrowHead(ctx,gx+ra*Math.cos(a+.05),gy+ra*Math.sin(a+.05),gx+ra*Math.cos(a),gy+ra*Math.sin(a),K.face,12);}
+  txt(ctx,'↺ '+T('g1Spin'),g.x+10,g.y+16,K.face,fs,700);
+  txt(ctx,T('g1Space'),g.x+10,g.y+g.h-14,K.dim,fs-1,600);
+  /* --- vòm trời của người quan sát --- */
+  const s=Lo.s,v=sunVec(S1.lat,S1.dec,S1.t),alt=Math.asin(clamp(v.u,-1,1))/DEG;
+  const sky=alt>6?'#6fa9e0':alt>-1?'#e59a5c':alt>-8?'#3a3f6b':'#0b1224';
+  const grd=ctx.createLinearGradient(0,s.y,0,s.y+s.h);grd.addColorStop(0,alt>6?'#3e86d1':alt>-8?'#2b3566':'#070b18');grd.addColorStop(1,sky);ctx.fillStyle=grd;ctx.fillRect(s.x,s.y,s.w,s.h);
+  if(alt<-4)stars(ctx,s.w,s.h*.7,90,3,sstep(-alt,4,12));
+  const el=24*DEG,Rd=Lo.wide?Math.min(s.w*.37,s.h*.62):Math.min(s.w*.34,s.h*.5),cx=s.x+s.w/2,gyd=s.y+s.h*(Lo.wide?.66:.64);
+  const P=(e,n,u)=>[cx-e*Rd,gyd-(u*Math.cos(el)-n*Math.sin(el))*Rd];S1.P=P;
+  /* mặt đất (đĩa chân trời) */
+  ctx.save();ctx.fillStyle=alt>-1?'#6f9455':'#2a3a2a';ctx.beginPath();ctx.ellipse(cx,gyd,Rd,Rd*Math.sin(el),0,0,7);ctx.fill();
+  ctx.fillStyle=alt>-1?'#5f8248':'#223022';ctx.fillRect(s.x,gyd,s.w,s.y+s.h-gyd);ctx.beginPath();ctx.ellipse(cx,gyd,Rd,Rd*Math.sin(el),0,0,7);ctx.fillStyle=alt>-1?'#7aa25f':'#2b3d2b';ctx.fill();ctx.restore();
+  /* vòng tròn Đông – thiên đỉnh – Tây */
+  const arc=[];for(let a=0;a<=180;a+=4)arc.push(P(Math.cos(a*DEG),0,Math.sin(a*DEG)));line(ctx,arc,'rgba(255,255,255,.28)',1,[3,5]);
+  const lab=[[1,0,'E'],[-1,0,'W'],[0,-1,'S'],[0,1,'N']];lab.forEach(([e,n,k])=>{const p=P(e*1.12,n*1.1,0);pill(ctx,T(k),p[0]+(e>0?-6:e<0?6:0),p[1]+(n>0?10:e!==0?18:-4),'#fff',fs,e>0?'right':e<0?'left':'center');});
+  /* đường đi của Mặt Trời trong ngày */
+  if($('path1').checked){const up=[],dn=[];let prev=null;
+    for(let t=0;t<=24.001;t+=.1){const q=sunVec(S1.lat,S1.dec,t),p=P(q.e,q.n,q.u);const isUp=q.u>=0;if(prev!==null&&prev!==isUp){(isUp?up:dn).push(null);}(isUp?up:dn).push(p);prev=isUp;}
+    const strokeSeg=(arr,col,lw,dash)=>{let cur=[];arr.forEach(p=>{if(p===null){line(ctx,cur,col,lw,dash);cur=[];}else cur.push(p);});line(ctx,cur,col,lw,dash);};
+    strokeSeg(dn,'rgba(255,220,120,.35)',2,[4,5]);strokeSeg(up,'rgba(255,214,90,.95)',3);
+    for(let hh=0;hh<24;hh++){const q=sunVec(S1.lat,S1.dec,hh);if(q.u<0)continue;const p=P(q.e,q.n,q.u);dot(ctx,p[0],p[1],2.5,'#fff');if(hh%3===0)txt(ctx,hh+'h',p[0],p[1]-10,'#fff',fs-2,700,'center');}}
+  /* cọc và bóng */
+  const sh=.17;if($('stick1').checked){const b=P(0,0,0),tp=P(0,0,sh);
+    if(v.u>.01){const hz=Math.hypot(v.e,v.n)||1e-6;const Ls=Math.min(sh*hz/v.u,.95);const q=P(-v.e/hz*Ls,-v.n/hz*Ls,0);line(ctx,[b,q],'rgba(20,25,20,.6)',5);}
+    line(ctx,[b,tp],'#5b3a1e',4);}
+  /* người quan sát quay lưng về phía ta, nhìn về hướng Nam */
+  {const b=P(.12,.18,0);const x=b[0],y=b[1];ctx.strokeStyle='#1d2433';ctx.lineWidth=3;line(ctx,[[x,y],[x,y-22]],'#1d2433',3);line(ctx,[[x-7,y-15],[x+7,y-15]],'#1d2433',3);
+    line(ctx,[[x,y],[x-5,y+0]],'#1d2433',3);dot(ctx,x,y-28,5,'#1d2433');}
+  /* Mặt Trời */
+  const sp=P(v.e,v.n,v.u);S1.sp=sp;
+  if(v.u>-.03)sunGlow(ctx,sp[0],sp[1],13);else{ctx.setLineDash([3,3]);dot(ctx,sp[0],sp[1],11,null,'rgba(255,220,120,.6)',2);ctx.setLineDash([]);}
+  const ly=s.y+16;if(Lo.wide)txt(ctx,T('g1Sky'),s.x+10,ly,'#fff',fs,700);
+  txt(ctx,(Lo.wide?(alt>3?T('day'):alt<-3?T('night'):T('dawn'))+' · ':'')+hm(S1.t),s.x+s.w-10,ly,'#fff',fs,700,'right');
+  if(!Lo.wide){ctx.fillStyle=C.panel;ctx.fillRect(0,s.y-1,w,2);}
+  ui1(v,alt);}
+function ui1(v,alt){const rs=riseSet(S1.lat,S1.dec),az=azOf(v);$('tV1').textContent=hm(S1.t);$('t1r').value=S1.t;
+  const spin=1670*Math.cos(S1.lat*DEG);
+  const rise=rs.mode==='rs'?hm(rs.rise):rs.mode==='day'?T('noSet'):rs.mode==='night'?T('noRise'):'—';
+  const set=rs.mode==='rs'?hm(rs.set):rise;
+  const len=rs.mode==='rs'?`${Math.floor(rs.len)} ${T('hour')} ${Math.round((rs.len%1)*60)} ${T('min')}`:rs.mode==='day'?'24 '+T('hour'):rs.mode==='night'?'0':'—';
+  $('o1').innerHTML=kv([[T('kLat'),nf(S1.lat,1)+'°'],[T('kAlt'),nf(alt,1)+'°'],[T('kDir'),alt>-1&&S1.lat<89?dirName(az):'—'],[T('kRise'),rise],[T('kSet'),set],
+    [T('kRiseDir'),rs.mode==='rs'?dirName(rs.az)+' ('+nf(rs.az,0)+'°)':'—'],[T('kDay'),len],[T('kShadow'),alt>1?nf(1/Math.tan(alt*DEG),2)+' m':'—'],[T('kSpin'),nf(spin,0)+' km/h']]);
+  const st=$('st1');if(alt>4){st.textContent=T('st1day');st.className='status ok';}else if(alt<-4){st.textContent=T('st1night');st.className='status no';}
+  else{st.textContent=T(S1.t<12?'st1rise':'st1set');st.className='status';}}
+function setPlace1(k){S1.pl=k;S1.lat=PL1[k];seg('pl1',Object.keys(PL1).map(x=>({k:x,label:T(x)})),k,setPlace1);draw();}
+function setDate1(k){S1.dk=k;S1.dec=DT1[k];seg('dt1',Object.keys(DT1).map(x=>({k:x,label:T(x)})),k,setDate1);draw();}
+function spd1(){seg('spd1',[{k:.75,label:T('spdS')},{k:1.5,label:T('spdM')},{k:4,label:T('spdF')}],S1.spd,k=>{S1.spd=k;spd1();});}
+$('t1r').addEventListener('input',e=>{S1.t=+e.target.value;draw();});
+['path1','stick1'].forEach(id=>$(id).addEventListener('change',draw));
+$('play1').onclick=()=>{S1.play=!S1.play;$('play1').textContent=T(S1.play?'pause':'play');};
+onDrag($('cv1'),p=>{const G=S1.G,sp=S1.sp;if(sp&&Math.hypot(p.x-sp[0],p.y-sp[1])<28){S1.drag='sun';return true;}
+  if(G&&Math.hypot(p.x-G.x,p.y-G.y)<G.R*1.15){S1.drag='globe';S1.a0=Math.atan2(-(p.y-G.y),p.x-G.x);return true;}return false;},
+  p=>{if(S1.drag==='globe'){const G=S1.G,a=Math.atan2(-(p.y-G.y),p.x-G.x);let d=a-S1.a0;if(d>Math.PI)d-=2*Math.PI;if(d<-Math.PI)d+=2*Math.PI;S1.a0=a;S1.t=((S1.t+d/DEG/15)%24+24)%24;}
+    else if(S1.drag==='sun'){let best=S1.t,bd=1e9;for(let t=0;t<24;t+=.05){const q=sunVec(S1.lat,S1.dec,t);if(q.u<-.12)continue;const pp=S1.P(q.e,q.n,q.u),d=Math.hypot(pp[0]-p.x,pp[1]-p.y);if(d<bd){bd=d;best=t;}}S1.t=best;}},
+  ()=>{S1.drag=null;});
+$('cv1')._hover=p=>{const G=S1.G,sp=S1.sp;return (sp&&Math.hypot(p.x-sp[0],p.y-sp[1])<28)||(G&&Math.hypot(p.x-G.x,p.y-G.y)<G.R*1.15);};
+
+/* ================= TAB 2: Tự phát sáng hay phản xạ ================= */
+const B2=[{k:'sun',own:true},{k:'star',own:true},{k:'moon',own:false},{k:'venus',own:false},{k:'mars',own:false},{k:'jup',own:false},{k:'comet',own:false},{k:'earth',own:false}];
+const S2={sun:{x:.13,y:.5},pick:{},checked:false,drag:false,
+  obj:{earth:{x:.56,y:.6,r:.05,day:'#3c7fca',night:'#14213a'},moon:{x:.66,y:.45,r:.02,day:'#d8d4cb',night:'#1a1f2b'},venus:{x:.34,y:.78,r:.027,day:'#e8d7a6',night:'#1d1c22'},
+       mars:{x:.8,y:.8,r:.024,day:'#d0643a',night:'#211613'},jup:{x:.86,y:.3,r:.055,day:'#d9b98c',night:'#1f1a14'},comet:{x:.44,y:.24,r:.012,day:'#e9eef5',night:'#1a1e26'}},
+  stars:[{x:.95,y:.08,k:'star',r:3.2},{x:.7,y:.1,r:1.6},{x:.25,y:.12,r:1.8},{x:.05,y:.9,r:1.5},{x:.6,y:.93,r:1.7},{x:.97,y:.6,r:1.4}]};
+function render2(){const cv=$('cv2'),{ctx,w,h}=size(cv,.62,520,260),fs=w<520?12:14,on=!$('off2').checked,U=Math.min(w,h*1.6);
+  const X=p=>p.x*w,Y=p=>p.y*h;ctx.fillStyle=K.space;ctx.fillRect(0,0,w,h);stars(ctx,w,h,120,11,.55);
+  const sx=X(S2.sun),sy=Y(S2.sun),eo=S2.obj.earth,ex=X(eo),ey=Y(eo),rays=$('ray2').checked;
+  /* sao: luôn sáng */
+  S2.stars.forEach(s=>{const x=X(s),y=Y(s);const g=ctx.createRadialGradient(x,y,0,x,y,s.r*4);g.addColorStop(0,'rgba(220,235,255,.9)');g.addColorStop(1,'rgba(220,235,255,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,s.r*4,0,7);ctx.fill();dot(ctx,x,y,s.r,'#fff');
+    if(s.k){if(rays){line(ctx,[[x,y],[ex,ey]],'rgba(200,225,255,.8)',1.6,[6,4]);arrowMid(ctx,x,y,ex,ey,'rgba(200,225,255,.95)',7);}pill(ctx,T('o_star'),x,y+18,'#dfe9ff',fs-1,'right');}});
+  /* tia sáng Mặt Trời tới các vật rồi hắt về mắt ở Trái Đất */
+  if(on&&rays)Object.entries(S2.obj).forEach(([k,o])=>{const x=X(o),y=Y(o);line(ctx,[[sx,sy],[x,y]],'rgba(255,211,77,.55)',1.6);arrowMid(ctx,sx,sy,x,y,K.ray,7);
+    if(k!=='earth'){line(ctx,[[x,y],[ex,ey]],'rgba(255,240,180,.75)',1.6,[6,4]);arrowMid(ctx,x,y,ex,ey,'#fff0b4',7);}});
+  /* sao chổi: đuôi hướng ra xa Mặt Trời */
+  {const o=S2.obj.comet,x=X(o),y=Y(o),a=Math.atan2(y-sy,x-sx),Lt=U*.2;ctx.save();ctx.translate(x,y);ctx.rotate(a);
+    const g=ctx.createLinearGradient(0,0,Lt,0);g.addColorStop(0,on?'rgba(220,235,255,.85)':'rgba(120,130,150,.12)');g.addColorStop(1,'rgba(220,235,255,0)');ctx.fillStyle=g;
+    ctx.beginPath();ctx.moveTo(0,-U*.012);ctx.quadraticCurveTo(Lt*.5,-U*.035,Lt,-U*.05);ctx.lineTo(Lt,U*.05);ctx.quadraticCurveTo(Lt*.5,U*.035,0,U*.012);ctx.fill();ctx.restore();
+    if(on)txt(ctx,T('tail'),x+Math.cos(a)*U*.14,y+Math.sin(a)*U*.14+16,'#cfe0f5',fs-2,600,'center');}
+  /* hành tinh, Mặt Trăng, Trái Đất */
+  Object.entries(S2.obj).forEach(([k,o])=>{const x=X(o),y=Y(o),r=o.r*U,a=Math.atan2(sy-y,sx-x);litBall(ctx,x,y,r,a,o.day,o.night,on);
+    if(!on){ctx.setLineDash([3,3]);dot(ctx,x,y,r,null,'rgba(160,175,200,.55)',1.2);ctx.setLineDash([]);}
+    if(k==='jup'&&on){ctx.save();ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.clip();ctx.strokeStyle='rgba(150,100,60,.35)';ctx.lineWidth=r*.18;[-.45,-.1,.3].forEach(f=>{ctx.beginPath();ctx.moveTo(x-r,y+f*r);ctx.lineTo(x+r,y+f*r);ctx.stroke();});ctx.restore();ctx.save();ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.clip();ctx.fillStyle='rgba(31,26,20,.92)';ctx.beginPath();ctx.arc(x,y,r,a+Math.PI/2,a+Math.PI*1.5);ctx.closePath();ctx.fill();ctx.restore();}
+    pill(ctx,T('o_'+k).replace(/ \(.*\)/,''),x,y+r+14,on?'#fff':'#9aa6ba',fs-1);});
+  eyeIcon(ctx,ex-eo.r*U*.2,ey-eo.r*U*.2,0,'#1b2a44',9);
+  /* Mặt Trời */
+  if(on)sunGlow(ctx,sx,sy,U*.065);else{dot(ctx,sx,sy,U*.065,'#2a2418','rgba(255,220,120,.4)',2);}
+  pill(ctx,T('o_sun')+(on?'':' ✕'),sx,sy+U*.065+16,on?K.ray:'#a99a70',fs);
+  if(!on)pill(ctx,T('offNote').split(':')[0],w/2,20,'#ffd9c2',fs);}
+function cls2(){const el=$('cls2');el.innerHTML=B2.map(b=>{const p=S2.pick[b.k],ok=S2.checked&&p!=null?(p===b.own):null;
+  return `<div class="it"><span>${T('o_'+b.k)} ${ok===true?'<span class="mark ok">✓</span>':ok===false?'<span class="mark no">✗</span>':''}</span><div class="seg">
+  <button class="btn" data-k="${b.k}" data-v="1" aria-pressed="${p===true}">${T('own')}</button><button class="btn" data-k="${b.k}" data-v="0" aria-pressed="${p===false}">${T('refl')}</button></div></div>`;}).join('');}
+$('cls2').addEventListener('click',e=>{const b=e.target.closest('button[data-k]');if(!b)return;S2.pick[b.dataset.k]=b.dataset.v==='1';S2.checked=false;$('st2').textContent='';cls2();});
+$('chk2').onclick=()=>{const n=B2.length,done=B2.filter(b=>S2.pick[b.k]!=null).length,k=B2.filter(b=>S2.pick[b.k]===b.own).length,st=$('st2');
+  if(done<n){st.textContent=T('st2none');st.className='status no';return;}S2.checked=true;cls2();st.textContent=k===n?Tf('st2all',{n}):Tf('st2some',{k,n});st.className='status '+(k===n?'ok':'no');};
+$('rst2').onclick=()=>{S2.pick={};S2.checked=false;$('st2').textContent='';cls2();};
+['off2','ray2'].forEach(id=>$(id).addEventListener('change',draw));
+onDrag($('cv2'),p=>{const cv=$('cv2'),w=cv.clientWidth,h=cv._h,U=Math.min(w,h*1.6);if(Math.hypot(p.x-S2.sun.x*w,p.y-S2.sun.y*h)<U*.09+10){S2.drag=true;return true;}return false;},
+  p=>{const cv=$('cv2');S2.sun.x=clamp(p.x/cv.clientWidth,.04,.96);S2.sun.y=clamp(p.y/cv._h,.06,.94);},()=>{S2.drag=false;});
+$('cv2')._hover=p=>{const cv=$('cv2'),w=cv.clientWidth,h=cv._h,U=Math.min(w,h*1.6);return Math.hypot(p.x-S2.sun.x*w,p.y-S2.sun.y*h)<U*.09+10;};
+
+/* ================= TAB 3: Tuần Trăng =================
+   θ = góc Mặt Trời – Trái Đất – Mặt Trăng (0° trăng non). Tuổi Trăng = θ/360 × 29,53 ngày.
+   Phần mặt nhìn thấy được chiếu sáng = (1 − cos θ)/2. Bắc bán cầu: trăng đầu tháng sáng bên phải. */
+const SYN=29.530589;
+const S3={age:3,play:false,spd:2,drag:false};
+const th3=()=>S3.age/SYN*360;
+function phaseIdx(t){t=((t%360)+360)%360;return t<8||t>352?0:t<82?1:t<98?2:t<172?3:t<188?4:t<262?5:t<278?6:7;}
+/* Vẽ hình dạng Mặt Trăng nhìn thấy: θ (độ), tâm, bán kính. Biên sáng tại x = ±√(R²−y²), đường phân cách tại x = k·√(R²−y²). */
+const MARIA=[[-.28,-.32,.2,.15],[.05,-.38,.15,.12],[.25,-.1,.17,.22],[-.1,.05,.24,.16],[-.38,.15,.15,.2],[.12,.33,.12,.1]];
+function moonFace(ctx,x,y,R,thDeg,glow=true){const t=((thDeg%360)+360)%360,c=Math.cos(t*DEG),wax=t<=180;
+  dot(ctx,x,y,R,K.moonDark);
+  ctx.save();ctx.beginPath();const N=48;
+  for(let i=0;i<=N;i++){const yy=-R+2*R*i/N,s=Math.sqrt(Math.max(0,R*R-yy*yy));ctx.lineTo(x+(wax?s:-s),y+yy);}
+  for(let i=N;i>=0;i--){const yy=-R+2*R*i/N,s=Math.sqrt(Math.max(0,R*R-yy*yy));ctx.lineTo(x+(wax?c*s:-c*s),y+yy);}
+  ctx.closePath();ctx.clip();
+  const g=ctx.createRadialGradient(x-R*.2,y-R*.25,R*.1,x,y,R);g.addColorStop(0,'#f2efe8');g.addColorStop(1,'#c9c4b8');dot(ctx,x,y,R,g);
+  ctx.fillStyle='rgba(120,118,112,.45)';MARIA.forEach(([a,b,rx,ry])=>{ctx.beginPath();ctx.ellipse(x+a*R,y+b*R,rx*R,ry*R,.3,0,7);ctx.fill();});
+  ctx.restore();if(glow){ctx.fillStyle='rgba(120,130,150,.07)';dot(ctx,x,y,R,null,'rgba(150,160,180,.25)',1);}}
+function layout3(w,h){if(w>=620){const tw=Math.min(h*1.05,w*.6);return {wide:true,a:{x:0,y:0,w:tw,h},b:{x:tw,y:0,w:w-tw,h}};}
+  const ah=Math.round(h*.58);return {wide:false,a:{x:0,y:0,w,h:ah},b:{x:0,y:ah,w,h:h-ah}};}
+function render3(){const cv=$('cv3'),w0=cv.clientWidth||600,{ctx,w,h}=size(cv,w0>=620?.5:1.25,w0>=620?460:720,300),Lo=layout3(w,h),fs=w<520?12:14,th=th3(),ti=th*DEG;
+  const a=Lo.a;ctx.fillStyle=K.space;ctx.fillRect(a.x,a.y,a.w,a.h);stars(ctx,a.w,a.h,60,5,.6);
+  const S=Math.min(a.w,a.h),Ex=a.x+a.w*.47,Ey=a.y+a.h*.52,Ro=S*.36,re=S*.07,rm=S*.045;S3.G={Ex,Ey,Ro};
+  for(let k=-3;k<=3;k++){const y=Ey+k*S*.13;line(ctx,[[a.x+a.w-4,y],[a.x+a.w-S*.08,y]],K.ray,2);arrowHead(ctx,a.x+a.w-4,y,a.x+a.w-S*.08,y,K.ray,8);}
+  txt(ctx,'☀ '+T('g3Sun'),a.x+a.w-8,a.y+16,K.ray,fs,700,'right');
+  if($('shad3').checked){ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(a.x,Ey-re,Ex-a.x,2*re);pill(ctx,T('g3Shadow'),a.x+(Ex-a.x)*.35,Ey,'#c9d3e6',fs-2);}
+  ctx.setLineDash([4,6]);dot(ctx,Ex,Ey,Ro,null,'rgba(255,255,255,.3)',1.2);ctx.setLineDash([]);
+  for(let k=0;k<8;k++){const q=k*45*DEG;dot(ctx,Ex+Ro*Math.cos(q),Ey-Ro*Math.sin(q),2,'rgba(255,255,255,.35)');}
+  litBall(ctx,Ex,Ey,re,0,'#3c7fca','#14213a');
+  const mx=Ex+Ro*Math.cos(ti),my=Ey-Ro*Math.sin(ti);S3.m={x:mx,y:my};
+  line(ctx,[[Ex,Ey],[mx,my]],'rgba(70,209,230,.55)',1.5,[5,4]);
+  litBall(ctx,mx,my,rm,0,K.moon,'#202737');
+  if($('half3').checked){const af=Math.atan2(Ey-my,Ex-mx);ctx.strokeStyle=K.face;ctx.lineWidth=4;ctx.beginPath();ctx.arc(mx,my,rm+4,af-Math.PI/2,af+Math.PI/2);ctx.stroke();
+    pill(ctx,T('g3Face'),clamp(mx+Math.cos(af+Math.PI)*(rm+30),a.x+75,a.x+a.w-75),my+Math.sin(af+Math.PI)*(rm+18),K.face,fs-2);}
+  const inSh=$('shad3').checked&&Math.cos(ti)<0&&Math.abs(Ro*Math.sin(ti))<re-rm*.3;
+  if(inSh)pill(ctx,lang==='vi'?'Nguyệt thực!':'Lunar eclipse!',mx,my-rm-14,K.warn,fs);
+  txt(ctx,'↺ '+T('g3Orbit'),a.x+10,a.y+16,K.face,fs,700);txt(ctx,T('g3Top'),a.x+10,a.y+a.h-14,K.dim,fs-1);
+  /* hình dạng nhìn thấy từ Việt Nam */
+  const b=Lo.b;const gb=ctx.createLinearGradient(0,b.y,0,b.y+b.h);gb.addColorStop(0,'#0a1124');gb.addColorStop(1,'#1c2a4a');ctx.fillStyle=gb;ctx.fillRect(b.x,b.y,b.w,b.h);stars(ctx,b.w,b.h,40,9,.5);
+  const R=Math.min(b.w,b.h)*.3,cx=b.x+b.w/2,cy=b.y+b.h*.46;
+  if(inSh){moonFace(ctx,cx,cy,R,180);ctx.fillStyle='rgba(130,40,20,.62)';dot(ctx,cx,cy,R,'rgba(120,35,15,.62)');}else moonFace(ctx,cx,cy,R,th);
+  txt(ctx,T('ph'+phaseIdx(th)),cx,b.y+b.h-24,'#fff',fs+1,700,'center');
+  txt(ctx,T('g3See'),b.x+10,b.y+16,K.dim,fs-1);
+  if(!Lo.wide){ctx.fillStyle=C.panel;ctx.fillRect(0,b.y-1,w,2);}
+  renderStrip3();ui3(th);}
+function renderStrip3(){const cv=$('cv3s'),w0=cv.clientWidth||600,two=w0<560,{ctx,w,h}=size(cv,two?.36:.1,two?170:90,two?118:66),fs=w<520?10:12;
+  ctx.fillStyle=K.space;ctx.fillRect(0,0,w,h);const per=two?15:30,rows=two?2:1,cw=w/per,rh=h/rows,R=Math.min(cw*.4,rh*.3);const cur=Math.floor(S3.age)+1;S3.strip={per,rows,cw,rh};
+  for(let d=1;d<=30;d++){const i=(d-1)%per,r=Math.floor((d-1)/per),x=cw*(i+.5),y=rh*r+rh*.42;const age=Math.min(d-.5,SYN-.01);
+    if(d===cur){ctx.fillStyle='rgba(70,209,230,.22)';ctx.fillRect(cw*i+1,rh*r+2,cw-2,rh-4);}
+    moonFace(ctx,x,y,R,age/SYN*360,false);txt(ctx,String(d),x,rh*r+rh*.86,d===15?K.ray:d===1?K.face:'#c7d0de',fs,700,'center');}}
+function ui3(th){const ix=phaseIdx(th),lit=(1-Math.cos(th*DEG))/2,day=Math.min(30,Math.floor(S3.age)+1);
+  $('aV3').textContent=nf(S3.age,1)+' '+T('days');$('a3r').value=S3.age;$('ph3').textContent=T('ph'+ix);
+  const best=['bestNone','bestEve','bestEveS','bestEveS','bestNight','bestLate','bestMornS','bestMorn'][ix];
+  $('o3').innerHTML=kv([[T('kLunar'),day===15?Tf('lunarR',{d:day}):Tf('lunarD',{d:day})],[T('kAngle'),nf(th,0)+'°'],[T('kLitF'),nf(lit*100,0)+' %'],[T('kLitAll'),'50 %'],
+    [T('kMRise'),hm(6+th/15)],[T('kMHigh'),hm(12+th/15)],[T('kMSet'),hm(18+th/15)],[T('kBest'),T(best),'txt']]);}
+function spd3(){seg('spd3',[{k:1,label:'1 '+T('days')+'/s'},{k:3,label:'3 '+T('days')+'/s'}],S3.spd,k=>{S3.spd=k;spd3();});}
+$('a3r').addEventListener('input',e=>{S3.age=+e.target.value;draw();});
+['half3','shad3'].forEach(id=>$(id).addEventListener('change',draw));
+$('play3').onclick=()=>{S3.play=!S3.play;$('play3').textContent=T(S3.play?'pause':'play');};
+onDrag($('cv3'),p=>{const G=S3.G;if(!G)return false;const d=Math.hypot(p.x-G.Ex,p.y-G.Ey);if(Math.abs(d-G.Ro)<G.Ro*.35){S3.drag=true;return true;}return false;},
+  p=>{const G=S3.G;let a=Math.atan2(-(p.y-G.Ey),p.x-G.Ex)/DEG;if(a<0)a+=360;S3.age=a/360*SYN;},()=>{S3.drag=false;});
+$('cv3')._hover=p=>{const G=S3.G;return G&&Math.abs(Math.hypot(p.x-G.Ex,p.y-G.Ey)-G.Ro)<G.Ro*.35;};
+$('cv3s').addEventListener('click',e=>{const p=pos($('cv3s'),e),s=S3.strip;if(!s)return;const i=Math.floor(p.x/s.cw),r=Math.floor(p.y/s.rh),d=r*s.per+i+1;if(d>=1&&d<=30){S3.age=Math.min(d-.5,SYN-.01);draw();}});
+
+/* ================= TAB 4: Hệ Mặt Trời =================
+   Số liệu NASA Planetary Fact Sheet: a (triệu km), T (ngày), D (km), v (km/s), L0 kinh độ trung bình tại J2000 (độ). */
+const AUkm=149.598e6,LYkm=9.4607e12,Ckm=299792.458;
+const PLN=[{k:'pMe',a:57.9,T:87.97,D:4879,v:47.4,ty:'tRock',col:'#a59a90',r:4,L0:252.25},{k:'pVe',a:108.2,T:224.70,D:12104,v:35.0,ty:'tRock',col:'#e8cf8f',r:6,L0:181.98},
+  {k:'pEa',a:149.6,T:365.256,D:12756,v:29.8,ty:'tRock',col:'#3f86d6',r:6,L0:100.46},{k:'pMa',a:228.0,T:686.98,D:6792,v:24.1,ty:'tRock',col:'#d0643a',r:5,L0:355.45},
+  {k:'pJu',a:778.5,T:4332.6,D:142984,v:13.1,ty:'tGas',col:'#d8b487',r:12,L0:34.40},{k:'pSa',a:1432.0,T:10759,D:120536,v:9.7,ty:'tGas',col:'#e3cf98',r:10,L0:49.94},
+  {k:'pUr',a:2867.0,T:30685,D:51118,v:6.8,ty:'tIce',col:'#8fd3dc',r:8,L0:313.23},{k:'pNe',a:4515.0,T:60190,D:49528,v:5.4,ty:'tIce',col:'#4d74e0',r:8,L0:304.88}];
+const J2000=Date.UTC(2000,0,1,12);const T0=(Date.now()-J2000)/864e5;
+const S4={t:T0,play:false,spd:30,view:'vAll',sc:'scC',sel:2,ax:'axLin',drag:null,pos:[]};
+const lon4=(p,t)=>(p.L0+360*t/p.T)*DEG;
+function rad4(a,Rmax){const amax=S4.view==='vIn'?1.75*AUkm/1e6:31*AUkm/1e6;const f=a/amax;return (S4.sc==='scT'?f:Math.sqrt(f))*Rmax;}
+function render4(){const cv=$('cv4'),{ctx,w,h}=size(cv,.62,600,300),fs=w<520?12:14,cx=w/2,cy=h/2,Rmax=Math.min(w,h)/2-22,k=Math.min(1,Math.min(w,h)/520)*1.05;
+  ctx.fillStyle=K.space;ctx.fillRect(0,0,w,h);stars(ctx,w,h,140,13,.55);
+  const list=S4.view==='vIn'?PLN.slice(0,4):PLN;
+  if(S4.view==='vAll'){const r1=rad4(2.2*AUkm/1e6,Rmax),r2=rad4(3.3*AUkm/1e6,Rmax);let s=99;const rnd=()=>{s=(s*16807)%2147483647;return s/2147483647;};ctx.fillStyle='rgba(190,180,160,.5)';
+    for(let i=0;i<260;i++){const r=lerp(r1,r2,rnd()),a=rnd()*7;ctx.fillRect(cx+r*Math.cos(a),cy-r*Math.sin(a),1.3,1.3);}
+    if(r2-r1>8)txt(ctx,T('belt'),cx,cy+(r1+r2)/2,'rgba(220,210,190,.75)',fs-3,600,'center');}
+  if($('trail4').checked)list.forEach((p,i)=>{dot(ctx,cx,cy,rad4(p.a,Rmax),null,i===S4.sel?'rgba(70,209,230,.75)':'rgba(255,255,255,.18)',i===S4.sel?2:1);});
+  sunGlow(ctx,cx,cy,S4.view==='vIn'?12*k:9*k);
+  S4.pos=[];let lastLab=[];
+  list.forEach((p,i)=>{const r=rad4(p.a,Rmax),a=lon4(p,S4.t),x=cx+r*Math.cos(a),y=cy-r*Math.sin(a),pr=p.r*k*(S4.view==='vIn'?1.4:1);S4.pos[i]={x,y,r:pr};
+    if(p.k==='pSa'){ctx.strokeStyle='rgba(230,210,160,.8)';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(x,y,pr*1.9,pr*.6,-.35,0,7);ctx.stroke();}
+    litBall(ctx,x,y,pr,Math.atan2(cy-y,cx-x),p.col,'rgba(30,34,46,1)');
+    if(i===S4.sel)dot(ctx,x,y,pr+5,null,K.face,2);
+    const crowded=lastLab.some(q=>Math.hypot(q[0]-x,q[1]-y)<34);
+    if(i===S4.sel||!crowded){pill(ctx,T(p.k),x,y-pr-12,i===S4.sel?K.face:'#e7edf6',fs-2);lastLab.push([x,y]);}});
+  const yrs=(S4.t-T0)/365.256;txt(ctx,new Intl.DateTimeFormat(lang==='vi'?'vi-VN':'en-GB').format(new Date(J2000+S4.t*864e5)),10,18,'#e7edf6',fs,700);
+  txt(ctx,(yrs>=0?'+':'')+nf(yrs,2)+' '+T('years'),10,38,K.dim,fs-1,600);
+  txt(ctx,T(S4.sc==='scT'?'scT':'scC'),w-10,h-14,K.dim,fs-2,600,'right');
+  renderG4();renderSz4();ui4();}
+function ui4(){const p=PLN[S4.sel];$('nm4').textContent=T(p.k);
+  const per=p.T<700?nf(p.T,p.T<100?1:0)+' '+T('days'):nf(p.T/365.256,p.T/365.256<20?1:0)+' '+T('years')+' ('+nf(p.T,0)+' '+T('days')+')';
+  const lt=p.a*1e6/Ckm;const ltS=lt<3600?nf(lt/60,1)+' '+T('min'):nf(lt/3600,1)+' '+T('hour');
+  $('o4').innerHTML=kv([[T('kDist'),nf(p.a,1)+' '+T('mkm')],[T('kAU'),Tf('xEarth',{x:nf(p.a/149.6,2)})],[T('kPer'),per],[T('kSpd'),nf(p.v,1)+' '+T('kms')],
+    [T('kDiam'),nf(p.D,0)+' km'],[T('kType'),T(p.ty),'txt'],[T('kLight'),ltS],[T('kLaps'),nf((S4.t-T0)/p.T,2)],[T('kDate'),new Intl.DateTimeFormat(lang==='vi'?'vi-VN':'en-GB').format(new Date(J2000+S4.t*864e5))]]);
+  $('st4').textContent=T('st4');}
+function renderG4(){const cv=$('cv4g'),{ctx,w,h}=size(cv,.7,340,220),fs=w<420?11:12,log=S4.ax==='axLog';
+  ctx.fillStyle=C.panel;ctx.fillRect(0,0,w,h);const m={l:46,r:14,t:14,b:38},W=w-m.l-m.r,H=h-m.t-m.b;
+  const xr=log?[.3,40]:[0,32],yr=log?[.2,200]:[0,175];
+  const X=v=>m.l+(log?(Math.log10(v)-Math.log10(xr[0]))/(Math.log10(xr[1])-Math.log10(xr[0])):(v-xr[0])/(xr[1]-xr[0]))*W;
+  const Y=v=>m.t+H-(log?(Math.log10(v)-Math.log10(yr[0]))/(Math.log10(yr[1])-Math.log10(yr[0])):(v-yr[0])/(yr[1]-yr[0]))*H;
+  ctx.strokeStyle=C.line;ctx.lineWidth=1;
+  const xt=log?[.3,1,3,10,30]:[0,5,10,15,20,25,30],yt=log?[.2,1,10,100]:[0,25,50,75,100,125,150,175];
+  xt.forEach(v=>{const x=X(v);ctx.beginPath();ctx.moveTo(x,m.t);ctx.lineTo(x,m.t+H);ctx.stroke();txt(ctx,nf(v,1),x,m.t+H+12,C.muted,fs,600,'center');});
+  yt.forEach(v=>{const y=Y(v);ctx.beginPath();ctx.moveTo(m.l,y);ctx.lineTo(m.l+W,y);ctx.stroke();txt(ctx,nf(v,1),m.l-6,y,C.muted,fs,600,'right');});
+  txt(ctx,T('axX'),m.l+W,h-8,C.muted,fs,600,'right');ctx.save();ctx.translate(12,m.t);ctx.rotate(-Math.PI/2);txt(ctx,T('axY'),0,0,C.muted,fs,600,'right');ctx.restore();
+  const cur=[];for(let i=0;i<=120;i++){const a=log?Math.pow(10,lerp(Math.log10(.3),Math.log10(32),i/120)):i/120*31;if(a<=0)continue;const t=Math.pow(a,1.5);if(t>yr[1]*1.05)break;cur.push([X(a),Y(t)]);}
+  line(ctx,cur,C.muted,1,[4,4]);
+  PLN.forEach((p,i)=>{const a=p.a/149.6,t=p.T/365.256,x=X(a),y=Y(t);dot(ctx,x,y,i===S4.sel?7:5,p.col,i===S4.sel?C.ink:C.panel,2);
+    if(log||i>=4||i===S4.sel){const R=x>w*.75;txt(ctx,T(p.k),R?x-8:x+8,y-8,C.ink,fs,600,R?'right':'left');}});}
+function renderSz4(){const cv=$('cv4s'),{ctx,w,h}=size(cv,.42,240,150),fs=w<420?10:12;ctx.fillStyle=K.space;ctx.fillRect(0,0,w,h);
+  const x0=w*.12,avail=w-x0-10,sumD=PLN.reduce((s,p)=>s+p.D,0);const kk=Math.min(h*.5/142984,avail/(sumD*1.25));const Rs=696000*kk;
+  sunGlow(ctx,x0-Rs+w*.06,h*.45,Rs);let x=x0+w*.05;const gap=(avail-w*.03-sumD*kk)/8;
+  PLN.forEach(p=>{const r=p.D/2*kk;x+=r;dot(ctx,x,h*.45,Math.max(r,.8),p.col);if(p.k==='pSa'){ctx.strokeStyle='rgba(230,210,160,.8)';ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(x,h*.45,r*2.2,r*.5,-.3,0,7);ctx.stroke();}
+    ctx.save();ctx.translate(x,h*.45+Math.max(r,4)+8);ctx.rotate(.6);txt(ctx,T(p.k).replace('Sao ',''),0,0,'#e7edf6',fs,600,'left');ctx.restore();x+=r+gap;});
+  txt(ctx,T('sun'),8,16,'#4a3200',fs+1,800);}
+function yard4(){const d=+$('sd4').value,k=d/100/1392700;$('sdV4').textContent=d+' cm';
+  const like=mm=>T(mm<1?'lk1':mm<3?'lk2':mm<5?'lk3':mm<11?'lk4':mm<20?'lk5':mm<45?'lk6':mm<90?'lk7':'lk8');
+  const fd=m=>m<1000?nf(m,m<10?1:0)+' m':nf(m/1000,m<1e4?2:1)+' km';
+  const rows=[[T('sun'),nf(d*10,0)+' mm',like(d*10),'—']].concat(PLN.map(p=>{const mm=p.D*k*1000;return [T(p.k),nf(mm,mm<1?2:1)+' mm',like(mm),fd(p.a*1e6*k*1000)];}));
+  rows.push([T('nearStar'),'—','—',fd(4.0175e13*k*1000)]);
+  $('yt4').innerHTML=`<tr><th>${T('thPl')}</th><th>${T('thSz')}</th><th>${T('thLike')}</th><th>${T('thDi')}</th></tr>`+rows.map(r=>`<tr><td>${r[0]}</td><td class="num">${r[1]}</td><td style="font-family:var(--font-ui)">${r[2]}</td><td class="num">${r[3]}</td></tr>`).join('');}
+$('sd4').addEventListener('input',yard4);
+function segs4(){seg('spd4',[{k:1,label:T('sp1')},{k:30,label:T('sp2')},{k:365.25,label:T('sp3')},{k:3652.5,label:T('sp4')}],S4.spd,k=>{S4.spd=k;segs4();});
+  seg('vw4',[{k:'vIn',label:T('vIn')},{k:'vAll',label:T('vAll')}],S4.view,k=>{S4.view=k;if(k==='vIn'&&S4.sel>3)S4.sel=2;segs4();draw();});
+  seg('sc4',[{k:'scT',label:T('scT')},{k:'scC',label:T('scC')}],S4.sc,k=>{S4.sc=k;segs4();draw();});
+  seg('ax4',[{k:'axLin',label:T('axLin')},{k:'axLog',label:T('axLog')}],S4.ax,k=>{S4.ax=k;segs4();draw();});}
+$('trail4').addEventListener('change',draw);
+$('play4').onclick=()=>{S4.play=!S4.play;$('play4').textContent=T(S4.play?'pause':'play');};
+function pick4(p){let best=-1,bd=26;S4.pos.forEach((q,i)=>{const d=Math.hypot(p.x-q.x,p.y-q.y)-q.r;if(d<bd){bd=d;best=i;}});return best;}
+onDrag($('cv4'),p=>{const i=pick4(p);if(i<0)return false;S4.sel=i;S4.drag=i;return true;},
+  p=>{const cv=$('cv4'),cx=cv.clientWidth/2,cy=cv._h/2,P=PLN[S4.drag],tgt=Math.atan2(-(p.y-cy),p.x-cx);let d=(tgt-lon4(P,S4.t))/DEG;d=((d%360)+540)%360-180;S4.t+=d/360*P.T;},()=>{S4.drag=null;});
+$('cv4')._hover=p=>pick4(p)>=0;
+
+/* ================= TAB 5: Ngân Hà (thu phóng theo bậc 10) ================= */
+const S5={z:6.1,drag:null,tex:null};
+const NSTAR=[{k:'lPrx',d:4.24,a:213},{k:'lAC',d:4.37,a:222},{k:'lBar',d:5.96,a:269},{k:'lWolf',d:7.86,a:164},{k:'lSir',d:8.6,a:101},{k:'lEps',d:10.5,a:53},{k:'lPro',d:11.46,a:115},{k:'lAlt',d:16.7,a:298},{k:'lVega',d:25,a:279}];
+const GC={d:26000,a:266};/* tâm Ngân Hà cách 26 000 năm ánh sáng */
+const GTEX=120000;/* bề rộng ảnh Ngân Hà (năm ánh sáng) */
+function galaxyTex(){if(S5.tex)return S5.tex;const N=640,cv=document.createElement('canvas');cv.width=cv.height=N;const cx=cv.getContext('2d'),im=cx.createImageData(N,N),d=im.data;
+  const ga=GC.a*DEG,sunG={x:-GC.d*Math.cos(ga),y:-GC.d*Math.sin(ga)};/* vị trí Mặt Trời so với tâm */
+  const phi0=Math.atan2(sunG.y,sunG.x),pitch=Math.tan(12.5*DEG);let s=7;const rnd=()=>{s=(s*16807)%2147483647;return s/2147483647;};
+  for(let j=0;j<N;j++)for(let i=0;i<N;i++){const x=(i/N-.5)*GTEX,y=(.5-j/N)*GTEX,r=Math.hypot(x,y),th=Math.atan2(y,x);
+    const xb=x*Math.cos(-.47)-y*Math.sin(-.47),yb=x*Math.sin(-.47)+y*Math.cos(-.47);
+    const bulge=1.5*Math.exp(-((r/2600)**2))+.9*Math.exp(-((xb/8500)**2+(yb/2300)**2));
+    const ph=th-Math.log(Math.max(r,1500)/26000)/pitch-phi0-.22;
+    const arm=Math.pow(.5+.5*Math.cos(2*ph),5)+.55*Math.pow(.5+.5*Math.cos(2*ph+Math.PI/2+.4),7);
+    const disk=Math.exp(-r/12000)*(1-sstep(r,42000,56000))*(r>2500?1:sstep(r,0,2500));
+    const v=bulge+disk*(.22+1.6*arm)*(.75+.5*rnd());const o=(j*N+i)*4;
+    const warm=Math.min(1,bulge/1.2);d[o]=clamp(255*(v*(.75+.25*warm)),0,255);d[o+1]=clamp(255*(v*(.78+.1*warm)),0,255);d[o+2]=clamp(255*(v*(.95-.35*warm)),0,255);d[o+3]=255;}
+  cx.putImageData(im,0,0);S5.tex=cv;return cv;}
+function hash2(i,j,l){let x=(i*374761393+j*668265263+l*2147483647)|0;x=(x^(x>>>13))*1274126177|0;x^=x>>>16;return (x>>>0)/4294967295;}
+function bigNum(x){const U=lang==='vi'?[[1e18,'tỉ tỉ'],[1e15,'triệu tỉ'],[1e12,'nghìn tỉ'],[1e9,'tỉ'],[1e6,'triệu']]:[[1e18,'quintillion'],[1e15,'quadrillion'],[1e12,'trillion'],[1e9,'billion'],[1e6,'million']];
+  for(const [v,n] of U)if(x>=v){const q=x/v;return nf(q,q<10?2:q<100?1:0)+' '+n;}if(x>0&&x<.01){const e=Math.floor(Math.log10(x));return nf(x/Math.pow(10,e),1)+' × 10'+String(e).replace('-','⁻').replace(/\d/g,c=>'⁰¹²³⁴⁵⁶⁷⁸⁹'[c]);}return nf(x,x<10?2:x<100?1:0);}
+function fmtDur(s){const y=s/31557600;if(s<60)return nf(s,1)+' '+T('s_');if(s<3600)return nf(s/60,1)+' '+T('mi_');if(s<172800)return nf(s/3600,1)+' '+T('h_');if(y<2)return nf(s/86400,0)+' '+T('d_');return bigNum(y)+' '+T('y_');}
+function render5(){const cv=$('cv5'),{ctx,w,h}=size(cv,.68,600,300),fs=w<520?12:14,z=S5.z,F=Math.pow(10,z),k=w/F;
+  ctx.fillStyle='#03050b';ctx.fillRect(0,0,w,h);
+  const t=T0,ea=lon4(PLN[2],t),Ex=AUkm*Math.cos(ea),Ey=AUkm*Math.sin(ea);const fc=1-sstep(z,7.4,8.6),cxw=Ex*fc,cyw=Ey*fc;
+  const SX=x=>w/2+(x-cxw)*k,SY=y=>h/2-(y-cyw)*k;
+  /* Ngân Hà */
+  const ag=sstep(z,16.0,17.2);if(ag>0){const tex=galaxyTex(),ga=GC.a*DEG,gx=GC.d*LYkm*Math.cos(ga),gy=GC.d*LYkm*Math.sin(ga),S=GTEX*LYkm*k;
+    ctx.globalAlpha=ag;ctx.drawImage(tex,SX(gx)-S/2,SY(gy)-S/2,S,S);ctx.globalAlpha=1;
+    if(z>16.8){pill(ctx,'✛ '+T('lCenter'),SX(gx),SY(gy)+22,'#ffe7b0',fs-1);}}
+  /* sao lấm tấm (mỗi chấm đại diện cho nhiều sao ở tỉ lệ lớn) */
+  const Fly=F/LYkm;if(Fly>40&&z<17.4){const fade=sstep(Fly,40,120)*(1-sstep(z,16.6,17.4));
+    for(let l=1;l<=4;l++){const cs=Math.pow(10,l),q=Fly/cs;const al=fade*sstep(q,3,9)*(1-sstep(q,40,90));if(al<=0)continue;
+      const x0=Math.floor((cxw/LYkm-Fly/2)/cs)-1,x1=Math.ceil((cxw/LYkm+Fly/2)/cs)+1,ry=Fly*h/w/2,y0=Math.floor((cyw/LYkm-ry)/cs)-1,y1=Math.ceil((cyw/LYkm+ry)/cs)+1;
+      for(let i=x0;i<=x1;i++)for(let j=y0;j<=y1;j++){const r1=hash2(i,j,l);if(r1<.25)continue;const x=(i+hash2(j,i,l+7))*cs*LYkm,y=(j+hash2(i+3,j-5,l+3))*cs*LYkm,b=hash2(j+11,i+5,l);
+        ctx.globalAlpha=al*(.35+.65*b);ctx.fillStyle=b>.8?'#ffe9c9':'#dfe8ff';const sz=b>.9?2.2:1.4;ctx.fillRect(SX(x),SY(y),sz,sz);}}ctx.globalAlpha=1;}
+  /* các sao lân cận có tên */
+  const an=sstep(z,13.1,13.6)*(1-sstep(z,15.4,16.0));if(an>0){ctx.globalAlpha=an;NSTAR.forEach(s=>{const x=SX(s.d*LYkm*Math.cos(s.a*DEG)),y=SY(s.d*LYkm*Math.sin(s.a*DEG));
+    dot(ctx,x,y,s.k==='lSir'||s.k==='lVega'||s.k==='lAlt'?3.5:2.5,'#fff');if(z<15.2){const Lf=x<w/2;txt(ctx,T(s.k)+' · '+nf(s.d,2)+' '+(lang==='vi'?'năm a.s.':'ly'),Lf?x-7:x+7,y,'#dfe8ff',fs-2,600,Lf?'right':'left');}});ctx.globalAlpha=1;}
+  /* đám mây Oort */
+  const ao=sstep(z,11.8,12.8)*(1-sstep(z,15.3,16.0));if(ao>0){const r1=2000*AUkm*k,r2=100000*AUkm*k,x=SX(0),y=SY(0);const g=ctx.createRadialGradient(x,y,r1,x,y,r2);
+    g.addColorStop(0,'rgba(140,180,255,0)');g.addColorStop(.15,`rgba(140,180,255,${.22*ao})`);g.addColorStop(1,'rgba(140,180,255,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,r2,0,7);ctx.fill();
+    if(z<14.0){ctx.globalAlpha=ao;pill(ctx,T('lOort'),x,y-Math.min(r2*.6,h*.4),'#cfe0ff',fs-1);ctx.globalAlpha=1;}}
+  /* các hành tinh và quỹ đạo */
+  const ap=1-sstep(z,11.2,12.2);if(ap>0){ctx.globalAlpha=ap;PLN.forEach(p=>{const r=p.a*1e6*k;if(r<2)return;if(r<8*w)dot(ctx,SX(0),SY(0),r,null,'rgba(255,255,255,.2)',1);
+    const a=lon4(p,t),x=SX(p.a*1e6*Math.cos(a)),y=SY(p.a*1e6*Math.sin(a));dot(ctx,x,y,Math.max(p.D/2*k,p.k==='pEa'?3:2.2),p.col);if(r>26&&z>7.8)txt(ctx,T(p.k),x+6,y-8,'#e7edf6',fs-2,600);});ctx.globalAlpha=1;}
+  /* Mặt Trăng, Trái Đất */
+  if(z<9.6){const ma=40*DEG,mx=Ex+384400*Math.cos(ma),my=Ey+384400*Math.sin(ma),rmo=384400*k;if(rmo>6)dot(ctx,SX(Ex),SY(Ey),rmo,null,'rgba(255,255,255,.25)',1);
+    const re=Math.max(6371*k,3);litBall(ctx,SX(Ex),SY(Ey),re,Math.atan2(SY(0)-SY(Ey),SX(0)-SX(Ex)),'#3f86d6','#13203a');if(re>5||z<8.4)pill(ctx,T('lEarth'),SX(Ex),SY(Ey)+re+14,'#cfe3ff',fs-1);
+    if(rmo>6){const rm=Math.max(1737*k,2);litBall(ctx,SX(mx),SY(my),rm,Math.atan2(SY(0)-SY(my),SX(0)-SX(mx)),K.moon,'#252b38');if(z<7.5)pill(ctx,T('lMoon'),SX(mx),SY(my)-rm-12,'#eee',fs-1);}}
+  /* Mặt Trời */
+  const rs=696000*k;if(z<16.6){if(rs>1.5)sunGlow(ctx,SX(0),SY(0),Math.max(rs,4));else dot(ctx,SX(0),SY(0),2.2,K.sun);
+    if(z>7.4&&z<12)pill(ctx,T('lSun'),SX(0),SY(0)+Math.max(rs,6)+16,K.ray,fs-1);}
+  if(z>12.6){const x=SX(0),y=SY(0),rr=16;ctx.strokeStyle=K.warn;ctx.lineWidth=2.5;dot(ctx,x,y,rr,null,K.warn,2.5);line(ctx,[[x+rr*.7,y-rr*.7],[x+rr*2.6,y-rr*2.6]],K.warn,2.5);pill(ctx,T('lHere'),x+rr*2.6,y-rr*2.6-10,K.warn,fs,'left');}
+  /* thước tỉ lệ */
+  {const target=w*.25,useLy=F>3*LYkm,useAu=!useLy&&F>.3*AUkm,u=useLy?LYkm:useAu?AUkm:1,raw=target/k/u,e=Math.pow(10,Math.floor(Math.log10(raw))),mant=raw/e,n=(mant>=5?5:mant>=2?2:1)*e,px=n*u*k;
+    const lab=useLy?bigNum(n)+' '+(lang==='vi'?'năm ánh sáng':'light-years'):useAu?bigNum(n)+' au':bigNum(n)+' km';
+    line(ctx,[[14,h-16],[14+px,h-16]],'#fff',3);line(ctx,[[14,h-22],[14,h-10]],'#fff',2);line(ctx,[[14+px,h-22],[14+px,h-10]],'#fff',2);txt(ctx,lab,14,h-32,'#fff',fs,700);}
+  ui5(F,k);}
+function ui5(F,k){$('zV5').textContent=bigNum(F)+' km';$('z5').value=S5.z;const ss=2*30.07*AUkm*k;
+  $('o5').innerHTML=kv([[T('kW'),bigNum(F)+' km'],[T('kWau'),bigNum(F/AUkm)],[T('kWly'),bigNum(F/LYkm)],[T('kCross'),fmtDur(F/Ckm)],[T('kSS'),ss<1?T('tooSmall'):nf(ss,ss<10?1:0)+' '+T('px')]]);
+  const z=S5.z,st=$('st5');st.textContent=T(z<9.9?'st5a':z<12.5?'st5b':z<16.5?'st5c':'st5d');st.className='status';}
+const PRE5={z1:6.1,z2:8.8,z3:10.25,z4:13.4,z5:14.6,z6:18.05};
+function pre5(){seg('pre5',Object.keys(PRE5).map(k=>({k,label:T(k)})),Object.keys(PRE5).find(k=>Math.abs(PRE5[k]-S5.z)<.02),k=>{animZ5(PRE5[k]);});}
+let zAnim=null;function animZ5(target){const z0=S5.z,t0=performance.now(),dur=900+300*Math.abs(target-z0);cancelAnimationFrame(zAnim);
+  const st=t=>{const f=clamp((t-t0)/dur,0,1),e=f<.5?2*f*f:1-2*(1-f)*(1-f);S5.z=lerp(z0,target,e);render5();if(f<1)zAnim=requestAnimationFrame(st);else pre5();};zAnim=requestAnimationFrame(st);}
+$('z5').addEventListener('input',e=>{cancelAnimationFrame(zAnim);S5.z=+e.target.value;pre5();draw();});
+onDrag($('cv5'),p=>{S5.drag=p.y;cancelAnimationFrame(zAnim);return true;},p=>{S5.z=clamp(S5.z+(p.y-S5.drag)/120,5.6,18.3);S5.drag=p.y;},()=>{pre5();});
+$('cv5').addEventListener('wheel',e=>{e.preventDefault();cancelAnimationFrame(zAnim);S5.z=clamp(S5.z+e.deltaY*.0025,5.6,18.3);draw();},{passive:false});
+
+/* ================= Vòng lặp thời gian ================= */
+let lastT=performance.now();
+function loop(now){const dt=Math.min((now-lastT)/1000,.1);lastT=now;
+  if(tab===1&&S1.play&&!S1.drag){S1.t=(S1.t+dt*S1.spd)%24;draw();}
+  if(tab===3&&S3.play&&!S3.drag){S3.age=(S3.age+dt*S3.spd)%SYN;draw();}
+  if(tab===4&&S4.play&&S4.drag==null){S4.t+=dt*S4.spd;draw();}
+  requestAnimationFrame(loop);}
+requestAnimationFrame(loop);
+
+/* ================= Đổi ngôn ngữ, khởi động ================= */
+function applyLang(){document.documentElement.lang=lang;document.title=T('title');
+  document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=T(el.dataset.i18n));
+  document.querySelectorAll('[data-i18n-html]').forEach(el=>el.innerHTML=T(el.dataset.i18nHtml));
+  $('langBtn').textContent=lang==='vi'?'EN':'VI';
+  $('play1').textContent=T(S1.play?'pause':'play');$('play3').textContent=T(S3.play?'pause':'play');$('play4').textContent=T(S4.play?'pause':'play');
+  Object.keys(PRED).forEach(renderPred);Object.keys(QZ).forEach(renderQuiz);[1,2,3,4,5].forEach(renderVids);renderOffline();
+  setPlace1(S1.pl);setDate1(S1.dk);spd1();spd3();segs4();pre5();cls2();yard4();draw();}
+$('langBtn').onclick=()=>{lang=lang==='vi'?'en':'vi';applyLang();};
+readColors();
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',readColors);
+new MutationObserver(readColors).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+addEventListener('resize',draw);
+applyLang();
+{const t=+store.get('tdbt-tab');setTab(t>=1&&t<=5?t:1);}
+</script>
+</body>
+</html>
